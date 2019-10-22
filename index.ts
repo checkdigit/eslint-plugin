@@ -1,5 +1,3 @@
-// eslint/index.js
-
 import {Rule} from 'eslint';
 import {Literal, Node, SourceLocation, TemplateElement} from 'estree';
 
