@@ -1,5 +1,5 @@
-import {Rule} from 'eslint';
-import {Literal, Node, SourceLocation, TemplateElement} from 'estree';
+import { Rule } from 'eslint';
+import { Literal, Node, SourceLocation, TemplateElement } from 'estree';
 
 export const CARD_NUMBER_FOUND = 'CARD_NUMBER_FOUND';
 export const CARD_NUMBERS_FOUND = 'CARD_NUMBERS_FOUND';
@@ -19,7 +19,9 @@ function luhnCheck(cardNumber: string) {
           }
         }
         return previousValue + currentValue;
-      }, 0) % 10 === 0
+      }, 0) %
+      10 ===
+    0
   );
 }
 
@@ -38,8 +40,7 @@ function checkForCardNumbers(value: string, context: Rule.RuleContext, node?: No
         },
         node
       });
-    }
-    else if (loc !== undefined) {
+    } else if (loc !== undefined) {
       context.report({
         messageId: CARD_NUMBER_FOUND,
         data: {
@@ -51,9 +52,7 @@ function checkForCardNumbers(value: string, context: Rule.RuleContext, node?: No
         }
       });
     }
-  }
-
-  else if (cardNumbers.length > 1) {
+  } else if (cardNumbers.length > 1) {
     if (node !== undefined) {
       context.report({
         messageId: CARD_NUMBERS_FOUND,
@@ -62,8 +61,7 @@ function checkForCardNumbers(value: string, context: Rule.RuleContext, node?: No
         },
         node
       });
-    }
-    else if (loc !== undefined) {
+    } else if (loc !== undefined) {
       context.report({
         messageId: CARD_NUMBERS_FOUND,
         data: {
@@ -79,44 +77,44 @@ function checkForCardNumbers(value: string, context: Rule.RuleContext, node?: No
 }
 
 const rule = {
-    meta: {
-      type: 'problem',
-      docs: {
-        description: 'Detects if a luhn passing card number',
-        url: 'https://github.com/samelliottdlt/eslint-plugin-file-path-comment'
-      },
-      messages: {
-        [CARD_NUMBER_FOUND]: `Valid card number: "{{ number }}"`,
-        [CARD_NUMBERS_FOUND]: `Multiple valid card numbers found: "{{ numbers }}"`
-      }
+  meta: {
+    type: 'problem',
+    docs: {
+      description: 'Detects if a luhn passing card number',
+      url: 'https://github.com/chkdgt/eslint-plugin'
     },
-    create(context: Rule.RuleContext) {
-      const sourceCode = context.getSourceCode();
-      const comments = sourceCode.getAllComments();
-
-      comments.forEach(comment => {
-        if (comment.loc !== undefined && comment.loc !== null) {
-          checkForCardNumbers(comment.value, context, undefined, comment.loc);
-        }
-      });
-      return {
-        Literal(node: Literal) {
-          if (node.value === undefined) {
-            return;
-          }
-          if (typeof node.value !== 'string' && typeof node.value !== 'number') {
-            return;
-          }
-          const value = node.value + '';
-          checkForCardNumbers(value, context, node);
-        },
-        TemplateElement(node: TemplateElement) {
-          if (!node.value) return;
-          const value = node.value.cooked + '';
-          checkForCardNumbers(value, context, node);
-        }
-      };
+    messages: {
+      [CARD_NUMBER_FOUND]: `Valid card number: "{{ number }}"`,
+      [CARD_NUMBERS_FOUND]: `Multiple valid card numbers found: "{{ numbers }}"`
     }
+  },
+  create(context: Rule.RuleContext) {
+    const sourceCode = context.getSourceCode();
+    const comments = sourceCode.getAllComments();
+
+    comments.forEach(comment => {
+      if (comment.loc !== undefined && comment.loc !== null) {
+        checkForCardNumbers(comment.value, context, undefined, comment.loc);
+      }
+    });
+    return {
+      Literal(node: Literal) {
+        if (node.value === undefined) {
+          return;
+        }
+        if (typeof node.value !== 'string' && typeof node.value !== 'number') {
+          return;
+        }
+        const value = node.value + '';
+        checkForCardNumbers(value, context, node);
+      },
+      TemplateElement(node: TemplateElement) {
+        if (!node.value) return;
+        const value = node.value.cooked + '';
+        checkForCardNumbers(value, context, node);
+      }
+    };
+  }
 };
 
 export default {

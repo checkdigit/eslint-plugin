@@ -1,6 +1,6 @@
-import plugin, {CARD_NUMBER_FOUND, CARD_NUMBERS_FOUND} from '../';
+import plugin, { CARD_NUMBER_FOUND, CARD_NUMBERS_FOUND } from '..';
 
-const {RuleTester} = require('eslint/lib/rule-tester');
+const { RuleTester } = require('eslint/lib/rule-tester');
 const rule = plugin.rules['no-card-numbers'];
 const ruleTester = new RuleTester({ env: { es6: true } });
 
