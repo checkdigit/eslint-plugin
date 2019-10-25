@@ -1,5 +1,5 @@
 {
-  "name": "eslint-plugin-file-path-comment",
+  "name": "@checkdigit/eslint-plugin",
   "version": "1.0.0",
   "description": "eslint plugin for appending file path as a comment at the top of a file",
   "prettier": "@checkdigit/prettier-config",
