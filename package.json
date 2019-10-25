@@ -1,0 +1,35 @@
+{
+  "name": "eslint-plugin-file-path-comment",
+  "version": "1.0.0",
+  "description": "eslint plugin for appending file path as a comment at the top of a file",
+  "prettier": "@checkdigit/prettier-config",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "npm run build && node tests/no-card-numbers.js && npm run prettier",
+    "prettier": "prettier --list-different src/**/*.ts",
+    "prettier:fix": "prettier --write src/**/*.ts",
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/samelliottdlt/eslint-plugin-file-path-comment.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/samelliottdlt/eslint-plugin-file-path-comment/issues"
+  },
+  "homepage": "https://github.com/samelliottdlt/eslint-plugin-file-path-comment#readme",
+  "dependencies": {},
+  "peerDependencies": {
+    "eslint": "^6.0.0"
+  },
+  "devDependencies": {
+    "@checkdigit/typescript": "~3.6.2",
+    "@checkdigit/prettier-config": "^1.0.0",
+    "@types/eslint": "^6.1.2",
+    "@types/node": "^12.11.2",
+    "eslint": "^6.5.1",
+    "prettier": "^1.18.2"
+  }
+}
