@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "eslint plugin for appending file path as a comment at the top of a file",
   "prettier": "@checkdigit/prettier-config",
-  "main": "src/index.js",
+  "main": "dist/index.js",
   "scripts": {
     "test": "npm run build && node tests/no-card-numbers.js && npm run prettier",
     "prettier": "prettier --list-different src/**/*.ts",
@@ -25,11 +25,11 @@
     "eslint": "^6.0.0"
   },
   "devDependencies": {
+    "@checkdigit/typescript": "~3.6.2",
     "@checkdigit/prettier-config": "^1.0.0",
     "@types/eslint": "^6.1.2",
     "@types/node": "^12.11.2",
     "eslint": "^6.5.1",
-    "prettier": "^1.18.2",
-    "typescript": "^3.6.4"
+    "prettier": "^1.18.2"
   }
 }
