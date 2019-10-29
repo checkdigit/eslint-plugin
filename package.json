@@ -1,5 +1,5 @@
 {
-  "name": "eslint-plugin-file-path-comment",
+  "name": "@checkdigit/eslint-plugin",
   "version": "1.0.0",
   "description": "eslint plugin for appending file path as a comment at the top of a file",
   "prettier": "@checkdigit/prettier-config",
@@ -12,14 +12,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/samelliottdlt/eslint-plugin-file-path-comment.git"
+    "url": "git+https://github.com/chkdgt/eslint-plugin.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/samelliottdlt/eslint-plugin-file-path-comment/issues"
+    "url": "https://github.com/chkdgt/eslint-plugin/issues"
   },
-  "homepage": "https://github.com/samelliottdlt/eslint-plugin-file-path-comment#readme",
+  "homepage": "https://github.com/chkdgt/eslint-plugin#readme",
   "dependencies": {},
   "peerDependencies": {
     "eslint": "^6.0.0"
