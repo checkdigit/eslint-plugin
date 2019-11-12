@@ -1,4 +1,7 @@
-import plugin, { CARD_NUMBER_FOUND, CARD_NUMBERS_FOUND } from '..';
+const CARD_NUMBER_FOUND = 'CARD_NUMBER_FOUND';
+const CARD_NUMBERS_FOUND = 'CARD_NUMBERS_FOUND';
+
+const plugin = require('../index.js');
 
 const { RuleTester } = require('eslint/lib/rule-tester');
 const rule = plugin.rules['no-card-numbers'];
@@ -18,7 +21,7 @@ const NOT_A_SECRET = "I'm not a secret, I think";
 
 const TEMPLATE_TEST = "const NOT_A_SECRET = `A template that isn't a secret. ${1+1} = 2`";
 
-const CONTAINS_CARD_NUMBER_IN_STRING = `
+const CONTAINS_CARD_NUMBER_IN_NUMBER = `
 const foo = 4507894813950280;
 `;
 
@@ -54,7 +57,7 @@ ruleTester.run('no-card-numbers', rule, {
   ],
   invalid: [
     {
-      code: CONTAINS_CARD_NUMBER_IN_STRING,
+      code: CONTAINS_CARD_NUMBER_IN_NUMBER,
       errors: [CARD_NUMBER_FOUND_MSG]
     },
     {

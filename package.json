@@ -5,7 +5,7 @@
   "prettier": "@checkdigit/prettier-config",
   "main": "dist/index.js",
   "scripts": {
-    "test": "npm run build && node tests/no-card-numbers.js && npm run prettier",
+    "test": "npm run build && node dist/tests/no-card-numbers.js && npm run prettier",
     "prettier": "prettier --list-different src/**/*.ts",
     "prettier:fix": "prettier --write src/**/*.ts",
     "build": "tsc"
