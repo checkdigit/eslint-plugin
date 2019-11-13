@@ -1,8 +1,8 @@
 import { Rule } from 'eslint';
 import { Literal, Node, SourceLocation, TemplateElement } from 'estree';
 
-export const CARD_NUMBER_FOUND = 'CARD_NUMBER_FOUND';
-export const CARD_NUMBERS_FOUND = 'CARD_NUMBERS_FOUND';
+const CARD_NUMBER_FOUND = 'CARD_NUMBER_FOUND';
+const CARD_NUMBERS_FOUND = 'CARD_NUMBERS_FOUND';
 const cardNumberRegex = /\d{15,19}/gm;
 
 function luhnCheck(cardNumber: string) {
@@ -117,7 +117,7 @@ const rule = {
   }
 };
 
-export default {
+module.exports = {
   rules: {
     'no-card-numbers': rule
   }
