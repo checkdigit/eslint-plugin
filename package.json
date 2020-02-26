@@ -22,14 +22,14 @@
   "homepage": "https://github.com/chkdgt/eslint-plugin#readme",
   "dependencies": {},
   "peerDependencies": {
-    "eslint": "^6.0.0"
+    "eslint": "^6.8.0"
   },
   "devDependencies": {
-    "@checkdigit/typescript": "~3.6.2",
-    "@checkdigit/prettier-config": "^1.0.0",
-    "@types/eslint": "^6.1.2",
-    "@types/node": "^12.11.2",
+    "@checkdigit/typescript": "~3.7.5",
+    "@checkdigit/prettier-config": "^1.0.1",
+    "@types/eslint": "^6.1.8",
+    "@types/node": "^13.7.6",
     "eslint": "^6.5.1",
-    "prettier": "^1.18.2"
+    "prettier": "^1.19.1"
   }
 }

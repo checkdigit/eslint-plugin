@@ -25,6 +25,10 @@ const CONTAINS_CARD_NUMBER_IN_NUMBER = `
 const foo = 4507894813950280;
 `;
 
+const CONTAINS_A_PASSING_CARD_NUMBER = `
+const foo = 4111111111111111;
+`;
+
 const CONTAINS_SEVERAL_CARD_NUMBERS_IN_STRING = `
 const foo = '4507894813950280 aa 4939816588221579';
 `;
@@ -53,6 +57,9 @@ ruleTester.run('no-card-numbers', rule, {
     },
     {
       code: STRING_WITH_CARD_NUMBER_THAT_DOESNT_PASS_LUHN_CHECK
+    },
+    {
+      code: CONTAINS_A_PASSING_CARD_NUMBER
     }
   ],
   invalid: [
