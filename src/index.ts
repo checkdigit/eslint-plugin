@@ -4,7 +4,7 @@ import { Literal, Node, SourceLocation, TemplateElement } from 'estree';
 const CARD_NUMBER_FOUND = 'CARD_NUMBER_FOUND';
 const CARD_NUMBERS_FOUND = 'CARD_NUMBERS_FOUND';
 const cardNumberRegex = /\d{15,19}/gm;
-const allowCardNumbers = ['4111111111111111','111111111111111'];
+const allowCardNumbers = ['4111111111111111','111111111111111','000000000000000'];
 
 function luhnCheck(cardNumber: string) {
   return (

@@ -1,6 +1,6 @@
 {
   "name": "@checkdigit/eslint-plugin",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "eslint plugin for appending file path as a comment at the top of a file",
   "prettier": "@checkdigit/prettier-config",
   "main": "dist/index.js",
