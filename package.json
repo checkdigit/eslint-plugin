@@ -1,35 +1,35 @@
 {
   "name": "@checkdigit/eslint-plugin",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "eslint plugin for appending file path as a comment at the top of a file",
   "prettier": "@checkdigit/prettier-config",
   "main": "dist/index.js",
   "scripts": {
     "test": "npm run build && node dist/tests/no-card-numbers.js && npm run prettier",
-    "prettier": "prettier --list-different src/**/*.ts",
-    "prettier:fix": "prettier --write src/**/*.ts",
+    "prettier": "prettier --list-different 'src/**/*.ts'",
+    "prettier:fix": "prettier --write 'src/**/*.ts'",
     "build": "tsc"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/chkdgt/eslint-plugin.git"
+    "url": "git+https://github.com/checkdigit/eslint-plugin.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/chkdgt/eslint-plugin/issues"
+    "url": "https://github.com/checkdigit/eslint-plugin/issues"
   },
-  "homepage": "https://github.com/chkdgt/eslint-plugin#readme",
+  "homepage": "https://github.com/checkdigit/eslint-plugin#readme",
   "dependencies": {},
   "peerDependencies": {
-    "eslint": "^6.0.0"
+    "eslint": "^6.8.0"
   },
   "devDependencies": {
-    "@checkdigit/typescript": "~3.6.2",
-    "@checkdigit/prettier-config": "^1.0.0",
-    "@types/eslint": "^6.1.2",
-    "@types/node": "^12.11.2",
+    "@checkdigit/typescript": "~3.7.5",
+    "@checkdigit/prettier-config": "^1.0.1",
+    "@types/eslint": "^6.1.8",
+    "@types/node": "^13.7.6",
     "eslint": "^6.5.1",
-    "prettier": "^1.18.2"
+    "prettier": "^1.19.1"
   }
 }
