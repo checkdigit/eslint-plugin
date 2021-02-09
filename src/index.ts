@@ -1,5 +1,5 @@
-import { Rule } from 'eslint';
-import { Literal, Node, SourceLocation, TemplateElement } from 'estree';
+import type { Rule } from 'eslint';
+import type { Literal, Node, SourceLocation, TemplateElement } from 'estree';
 
 const CARD_NUMBER_FOUND = 'CARD_NUMBER_FOUND';
 const CARD_NUMBERS_FOUND = 'CARD_NUMBERS_FOUND';
@@ -11,7 +11,7 @@ const allowCardNumbers = [
   '0000000000000000',
   '00000000000000000',
   '000000000000000000',
-  '0000000000000000000'
+  '0000000000000000000',
 ];
 
 function luhnCheck(cardNumber: string) {
@@ -19,7 +19,7 @@ function luhnCheck(cardNumber: string) {
     cardNumber
       .split('')
       .reverse()
-      .map(d => parseInt(d, 10))
+      .map((d) => parseInt(d, 10))
       .reduce((previousValue, currentValue, index) => {
         if (index % 2 === 1) {
           currentValue *= 2;
@@ -39,26 +39,26 @@ function checkForCardNumbers(value: string, context: Rule.RuleContext, node?: No
   if (matches === null || allowCardNumbers.indexOf(value) >= 0) {
     return;
   }
-  const cardNumbers = matches.filter(match => luhnCheck(match));
+  const cardNumbers = matches.filter((match) => luhnCheck(match));
   if (cardNumbers.length === 1) {
     if (node !== undefined) {
       context.report({
         messageId: CARD_NUMBER_FOUND,
         data: {
-          number: cardNumbers[0]
+          number: cardNumbers[0],
         },
-        node
+        node,
       });
     } else if (loc !== undefined) {
       context.report({
         messageId: CARD_NUMBER_FOUND,
         data: {
-          number: cardNumbers[0]
+          number: cardNumbers[0],
         },
         loc: {
           start: loc.start,
-          end: loc.end
-        }
+          end: loc.end,
+        },
       });
     }
   } else if (cardNumbers.length > 1) {
@@ -66,20 +66,20 @@ function checkForCardNumbers(value: string, context: Rule.RuleContext, node?: No
       context.report({
         messageId: CARD_NUMBERS_FOUND,
         data: {
-          number: matches.join(', ')
+          number: matches.join(', '),
         },
-        node
+        node,
       });
     } else if (loc !== undefined) {
       context.report({
         messageId: CARD_NUMBERS_FOUND,
         data: {
-          number: matches.join(', ')
+          number: matches.join(', '),
         },
         loc: {
           start: loc.start,
-          end: loc.end
-        }
+          end: loc.end,
+        },
       });
     }
   }
@@ -90,18 +90,18 @@ const rule = {
     type: 'problem',
     docs: {
       description: 'Detects if a luhn passing card number',
-      url: 'https://github.com/chkdgt/eslint-plugin'
+      url: 'https://github.com/chkdgt/eslint-plugin',
     },
     messages: {
       [CARD_NUMBER_FOUND]: `Valid card number: "{{ number }}"`,
-      [CARD_NUMBERS_FOUND]: `Multiple valid card numbers found: "{{ numbers }}"`
-    }
+      [CARD_NUMBERS_FOUND]: `Multiple valid card numbers found: "{{ numbers }}"`,
+    },
   },
   create(context: Rule.RuleContext) {
     const sourceCode = context.getSourceCode();
     const comments = sourceCode.getAllComments();
 
-    comments.forEach(comment => {
+    comments.forEach((comment) => {
       if (comment.loc !== undefined && comment.loc !== null) {
         checkForCardNumbers(comment.value, context, undefined, comment.loc);
       }
@@ -121,13 +121,13 @@ const rule = {
         if (!node.value) return;
         const value = node.value.cooked + '';
         checkForCardNumbers(value, context, node);
-      }
+      },
     };
-  }
+  },
 };
 
 module.exports = {
   rules: {
-    'no-card-numbers': rule
-  }
+    'no-card-numbers': rule,
+  },
 };

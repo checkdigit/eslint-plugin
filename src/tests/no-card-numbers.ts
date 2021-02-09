@@ -8,11 +8,11 @@ const rule = plugin.rules['no-card-numbers'];
 const ruleTester = new RuleTester({ env: { es6: true } });
 
 const CARD_NUMBER_FOUND_MSG = {
-  messageId: CARD_NUMBER_FOUND
+  messageId: CARD_NUMBER_FOUND,
 };
 
 const CARD_NUMBERS_FOUND_MSG = {
-  messageId: CARD_NUMBERS_FOUND
+  messageId: CARD_NUMBERS_FOUND,
 };
 
 const STRING_TEST = `
@@ -56,34 +56,34 @@ const STRING_WITH_CARD_NUMBER_THAT_DOESNT_PASS_LUHN_CHECK = `
 ruleTester.run('no-card-numbers', rule, {
   valid: [
     {
-      code: STRING_TEST
+      code: STRING_TEST,
     },
     {
-      code: TEMPLATE_TEST
+      code: TEMPLATE_TEST,
     },
     {
-      code: STRING_WITH_CARD_NUMBER_THAT_DOESNT_PASS_LUHN_CHECK
+      code: STRING_WITH_CARD_NUMBER_THAT_DOESNT_PASS_LUHN_CHECK,
     },
     {
-      code: CONTAINS_A_PASSING_CARD_NUMBER
-    }
+      code: CONTAINS_A_PASSING_CARD_NUMBER,
+    },
   ],
   invalid: [
     {
       code: CONTAINS_CARD_NUMBER_IN_NUMBER,
-      errors: [CARD_NUMBER_FOUND_MSG]
+      errors: [CARD_NUMBER_FOUND_MSG],
     },
     {
       code: CONTAINS_SEVERAL_CARD_NUMBERS_IN_STRING,
-      errors: [CARD_NUMBERS_FOUND_MSG]
+      errors: [CARD_NUMBERS_FOUND_MSG],
     },
     {
       code: CONTAINS_CARD_NUMBER_IN_COMMENT,
-      errors: [CARD_NUMBER_FOUND_MSG]
+      errors: [CARD_NUMBER_FOUND_MSG],
     },
     {
       code: CONTAINS_SEVERAL_CARD_NUMBERS_IN_COMMENT,
-      errors: [CARD_NUMBERS_FOUND_MSG]
-    }
-  ]
+      errors: [CARD_NUMBERS_FOUND_MSG],
+    },
+  ],
 });
