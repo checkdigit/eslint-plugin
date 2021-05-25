@@ -45,7 +45,7 @@ function checkForCardNumbers(value: string, context: Rule.RuleContext, node?: No
       context.report({
         messageId: CARD_NUMBER_FOUND,
         data: {
-          number: cardNumbers[0],
+          number: cardNumbers[0] as string,
         },
         node,
       });
@@ -53,7 +53,7 @@ function checkForCardNumbers(value: string, context: Rule.RuleContext, node?: No
       context.report({
         messageId: CARD_NUMBER_FOUND,
         data: {
-          number: cardNumbers[0],
+          number: cardNumbers[0] as string,
         },
         loc: {
           start: loc.start,
