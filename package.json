@@ -5,6 +5,10 @@
   "prettier": "@checkdigit/prettier-config",
   "main": "dist/index.js",
   "scripts": {
+    "prepublishOnly": "publish",
+    "postpublish": "rimraf dist .npmignore",
+    "preversion": "npm test",
+    "postversion": "git push && git push --tags",
     "test": "npm run build && node build/tests/no-card-numbers.js && npm run prettier",
     "prettier": "prettier --list-different 'src/**/*.ts'",
     "prettier:fix": "prettier --write 'src/**/*.ts'",
@@ -23,14 +27,14 @@
     "url": "https://github.com/checkdigit/eslint-plugin/issues"
   },
   "homepage": "https://github.com/checkdigit/eslint-plugin#readme",
-  "dependencies": {
-    "@checkdigit/typescript-config": "^1.0.5"
-  },
+  "dependencies": {},
   "peerDependencies": {
-    "eslint": "^7.19.0"
+    "eslint": "^7.27.0"
   },
   "devDependencies": {
     "@checkdigit/prettier-config": "^1.0.2",
+    "@checkdigit/publish": "^1.0.19",
+    "@checkdigit/typescript-config": "^1.0.5",
     "@types/eslint": "^7.2.11",
     "@types/node": "^15.6.1",
     "eslint": "^7.27.0",
