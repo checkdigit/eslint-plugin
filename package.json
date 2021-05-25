@@ -29,7 +29,7 @@
   "homepage": "https://github.com/checkdigit/eslint-plugin#readme",
   "dependencies": {},
   "peerDependencies": {
-    "eslint": "^7.27.0"
+    "eslint": ">=7"
   },
   "devDependencies": {
     "@checkdigit/prettier-config": "^1.0.2",
