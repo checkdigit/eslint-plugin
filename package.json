@@ -10,6 +10,9 @@
     "prettier:fix": "prettier --write 'src/**/*.ts'",
     "build": "tsc"
   },
+  "engines": {
+    "node": ">=14"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/checkdigit/eslint-plugin.git"

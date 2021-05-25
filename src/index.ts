@@ -1,5 +1,11 @@
 // index.ts
 
+/*
+ * Copyright (c) 2021 Check Digit, LLC
+ *
+ * This code is licensed under the MIT license (see LICENSE.txt for details).
+ */
+
 import type { Rule } from 'eslint';
 import type { Literal, Node, SourceLocation, TemplateElement } from 'estree';
 
@@ -92,7 +98,7 @@ const rule = {
     type: 'problem',
     docs: {
       description: 'Detects if a luhn passing card number',
-      url: 'https://github.com/chkdgt/eslint-plugin',
+      url: 'https://github.com/checkdigit/eslint-plugin',
     },
     messages: {
       [CARD_NUMBER_FOUND]: `Valid card number: "{{ number }}"`,
