@@ -6,10 +6,10 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
+import plugin from './index';
+
 const CARD_NUMBER_FOUND = 'CARD_NUMBER_FOUND';
 const CARD_NUMBERS_FOUND = 'CARD_NUMBERS_FOUND';
-
-const plugin = require('../index.js');
 
 const { RuleTester } = require('eslint/lib/rule-tester');
 const rule = plugin.rules['no-card-numbers'];
@@ -61,37 +61,39 @@ const STRING_WITH_CARD_NUMBER_THAT_DOESNT_PASS_LUHN_CHECK = `
   const foo = 4507894813950285;
 `;
 
-ruleTester.run('no-card-numbers', rule, {
-  valid: [
-    {
-      code: STRING_TEST,
-    },
-    {
-      code: TEMPLATE_TEST,
-    },
-    {
-      code: STRING_WITH_CARD_NUMBER_THAT_DOESNT_PASS_LUHN_CHECK,
-    },
-    {
-      code: CONTAINS_A_PASSING_CARD_NUMBER,
-    },
-  ],
-  invalid: [
-    {
-      code: CONTAINS_CARD_NUMBER_IN_NUMBER,
-      errors: [CARD_NUMBER_FOUND_MSG],
-    },
-    {
-      code: CONTAINS_SEVERAL_CARD_NUMBERS_IN_STRING,
-      errors: [CARD_NUMBERS_FOUND_MSG],
-    },
-    {
-      code: CONTAINS_CARD_NUMBER_IN_COMMENT,
-      errors: [CARD_NUMBER_FOUND_MSG],
-    },
-    {
-      code: CONTAINS_SEVERAL_CARD_NUMBERS_IN_COMMENT,
-      errors: [CARD_NUMBERS_FOUND_MSG],
-    },
-  ],
+describe('no-card-numbers', () => {
+  ruleTester.run('no-card-numbers', rule, {
+    valid: [
+      {
+        code: STRING_TEST,
+      },
+      {
+        code: TEMPLATE_TEST,
+      },
+      {
+        code: STRING_WITH_CARD_NUMBER_THAT_DOESNT_PASS_LUHN_CHECK,
+      },
+      {
+        code: CONTAINS_A_PASSING_CARD_NUMBER,
+      },
+    ],
+    invalid: [
+      {
+        code: CONTAINS_CARD_NUMBER_IN_NUMBER,
+        errors: [CARD_NUMBER_FOUND_MSG],
+      },
+      {
+        code: CONTAINS_SEVERAL_CARD_NUMBERS_IN_STRING,
+        errors: [CARD_NUMBERS_FOUND_MSG],
+      },
+      {
+        code: CONTAINS_CARD_NUMBER_IN_COMMENT,
+        errors: [CARD_NUMBER_FOUND_MSG],
+      },
+      {
+        code: CONTAINS_SEVERAL_CARD_NUMBERS_IN_COMMENT,
+        errors: [CARD_NUMBERS_FOUND_MSG],
+      },
+    ],
+  });
 });

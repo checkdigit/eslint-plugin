@@ -9,7 +9,7 @@
     "postpublish": "rimraf dist .npmignore",
     "preversion": "npm test",
     "postversion": "git push && git push --tags",
-    "test": "npm run build && node build/tests/no-card-numbers.js && npm run prettier",
+    "test": "tsc --noEmit && jest && npm run prettier",
     "prettier": "prettier --list-different 'src/**/*.ts'",
     "prettier:fix": "prettier --write 'src/**/*.ts'",
     "build": "tsc"
@@ -36,9 +36,24 @@
     "@checkdigit/publish": "^1.0.19",
     "@checkdigit/typescript-config": "^1.0.5",
     "@types/eslint": "^7.2.11",
+    "@types/jest": "^26.0.23",
     "@types/node": "^15.6.1",
     "eslint": "^7.27.0",
+    "jest": "^26.6.3",
     "prettier": "^2.3.0",
+    "ts-jest": "^26.5.6",
     "typescript": "^4.2.4"
+  },
+  "jest": {
+    "collectCoverage": true,
+    "preset": "ts-jest",
+    "testMatch": [
+      "<rootDir>/src/**/?(*.)spec.ts"
+    ],
+    "testPathIgnorePatterns": [
+      "<rootDir>/build",
+      "<rootDir>/coverage",
+      "<rootDir>/node_modules"
+    ]
   }
 }

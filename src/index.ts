@@ -134,7 +134,7 @@ const rule = {
   },
 };
 
-module.exports = {
+export default {
   rules: {
     'no-card-numbers': rule,
   },
