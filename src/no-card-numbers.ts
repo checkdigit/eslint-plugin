@@ -44,10 +44,10 @@ function luhnCheck(cardNumber: string) {
 
 function checkForCardNumbers(value: string, context: Rule.RuleContext, node?: Node, loc?: SourceLocation) {
   const matches = value.match(cardNumberRegex);
-  if (matches === null || allowCardNumbers.indexOf(value) >= 0) {
+  if (matches === null) {
     return;
   }
-  const cardNumbers = matches.filter((match) => luhnCheck(match));
+  const cardNumbers = matches.filter((match) => luhnCheck(match) && allowCardNumbers.indexOf(match) === -1);
   if (cardNumbers.length === 1) {
     if (node !== undefined) {
       context.report({
