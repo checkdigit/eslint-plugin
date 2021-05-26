@@ -6,13 +6,12 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import plugin from './index';
+import rule from './no-card-numbers';
 
 const CARD_NUMBER_FOUND = 'CARD_NUMBER_FOUND';
 const CARD_NUMBERS_FOUND = 'CARD_NUMBERS_FOUND';
 
 const { RuleTester } = require('eslint/lib/rule-tester');
-const rule = plugin.rules['no-card-numbers'];
 const ruleTester = new RuleTester({ env: { es6: true } });
 
 const CARD_NUMBER_FOUND_MSG = {
@@ -35,6 +34,7 @@ const foo = 4507894813950280;
 
 const CONTAINS_A_PASSING_CARD_NUMBER = `
 const foo = 4111111111111111;
+const fuz = 123111111111111111567;
 const bar = 111111111111111;
 const baz = 000000000000000;
 const far = 0000000000000000;
