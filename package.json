@@ -5,17 +5,24 @@
   "prettier": "@checkdigit/prettier-config",
   "main": "dist/index.js",
   "scripts": {
-    "test": "npm run build && node dist/tests/no-card-numbers.js && npm run prettier",
+    "prepublishOnly": "publish",
+    "postpublish": "rimraf dist .npmignore",
+    "preversion": "npm test",
+    "postversion": "git push && git push --tags",
+    "test": "tsc --noEmit && jest && npm run prettier",
     "prettier": "prettier --list-different 'src/**/*.ts'",
     "prettier:fix": "prettier --write 'src/**/*.ts'",
     "build": "tsc"
+  },
+  "engines": {
+    "node": ">=14"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/checkdigit/eslint-plugin.git"
   },
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/checkdigit/eslint-plugin/issues"
   },
@@ -25,11 +32,27 @@
   },
   "devDependencies": {
     "@checkdigit/prettier-config": "^1.0.2",
-    "@checkdigit/typescript-config": "^1.0.5",
+    "@checkdigit/publish": "^1.0.19",
+    "@checkdigit/typescript-config": "^2.1.0",
     "@types/eslint": "^7.2.11",
+    "@types/jest": "^26.0.23",
     "@types/node": "^15.6.1",
     "eslint": "^7.27.0",
+    "jest": "^27.0.1",
     "prettier": "^2.3.0",
-    "typescript": "^4.2.4"
+    "ts-jest": "^27.0.0",
+    "typescript": "^4.3.2"
+  },
+  "jest": {
+    "collectCoverage": true,
+    "preset": "ts-jest",
+    "testMatch": [
+      "<rootDir>/src/**/?(*.)spec.ts"
+    ],
+    "testPathIgnorePatterns": [
+      "<rootDir>/build",
+      "<rootDir>/coverage",
+      "<rootDir>/node_modules"
+    ]
   }
 }

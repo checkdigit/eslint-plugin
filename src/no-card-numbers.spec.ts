@@ -1,10 +1,17 @@
+// tests/no-card-numbers.ts
+
+/*
+ * Copyright (c) 2021 Check Digit, LLC
+ *
+ * This code is licensed under the MIT license (see LICENSE.txt for details).
+ */
+
+import rule from './no-card-numbers';
+
 const CARD_NUMBER_FOUND = 'CARD_NUMBER_FOUND';
 const CARD_NUMBERS_FOUND = 'CARD_NUMBERS_FOUND';
 
-const plugin = require('../index.js');
-
 const { RuleTester } = require('eslint/lib/rule-tester');
-const rule = plugin.rules['no-card-numbers'];
 const ruleTester = new RuleTester({ env: { es6: true } });
 
 const CARD_NUMBER_FOUND_MSG = {
@@ -27,6 +34,7 @@ const foo = 4507894813950280;
 
 const CONTAINS_A_PASSING_CARD_NUMBER = `
 const foo = 4111111111111111;
+const fuz = 123111111111111111567;
 const bar = 111111111111111;
 const baz = 000000000000000;
 const far = 0000000000000000;
@@ -53,37 +61,39 @@ const STRING_WITH_CARD_NUMBER_THAT_DOESNT_PASS_LUHN_CHECK = `
   const foo = 4507894813950285;
 `;
 
-ruleTester.run('no-card-numbers', rule, {
-  valid: [
-    {
-      code: STRING_TEST,
-    },
-    {
-      code: TEMPLATE_TEST,
-    },
-    {
-      code: STRING_WITH_CARD_NUMBER_THAT_DOESNT_PASS_LUHN_CHECK,
-    },
-    {
-      code: CONTAINS_A_PASSING_CARD_NUMBER,
-    },
-  ],
-  invalid: [
-    {
-      code: CONTAINS_CARD_NUMBER_IN_NUMBER,
-      errors: [CARD_NUMBER_FOUND_MSG],
-    },
-    {
-      code: CONTAINS_SEVERAL_CARD_NUMBERS_IN_STRING,
-      errors: [CARD_NUMBERS_FOUND_MSG],
-    },
-    {
-      code: CONTAINS_CARD_NUMBER_IN_COMMENT,
-      errors: [CARD_NUMBER_FOUND_MSG],
-    },
-    {
-      code: CONTAINS_SEVERAL_CARD_NUMBERS_IN_COMMENT,
-      errors: [CARD_NUMBERS_FOUND_MSG],
-    },
-  ],
+describe('no-card-numbers', () => {
+  ruleTester.run('no-card-numbers', rule, {
+    valid: [
+      {
+        code: STRING_TEST,
+      },
+      {
+        code: TEMPLATE_TEST,
+      },
+      {
+        code: STRING_WITH_CARD_NUMBER_THAT_DOESNT_PASS_LUHN_CHECK,
+      },
+      {
+        code: CONTAINS_A_PASSING_CARD_NUMBER,
+      },
+    ],
+    invalid: [
+      {
+        code: CONTAINS_CARD_NUMBER_IN_NUMBER,
+        errors: [CARD_NUMBER_FOUND_MSG],
+      },
+      {
+        code: CONTAINS_SEVERAL_CARD_NUMBERS_IN_STRING,
+        errors: [CARD_NUMBERS_FOUND_MSG],
+      },
+      {
+        code: CONTAINS_CARD_NUMBER_IN_COMMENT,
+        errors: [CARD_NUMBER_FOUND_MSG],
+      },
+      {
+        code: CONTAINS_SEVERAL_CARD_NUMBERS_IN_COMMENT,
+        errors: [CARD_NUMBERS_FOUND_MSG],
+      },
+    ],
+  });
 });
