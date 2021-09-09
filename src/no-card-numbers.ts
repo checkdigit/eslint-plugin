@@ -7,7 +7,7 @@
  */
 
 import type { Rule } from 'eslint';
-import type { Literal, Node, SourceLocation, TemplateElement } from 'estree';
+import type { Node, SourceLocation } from 'estree';
 
 const CARD_NUMBER_FOUND = 'CARD_NUMBER_FOUND';
 const CARD_NUMBERS_FOUND = 'CARD_NUMBERS_FOUND';
@@ -105,7 +105,7 @@ export default {
       [CARD_NUMBERS_FOUND]: `Multiple valid card numbers found: "{{ numbers }}"`,
     },
   },
-  create(context: Rule.RuleContext) {
+  create(context) {
     const sourceCode = context.getSourceCode();
     const comments = sourceCode.getAllComments();
 
@@ -115,7 +115,7 @@ export default {
       }
     });
     return {
-      Literal(node: Literal) {
+      Literal(node) {
         if (node.value === undefined) {
           return;
         }
@@ -125,11 +125,11 @@ export default {
         const value = node.value + '';
         checkForCardNumbers(value, context, node);
       },
-      TemplateElement(node: TemplateElement) {
+      TemplateElement(node) {
         if (!node.value) return;
         const value = node.value.cooked + '';
         checkForCardNumbers(value, context, node);
       },
     };
   },
-};
+} as Rule.RuleModule;

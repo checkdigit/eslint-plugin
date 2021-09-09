@@ -1,4 +1,4 @@
-// tests/no-card-numbers.ts
+// no-card-numbers.spec.ts
 
 /*
  * Copyright (c) 2021 Check Digit, LLC
@@ -6,13 +6,12 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
+import { RuleTester } from 'eslint';
+
 import rule from './no-card-numbers';
 
 const CARD_NUMBER_FOUND = 'CARD_NUMBER_FOUND';
 const CARD_NUMBERS_FOUND = 'CARD_NUMBERS_FOUND';
-
-const { RuleTester } = require('eslint/lib/rule-tester');
-const ruleTester = new RuleTester({ env: { es6: true } });
 
 const CARD_NUMBER_FOUND_MSG = {
   messageId: CARD_NUMBER_FOUND,
@@ -73,6 +72,7 @@ const STRING_WITH_CARD_NUMBER_THAT_DOESNT_PASS_LUHN_CHECK = `
 `;
 
 describe('no-card-numbers', () => {
+  const ruleTester = new RuleTester({ parserOptions: { ecmaVersion: 2020 } });
   ruleTester.run('no-card-numbers', rule, {
     valid: [
       {
