@@ -18,18 +18,8 @@ export default {
     fixable: 'code',
   },
   create(context) {
-    const firstLine = context.getSourceCode().getLines()[0] ?? '';
-
-    console.log(context.getFilename());
-
-    const expectedPath = context
-      .getFilename()
-      .split('src')[1]
-      .split('')
-      .filter((_, index) => index !== 0)
-      .join('');
-
-    const fixText = `// ${expectedPath}\n\n`;
+    const firstLine = context.getSourceCode().getLines()[0] as string;
+    const expectedPath = context.getFilename().split('src/')[1];
 
     if (!firstLine.startsWith('//')) {
       if (firstLine.startsWith('/*')) {
@@ -46,7 +36,7 @@ export default {
           },
           message: 'first line cannot be a block comment',
           fix(fixer: Rule.RuleFixer) {
-            return fixer.insertTextBeforeRange([0, 0], fixText);
+            return fixer.insertTextBeforeRange([0, 0], `// ${expectedPath}\n\n`);
           },
         });
       } else {
@@ -63,17 +53,12 @@ export default {
           },
           message: 'first line is not a comment with the file path',
           fix(fixer: Rule.RuleFixer) {
-            return fixer.insertTextBeforeRange([0, 0], fixText);
+            return fixer.insertTextBeforeRange([0, 0], `// ${expectedPath}\n\n`);
           },
         });
       }
     } else {
-      const actualComment = firstLine
-        .split('//')
-        .filter((element, i) => i !== 0)
-        .join('')
-        .trim();
-
+      const actualComment = firstLine.split('// ')[1];
       if (expectedPath !== actualComment) {
         context.report({
           loc: {
@@ -88,7 +73,7 @@ export default {
           },
           message: 'first line is a comment but is not a path to the file',
           fix(fixer: Rule.RuleFixer) {
-            return fixer.insertTextBeforeRange([0, 0], fixText);
+            return fixer.replaceTextRange([0, firstLine.length], `// ${expectedPath}`);
           },
         });
       }

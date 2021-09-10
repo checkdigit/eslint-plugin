@@ -10,35 +10,50 @@ import { RuleTester } from 'eslint';
 
 import rule from './file-path-comment';
 
-const CARD_NUMBER_FOUND = 'CARD_NUMBER_FOUND';
-
-const CARD_NUMBER_FOUND_MSG = {
-  messageId: CARD_NUMBER_FOUND,
-};
-
-const STRING_TEST = `
-const NOT_A_SECRET = "I'm not a secret, I think";
-`;
-
-const CONTAINS_CARD_NUMBER_IN_NUMBER = `
-const foo = 4507894813950280;
-`;
-
-describe('file-path-comment', () => {
+describe.only('file-path-comment', () => {
   const ruleTester = new RuleTester({ parserOptions: { ecmaVersion: 2020 } });
 
   ruleTester.run('file-path-comment', rule, {
     valid: [
       {
-        filename: 'src/hello',
-        code: STRING_TEST,
+        filename: 'src/world/hello.ts',
+        code: `// world/hello.ts`,
+      },
+      {
+        filename: 'src/hello.ts',
+        code: `// hello.ts\n`,
       },
     ],
     invalid: [
       {
-        filename: 'src/hello',
-        code: CONTAINS_CARD_NUMBER_IN_NUMBER,
-        errors: [CARD_NUMBER_FOUND_MSG],
+        filename: 'src/hello.ts',
+        code: `// not-hello.ts`,
+        errors: [{ message: 'first line is a comment but is not a path to the file' }],
+        output: `// hello.ts`,
+      },
+      {
+        filename: 'src/hello.ts',
+        code: `//hello.ts\n`,
+        errors: [{ message: 'first line is a comment but is not a path to the file' }],
+        output: `// hello.ts\n`,
+      },
+      {
+        filename: 'src/hello.ts',
+        code: `/* not-hello.ts */`,
+        errors: [{ message: 'first line cannot be a block comment' }],
+        output: `// hello.ts\n\n/* not-hello.ts */`,
+      },
+      {
+        filename: 'src/hello.ts',
+        code: `const x = 123;`,
+        errors: [{ message: 'first line is not a comment with the file path' }],
+        output: `// hello.ts\n\nconst x = 123;`,
+      },
+      {
+        filename: 'src/hello.ts',
+        code: ``,
+        errors: [{ message: 'first line is not a comment with the file path' }],
+        output: `// hello.ts\n\n`,
       },
     ],
   });
