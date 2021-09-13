@@ -21,6 +21,10 @@ export default {
     const firstLine = context.getSourceCode().getLines()[0] as string;
     const expectedPath = context.getFilename().split('src/')[1];
 
+    if (expectedPath === undefined) {
+      throw Error(`Bad filename ${context.getFilename()}, not under src/`);
+    }
+
     if (!firstLine.startsWith('//')) {
       if (firstLine.startsWith('/*')) {
         context.report({

@@ -25,6 +25,7 @@ const STRING_TEST = `
 const NOT_A_SECRET = "I'm not a secret, I think";
 `;
 
+// eslint-disable-next-line no-template-curly-in-string
 const TEMPLATE_TEST = "const NOT_A_SECRET = `A template that isn't a secret. ${1+1} = 2`";
 
 const CONTAINS_CARD_NUMBER_IN_NUMBER = `

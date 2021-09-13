@@ -10,7 +10,7 @@ import { RuleTester } from 'eslint';
 
 import rule from './file-path-comment';
 
-describe.only('file-path-comment', () => {
+describe('file-path-comment', () => {
   const ruleTester = new RuleTester({ parserOptions: { ecmaVersion: 2020 } });
 
   ruleTester.run('file-path-comment', rule, {
