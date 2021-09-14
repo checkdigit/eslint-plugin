@@ -22,7 +22,7 @@ export default {
     const expectedPath = context.getFilename().split('src/')[1];
 
     if (expectedPath === undefined) {
-      throw Error(`Bad filename ${context.getFilename()}, not under src/`);
+      return {};
     }
 
     if (!firstLine.startsWith('//')) {

@@ -18,10 +18,21 @@ describe('file-path-comment', () => {
       {
         filename: 'src/world/hello.ts',
         code: `// world/hello.ts`,
+        parserOptions: {
+          project: './tsconfig.json',
+        },
       },
       {
         filename: 'src/hello.ts',
         code: `// hello.ts\n`,
+      },
+      {
+        filename: 'hello.ts',
+        code: `// whatever does not matter\n`,
+      },
+      {
+        filename: 'source/hello.ts',
+        code: `// whatever does not matter\n`,
       },
     ],
     invalid: [
