@@ -1,18 +1,20 @@
 {
   "name": "@checkdigit/eslint-plugin",
   "version": "2.0.1",
-  "description": "eslint plugin for appending file path as a comment at the top of a file",
+  "description": "Check Digit eslint plugins",
   "prettier": "@checkdigit/prettier-config",
   "main": "dist/index.js",
+  "keywords": [
+    "eslint",
+    "eslintplugin"
+  ],
   "scripts": {
-    "prepublishOnly": "publish",
-    "postpublish": "rimraf dist .npmignore",
     "preversion": "npm test",
     "postversion": "git push && git push --tags",
-    "test": "tsc --noEmit && jest && npm run prettier",
+    "test": "tsc --noEmit && jest && npm run prettier && npm run lint",
+    "lint": "eslint -f unix --ext .ts src/**",
     "prettier": "prettier --list-different 'src/**/*.ts'",
-    "prettier:fix": "prettier --write 'src/**/*.ts'",
-    "build": "tsc"
+    "prettier:fix": "prettier --write 'src/**/*.ts'"
   },
   "engines": {
     "node": ">=14"
@@ -32,16 +34,24 @@
   },
   "devDependencies": {
     "@checkdigit/prettier-config": "^1.0.2",
-    "@checkdigit/publish": "^1.0.19",
-    "@checkdigit/typescript-config": "^2.1.0",
-    "@types/eslint": "^7.2.11",
-    "@types/jest": "^26.0.23",
-    "@types/node": "^15.6.1",
+    "@checkdigit/typescript-config": "^2.2.0",
+    "@types/eslint": "^7.28.0",
+    "@types/jest": "^27.0.1",
+    "@types/node": "^16.9.1",
+    "@typescript-eslint/eslint-plugin": "^4.31.1",
     "eslint": "^7.27.0",
-    "jest": "^27.0.1",
-    "prettier": "^2.3.0",
-    "ts-jest": "^27.0.0",
-    "typescript": "^4.3.2"
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-deprecate": "^0.7.0",
+    "eslint-plugin-eslint-plugin": "^3.5.3",
+    "eslint-plugin-import": "^2.24.2",
+    "eslint-plugin-no-only-tests": "^2.6.0",
+    "eslint-plugin-no-secrets": "^0.8.9",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-sonarjs": "^0.10.0",
+    "jest": "^27.2.0",
+    "prettier": "^2.4.0",
+    "ts-jest": "^27.0.5",
+    "typescript": "^4.4.3"
   },
   "jest": {
     "collectCoverage": true,

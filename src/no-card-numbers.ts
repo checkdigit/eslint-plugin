@@ -6,12 +6,12 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
+import type { Node, SourceLocation } from 'estree';
 import type { Rule } from 'eslint';
-import type { Literal, Node, SourceLocation, TemplateElement } from 'estree';
 
 const CARD_NUMBER_FOUND = 'CARD_NUMBER_FOUND';
 const CARD_NUMBERS_FOUND = 'CARD_NUMBERS_FOUND';
-const cardNumberRegex = /\d{15,19}/gm;
+const cardNumberRegex = /\d{15,19}/gmu;
 const allowCardNumbers = [
   '4111111111111111',
   '111111111111111',
@@ -27,15 +27,17 @@ function luhnCheck(cardNumber: string) {
     cardNumber
       .split('')
       .reverse()
-      .map((d) => parseInt(d, 10))
+      .map((digit) => parseInt(digit, 10))
       .reduce((previousValue, currentValue, index) => {
+        let value = currentValue;
         if (index % 2 === 1) {
-          currentValue *= 2;
-          if (currentValue > 9) {
-            currentValue = (currentValue % 10) + 1;
+          value *= 2;
+          // eslint-disable-next-line no-magic-numbers
+          if (value > 9) {
+            value = (value % 10) + 1;
           }
         }
-        return previousValue + currentValue;
+        return previousValue + value;
       }, 0) %
       10 ===
     0
@@ -105,7 +107,7 @@ export default {
       [CARD_NUMBERS_FOUND]: `Multiple valid card numbers found: "{{ numbers }}"`,
     },
   },
-  create(context: Rule.RuleContext) {
+  create(context) {
     const sourceCode = context.getSourceCode();
     const comments = sourceCode.getAllComments();
 
@@ -115,21 +117,25 @@ export default {
       }
     });
     return {
-      Literal(node: Literal) {
+      Literal(node) {
         if (node.value === undefined) {
           return;
         }
         if (typeof node.value !== 'string' && typeof node.value !== 'number') {
           return;
         }
-        const value = node.value + '';
+        const value = `${node.value}`;
         checkForCardNumbers(value, context, node);
       },
-      TemplateElement(node: TemplateElement) {
-        if (!node.value) return;
-        const value = node.value.cooked + '';
-        checkForCardNumbers(value, context, node);
+      TemplateElement(node) {
+        if (!node.value) {
+          return;
+        }
+        if (typeof node.value.cooked !== 'string') {
+          return;
+        }
+        checkForCardNumbers(node.value.cooked, context, node);
       },
     };
   },
-};
+} as Rule.RuleModule;
