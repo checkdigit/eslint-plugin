@@ -1,6 +1,6 @@
 {
   "name": "@checkdigit/eslint-plugin",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Check Digit eslint plugins",
   "prettier": "@checkdigit/prettier-config",
   "main": "dist/index.js",
