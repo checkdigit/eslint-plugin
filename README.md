@@ -7,8 +7,13 @@ Copyright (c) 2021 [Check Digit, LLC](https://checkdigit.com)
 
 ## Rules
 
-* `no-card-numbers`
-* `file-path-comment`
+* `@checkdigit/no-card-numbers`
+* `@checkdigit/file-path-comment`
+
+## Configurations
+
+* `@checkdigit/all`
+* `@checkdigit/recommended`
 
 ## License
 
