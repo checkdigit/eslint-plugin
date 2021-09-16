@@ -9,7 +9,23 @@
 import filePathComment from './file-path-comment';
 import noCardNumbers from './no-card-numbers';
 
-export const rules = {
-  'file-path-comment': filePathComment,
-  'no-card-numbers': noCardNumbers,
+export = {
+  rules: {
+    'file-path-comment': filePathComment,
+    'no-card-numbers': noCardNumbers,
+  },
+  configs: {
+    all: {
+      rules: {
+        '@checkdigit/no-card-numbers': 'error',
+        '@checkdigit/file-path-comment': 'error',
+      },
+    },
+    recommended: {
+      rules: {
+        '@checkdigit/no-card-numbers': 'error',
+        '@checkdigit/file-path-comment': 'off',
+      },
+    },
+  },
 };
