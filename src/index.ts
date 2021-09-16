@@ -9,7 +9,7 @@
 import filePathComment from './file-path-comment';
 import noCardNumbers from './no-card-numbers';
 
-export = {
+export default {
   rules: {
     'file-path-comment': filePathComment,
     'no-card-numbers': noCardNumbers,
