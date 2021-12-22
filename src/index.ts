@@ -8,11 +8,13 @@
 
 import filePathComment from './file-path-comment';
 import noCardNumbers from './no-card-numbers';
+import pureFunctions from './pure-functions';
 
 export default {
   rules: {
     'file-path-comment': filePathComment,
     'no-card-numbers': noCardNumbers,
+    'pure-functions': pureFunctions,
   },
   configs: {
     all: {
