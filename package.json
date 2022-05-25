@@ -1,6 +1,6 @@
 {
   "name": "@checkdigit/eslint-plugin",
-  "version": "3.0.0",
+  "version": "4.0.0-beta.1",
   "description": "Check Digit eslint plugins",
   "prettier": "@checkdigit/prettier-config",
   "main": "dist/index.js",
@@ -17,7 +17,7 @@
     "prettier:fix": "prettier --write 'src/**/*.ts'"
   },
   "engines": {
-    "node": ">=14"
+    "node": ">=16"
   },
   "repository": {
     "type": "git",
@@ -35,24 +35,22 @@
   "devDependencies": {
     "@checkdigit/prettier-config": "^1.0.2",
     "@checkdigit/typescript-config": "^2.2.0",
-    "@types/eslint": "^8.2.1",
-    "@types/jest": "^27.0.3",
-    "@types/node": "^17.0.2",
-    "@typescript-eslint/eslint-plugin": "^5.8.0",
-    "@typescript-eslint/parser": "^5.8.0",
-    "eslint": "^8.5.0",
-    "eslint-config-prettier": "^8.3.0",
+    "@types/eslint": "^8.4.2",
+    "@types/jest": "^27.5.1",
+    "@types/node": "^17.0.35",
+    "@typescript-eslint/eslint-plugin": "^5.26.0",
+    "@typescript-eslint/parser": "^5.26.0",
+    "eslint": "^8.16.0",
+    "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-deprecate": "^0.7.0",
-    "eslint-plugin-eslint-plugin": "^4.1.0",
-    "eslint-plugin-import": "^2.25.3",
+    "eslint-plugin-eslint-plugin": "^4.2.0",
+    "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-no-only-tests": "^2.6.0",
     "eslint-plugin-no-secrets": "^0.8.9",
     "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-sonarjs": "^0.11.0",
-    "jest": "^27.4.5",
-    "prettier": "^2.5.1",
-    "ts-jest": "^27.1.2",
-    "typescript": "^4.5.4"
+    "eslint-plugin-sonarjs": "^0.13.0",
+    "jest": "^28.1.0",
+    "ts-jest": "^28.0.3"
   },
   "jest": {
     "collectCoverage": true,

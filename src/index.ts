@@ -21,12 +21,14 @@ export default {
       rules: {
         '@checkdigit/no-card-numbers': 'error',
         '@checkdigit/file-path-comment': 'error',
+        '@checkdigit/pure-functions': 'error',
       },
     },
     recommended: {
       rules: {
         '@checkdigit/no-card-numbers': 'error',
         '@checkdigit/file-path-comment': 'off',
+        '@checkdigit/pure-functions': 'off',
       },
     },
   },
