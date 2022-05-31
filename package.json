@@ -48,7 +48,6 @@
     "eslint-plugin-no-secrets": "^0.8.9",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-sonarjs": "^0.13.0",
-    "jest": "^28.1.0",
     "ts-jest": "^28.0.3"
   },
   "jest": {
