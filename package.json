@@ -61,6 +61,12 @@
       "<rootDir>/build",
       "<rootDir>/coverage",
       "<rootDir>/node_modules"
-    ]
+    ],
+    "globals": {
+      "ts-jest": {
+        "isolatedModules": true,
+        "diagnostics": false
+      }
+    }
   }
 }
