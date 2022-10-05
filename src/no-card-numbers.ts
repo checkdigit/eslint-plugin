@@ -76,7 +76,7 @@ function checkForCardNumbers(value: string, context: Rule.RuleContext, node?: No
       context.report({
         messageId: CARD_NUMBERS_FOUND,
         data: {
-          number: matches.join(', '),
+          numbers: matches.join(', '),
         },
         node,
       });
@@ -84,7 +84,7 @@ function checkForCardNumbers(value: string, context: Rule.RuleContext, node?: No
       context.report({
         messageId: CARD_NUMBERS_FOUND,
         data: {
-          number: matches.join(', '),
+          numbers: matches.join(', '),
         },
         loc: {
           start: loc.start,

@@ -3,15 +3,7 @@
   "parserOptions": {
     "project": "./tsconfig.json"
   },
-  "plugins": [
-    "@typescript-eslint",
-    "sonarjs",
-    "import",
-    "no-only-tests",
-    "no-secrets",
-    "deprecate",
-    "eslint-plugin"
-  ],
+  "plugins": ["@typescript-eslint", "sonarjs", "import", "no-only-tests", "no-secrets", "deprecate", "eslint-plugin"],
   "extends": [
     "eslint:all",
     "plugin:@typescript-eslint/recommended",
