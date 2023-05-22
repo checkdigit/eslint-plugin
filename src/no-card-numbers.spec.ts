@@ -72,6 +72,26 @@ const STRING_WITH_CARD_NUMBER_THAT_DOESNT_PASS_LUHN_CHECK = `
   const foo = 4507894813950285;
 `;
 
+const CONTAINS_PASSING_BUT_INVALID_0_PREFIX_CARD_NUMBER_IN_STRING = `
+const foo = '0027576507977237';
+`;
+
+const CONTAINS_PASSING_BUT_INVALID_1_PREFIX_CARD_NUMBER_IN_STRING = `
+const foo = '1237027241007794';
+`;
+
+const CONTAINS_PASSING_BUT_INVALID_7_PREFIX_CARD_NUMBER_IN_STRING = `
+const foo = '7603721237334401';
+`;
+
+const CONTAINS_PASSING_BUT_INVALID_8_PREFIX_CARD_NUMBER_IN_STRING = `
+const foo = '8119915764450821';
+`;
+
+const CONTAINS_PASSING_BUT_INVALID_9_PREFIX_CARD_NUMBER_IN_STRING = `
+const foo = '9118724531442999';
+`;
+
 describe('no-card-numbers', () => {
   const ruleTester = new RuleTester({ parserOptions: { ecmaVersion: 2020 } });
   ruleTester.run('no-card-numbers', rule, {
@@ -90,6 +110,21 @@ describe('no-card-numbers', () => {
       },
       {
         code: CONTAINS_A_PASSING_CARD_NUMBER_IN_COMMENT,
+      },
+      {
+        code: CONTAINS_PASSING_BUT_INVALID_0_PREFIX_CARD_NUMBER_IN_STRING,
+      },
+      {
+        code: CONTAINS_PASSING_BUT_INVALID_1_PREFIX_CARD_NUMBER_IN_STRING,
+      },
+      {
+        code: CONTAINS_PASSING_BUT_INVALID_7_PREFIX_CARD_NUMBER_IN_STRING,
+      },
+      {
+        code: CONTAINS_PASSING_BUT_INVALID_8_PREFIX_CARD_NUMBER_IN_STRING,
+      },
+      {
+        code: CONTAINS_PASSING_BUT_INVALID_9_PREFIX_CARD_NUMBER_IN_STRING,
       },
     ],
     invalid: [

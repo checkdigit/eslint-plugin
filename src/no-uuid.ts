@@ -23,7 +23,7 @@ function checkForUuid(value: string, context: Rule.RuleContext, node?: Node, loc
       context.report({
         messageId: UUID_FOUND,
         data: {
-          uuid: matches[0] as string,
+          uuid: matches[0] ?? '',
         },
         node,
       });
@@ -31,7 +31,7 @@ function checkForUuid(value: string, context: Rule.RuleContext, node?: Node, loc
       context.report({
         messageId: UUID_FOUND,
         data: {
-          uuid: matches[0] as string,
+          uuid: matches[0] ?? '',
         },
         loc: {
           start: loc.start,
