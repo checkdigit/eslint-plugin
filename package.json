@@ -55,5 +55,9 @@
   },
   "jest": {
     "preset": "@checkdigit/jest-config"
-  }
+  },
+  "files": [
+    "dist",
+    "SECURITY.md"
+  ]
 }
