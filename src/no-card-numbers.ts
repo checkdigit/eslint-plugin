@@ -49,7 +49,17 @@ function checkForCardNumbers(value: string, context: Rule.RuleContext, node?: No
   if (matches === null) {
     return;
   }
-  const cardNumbers = matches.filter((match) => luhnCheck(match) && allowCardNumbers.indexOf(match) === -1);
+  const cardNumbers = matches.filter(
+    (match) =>
+      luhnCheck(match) &&
+      allowCardNumbers.indexOf(match) === -1 &&
+      // any 16-digit number that begins with 0-1 or 7-9 is not a valid card number
+      match[0] !== '0' &&
+      match[0] !== '1' &&
+      match[0] !== '7' &&
+      match[0] !== '8' &&
+      match[0] !== '9'
+  );
   if (cardNumbers.length === 1) {
     if (node !== undefined) {
       context.report({
