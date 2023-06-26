@@ -1,6 +1,6 @@
 {
   "name": "@checkdigit/eslint-plugin",
-  "version": "4.1.1",
+  "version": "5.0.0",
   "description": "Check Digit eslint plugins",
   "prettier": "@checkdigit/prettier-config",
   "main": "dist/index.js",
@@ -9,7 +9,7 @@
     "eslintplugin"
   ],
   "engines": {
-    "node": ">=16"
+    "node": ">=18"
   },
   "repository": {
     "type": "git",
@@ -25,12 +25,12 @@
     "eslint": ">=8"
   },
   "devDependencies": {
-    "@checkdigit/jest-config": "^2.2.1",
-    "@checkdigit/prettier-config": "^3.4.0",
-    "@checkdigit/typescript-config": "^3.3.0",
-    "@types/eslint": "^8.37.0",
-    "@typescript-eslint/eslint-plugin": "^5.59.7",
-    "@typescript-eslint/parser": "^5.59.7",
+    "@checkdigit/jest-config": "^2.3.0",
+    "@checkdigit/prettier-config": "4.0.0-PR.23-11e4",
+    "@checkdigit/typescript-config": "4.0.0-PR.38-e2c9",
+    "@types/eslint": "^8.40.2",
+    "@typescript-eslint/eslint-plugin": "^5.60.1",
+    "@typescript-eslint/parser": "^5.60.1",
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-deprecate": "^0.7.0",
     "eslint-plugin-eslint-plugin": "^5.1.0",
