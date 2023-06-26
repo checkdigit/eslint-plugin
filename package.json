@@ -27,7 +27,7 @@
   "devDependencies": {
     "@checkdigit/jest-config": "^2.3.0",
     "@checkdigit/prettier-config": "4.0.0-PR.23-11e4",
-    "@checkdigit/typescript-config": "4.0.0-PR.38-e2c9",
+    "@checkdigit/typescript-config": "4.0.0-PR.38-ff3c",
     "@types/eslint": "^8.40.2",
     "@typescript-eslint/eslint-plugin": "^5.60.1",
     "@typescript-eslint/parser": "^5.60.1",
