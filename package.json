@@ -3,7 +3,16 @@
   "version": "5.0.0",
   "description": "Check Digit eslint plugins",
   "prettier": "@checkdigit/prettier-config",
-  "main": "dist/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist-types/index.d.ts",
+      "require": "./dist-cjs/index.cjs",
+      "import": "./dist-mjs/index.mjs",
+      "default": "./dist-mjs/index.mjs"
+    }
+  },
+  "type": "module",
+  "sideEffects": false,
   "keywords": [
     "eslint",
     "eslintplugin"
@@ -41,7 +50,10 @@
     "eslint-plugin-sonarjs": "^0.19.0"
   },
   "scripts": {
-    "postversion": "git push && git push --tags",
+    "prepublishOnly": "npm run build:dist-types && npm run build:dist-cjs && npm run build:dist-esm",
+    "build:dist-types": "rimraf dist-types && npx builder --type=types --outDir=dist-types",
+    "build:dist-cjs": "rimraf dist-cjs && npx builder --type=commonjs --sourceMap --outDir=dist-cjs",
+    "build:dist-esm": "rimraf dist-esm && npx builder --type=module --sourceMap --outDir=dist-mjs",
     "lint:fix": "eslint -f unix --ext .ts src --fix",
     "lint": "eslint -f unix --ext .ts src",
     "prettier": "prettier --ignore-path .gitignore --list-different .",
@@ -57,7 +69,18 @@
     "preset": "@checkdigit/jest-config"
   },
   "files": [
-    "dist",
+    "src",
+    "dist-types",
+    "dist-cjs",
+    "dist-mjs",
+    "!src/**/*.test.ts",
+    "!src/**/*.spec.ts",
+    "!dist-types/**/*.test.d.ts",
+    "!dist-types/**/*.spec.d.ts",
+    "!dist-cjs/**/*.test.cjs",
+    "!dist-cjs/**/*.spec.cjs",
+    "!dist-mjs/**/*.test.mjs",
+    "!dist-mjs/**/*.spec.mjs",
     "SECURITY.md"
   ]
 }
