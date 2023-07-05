@@ -58,7 +58,7 @@ function checkForCardNumbers(value: string, context: Rule.RuleContext, node?: No
       match[0] !== '1' &&
       match[0] !== '7' &&
       match[0] !== '8' &&
-      match[0] !== '9'
+      match[0] !== '9',
   );
   if (cardNumbers.length === 1) {
     if (node !== undefined) {

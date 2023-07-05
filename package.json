@@ -1,15 +1,22 @@
 {
   "name": "@checkdigit/eslint-plugin",
-  "version": "4.1.1",
+  "version": "5.0.0",
   "description": "Check Digit eslint plugins",
   "prettier": "@checkdigit/prettier-config",
-  "main": "dist/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist-types/index.d.ts",
+      "require": "./dist-cjs/index.cjs",
+      "import": "./dist-mjs/index.mjs",
+      "default": "./dist-mjs/index.mjs"
+    }
+  },
   "keywords": [
     "eslint",
     "eslintplugin"
   ],
   "engines": {
-    "node": ">=16"
+    "node": ">=18"
   },
   "repository": {
     "type": "git",
@@ -25,14 +32,14 @@
     "eslint": ">=8"
   },
   "devDependencies": {
-    "@checkdigit/jest-config": "^2.2.1",
-    "@checkdigit/prettier-config": "^3.4.0",
-    "@checkdigit/typescript-config": "^3.3.0",
-    "@types/eslint": "^8.37.0",
-    "@typescript-eslint/eslint-plugin": "^5.59.7",
-    "@typescript-eslint/parser": "^5.59.7",
+    "@checkdigit/jest-config": "^2.3.0",
+    "@checkdigit/prettier-config": "^4.0.0",
+    "@checkdigit/typescript-config": "^4.0.0",
+    "@types/eslint": "^8.40.2",
+    "@typescript-eslint/eslint-plugin": "^5.61.0",
+    "@typescript-eslint/parser": "^5.61.0",
     "eslint-config-prettier": "^8.8.0",
-    "eslint-plugin-deprecate": "^0.7.0",
+    "eslint-plugin-deprecate": "^0.8.0",
     "eslint-plugin-eslint-plugin": "^5.1.0",
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-no-only-tests": "^3.1.0",
@@ -41,7 +48,10 @@
     "eslint-plugin-sonarjs": "^0.19.0"
   },
   "scripts": {
-    "postversion": "git push && git push --tags",
+    "prepublishOnly": "npm run build:dist-types && npm run build:dist-cjs && npm run build:dist-esm",
+    "build:dist-types": "rimraf dist-types && npx builder --type=types --outDir=dist-types",
+    "build:dist-cjs": "rimraf dist-cjs && npx builder --type=commonjs --sourceMap --entryPoint=index.ts --outDir=dist-cjs --outFile=index.cjs && echo \"module.exports = module.exports.default;\" >> dist-cjs/index.cjs",
+    "build:dist-esm": "rimraf dist-esm && npx builder --type=module --sourceMap --outDir=dist-mjs",
     "lint:fix": "eslint -f unix --ext .ts src --fix",
     "lint": "eslint -f unix --ext .ts src",
     "prettier": "prettier --ignore-path .gitignore --list-different .",
@@ -57,7 +67,18 @@
     "preset": "@checkdigit/jest-config"
   },
   "files": [
-    "dist",
+    "src",
+    "dist-types",
+    "dist-cjs",
+    "dist-mjs",
+    "!src/**/*.test.ts",
+    "!src/**/*.spec.ts",
+    "!dist-types/**/*.test.d.ts",
+    "!dist-types/**/*.spec.d.ts",
+    "!dist-cjs/**/*.test.cjs",
+    "!dist-cjs/**/*.spec.cjs",
+    "!dist-mjs/**/*.test.mjs",
+    "!dist-mjs/**/*.spec.mjs",
     "SECURITY.md"
   ]
 }
