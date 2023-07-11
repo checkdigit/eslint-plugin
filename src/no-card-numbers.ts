@@ -52,34 +52,37 @@ function checkForCardNumbers(value: string, context: Rule.RuleContext, node?: No
   const cardNumbers = matches.filter(
     (match) =>
       luhnCheck(match) &&
-      allowCardNumbers.indexOf(match) === -1 &&
+      !allowCardNumbers.includes(match) &&
       // any 16-digit number that begins with 0-1 or 7-9 is not a valid card number
-      match[0] !== '0' &&
-      match[0] !== '1' &&
-      match[0] !== '7' &&
-      match[0] !== '8' &&
-      match[0] !== '9',
+      !match.startsWith('0') &&
+      !match.startsWith('1') &&
+      !match.startsWith('7') &&
+      !match.startsWith('8') &&
+      !match.startsWith('9'),
   );
   if (cardNumbers.length === 1) {
-    if (node !== undefined) {
-      context.report({
-        messageId: CARD_NUMBER_FOUND,
-        data: {
-          number: cardNumbers[0] as string,
-        },
-        node,
-      });
-    } else if (loc !== undefined) {
-      context.report({
-        messageId: CARD_NUMBER_FOUND,
-        data: {
-          number: cardNumbers[0] as string,
-        },
-        loc: {
-          start: loc.start,
-          end: loc.end,
-        },
-      });
+    const cardNumber = cardNumbers[0];
+    if (cardNumber !== undefined) {
+      if (node !== undefined) {
+        context.report({
+          messageId: CARD_NUMBER_FOUND,
+          data: {
+            number: cardNumber,
+          },
+          node,
+        });
+      } else if (loc !== undefined) {
+        context.report({
+          messageId: CARD_NUMBER_FOUND,
+          data: {
+            number: cardNumber,
+          },
+          loc: {
+            start: loc.start,
+            end: loc.end,
+          },
+        });
+      }
     }
   } else if (cardNumbers.length > 1) {
     if (node !== undefined) {
@@ -118,7 +121,7 @@ export default {
     },
   },
   create(context) {
-    const sourceCode = context.getSourceCode();
+    const sourceCode = context.sourceCode;
     const comments = sourceCode.getAllComments();
 
     comments.forEach((comment) => {
@@ -138,9 +141,6 @@ export default {
         checkForCardNumbers(value, context, node);
       },
       TemplateElement(node) {
-        if (!node.value) {
-          return;
-        }
         if (typeof node.value.cooked !== 'string') {
           return;
         }

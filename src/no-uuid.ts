@@ -23,7 +23,7 @@ function checkForUuid(value: string, context: Rule.RuleContext, node?: Node, loc
       context.report({
         messageId: UUID_FOUND,
         data: {
-          uuid: matches[0] ?? '',
+          uuid: matches[0],
         },
         node,
       });
@@ -31,7 +31,7 @@ function checkForUuid(value: string, context: Rule.RuleContext, node?: Node, loc
       context.report({
         messageId: UUID_FOUND,
         data: {
-          uuid: matches[0] ?? '',
+          uuid: matches[0],
         },
         loc: {
           start: loc.start,
@@ -76,7 +76,7 @@ export default {
     },
   },
   create(context) {
-    const sourceCode = context.getSourceCode();
+    const sourceCode = context.sourceCode;
     const comments = sourceCode.getAllComments();
 
     comments.forEach((comment) => {
@@ -96,9 +96,6 @@ export default {
         checkForUuid(value, context, node);
       },
       TemplateElement(node) {
-        if (!node.value) {
-          return;
-        }
         if (typeof node.value.cooked !== 'string') {
           return;
         }

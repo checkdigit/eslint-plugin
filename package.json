@@ -3,6 +3,7 @@
   "version": "5.0.0",
   "description": "Check Digit eslint plugins",
   "prettier": "@checkdigit/prettier-config",
+  "type": "module",
   "exports": {
     ".": {
       "types": "./dist-types/index.d.ts",
@@ -29,15 +30,15 @@
   },
   "homepage": "https://github.com/checkdigit/eslint-plugin#readme",
   "peerDependencies": {
-    "eslint": ">=8"
+    "eslint": ">=8 <9"
   },
   "devDependencies": {
-    "@checkdigit/jest-config": "^2.3.0",
+    "@checkdigit/jest-config": "^3.0.0",
     "@checkdigit/prettier-config": "^4.0.0",
     "@checkdigit/typescript-config": "^4.0.0",
-    "@types/eslint": "^8.40.2",
-    "@typescript-eslint/eslint-plugin": "^5.61.0",
-    "@typescript-eslint/parser": "^5.61.0",
+    "@types/eslint": "^8.44.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-deprecate": "^0.8.0",
     "eslint-plugin-eslint-plugin": "^5.1.0",
@@ -58,8 +59,8 @@
     "prettier:fix": "prettier --ignore-path .gitignore --write .",
     "test": "npm run ci:compile && npm run ci:test && npm run ci:lint && npm run ci:style",
     "ci:compile": "tsc --noEmit",
-    "ci:test": "jest --coverage=false",
-    "ci:coverage": "jest --coverage=true",
+    "ci:test": "NODE_OPTIONS=\"--experimental-vm-modules\" jest --coverage=false",
+    "ci:coverage": "NODE_OPTIONS=\"--experimental-vm-modules\" jest --coverage=true",
     "ci:lint": "npm run lint",
     "ci:style": "npm run prettier"
   },
