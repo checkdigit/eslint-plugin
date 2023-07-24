@@ -18,10 +18,10 @@ export default {
     fixable: 'code',
   },
   create(context) {
-    const firstLine = context.getSourceCode().getLines()[0] as string;
-    const expectedPath = context.getFilename().split('src/')[1];
+    const firstLine = context.sourceCode.getLines()[0];
+    const expectedPath = context.filename.split('src/')[1];
 
-    if (expectedPath === undefined) {
+    if (firstLine === undefined || expectedPath === undefined) {
       return {};
     }
 
