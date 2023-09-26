@@ -9,12 +9,42 @@ env:
   CI: true
 
 jobs:
-  coverage:
+  pullRequestBuild:
+    name: Pull Request Build
     runs-on: ubuntu-latest
-    name: Coverage
     strategy:
       matrix:
-        node-version: [20.x]
+        node-version: [18.x, 20.x]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Audit Signatures
+        run: npm audit signatures
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Compile
+        run: npm run ci:compile
+      - name: Check Code Style
+        run: npm run ci:style
+      - name: Perform Linting
+        run: npm run ci:lint
+      - name: Run Tests
+        run: npm run ci:test
+
+  branchBuild:
+    runs-on: ubuntu-latest
+    name: Branch Build
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
     steps:
       - uses: actions/checkout@v3
         with:
@@ -26,17 +56,17 @@ jobs:
           cache: 'npm'
       - name: Install dependencies
         run: npm ci --ignore-scripts
-      - name: Calculate Code Coverage
-        run: npm run ci:coverage
-      - name: Create Coverage Report for base branch
-        run: |
-          mv coverage/lcov.info coverage/lcov_head.info
-          git fetch
-          git checkout origin/${{ github.event.pull_request.base.ref }}
-          npm ci --ignore-scripts && npm run ci:coverage
-      - name: Post Coverage Report
-        uses: checkdigit/github-actions/coverage-reporter@main
-        with:
-          lcov-file: 'coverage/lcov_head.info'
-          lcov-base: 'coverage/lcov.info'
-          delete-old-comments: true
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Audit Signatures
+        run: npm audit signatures
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Compile
+        run: npm run ci:compile
+      - name: Check Code Style
+        run: npm run ci:style
+      - name: Perform Linting
+        run: npm run ci:lint
+      - name: Run Tests
+        run: npm run ci:test
