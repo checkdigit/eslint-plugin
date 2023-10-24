@@ -6,10 +6,10 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import type {Rule} from 'eslint';
+import type { Rule } from 'eslint';
 
 function removeComments(input: string) {
-  const commentPattern = /\/\/\s*(\?{1,2}\.?|file\.only)/g;
+  const commentPattern = /\/\/\s*(?<comment>\?{1,2}\.?|file\.only)/gu;
   return input.replace(commentPattern, '').trim();
 }
 
