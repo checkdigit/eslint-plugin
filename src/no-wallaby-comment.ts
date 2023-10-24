@@ -10,7 +10,7 @@ import type { Rule } from 'eslint';
 
 function removeComments(input: string) {
   const commentPattern = /\/\/\s*(?<comment>\?{1,2}\.?|file\.only)/gu;
-  return input.replace(commentPattern, '').trim();
+  return input.replaceAll(commentPattern, '').trim();
 }
 
 export default {
