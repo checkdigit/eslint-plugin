@@ -13,7 +13,7 @@ const LINE_WITH_NO_COMMENTS = `const NOT_A_SECRET = "A template that isn't a sec
 
 const LINE_WITH_COMMENT = `const NOT_A_SECRET = "A template that isn't a secret." // ?`;
 
-const LINE_WITH_MULTIPLE_COMMENTS = `// file.only const NOT_A_SECRET = "A template that isn't a secret."; // ?? // ?`;
+const LINE_WITH_MULTIPLE_COMMENTS = `// file.only const NOT_A_SECRET = "A template that isn't a secret."; // ?. // ?? // ?`;
 
 describe('no-wallaby-comment', () => {
   const ruleTester = new RuleTester({ parserOptions: { ecmaVersion: 2020 } });
