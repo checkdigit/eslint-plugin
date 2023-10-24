@@ -9,13 +9,12 @@
 import type { Rule } from 'eslint';
 
 function removeComments(input: string) {
-  const commentPattern = /(?:\/\/|<!--)\s*(?<comment>\?{1,2}\.?|file\.only)/gu;
   let modifiedInput = input;
+  let previous: string;
 
-  let previous;
   do {
     previous = modifiedInput;
-    modifiedInput = modifiedInput.replace(commentPattern, '').trim();
+    modifiedInput = modifiedInput.replace(/\/\/[?\s]*\?{1,2}\.?|\/\/[?\s]*file\.only/gu, '').trim();
   } while (modifiedInput !== previous);
 
   return modifiedInput;
