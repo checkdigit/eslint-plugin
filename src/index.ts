@@ -9,12 +9,13 @@
 import filePathComment from './file-path-comment';
 import noCardNumbers from './no-card-numbers';
 import noUuid from './no-uuid';
-
+import nowallabycomment from './no-wallaby-comment';
 export default {
   rules: {
     'file-path-comment': filePathComment,
     'no-card-numbers': noCardNumbers,
     'no-uuid': noUuid,
+    'no-wallaby-comment': nowallabycomment,
   },
   configs: {
     all: {
@@ -22,6 +23,7 @@ export default {
         '@checkdigit/no-card-numbers': 'error',
         '@checkdigit/file-path-comment': 'error',
         '@checkdigit/no-uuid': 'error',
+        '@checkdigit/no-wallaby-comment': 'error',
       },
     },
     recommended: {
@@ -29,6 +31,7 @@ export default {
         '@checkdigit/no-card-numbers': 'error',
         '@checkdigit/file-path-comment': 'off',
         '@checkdigit/no-uuid': 'error',
+        '@checkdigit/no-wallaby-comment': 'off',
       },
     },
   },
