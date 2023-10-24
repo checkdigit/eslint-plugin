@@ -14,7 +14,7 @@ function removeComments(input: string) {
 
   do {
     previous = modifiedInput;
-    modifiedInput = modifiedInput.replace(/\/\/[?\s]*\?{1,2}\.?|\/\/[?\s]*file\.only/gu, '').trim();
+    modifiedInput = modifiedInput.replace(/(?:\/\/|<!--)\s*(?<comment>\?{1,2}\.?|file\.only)/gu, '').trim();
   } while (modifiedInput !== previous);
 
   return modifiedInput;
