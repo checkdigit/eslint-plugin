@@ -19,7 +19,7 @@ export default {
   },
   create(context: Rule.RuleContext) {
     const sourceCode = context.sourceCode;
-    const sourceLines = sourceCode.getText().split('\n');
+    const sourceLines = sourceCode.lines;
 
     sourceLines.forEach((line, lineNumber) => {
       const regex = /(?:\/\/|<!--)\s*(?<comment>\?{1,2}\.?|file\.only)/gu;
