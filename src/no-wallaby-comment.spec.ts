@@ -11,7 +11,7 @@ import rule from './no-wallaby-comment';
 
 const LINE_WITH_NO_COMMENTS = `const NOT_A_SECRET = "A template that isn't a secret.";`;
 
-const LINE_WITH_COMMENT = `const NOT_A_SECRET = "A template that isn't a secret." // ?`;
+const LINE_WITH_COMMENT = `const NOT_A_SECRET = "A template that isn't a secret."; // ?`;
 
 const LINE_WITH_MULTIPLE_COMMENTS = `// file.only const NOT_A_SECRET = "A template that isn't a secret."; // ?. // ?? // ?`;
 
@@ -28,12 +28,17 @@ describe('no-wallaby-comment', () => {
       {
         code: LINE_WITH_COMMENT,
         errors: [{ message: 'Remove wallaby-specific comments' }],
-        output: `const NOT_A_SECRET = "A template that isn't a secret."`,
+        output: `const NOT_A_SECRET = "A template that isn't a secret."; `,
       },
       {
         code: LINE_WITH_MULTIPLE_COMMENTS,
-        errors: [{ message: 'Remove wallaby-specific comments' }],
-        output: `const NOT_A_SECRET = "A template that isn't a secret.";`,
+        errors: [
+          { message: 'Remove wallaby-specific comments' },
+          { message: 'Remove wallaby-specific comments' },
+          { message: 'Remove wallaby-specific comments' },
+          { message: 'Remove wallaby-specific comments' },
+        ],
+        output: ` const NOT_A_SECRET = "A template that isn't a secret.";   `,
       },
     ],
   });

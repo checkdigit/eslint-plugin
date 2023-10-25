@@ -8,18 +8,6 @@
 
 import type { Rule } from 'eslint';
 
-function removeComments(input: string) {
-  let modifiedInput = input;
-  let previous: string;
-
-  do {
-    previous = modifiedInput;
-    modifiedInput = modifiedInput.replace(/(?:\/\/|<!--)\s*(?<comment>\?{1,2}\.?|file\.only)/gu, '').trim();
-  } while (modifiedInput !== previous);
-
-  return modifiedInput;
-}
-
 export default {
   meta: {
     type: 'problem',
@@ -31,15 +19,25 @@ export default {
   },
   create(context: Rule.RuleContext) {
     const sourceCode = context.sourceCode;
-    const modifiedCode = removeComments(sourceCode.text);
+    const sourceLines = sourceCode.getText().split('\n');
 
-    if (sourceCode.text !== modifiedCode) {
-      context.report({
-        loc: { line: 1, column: 0 },
-        message: 'Remove wallaby-specific comments',
-        fix: (fixer) => fixer.replaceTextRange([0, sourceCode.text.length], modifiedCode),
-      });
-    }
+    sourceLines.forEach((line, lineNumber) => {
+      const regex = /(?:\/\/|<!--)\s*(?<comment>\?{1,2}\.?|file\.only)/gu;
+      let match;
+      while ((match = regex.exec(line)) !== null) {
+        const commentStart = match.index;
+        const start = sourceCode.getIndexFromLoc({ line: lineNumber + 1, column: commentStart });
+        const end = sourceCode.getIndexFromLoc({ line: lineNumber + 1, column: commentStart + match[0].length });
+        context.report({
+          loc: {
+            line: lineNumber + 1,
+            column: commentStart,
+          },
+          message: 'Remove wallaby-specific comments',
+          fix: (fixer) => fixer.removeRange([start, end]),
+        });
+      }
+    });
 
     return {};
   },
