@@ -24,9 +24,10 @@ export default {
 
     sourceLines.forEach((line, lineNumber) => {
       const regex = /\s*\/\/\s*(?:\?{1,2}\.?|file\.(?:only|skip))\s*/gu;
-      const newLine = line.replace(regex, '');
+      const parts = line.split(regex);
+      if (parts.length > 1) {
+        const newLine = parts.join('');
 
-      if (newLine !== line) {
         context.report({
           loc: {
             line: lineNumber + 1,
