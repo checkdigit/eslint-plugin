@@ -12,8 +12,9 @@ export default {
   meta: {
     type: 'problem',
     docs: {
-      description: 'Detects wallaby-specific temporary comments like // ? or // ?? or // ?. or // file.only and fix it',
-      url: 'https://github.com/checkdigit/eslint-plugin',
+      description:
+        'Detects wallaby-specific temporary comments like // ? or // ?? or // ?. or // file.only or // file.skip and fix it',
+      url: 'https://github.com/xxxxxxxx/eslint-plugin',
     },
     fixable: 'code',
   },
@@ -22,23 +23,27 @@ export default {
     const sourceLines = sourceCode.lines;
 
     sourceLines.forEach((line, lineNumber) => {
-      const regex = /(?:\/\/|<!--)\s*(?<comment>\?{1,2}\.?|file\.only)/gu;
-      let match;
-      while ((match = regex.exec(line)) !== null) {
-        const commentStart = match.index;
-        const start = sourceCode.getIndexFromLoc({ line: lineNumber + 1, column: commentStart });
-        const end = sourceCode.getIndexFromLoc({ line: lineNumber + 1, column: commentStart + match[0].length });
+      const regex = /\s*\/\/\s*(?:\?{1,2}\.?|file\.(?:only|skip))\s*/gu;
+      const newLine = line.replace(regex, '');
+
+      if (newLine !== line) {
         context.report({
           loc: {
             line: lineNumber + 1,
-            column: commentStart,
+            column: 0,
           },
           message: 'Remove wallaby-specific comments',
-          fix: (fixer) => fixer.removeRange([start, end]),
+          fix: (fixer) =>
+            fixer.replaceTextRange(
+              [
+                sourceCode.getIndexFromLoc({ line: lineNumber + 1, column: 0 }),
+                sourceCode.getIndexFromLoc({ line: lineNumber + 1, column: line.length }),
+              ],
+              newLine,
+            ),
         });
       }
     });
-
     return {};
   },
 } as Rule.RuleModule;
