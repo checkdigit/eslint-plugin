@@ -14,7 +14,7 @@ export default {
     docs: {
       description:
         'Detects wallaby-specific temporary comments like // ? or // ?? or // ?. or // file.only or // file.skip and fix it',
-      url: 'https://github.com/xxxxxxxx/eslint-plugin',
+      url: 'https://github.com/checkdigit/eslint-plugin',
     },
     fixable: 'code',
   },
@@ -23,7 +23,8 @@ export default {
     const sourceLines = sourceCode.lines;
 
     sourceLines.forEach((line, lineNumber) => {
-      const regex = /\s*\/\/\s*(?:\?{1,2}\.?|file\.(?:only|skip))\s*/gu;
+      const regex = /\s*(?:\/\/|<!--)\s*(?:\?{1,2}\.?|file\.(?:only|skip))\s*/gu;
+
       const parts = line.split(regex);
       if (parts.length > 1) {
         const newLine = parts.join('');
