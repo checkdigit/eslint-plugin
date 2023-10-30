@@ -11,7 +11,35 @@ import rule from './no-wallaby-comment';
 
 const LINE_WITH_NO_COMMENTS = `const NOT_A_SECRET = "A template that isn't a secret.";`;
 
-const LINE_WITH_MULTIPLE_COMMENTS = `// file.only const NOT_A_SECRET = "A template that isn't a secret."; // ?. // ?? // ? // file.skip`;
+const LINE_ONE_WITH_MULTIPLE_COMMENTS = `
+// file.skip const NOT_A_SECRET = "A template that isn't a secret.";
+const NOT_SECRET = "A template that isn't a secret.";
+const TEST = "this isn't secret"; // ?
+`;
+
+const LINE_ONE_WITH_MULTIPLE_COMMENTS_EXPECTED = `
+const NOT_A_SECRET = "A template that isn't a secret.";
+const NOT_SECRET = "A template that isn't a secret.";
+const TEST = "this isn't secret";
+`;
+
+const LINE_TWO_WITH_MULTIPLE_COMMENTS = `
+// file.only const NOT_A_SECRET = "A template that isn't a secret";
+        const NOT_SECRET = "A template that isn't a secret.";
+        const TEST = "this isn't secret"; // ?
+        const TEST_DOT = "this isn't secret"; // ?.
+        const SECRET = "A template that is a secret."; // ??
+const TEST_LINE = "test template"; // file.skip
+`;
+
+const LINE_TWO_WITH_MULTIPLE_COMMENTS_EXPECTED = `
+const NOT_A_SECRET = "A template that isn't a secret";
+        const NOT_SECRET = "A template that isn't a secret.";
+        const TEST = "this isn't secret";
+        const TEST_DOT = "this isn't secret";
+        const SECRET = "A template that is a secret.";
+const TEST_LINE = "test template";
+`;
 
 describe('no-wallaby-comment', () => {
   const ruleTester = new RuleTester({ parserOptions: { ecmaVersion: 2020 } });
@@ -39,26 +67,22 @@ describe('no-wallaby-comment', () => {
         output: `const NOT_A_SECRET = "A template that isn't a secret.";`,
       },
       {
+        code: `const NOT_A_SECRET = "A template that isn't a secret."; // ??.`,
+        errors: [{ message: 'Remove wallaby-specific comments' }],
+        output: `const NOT_A_SECRET = "A template that isn't a secret.";`,
+      },
+      {
         code: `// file.only const NOT_A_SECRET = "A template that isn't a secret.";`,
         errors: [{ message: 'Remove wallaby-specific comments' }],
         output: `const NOT_A_SECRET = "A template that isn't a secret.";`,
       },
       {
-        code: `// file.skip const NOT_A_SECRET = "A template that isn't a secret.";
-        const NOT_SECRET = "A template that isn't a secret.";
-        const TEST = "this isn't secret"; // ?`,
+        code: LINE_ONE_WITH_MULTIPLE_COMMENTS,
         errors: [{ message: 'Remove wallaby-specific comments' }, { message: 'Remove wallaby-specific comments' }],
-        output: `const NOT_A_SECRET = "A template that isn't a secret.";
-        const NOT_SECRET = "A template that isn't a secret.";
-        const TEST = "this isn't secret";`,
+        output: LINE_ONE_WITH_MULTIPLE_COMMENTS_EXPECTED,
       },
       {
-        code: `// file.only const NOT_A_SECRET = "A template that isn't a secret";
-        const NOT_SECRET = "A template that isn't a secret.";
-        const TEST = "this isn't secret"; // ?
-        const TEST_DOT = "this isn't secret"; // ?.
-        const SECRET = "A template that is a secret."; // ??
-        const TEST_LINE = "test template"; // file.skip`,
+        code: LINE_TWO_WITH_MULTIPLE_COMMENTS,
         errors: [
           { message: 'Remove wallaby-specific comments' },
           { message: 'Remove wallaby-specific comments' },
@@ -66,22 +90,7 @@ describe('no-wallaby-comment', () => {
           { message: 'Remove wallaby-specific comments' },
           { message: 'Remove wallaby-specific comments' },
         ],
-        output: `const NOT_A_SECRET = "A template that isn't a secret";
-        const NOT_SECRET = "A template that isn't a secret.";
-        const TEST = "this isn't secret";
-        const TEST_DOT = "this isn't secret";
-        const SECRET = "A template that is a secret.";
-        const TEST_LINE = "test template";`,
-      },
-      {
-        code: `// ? // ?. // ?? // ? // file.only // file.skip`,
-        errors: [{ message: 'Remove wallaby-specific comments' }],
-        output: ``,
-      },
-      {
-        code: LINE_WITH_MULTIPLE_COMMENTS,
-        errors: [{ message: 'Remove wallaby-specific comments' }],
-        output: `const NOT_A_SECRET = "A template that isn't a secret.";`,
+        output: LINE_TWO_WITH_MULTIPLE_COMMENTS_EXPECTED,
       },
     ],
   });
