@@ -6,12 +6,11 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
+import type { Node } from 'estree';
 import type { Rule } from 'eslint';
 
 const ENUM_FOUND = 'ENUM_FOUND';
 const ENUMS_FOUND = 'ENUMS_FOUND';
-
-
 
 export default {
   meta: {
@@ -27,7 +26,7 @@ export default {
   },
   create: function (context) {
     return {
-      TSEnumDeclaration: function (node: any) {
+      TSEnumDeclaration: function (node: Node) {
         context.report({
           node,
           message: "Avoid using enums in TypeScript files.",

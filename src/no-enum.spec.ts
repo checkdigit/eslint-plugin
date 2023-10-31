@@ -20,21 +20,25 @@ const ENUM_FOUND_MSG = {
 const ENUMS_FOUND_MSG = {
   messageId: ENUMS_FOUND,
 };
-
+// file.only
 const LINES_WITH_NO_ENUM = `
 const NOT_A_SECRET = "I'm not a secret, I think";
 `;
 
-const LINE_WITH_ENUM = `enum States { CREATED, ASSIGNED, CLOSED, ERROR }`;
+const LINE_WITH_ENUM = `enumValues States { CREATED, ASSIGNED, CLOSED, ERROR }`;
 
-const LINE_WITH_MULTIPLE_ENUMS = `"TestMethod": {
+const LINE_WITH_MULTIPLE_ENUMS = `
+{
+    "TestEnums": {
+        "TestMethod": {
             "enum": [
                 "DEL",
                 "GET",
                 "PUT"
             ],
             "type": "string"
-        },  "ServiceType": {
+        },
+        "ServiceType": {
             "enum": [
                 "test1",
                 "test2",
@@ -44,7 +48,11 @@ const LINE_WITH_MULTIPLE_ENUMS = `"TestMethod": {
                 "test6"
             ],
             "type": "string"
-        }`;
+        }
+    }
+}
+`;
+
 describe('no-enum', () => {
   const ruleTester = new RuleTester({ parserOptions: { ecmaVersion: 2020 } });
 
