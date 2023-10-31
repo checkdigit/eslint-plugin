@@ -26,6 +26,8 @@ const NEVER_A_SECRET = /W/gu;
 const NOT_SECRET = "I'm not a secret, I think";
 `;
 
+const INVALID_TEST_2 = `const UUID_REGEX = /[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}/gmu;`;
+
 describe('regular-expression-comment', () => {
   const ruleTester = new RuleTester({ parserOptions: { ecmaVersion: 2020 } });
   ruleTester.run('regular-expression-comment', rule, {
@@ -46,6 +48,14 @@ describe('regular-expression-comment', () => {
     invalid: [
       {
         code: INVALID_TEST,
+        errors: [
+          {
+            message: 'Missing comment for regular expression',
+          },
+        ],
+      },
+      {
+        code: INVALID_TEST_2,
         errors: [
           {
             message: 'Missing comment for regular expression',
