@@ -11,25 +11,27 @@ import rule from './no-wallaby-comment';
 
 const LINE_WITH_NO_COMMENTS = `const NOT_A_SECRET = "A template that isn't a secret.";`;
 
-const LINE_ONE_WITH_MULTIPLE_COMMENTS = `
-// file.skip const NOT_A_SECRET = "A template that isn't a secret.";
-const NOT_SECRET = "A template that isn't a secret.";
+const LINE_ONE_WITH_MULTIPLE_COMMENTS = `// file.only 
+const NOT_A_SECRET = "A template that isn't a secret.";
+const NOT_SECRET = "A template that isn't a secret."; // ??.
 const TEST = "this isn't secret"; // ?
+const SECRET = "A template that is a secret."; // ??
 `;
 
 const LINE_ONE_WITH_MULTIPLE_COMMENTS_EXPECTED = `
 const NOT_A_SECRET = "A template that isn't a secret.";
 const NOT_SECRET = "A template that isn't a secret.";
 const TEST = "this isn't secret";
+const SECRET = "A template that is a secret.";
 `;
 
-const LINE_TWO_WITH_MULTIPLE_COMMENTS = `
-// file.only const NOT_A_SECRET = "A template that isn't a secret";
+const LINE_TWO_WITH_MULTIPLE_COMMENTS = `// file.skip 
+const NOT_A_SECRET = "A template that isn't a secret";
         const NOT_SECRET = "A template that isn't a secret.";
         const TEST = "this isn't secret"; // ?
         const TEST_DOT = "this isn't secret"; // ?.
         const SECRET = "A template that is a secret."; // ??
-const TEST_LINE = "test template"; // file.skip
+const TEST_LINE = "test template";
 `;
 
 const LINE_TWO_WITH_MULTIPLE_COMMENTS_EXPECTED = `
@@ -78,13 +80,17 @@ describe('no-wallaby-comment', () => {
       },
       {
         code: LINE_ONE_WITH_MULTIPLE_COMMENTS,
-        errors: [{ message: 'Remove wallaby-specific comments' }, { message: 'Remove wallaby-specific comments' }],
+        errors: [
+          { message: 'Remove wallaby-specific comments' },
+          { message: 'Remove wallaby-specific comments' },
+          { message: 'Remove wallaby-specific comments' },
+          { message: 'Remove wallaby-specific comments' },
+        ],
         output: LINE_ONE_WITH_MULTIPLE_COMMENTS_EXPECTED,
       },
       {
         code: LINE_TWO_WITH_MULTIPLE_COMMENTS,
         errors: [
-          { message: 'Remove wallaby-specific comments' },
           { message: 'Remove wallaby-specific comments' },
           { message: 'Remove wallaby-specific comments' },
           { message: 'Remove wallaby-specific comments' },
