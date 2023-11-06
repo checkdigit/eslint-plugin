@@ -55,7 +55,7 @@ const LINE_FIVE_WITH_COMMENTS = `/*
 const LINE_SIX_WITH_COMMENTS = `/*
 * This is first comment
 * This is second comment
-* file.skip
+* file.only
 * This is third comment
 * This is fourth comment
 */`;
@@ -66,6 +66,122 @@ const LINE_SIX_WITH_COMMENTS_EXPECTED = `/*
 * This is third comment
 * This is fourth comment
 */`;
+
+const LINE_SEVEN_WITH_COMMENTS = `
+/*
+ * some other comment
+ */
+`;
+
+const LINE_EIGHT_WITH_COMMENTS = `
+/*
+ * This is a test comment
+ */
+ 
+ /*
+ * some other comment
+ * file.skip
+*/
+`;
+
+const LINE_EIGHT_WITH_COMMENTS_EXPECTED = `
+/*
+ * This is a test comment
+ */
+ 
+ /*
+ * some other comment
+ */
+`;
+
+const LINE_NINE_WITH_COMMENTS = `
+// test.ts
+
+/*
+ * This is a test comment
+ */
+ 
+ /*
+ * some other comment
+ * file.only
+ */
+ 
+ /*
+ * This is a test comment
+ * some other new comment
+ */
+`;
+
+const LINE_NINE_WITH_COMMENTS_EXPECTED = `
+// test.ts
+
+/*
+ * This is a test comment
+ */
+ 
+ /*
+ * some other comment
+  */
+ 
+ /*
+ * This is a test comment
+ * some other new comment
+ */
+`;
+
+const LINE_TEN_WITH_COMMENTS = `
+// test.ts
+
+/*
+ * This is a test comment
+ */
+ 
+ /*
+ * some other comment
+ * file.only
+ * some other comment
+ */
+`;
+
+const LINE_TEN_WITH_COMMENTS_EXPECTED = `
+// test.ts
+
+/*
+ * This is a test comment
+ */
+ 
+ /*
+ * some other comment
+  * some other comment
+ */
+`;
+
+const LINE_11_WITH_COMMENTS = `
+// test.ts
+
+/**
+ ** This is a test comment
+ **/
+ 
+ /**
+ ** some other comment
+ ** file.only
+ ** some other comment
+ **/
+`;
+
+const LINE_11_WITH_COMMENTS_EXPECTED = `
+// test.ts
+
+/**
+ ** This is a test comment
+ **/
+ 
+ /**
+ ** some other comment
+  ** some other comment
+ **/
+`;
 
 describe('no-wallaby-comment', () => {
   const ruleTester = new RuleTester({ parserOptions: { ecmaVersion: 2020 } });
@@ -78,25 +194,28 @@ describe('no-wallaby-comment', () => {
       {
         code: LINE_TWO_NO_COMMENTS,
       },
+      {
+        code: LINE_SEVEN_WITH_COMMENTS,
+      },
     ],
     invalid: [
       {
-        code: `const NOT_A_SECRET = "A template that isn't a secret.";// ?`,
+        code: `const NOT_A_SECRET = "A template that isn't a secret.";// ? `,
         errors: [{ message: 'Remove wallaby-specific comments' }],
         output: `const NOT_A_SECRET = "A template that isn't a secret.";`,
       },
       {
-        code: `const NOT_A_SECRET = "A template that isn't a secret.";// ??`,
+        code: `const NOT_A_SECRET = "A template that isn't a secret.";// ?? `,
         errors: [{ message: 'Remove wallaby-specific comments' }],
         output: `const NOT_A_SECRET = "A template that isn't a secret.";`,
       },
       {
-        code: `const NOT_A_SECRET = "A template that isn't a secret.";// ?.`,
+        code: `const NOT_A_SECRET = "A template that isn't a secret.";// ?. `,
         errors: [{ message: 'Remove wallaby-specific comments' }],
         output: `const NOT_A_SECRET = "A template that isn't a secret.";`,
       },
       {
-        code: `const NOT_A_SECRET = "A template that isn't a secret.";// ??.`,
+        code: `const NOT_A_SECRET = "A template that isn't a secret.";// ??. `,
         errors: [{ message: 'Remove wallaby-specific comments' }],
         output: `const NOT_A_SECRET = "A template that isn't a secret.";`,
       },
@@ -106,7 +225,7 @@ describe('no-wallaby-comment', () => {
         output: ``,
       },
       {
-        code: `// file.skip`,
+        code: `//  file.skip   `,
         errors: [{ message: 'Remove wallaby-specific comments' }],
         output: ``,
       },
@@ -149,6 +268,26 @@ describe('no-wallaby-comment', () => {
         code: LINE_SIX_WITH_COMMENTS,
         errors: [{ message: 'Remove wallaby-specific comments' }],
         output: LINE_SIX_WITH_COMMENTS_EXPECTED,
+      },
+      {
+        code: LINE_EIGHT_WITH_COMMENTS,
+        errors: [{ message: 'Remove wallaby-specific comments' }],
+        output: LINE_EIGHT_WITH_COMMENTS_EXPECTED,
+      },
+      {
+        code: LINE_NINE_WITH_COMMENTS,
+        errors: [{ message: 'Remove wallaby-specific comments' }],
+        output: LINE_NINE_WITH_COMMENTS_EXPECTED,
+      },
+      {
+        code: LINE_TEN_WITH_COMMENTS,
+        errors: [{ message: 'Remove wallaby-specific comments' }],
+        output: LINE_TEN_WITH_COMMENTS_EXPECTED,
+      },
+      {
+        code: LINE_11_WITH_COMMENTS,
+        errors: [{ message: 'Remove wallaby-specific comments' }],
+        output: LINE_11_WITH_COMMENTS_EXPECTED,
       },
     ],
   });
