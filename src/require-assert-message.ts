@@ -15,7 +15,6 @@ export default {
       description: 'Validate that message argument to always be supplied to node:assert methods',
       url: 'https://github.com/xxxxx/eslint-plugin',
     },
-    fixable: 'code',
   },
   create(context) {
     return {
