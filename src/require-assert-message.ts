@@ -10,7 +10,7 @@ import type { Rule } from 'eslint';
 
 export default {
   meta: {
-    type: 'suggestion',
+    type: 'problem',
     docs: {
       description: 'Validate that message argument to always be supplied to node:assert methods',
       url: 'https://github.com/xxxxx/eslint-plugin',
