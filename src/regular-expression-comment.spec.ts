@@ -10,6 +10,7 @@ import { RuleTester } from 'eslint';
 
 import rule from './regular-expression-comment';
 
+// file.only
 const VALID_TEST_1 = `// This regular expression removes all non-alphanumeric characters.
 const NOT_A_SECRET = /W/gu;`;
 
@@ -20,7 +21,7 @@ const NOT_A_SECRET = /W/gu;`;
 const VALID_TEST_4 = `
 /* This regular expression removes all non-alphanumeric characters. */ const NOT_A_SECRET = /W/gu;`;
 
-const INVALID_TEST = `
+const INVALID_TEST_1 = `
 const NOT_A_SECRET = "I'm not a secret, I think"; 
 const NEVER_A_SECRET = /W/gu;
 const NOT_SECRET = "I'm not a secret, I think";
@@ -47,7 +48,7 @@ describe('regular-expression-comment', () => {
     ],
     invalid: [
       {
-        code: INVALID_TEST,
+        code: INVALID_TEST_1,
         errors: [
           {
             message: 'Missing comment for regular expression',

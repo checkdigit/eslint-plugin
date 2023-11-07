@@ -17,17 +17,18 @@ export default {
     },
   },
   create(context) {
+    const comments = context.sourceCode.getAllComments();
     return {
       Literal(node) {
         if (node.value instanceof RegExp) {
           const regexLine = node.loc?.start.line;
           if (regexLine) {
             const previousLine = regexLine - 1;
-            const hasRegexComment =
-              context.sourceCode.getAllComments().some((comment) => comment.loc?.start.line === previousLine) ||
-              context.sourceCode
-                .getAllComments()
-                .some((comment) => comment.loc && comment.loc.start.line === regexLine);
+
+            const hasRegexComment = comments.find(
+              (comment) => comment.loc?.start.line === previousLine || comment.loc?.start.line === regexLine,
+            );
+
             if (!hasRegexComment) {
               context.report({
                 node,
