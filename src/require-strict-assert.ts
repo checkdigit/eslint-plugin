@@ -1,33 +1,64 @@
 // require-strict-assert.ts
 
-import type { Rule } from 'eslint';
-
 /*
  * Copyright (c) 2021-2023 Check Digit, LLC
  *
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
+import type { Rule } from 'eslint';
+
+const STRICT_ASSERT_INDEX = 6;
 export default {
   meta: {
     type: 'problem',
     docs: {
-      description: 'Require importing strict version of node:assert',
+      description: 'Require importing strict version of node:assert and using non-strict assert functions.',
       url: 'https://github.com/checkdigit/eslint-plugin',
     },
+    fixable: 'code',
   },
   create(context) {
     return {
-      ImportDeclaration(node) {
+      Literal(node) {
+        if (node.value === 'node:assert' && node.parent.type === 'ImportDeclaration') {
+          const importDeclaration = node.parent;
+          const defaultSpecifier = importDeclaration.specifiers.find(
+            (specifier) => specifier.type === 'ImportDefaultSpecifier' || specifier.type === 'ImportNamespaceSpecifier',
+          );
+
+          if (defaultSpecifier) {
+            const importDeclarationRange = importDeclaration.range ?? [0, 0];
+            const rangeToReplace = defaultSpecifier.range ?? importDeclarationRange;
+            const correctedText = '{ strict as assert }';
+
+            context.report({
+              node: importDeclaration,
+              message: 'Require the strict version of node:assert.',
+              fix: (fixer) => fixer.replaceTextRange(rangeToReplace, correctedText),
+            });
+          }
+        }
+      },
+      CallExpression(node) {
+        const callee = node.callee;
         if (
-          node.source.value === 'node:assert' &&
-          !node.specifiers.every(
-            (specifier) => specifier.type === 'ImportSpecifier' && specifier.imported.name === 'strict',
-          )
+          callee.type === 'MemberExpression' &&
+          'name' in callee.object &&
+          callee.object.name === 'assert' &&
+          'name' in callee.property &&
+          callee.property.name.startsWith('strict')
         ) {
+          const functionName = callee.property.name.slice(STRICT_ASSERT_INDEX);
+          const firstChar = functionName.charAt(0).toLowerCase();
+          const restOfName = functionName.slice(1);
+          const nonStrictFunctionName = `assert.${firstChar}${restOfName}`;
           context.report({
             node,
-            message: 'Require the strict version of node:assert.',
+            message: 'Use non-strict counterpart for assert function.',
+            fix(fixer) {
+              return fixer.replaceText(callee, nonStrictFunctionName);
+            },
           });
         }
       },
