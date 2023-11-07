@@ -9,12 +9,14 @@
 import filePathComment from './file-path-comment';
 import noCardNumbers from './no-card-numbers';
 import noUuid from './no-uuid';
+import requireAssertMessage from './require-assert-message';
 
 export default {
   rules: {
     'file-path-comment': filePathComment,
     'no-card-numbers': noCardNumbers,
     'no-uuid': noUuid,
+    'require-assert-message': requireAssertMessage,
   },
   configs: {
     all: {
@@ -22,6 +24,7 @@ export default {
         '@checkdigit/no-card-numbers': 'error',
         '@checkdigit/file-path-comment': 'error',
         '@checkdigit/no-uuid': 'error',
+        '@checkdigit/require-assert-message': 'error',
       },
     },
     recommended: {
@@ -29,6 +32,7 @@ export default {
         '@checkdigit/no-card-numbers': 'error',
         '@checkdigit/file-path-comment': 'off',
         '@checkdigit/no-uuid': 'error',
+        '@checkdigit/require-assert-message': 'error',
       },
     },
   },
