@@ -8,7 +8,6 @@
 
 import type { Rule } from 'eslint';
 
-const STRICT_ASSERT_INDEX = 6;
 export default {
   meta: {
     type: 'problem',
@@ -47,12 +46,14 @@ export default {
           'name' in callee.object &&
           callee.object.name === 'assert' &&
           'name' in callee.property &&
-          callee.property.name.startsWith('strict')
+          (callee.property.name.includes('strict') || callee.property.name.includes('Strict'))
         ) {
-          const functionName = callee.property.name.slice(STRICT_ASSERT_INDEX);
-          const firstChar = functionName.charAt(0).toLowerCase();
-          const restOfName = functionName.slice(1);
-          const nonStrictFunctionName = `assert.${firstChar}${restOfName}`;
+          const strictFunctionName = callee.property.name;
+          const functionName = strictFunctionName.includes('strict')
+            ? strictFunctionName.split('strict').join('')
+            : strictFunctionName.split('Strict').join('');
+          const fixedFunctionName = `${functionName.charAt(0).toLowerCase()}${functionName.slice(1)}`;
+          const nonStrictFunctionName = `assert.${fixedFunctionName}`;
           context.report({
             node,
             message: 'Use non-strict counterpart for assert function.',

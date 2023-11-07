@@ -80,7 +80,7 @@ describe('require-strict-assert', () => {
       },
       {
         code: `import { strict as assert } from 'node:assert';
-               assert.strictDeepEqual(obj1, obj2);`,
+               assert.deepStrictEqual(obj1, obj2);`,
         errors: [
           {
             message: 'Use non-strict counterpart for assert function.',
