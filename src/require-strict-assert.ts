@@ -29,7 +29,7 @@ export default {
           if (defaultSpecifier) {
             const importDeclarationRange = importDeclaration.range ?? [0, 0];
             const rangeToReplace = defaultSpecifier.range ?? importDeclarationRange;
-            const correctedText = '{ strict as assert }';
+            const correctedText = `{ strict as ${defaultSpecifier.local.name} }`;
 
             context.report({
               node: importDeclaration,
@@ -44,22 +44,24 @@ export default {
         if (
           callee.type === 'MemberExpression' &&
           'name' in callee.object &&
-          callee.object.name === 'assert' &&
           'name' in callee.property &&
           (callee.property.name.includes('strict') || callee.property.name.includes('Strict'))
         ) {
+          let nonStrictFunctionName = '';
           const strictFunctionName = callee.property.name;
-          const functionName = strictFunctionName.includes('strict')
-            ? strictFunctionName.split('strict').join('')
-            : strictFunctionName.split('Strict').join('');
-          const fixedFunctionName = `${functionName.charAt(0).toLowerCase()}${functionName.slice(1)}`;
-          const nonStrictFunctionName = `assert.${fixedFunctionName}`;
+          if (strictFunctionName === 'strict') {
+            nonStrictFunctionName = `${callee.object.name}.equal`;
+          } else {
+            const functionName = strictFunctionName.includes('strict')
+              ? strictFunctionName.split('strict').join('')
+              : strictFunctionName.split('Strict').join('');
+            const fixedFunctionName = `${functionName.charAt(0).toLowerCase()}${functionName.slice(1)}`;
+            nonStrictFunctionName = `${callee.object.name}.${fixedFunctionName}`;
+          }
           context.report({
             node,
             message: 'Use non-strict counterpart for assert function.',
-            fix(fixer) {
-              return fixer.replaceText(callee, nonStrictFunctionName);
-            },
+            fix: (fixer) => fixer.replaceText(callee, nonStrictFunctionName),
           });
         }
       },
