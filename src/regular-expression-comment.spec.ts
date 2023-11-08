@@ -10,7 +10,6 @@ import { RuleTester } from 'eslint';
 
 import rule from './regular-expression-comment';
 
-// file.only
 const VALID_TEST_1 = `// This regular expression removes all non-alphanumeric characters.
 const NOT_A_SECRET = /W/gu;`;
 
