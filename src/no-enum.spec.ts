@@ -10,25 +10,8 @@ import { RuleTester } from 'eslint';
 
 import rule from './no-enum';
 
-const ENUM_FOUND = 'ENUM_FOUND';
-const ENUMS_FOUND = 'ENUMS_FOUND';
-
-const ENUM_FOUND_MSG = {
-  messageId: ENUM_FOUND,
-};
-
-const ENUMS_FOUND_MSG = {
-  messageId: ENUMS_FOUND,
-};
-// file.only
-const LINES_WITH_NO_ENUM = `
-const NOT_A_SECRET = "I'm not a secret, I think";
-`;
-
-const LINE_WITH_ENUM = `enumValues States { CREATED, ASSIGNED, CLOSED, ERROR }`;
-
 const LINE_WITH_MULTIPLE_ENUMS = `
-{
+const test = {
     "TestEnums": {
         "TestMethod": {
             "enum": [
@@ -50,27 +33,47 @@ const LINE_WITH_MULTIPLE_ENUMS = `
             "type": "string"
         }
     }
-}
+};
 `;
 
+// file.only
 describe('no-enum', () => {
   const ruleTester = new RuleTester({ parserOptions: { ecmaVersion: 2020 } });
 
   ruleTester.run('no-enum', rule, {
     valid: [
       {
-        code: LINES_WITH_NO_ENUM,
-      }
+        code: 'const colors = { Red: 0, Green: 1, Blue: 2 };',
+        filename: 'example.ts',
+      },
+      {
+        code: 'const days = ["Sunday", "Monday", "Tuesday"];',
+        filename: 'example.ts',
+      },
+      {
+        code: 'class Car {}',
+        filename: 'example.ts',
+      },
     ],
     invalid: [
       {
-        code: LINE_WITH_ENUM,
-        errors: [ENUM_FOUND_MSG],
-        only: true,
+        code: `enum CompassDirection {
+                North,
+                East,
+                South,
+                West,
+              } ;
+              const startingDirection = CompassDirection.East;`,
+        errors: [{
+          message: 'Avoid using enums in TypeScript files.'
+        }],
       },
       {
         code: LINE_WITH_MULTIPLE_ENUMS,
-        errors: [ENUMS_FOUND_MSG],
+        errors: [{
+          message: 'Avoid using enums in TypeScript files.'
+        }],
+        only: true,
       },
     ],
   });
