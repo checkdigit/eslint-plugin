@@ -80,7 +80,7 @@ const LINE_EIGHT_WITH_COMMENTS = `
  
  /*
  * some other comment
- * file.skip
+ * file.only
 */
 `;
 
@@ -138,7 +138,7 @@ const LINE_TEN_WITH_COMMENTS = `
  
  /*
  * some other comment
- * file.only
+ * file.skip
  * some other comment
  */
 `;
@@ -220,7 +220,17 @@ describe('no-wallaby-comment', () => {
         output: `const NOT_A_SECRET = "A template that isn't a secret.";`,
       },
       {
-        code: `// file.only`,
+        code: `const NOT_A_SECRET = "A template that isn't a secret.";     // ?     `,
+        errors: [{ message: 'Remove wallaby-specific comments' }],
+        output: `const NOT_A_SECRET = "A template that isn't a secret.";`,
+      },
+      {
+        code: `  // file.only `,
+        errors: [{ message: 'Remove wallaby-specific comments' }],
+        output: ``,
+      },
+      {
+        code: `// file.only   `,
         errors: [{ message: 'Remove wallaby-specific comments' }],
         output: ``,
       },
