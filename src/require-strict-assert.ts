@@ -41,7 +41,7 @@ export default {
 
             context.report({
               node: importDeclaration,
-              message: 'Require strict assertion mode.',
+              message: 'Invalid form of strict assertion mode',
               fix: (fixer) => fixer.replaceTextRange(rangeToReplace, correctedText),
             });
           }
@@ -51,8 +51,10 @@ export default {
         const callee = node.callee;
         if (
           callee.type === 'MemberExpression' &&
-          'name' in callee.object &&
-          'name' in callee.property &&
+          callee.object.type === 'Identifier' &&
+          callee.object.name &&
+          callee.property.type === 'Identifier' &&
+          callee.property.name &&
           (callee.property.name.includes('strict') || callee.property.name.includes('Strict'))
         ) {
           let nonStrictFunctionName = '';

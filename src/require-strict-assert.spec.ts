@@ -26,7 +26,7 @@ describe('require-strict-assert', () => {
         code: `import * as assert from 'node:assert';`,
         errors: [
           {
-            message: 'Require strict assertion mode.',
+            message: 'Invalid form of strict assertion mode',
           },
         ],
         output: `import { strict as assert } from 'node:assert';`,
@@ -35,7 +35,7 @@ describe('require-strict-assert', () => {
         code: `import assert from 'node:assert';`,
         errors: [
           {
-            message: 'Require strict assertion mode.',
+            message: 'Invalid form of strict assertion mode',
           },
         ],
         output: `import { strict as assert } from 'node:assert';`,
@@ -46,7 +46,7 @@ describe('require-strict-assert', () => {
                import otherModule2 from 'other-module2';`,
         errors: [
           {
-            message: 'Require strict assertion mode.',
+            message: 'Invalid form of strict assertion mode',
           },
         ],
         output: `import { strict as assert } from 'node:assert';
@@ -58,7 +58,7 @@ describe('require-strict-assert', () => {
                assert.strictEqual(value1, value2);`,
         errors: [
           {
-            message: 'Require strict assertion mode.',
+            message: 'Invalid form of strict assertion mode',
           },
           {
             message: 'strict method not required when in strict assertion mode.',
@@ -128,7 +128,7 @@ describe('require-strict-assert', () => {
         code: `import assert from 'node:assert/strict';`,
         errors: [
           {
-            message: 'Require strict assertion mode.',
+            message: 'Invalid form of strict assertion mode',
           },
         ],
         output: `import { strict as assert } from 'node:assert';`,
