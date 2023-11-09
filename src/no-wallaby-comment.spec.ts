@@ -225,7 +225,7 @@ describe('no-wallaby-comment', () => {
         output: `const NOT_A_SECRET = "A template that isn't a secret.";`,
       },
       {
-        code: `  // file.only `,
+        code: `  // file.only    `,
         errors: [{ message: 'Remove wallaby-specific comments' }],
         output: ``,
       },
