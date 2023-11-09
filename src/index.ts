@@ -9,8 +9,8 @@
 import filePathComment from './file-path-comment';
 import noCardNumbers from './no-card-numbers';
 import noUuid from './no-uuid';
-import requireStrictAssert from './require-strict-assert';
 import regexComment from './regular-expression-comment';
+import requireStrictAssert from './require-strict-assert';
 
 export default {
   rules: {
