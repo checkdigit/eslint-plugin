@@ -20,7 +20,10 @@ export default {
   create(context) {
     return {
       Literal(node) {
-        if (node.value === 'node:assert' && node.parent.type === 'ImportDeclaration') {
+        if (
+          (node.value === 'node:assert' || node.value === 'node:assert/strict') &&
+          node.parent.type === 'ImportDeclaration'
+        ) {
           const importDeclaration = node.parent;
           const defaultSpecifier = importDeclaration.specifiers.find(
             (specifier) => specifier.type === 'ImportDefaultSpecifier' || specifier.type === 'ImportNamespaceSpecifier',
@@ -28,12 +31,17 @@ export default {
 
           if (defaultSpecifier) {
             const importDeclarationRange = importDeclaration.range ?? [0, 0];
-            const rangeToReplace = defaultSpecifier.range ?? importDeclarationRange;
-            const correctedText = `{ strict as ${defaultSpecifier.local.name} }`;
+            let rangeToReplace = defaultSpecifier.range ?? importDeclarationRange;
+            let correctedText = `{ strict as ${defaultSpecifier.local.name} }`;
+
+            if (node.value === 'node:assert/strict' && defaultSpecifier.range && importDeclaration.source.range) {
+              rangeToReplace = [defaultSpecifier.range[0], importDeclaration.source.range[1]];
+              correctedText = `{ strict as ${defaultSpecifier.local.name} } from 'node:assert'`;
+            }
 
             context.report({
               node: importDeclaration,
-              message: 'Require the strict version of node:assert.',
+              message: 'Require strict assertion mode.',
               fix: (fixer) => fixer.replaceTextRange(rangeToReplace, correctedText),
             });
           }
@@ -60,7 +68,7 @@ export default {
           }
           context.report({
             node,
-            message: 'Use non-strict counterpart for assert function.',
+            message: 'strict method not required when in strict assertion mode.',
             fix: (fixer) => fixer.replaceText(callee, nonStrictFunctionName),
           });
         }

@@ -1,7 +1,7 @@
 // require-strict-assert.spec.ts
 
 /*
- * Copyright (c) 2021-2022 Check Digit, LLC
+ * Copyright (c) 2021-2023 Check Digit, LLC
  *
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
@@ -26,7 +26,7 @@ describe('require-strict-assert', () => {
         code: `import * as assert from 'node:assert';`,
         errors: [
           {
-            message: 'Require the strict version of node:assert.',
+            message: 'Require strict assertion mode.',
           },
         ],
         output: `import { strict as assert } from 'node:assert';`,
@@ -35,7 +35,7 @@ describe('require-strict-assert', () => {
         code: `import assert from 'node:assert';`,
         errors: [
           {
-            message: 'Require the strict version of node:assert.',
+            message: 'Require strict assertion mode.',
           },
         ],
         output: `import { strict as assert } from 'node:assert';`,
@@ -46,7 +46,7 @@ describe('require-strict-assert', () => {
                import otherModule2 from 'other-module2';`,
         errors: [
           {
-            message: 'Require the strict version of node:assert.',
+            message: 'Require strict assertion mode.',
           },
         ],
         output: `import { strict as assert } from 'node:assert';
@@ -58,10 +58,10 @@ describe('require-strict-assert', () => {
                assert.strictEqual(value1, value2);`,
         errors: [
           {
-            message: 'Require the strict version of node:assert.',
+            message: 'Require strict assertion mode.',
           },
           {
-            message: 'Use non-strict counterpart for assert function.',
+            message: 'strict method not required when in strict assertion mode.',
           },
         ],
         output: `import { strict as assert } from 'node:assert';
@@ -72,7 +72,7 @@ describe('require-strict-assert', () => {
                assert.strictEqual(value1, value2);`,
         errors: [
           {
-            message: 'Use non-strict counterpart for assert function.',
+            message: 'strict method not required when in strict assertion mode.',
           },
         ],
         output: `import { strict as assert } from 'node:assert';
@@ -83,7 +83,7 @@ describe('require-strict-assert', () => {
                assert.deepStrictEqual(obj1, obj2);`,
         errors: [
           {
-            message: 'Use non-strict counterpart for assert function.',
+            message: 'strict method not required when in strict assertion mode.',
           },
         ],
         output: `import { strict as assert } from 'node:assert';
@@ -91,16 +91,47 @@ describe('require-strict-assert', () => {
       },
       {
         code: `import { strict as assert } from 'node:assert';
+               assert.notStrictEqual(value1, value2);`,
+        errors: [
+          {
+            message: 'strict method not required when in strict assertion mode.',
+          },
+        ],
+        output: `import { strict as assert } from 'node:assert';
+               assert.notEqual(value1, value2);`,
+      },
+      {
+        code: `import { strict as assert } from 'node:assert';
+               assert.notDeepStrictEqual(obj1, obj2);`,
+        errors: [
+          {
+            message: 'strict method not required when in strict assertion mode.',
+          },
+        ],
+        output: `import { strict as assert } from 'node:assert';
+               assert.notDeepEqual(obj1, obj2);`,
+      },
+      {
+        code: `import { strict as assert } from 'node:assert';
                const val1 = 'val2';
                assert.strict(val1, 'val2');`,
         errors: [
           {
-            message: 'Use non-strict counterpart for assert function.',
+            message: 'strict method not required when in strict assertion mode.',
           },
         ],
         output: `import { strict as assert } from 'node:assert';
                const val1 = 'val2';
                assert.equal(val1, 'val2');`,
+      },
+      {
+        code: `import assert from 'node:assert/strict';`,
+        errors: [
+          {
+            message: 'Require strict assertion mode.',
+          },
+        ],
+        output: `import { strict as assert } from 'node:assert';`,
       },
     ],
   });
