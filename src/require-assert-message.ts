@@ -13,15 +13,22 @@ export default {
     type: 'problem',
     docs: {
       description: 'Validate that message argument to always be supplied to node:assert methods',
-      url: 'https://github.com/xxxxx/eslint-plugin',
+      url: 'https://github.com/checkdigit/eslint-plugin',
     },
   },
   create(context) {
     return {
       CallExpression(node) {
-        if (node.callee.type === 'MemberExpression' && 'name' in node.callee.object && 'name' in node.callee.property) {
-          const objectName = node.callee.object.name;
-          const methodName = node.callee.property.name;
+        const callee = node.callee;
+        console.log(callee);
+        const isSpec = context.filename.includes('spec');
+        if (!isSpec && callee.type === 'MemberExpression' &&
+            callee.object.type === 'Identifier' &&
+            callee.property.type === 'Identifier'
+        ) {
+
+          const objectName = callee.object.name;
+          const methodName = callee.property.name;
 
           if (objectName === 'assert' && methodName !== 'ifError') {
             const expectedMessageArgIndex = methodName === 'ok' || methodName === 'strict' ? 1 : 2;
