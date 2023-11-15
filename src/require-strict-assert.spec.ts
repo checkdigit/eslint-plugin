@@ -133,6 +133,19 @@ describe('require-strict-assert', () => {
         ],
         output: `import { strict as assert } from 'node:assert';`,
       },
+      {
+        code: `import { strict as foo } from 'node:assert';
+               const val1 = 'val2';
+               foo.strictEqual(val1, 'val2');`,
+        errors: [
+          {
+            message: 'strict method not required when in strict assertion mode.',
+          },
+        ],
+        output: `import { strict as foo } from 'node:assert';
+               const val1 = 'val2';
+               foo.equal(val1, 'val2');`,
+      },
     ],
   });
 });
