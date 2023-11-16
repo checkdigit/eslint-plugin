@@ -15,20 +15,17 @@ const test = {
     "TestEnums": {
         "TestMethod": {
             "enum": [
-                "DEL",
-                "GET",
-                "PUT"
+                "Baz",
+                "Bar",
+                "Foo"
             ],
             "type": "string"
         },
         "ServiceType": {
             "enum": [
-                "test1",
-                "test2",
-                "test3",
-                "test4",
-                "test5",
-                "test6"
+                "Baz",
+                "Bar",
+                "Foo"
             ],
             "type": "string"
         }
@@ -36,44 +33,43 @@ const test = {
 };
 `;
 
-// file.only
 describe('no-enum', () => {
   const ruleTester = new RuleTester({ parserOptions: { ecmaVersion: 2020 } });
 
   ruleTester.run('no-enum', rule, {
     valid: [
       {
-        code: 'const colors = { Red: 0, Green: 1, Blue: 2 };',
+        code: 'const foo = { Foo: 0, Bar: 1, Baz: 2 };',
         filename: 'example.ts',
       },
       {
-        code: 'const days = ["Sunday", "Monday", "Tuesday"];',
+        code: 'const foo = ["Baz", "Bar", "Foo"];',
         filename: 'example.ts',
       },
       {
-        code: 'class Car {}',
+        code: 'class Foo {}',
         filename: 'example.ts',
       },
     ],
     invalid: [
       {
-        code: `enum CompassDirection {
-                North,
-                East,
-                South,
-                West,
+        code: `enum Foo {
+                foo,
+                bar,
+                baz,
               } ;
-              const startingDirection = CompassDirection.East;`,
+              const test = Foo.bar;`,
+        filename: 'example.ts',
         errors: [{
           message: 'Avoid using enums in TypeScript files.'
         }],
       },
       {
         code: LINE_WITH_MULTIPLE_ENUMS,
+        filename: 'example.ts',
         errors: [{
           message: 'Avoid using enums in TypeScript files.'
         }],
-        only: true,
       },
     ],
   });
