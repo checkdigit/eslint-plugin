@@ -8,6 +8,7 @@
 
 import filePathComment from './file-path-comment';
 import noCardNumbers from './no-card-numbers';
+import noEnum from './no-enum';
 import noUuid from './no-uuid';
 import regexComment from './regular-expression-comment';
 
@@ -17,6 +18,7 @@ export default {
     'no-card-numbers': noCardNumbers,
     'no-uuid': noUuid,
     'regular-expression-comment': regexComment,
+    'no-enum': noEnum,
   },
   configs: {
     all: {
@@ -25,6 +27,7 @@ export default {
         '@checkdigit/file-path-comment': 'error',
         '@checkdigit/no-uuid': 'error',
         '@checkdigit/regular-expression-comment': 'error',
+        '@checkdigit/no-enum': 'error',
       },
     },
     recommended: {
@@ -33,6 +36,7 @@ export default {
         '@checkdigit/file-path-comment': 'off',
         '@checkdigit/no-uuid': 'error',
         '@checkdigit/regular-expression-comment': 'error',
+        '@checkdigit/no-enum': 'error',
       },
     },
   },

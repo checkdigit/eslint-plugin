@@ -3,23 +3,14 @@
   "parserOptions": {
     "project": true
   },
-  "plugins": [
-    "@typescript-eslint",
-    "sonarjs",
-    "import",
-    "no-only-tests",
-    "no-secrets",
-    "eslint-plugin",
-    "typescript-enum"
-  ],
+  "plugins": ["@typescript-eslint", "sonarjs", "import", "no-only-tests", "no-secrets", "eslint-plugin"],
   "extends": [
     "eslint:all",
     "plugin:@typescript-eslint/strict-type-checked",
     "plugin:@typescript-eslint/stylistic-type-checked",
     "plugin:eslint-plugin-eslint-plugin/recommended",
     "plugin:sonarjs/recommended",
-    "prettier",
-    "plugin:typescript-enum/recommended"
+    "prettier"
   ],
   "rules": {
     "sort-keys": "off",
