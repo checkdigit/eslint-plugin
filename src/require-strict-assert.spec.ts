@@ -20,6 +20,11 @@ describe('require-strict-assert', () => {
         code: `import { strict as assert } from 'node:assert';
                import otherModule from 'other-module';`,
       },
+      {
+        code: `import foo from 'something-that-is-not-assert';
+               const val1 = 'val2';
+               foo.strictEqual(val1, 'val2');`,
+      },
     ],
     invalid: [
       {
