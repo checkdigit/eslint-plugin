@@ -40,7 +40,7 @@ export default {
                 specifier.type === 'ImportDefaultSpecifier' || specifier.type === 'ImportNamespaceSpecifier',
             );
 
-            if (defaultSpecifier) {
+            if (defaultSpecifier !== undefined) {
               const importDeclarationRange = importDeclaration.range ?? [0, 0];
               let rangeToReplace = defaultSpecifier.range ?? importDeclarationRange;
               let correctedText = `{ strict as ${defaultSpecifier.local.name} }`;
@@ -64,13 +64,13 @@ export default {
         if (
           callee.type === 'MemberExpression' &&
           callee.object.type === 'Identifier' &&
-          callee.object.name &&
+          callee.object.name !== '' &&
           callee.property.type === 'Identifier' &&
-          callee.property.name &&
+          callee.property.name !== '' &&
           (callee.property.name.includes('strict') || callee.property.name.includes('Strict'))
         ) {
           const nodeValue = nodeValues[callee.object.name];
-          if (nodeValue && (nodeValue === NODE_ASSERT || nodeValue === NODE_ASSERT_STRICT)) {
+          if (nodeValue === NODE_ASSERT || nodeValue === NODE_ASSERT_STRICT) {
             let nonStrictFunctionName = '';
             const strictFunctionName = callee.property.name;
             if (strictFunctionName === 'strict') {
