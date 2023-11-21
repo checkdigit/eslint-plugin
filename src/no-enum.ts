@@ -10,21 +10,21 @@ import type { Node } from 'estree';
 import type { Rule } from 'eslint';
 
 export default {
-    meta: {
-        type: 'problem',
-        docs: {
-            description: 'Detects if a file contains enum keyword',
-            url: 'https://github.com/checkdigit/eslint-plugin',
-        }
+  meta: {
+    type: 'problem',
+    docs: {
+      description: 'Detects if a file contains enum keyword',
+      url: 'https://github.com/checkdigit/eslint-plugin',
     },
-    create: function (context) {
-        return {
-            TSEnumDeclaration: function (node: Node) {
-                context.report({
-                    node,
-                    message: "Avoid using enums in TypeScript files.",
-                });
-            },
-        };
-    },
+  },
+  create (context) {
+    return {
+      TSEnumDeclaration (node: Node) {
+        context.report({
+          node,
+          message: 'Avoid using enums in TypeScript files.',
+        });
+      },
+    };
+  },
 } as Rule.RuleModule;
