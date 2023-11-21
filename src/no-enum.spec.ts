@@ -63,8 +63,6 @@ describe('no-enum', () => {
                 errors: [{
                     message: 'Avoid using enums in TypeScript files.'
                 }],
-                only  : true,
-                // file.only
             },
             {
                 code: LINE_WITH_MULTIPLE_ENUMS,
