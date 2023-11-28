@@ -197,6 +197,9 @@ const LINE_12_WITH_COMMENTS = `
  */
 `;
 
+const LINE_13_WITH_COMMENTS = `// test the comment`;
+const LINE_14_WITH_COMMENTS = `// test the comment ?  line ?? (bug?) (bug ?) ??. ?.`;
+
 describe('no-wallaby-comment', () => {
   const ruleTester = new RuleTester({ parserOptions: { ecmaVersion: 2020 } });
 
@@ -213,6 +216,12 @@ describe('no-wallaby-comment', () => {
       },
       {
         code: LINE_12_WITH_COMMENTS,
+      },
+      {
+        code: LINE_13_WITH_COMMENTS,
+      },
+      {
+        code: LINE_14_WITH_COMMENTS,
       },
     ],
     invalid: [
