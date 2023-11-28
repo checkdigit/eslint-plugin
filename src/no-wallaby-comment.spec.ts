@@ -183,6 +183,20 @@ const LINE_11_WITH_COMMENTS_EXPECTED = `
  **/
 `;
 
+const LINE_12_WITH_COMMENTS = `
+/**
+ * For some reason (bug ?) test ??,
+ * or does not handle ??.,
+ * (bug ?)
+ *
+ * ?
+ * ??
+ * ?.
+ *
+ * Created an issue:
+ */
+`;
+
 describe('no-wallaby-comment', () => {
   const ruleTester = new RuleTester({ parserOptions: { ecmaVersion: 2020 } });
 
@@ -196,6 +210,9 @@ describe('no-wallaby-comment', () => {
       },
       {
         code: LINE_SEVEN_WITH_COMMENTS,
+      },
+      {
+        code: LINE_12_WITH_COMMENTS,
       },
     ],
     invalid: [
