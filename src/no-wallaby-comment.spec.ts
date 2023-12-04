@@ -199,6 +199,12 @@ const LINE_12_WITH_COMMENTS = `
 
 const LINE_13_WITH_COMMENTS = `// test the comment`;
 const LINE_14_WITH_COMMENTS = `// test the comment ?  line ?? (bug?) (bug ?) ??. ?.`;
+const LINE_15_WITH_COMMENTS = `const NOT_A_SECRET = "A template that isn't a secret"; // testing with ? here and ? ??.there`;
+const LINE_16_WITH_COMMENTS = `const TEST = "this isn't secret"; // testing with ? here and there ??.`;
+const LINE_17_WITH_COMMENTS = `
+const NOT_A_SECRET = "A template that isn't a secret"; // test the comment
+const TEST = "this isn't secret"; // testing with ? here and there ??.
+`;
 
 describe('no-wallaby-comment', () => {
   const ruleTester = new RuleTester({ parserOptions: { ecmaVersion: 2020 } });
@@ -222,6 +228,15 @@ describe('no-wallaby-comment', () => {
       },
       {
         code: LINE_14_WITH_COMMENTS,
+      },
+      {
+        code: LINE_15_WITH_COMMENTS,
+      },
+      {
+        code: LINE_16_WITH_COMMENTS,
+      },
+      {
+        code: LINE_17_WITH_COMMENTS,
       },
     ],
     invalid: [
