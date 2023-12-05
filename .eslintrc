@@ -43,7 +43,8 @@
     "max-lines-per-function": ["error", 200],
     "sonarjs/cognitive-complexity": ["error", 24],
     "no-only-tests/no-only-tests": "error",
-    "curly": "error"
+    "curly": "error",
+    "@typescript-eslint/strict-boolean-expressions": "error"
   },
   "overrides": [
     {
@@ -61,8 +62,7 @@
         "@typescript-eslint/no-unsafe-member-access": "off",
         "@typescript-eslint/no-unsafe-assignment": "off",
         "@typescript-eslint/no-unsafe-return": "off",
-        "@typescript-eslint/restrict-template-expressions": "off",
-        "@typescript-eslint/strict-boolean-expressions": "error"
+        "@typescript-eslint/restrict-template-expressions": "off"
       }
     }
   ]
