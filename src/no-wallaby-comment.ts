@@ -9,7 +9,7 @@
 import type { Rule, SourceCode } from 'eslint';
 import type { Comment } from 'estree';
 
-const wallabyRegex = /\s*(?:[?]{1,2}\.?|file\.only|file\.skip)\s*/gu;
+const wallabyRegex = /(?<=(?:^|\*\/)\s*)[?]{1,2}|file\.only|file\.skip/gu;
 const commentRegex = /\s*(?:\/\/|<!--)\s*(?<comment>\?{1,2}\.?\s*|file\.(?:only|skip))\s*/gu;
 function removeWallabyComment(context: Rule.RuleContext, sourceCode: SourceCode, start: number, end: number): void {
   context.report({
