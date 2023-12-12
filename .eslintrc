@@ -43,7 +43,14 @@
     "max-lines-per-function": ["error", 200],
     "sonarjs/cognitive-complexity": ["error", 24],
     "no-only-tests/no-only-tests": "error",
-    "curly": "error"
+    "curly": "error",
+    "no-restricted-syntax": [
+      "error",
+      {
+        "selector": "TSEnumDeclaration",
+        "message": "Avoid using enums in TypeScript files."
+      }
+    ]
   },
   "overrides": [
     {
