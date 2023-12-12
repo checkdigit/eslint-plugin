@@ -31,7 +31,6 @@ export default {
         '@checkdigit/require-strict-assert': 'error',
         '@checkdigit/no-wallaby-comment': 'error',
         '@checkdigit/regular-expression-comment': 'error',
-        '@checkdigit/no-enum': 'error',
       },
     },
     recommended: {
