@@ -18,12 +18,13 @@ export default {
   },
   create(context) {
     const comments = context.sourceCode.getAllComments();
+    const lines = context.sourceCode.getLines();
     return {
       Literal(node) {
         if (node.loc && node.value instanceof RegExp) {
           const regularExpressionLine = node.loc.start.line;
           const previousLine = regularExpressionLine - 1;
-          const previousLineComment = context.sourceCode.getLines()[previousLine - 1];
+          const previousLineComment = lines[previousLine - 1];
           const regularExpressionComment = comments.find((comment) => {
             if (!comment.loc) {
               return false;
