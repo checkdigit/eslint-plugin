@@ -43,7 +43,8 @@
     "max-lines-per-function": ["error", 200],
     "sonarjs/cognitive-complexity": ["error", 24],
     "no-only-tests/no-only-tests": "error",
-    "curly": "error"
+    "curly": "error",
+    "@typescript-eslint/strict-boolean-expressions": "error"
   },
   "overrides": [
     {

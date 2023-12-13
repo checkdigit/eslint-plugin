@@ -18,23 +18,40 @@ export default {
   },
   create(context) {
     const comments = context.sourceCode.getAllComments();
+    const lines = context.sourceCode.getLines();
     return {
       Literal(node) {
-        if (node.value instanceof RegExp) {
-          const regexLine = node.loc?.start.line;
-          if (regexLine) {
-            const previousLine = regexLine - 1;
-
-            const hasRegexComment = comments.find(
-              (comment) => comment.loc?.start.line === previousLine || comment.loc?.start.line === regexLine,
-            );
-
-            if (!hasRegexComment) {
-              context.report({
-                node,
-                message: 'Missing comment for regular expression',
-              });
+        if (node.loc && node.value instanceof RegExp) {
+          const regularExpressionLine = node.loc.start.line;
+          const previousLine = regularExpressionLine - 1;
+          const previousLineComment = lines[previousLine - 1];
+          const regularExpressionComment = comments.find((comment) => {
+            if (!comment.loc) {
+              return false;
             }
+            const regularExpression = /[a-zA-Z]/gu;
+            const commentRegularExpressionLine = /^(?:\/{2,}|\/\*+)/gu;
+            const hasComment = regularExpression.test(comment.value.trim());
+            if (comment.type === 'Line' || comment.loc.start.line === comment.loc.end.line) {
+              return (
+                (comment.loc.end.line === previousLine &&
+                  previousLineComment !== undefined &&
+                  commentRegularExpressionLine.test(previousLineComment) &&
+                  hasComment) ||
+                (comment.loc.end.line === regularExpressionLine && hasComment)
+              );
+            }
+            return (
+              (comment.loc.end.line === previousLine && hasComment) ||
+              (comment.loc.end.line === regularExpressionLine && hasComment)
+            );
+          });
+
+          if (!regularExpressionComment) {
+            context.report({
+              node,
+              message: 'Missing comment for regular expression',
+            });
           }
         }
       },

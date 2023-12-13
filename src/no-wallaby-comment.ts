@@ -9,7 +9,7 @@
 import type { Rule, SourceCode } from 'eslint';
 import type { Comment } from 'estree';
 
-const wallabyRegex = /\s*(?:[?]{1,2}\.?|file\.only|file\.skip)\s*/gu;
+const wallabyRegex = /(?<=(?:^|\*\/)\s*)[?]{1,2}|file\.only|file\.skip/gu;
 const commentRegex = /\s*(?:\/\/|<!--)\s*(?<comment>\?{1,2}\.?\s*|file\.(?:only|skip))\s*/gu;
 function removeWallabyComment(context: Rule.RuleContext, sourceCode: SourceCode, start: number, end: number): void {
   context.report({
@@ -25,7 +25,7 @@ function removeWallabyComment(context: Rule.RuleContext, sourceCode: SourceCode,
 function processLineComment(context: Rule.RuleContext, sourceCode: SourceCode, comment: Comment): void {
   if (comment.loc) {
     const line = sourceCode.getLines()[comment.loc.start.line - 1];
-    if (line) {
+    if (line !== undefined) {
       let match;
       while ((match = commentRegex.exec(line)) !== null) {
         const start = sourceCode.getIndexFromLoc({ line: comment.loc.start.line, column: match.index });
@@ -54,7 +54,7 @@ function processBlockComment(context: Rule.RuleContext, sourceCode: SourceCode, 
         let lineNumber = 0;
         while (startLine <= endLine) {
           const line = sourceCode.getLines()[startLine];
-          if (line && line.includes(match.input)) {
+          if (line !== undefined && line.includes(match.input)) {
             lineNumber = startLine;
             break;
           }
