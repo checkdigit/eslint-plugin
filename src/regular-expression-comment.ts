@@ -30,7 +30,7 @@ export default {
               return false;
             }
             const regularExpression = /[a-zA-Z]/gu;
-            const commentRegularExpressionLine = /^(?:\/{2,}|\/\*+)/gu;
+            const commentRegularExpressionLine = /^\s*(?:\/{2,}|\/\*+)/gu;
             const hasComment = regularExpression.test(comment.value.trim());
             if (comment.type === 'Line' || comment.loc.start.line === comment.loc.end.line) {
               return (
