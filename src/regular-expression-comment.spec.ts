@@ -57,6 +57,11 @@ const VALID_TEST_9 = `
   const disallowedCharacters = /\\\\t+|\\\\n+|\\\\r+/gu;
 `;
 
+const VALID_TEST_10 = `
+          /// returns true if the string passed is valid
+  const disallowedCharacters = /\\\\t+|\\\\n+|\\\\r+/gu;
+`;
+
 const INVALID_TEST_1 = `
 const NOT_A_SECRET = "I'm not a secret, I think"; 
 const NEVER_A_SECRET = /W/gu;
@@ -173,6 +178,9 @@ describe('regular-expression-comment', () => {
       },
       {
         code: VALID_TEST_9,
+      },
+      {
+        code: VALID_TEST_10,
       },
     ],
     invalid: [
