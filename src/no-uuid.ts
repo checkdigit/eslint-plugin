@@ -92,7 +92,7 @@ export default {
         if (typeof node.value !== 'string') {
           return;
         }
-        const value = `${node.value}`;
+        const value = node.value;
         checkForUuid(value, context, node);
       },
       TemplateElement(node) {

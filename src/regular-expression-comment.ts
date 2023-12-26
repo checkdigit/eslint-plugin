@@ -29,8 +29,10 @@ export default {
             if (!comment.loc) {
               return false;
             }
+            // This regex is to check if the comment has valid text
             const regularExpression = /[a-zA-Z]/gu;
-            const commentRegularExpressionLine = /^(?:\/{2,}|\/\*+)/gu;
+            // This regex is to check if the line starts with or without spaces and followed by two or more consecutive slashes // or start with /* and may have one or more asterisks, continuing until the first occurrence of */.
+            const commentRegularExpressionLine = /^\s*(?:\/{2,}|\/\*+)/gu;
             const hasComment = regularExpression.test(comment.value.trim());
             if (comment.type === 'Line' || comment.loc.start.line === comment.loc.end.line) {
               return (
