@@ -30,18 +30,36 @@ const fileName = \`TEST_testDate1_testDate2}_fileId.txt\`;
 `;
 
 const VALID_TEST_6 = `
-// test
+   // test
 const testDate1 = test1.replaceAll(/\\W/gu, '');
 const testDate2 = test2.replaceAll(/\\W/gu, ''); // test
 const fileName = \`TEST_testDate1_testDate2}_fileId.txt\`;
 `;
 
 const VALID_TEST_7 = `
-/**  test
-**/
+   /**  test
+  **/
 const testDate1 = test1.replaceAll(/\\W/gu, '');
-const testDate2 = test2.replaceAll(/\\W/gu, ''); // test
+const testDate2 = test2.replaceAll(/\\W/gu, '');    // test
 const fileName = \`TEST_testDate1_testDate2}_fileId.txt\`;
+`;
+
+const VALID_TEST_8 = `
+['', undefined].forEach((_lib) => {
+  // this is a comment for the regex below
+  assert.ok(/^[a-z]+$/u.test('hello'));
+  // do nothing
+});
+`;
+
+const VALID_TEST_9 = `
+  // returns true if the string passed is valid
+  const disallowedCharacters = /\\\\t+|\\\\n+|\\\\r+/gu;
+`;
+
+const VALID_TEST_10 = `
+          /// returns true if the string passed is valid
+  const disallowedCharacters = /\\\\t+|\\\\n+|\\\\r+/gu;
 `;
 
 const INVALID_TEST_1 = `
@@ -154,6 +172,15 @@ describe('regular-expression-comment', () => {
       },
       {
         code: VALID_TEST_7,
+      },
+      {
+        code: VALID_TEST_8,
+      },
+      {
+        code: VALID_TEST_9,
+      },
+      {
+        code: VALID_TEST_10,
       },
     ],
     invalid: [
