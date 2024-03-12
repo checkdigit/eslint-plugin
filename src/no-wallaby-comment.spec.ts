@@ -6,6 +6,7 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 import { RuleTester } from 'eslint';
+import { describe } from '@jest/globals';
 
 import rule from './no-wallaby-comment';
 
