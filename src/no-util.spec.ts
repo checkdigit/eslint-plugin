@@ -19,10 +19,6 @@ describe('no-util', () => {
         filename: 'hello.ts',
         code: `test`,
       },
-      {
-        filename: 'util-test.ts',
-        code: `test`,
-      },
     ],
     invalid: [
       {
@@ -44,6 +40,26 @@ describe('no-util', () => {
         filename: 'util.test.ts',
         code: `test`,
         errors: [{ message: `File name 'util.test.ts' contains banned 'util' pattern.` }],
+      },
+      {
+        filename: 'util-test.ts',
+        code: `test`,
+        errors: [{ message: `File name 'util-test.ts' contains banned 'util' pattern.` }],
+      },
+      {
+        filename: 'test-util.ts',
+        code: `test`,
+        errors: [{ message: `File name 'test-util.ts' contains banned 'util' pattern.` }],
+      },
+      {
+        filename: 'testUtil.ts',
+        code: `test`,
+        errors: [{ message: `File name 'testUtil.ts' contains banned 'util' pattern.` }],
+      },
+      {
+        filename: 'utilTest.ts',
+        code: `test`,
+        errors: [{ message: `File name 'utilTest.ts' contains banned 'util' pattern.` }],
       },
     ],
   });

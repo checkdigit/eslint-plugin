@@ -19,7 +19,7 @@ export default {
     return {
       Program() {
         const filename = context.filename;
-        const utilRegex = /(?:^|\/)util(?:\.(?:spec|test))?\.ts$/u;
+        const utilRegex = /util/iu;
         if (utilRegex.test(filename)) {
           context.report({
             message: `File name '${filename}' contains banned 'util' pattern.`,
