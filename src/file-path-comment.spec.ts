@@ -10,6 +10,8 @@ import { RuleTester } from 'eslint';
 
 import rule from './file-path-comment';
 
+import { describe } from '@jest/globals';
+
 describe('file-path-comment', () => {
   const ruleTester = new RuleTester({ parserOptions: { ecmaVersion: 2020 } });
 

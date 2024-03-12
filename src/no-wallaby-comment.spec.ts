@@ -9,6 +9,8 @@ import { RuleTester } from 'eslint';
 
 import rule from './no-wallaby-comment';
 
+import { describe } from '@jest/globals';
+
 const LINE_ONE_NO_COMMENTS = `const NOT_A_SECRET = "A template that isn't a secret.";`;
 const LINE_TWO_NO_COMMENTS = `/*
 * This is a comment

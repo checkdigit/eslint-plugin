@@ -10,6 +10,9 @@ import { RuleTester } from 'eslint';
 
 import rule from './no-uuid';
 
+import { describe } from '@jest/globals';
+
+
 const UUID_FOUND = 'UUID_FOUND';
 const UUIDS_FOUND = 'UUIDS_FOUND';
 

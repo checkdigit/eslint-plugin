@@ -6,19 +6,20 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import type { Rule } from 'eslint';
+import { TSESTree } from '@typescript-eslint/types';
+import type {Rule} from 'eslint';
 
 export default {
   meta: {
     type: 'problem',
     docs: {
-      description: 'Validate that message argument to always be supplied to node:assert methods',
+      description: 'Validate that message argument is always supplied to node:assert methods',
       url: 'https://github.com/checkdigit/eslint-plugin',
     },
   },
   create(context) {
     return {
-      CallExpression(node) {
+      CallExpression(node: TSESTree.CallExpression) {
         const callee = node.callee;
         console.log(callee);
         const isSpec = context.filename.includes('spec');
@@ -27,14 +28,14 @@ export default {
             callee.property.type === 'Identifier'
         ) {
 
-          const objectName = callee.object.name;
-          const methodName = callee.property.name;
+          const objectName = (callee.object as TSESTree.Identifier).name;
+          const methodName = (callee.property as TSESTree.Identifier).name;
 
           if (objectName === 'assert' && methodName !== 'ifError') {
             const expectedMessageArgIndex = methodName === 'ok' || methodName === 'strict' ? 1 : 2;
             if (node.arguments.length <= expectedMessageArgIndex) {
               context.report({
-                node,
+                loc: node.loc,
                 message: `Missing message argument in ${methodName}() method.`,
               });
             }

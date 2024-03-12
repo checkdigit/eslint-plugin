@@ -10,6 +10,8 @@ import { RuleTester } from 'eslint';
 
 import rule from './require-assert-message';
 
+import {  describe } from '@jest/globals';
+
 describe('require-assert-message', () => {
   const ruleTester = new RuleTester({ parserOptions: { ecmaVersion: 2020, sourceType: 'module' } });
   ruleTester.run('require-assert-message', rule, {
@@ -93,8 +95,6 @@ describe('require-assert-message', () => {
                assert('val1', 'correct value');`,
         errors: [{ message: 'Missing message argument in method.' }],
         filename: 'src/require-assert-message.ts',
-        only:true
-        // file.only
       },
     ],
   });

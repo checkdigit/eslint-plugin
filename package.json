@@ -34,11 +34,12 @@
   },
   "devDependencies": {
     "@checkdigit/jest-config": "^5.0.0",
-    "@checkdigit/prettier-config": "^5.0.0",
+    "@checkdigit/prettier-config": "^5.1.0",
     "@checkdigit/typescript-config": "^6.0.0",
     "@types/eslint": "^8.56.0",
     "@typescript-eslint/eslint-plugin": "^6.16.0",
     "@typescript-eslint/parser": "^6.16.0",
+    "@typescript-eslint/types": "^6.17.0",
     "@typescript-eslint/utils": "^6.16.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-eslint-plugin": "^5.2.1",
@@ -66,6 +67,13 @@
   },
   "jest": {
     "preset": "@checkdigit/jest-config"
+  },
+  "wallaby": {
+    "env": {
+      "params": {
+        "runner": "--experimental-vm-modules"
+      }
+    }
   },
   "files": [
     "src",
