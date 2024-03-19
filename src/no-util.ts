@@ -23,7 +23,16 @@ export default {
         if (utilRegex.test(filename)) {
           context.report({
             message: `File name '${filename}' contains banned 'util' pattern.`,
-            loc: { line: 1, column: 0 },
+            loc: {
+              start: {
+                line: 2,
+                column: 0,
+              },
+              end: {
+                line: 2,
+                column: 1,
+              },
+            },
           });
         }
       },
