@@ -19,6 +19,18 @@ describe('no-util', () => {
         filename: 'hello.ts',
         code: `test`,
       },
+      {
+        filename: 'testUtil.ts',
+        code: `test`,
+      },
+      {
+        filename: 'utilTest.ts',
+        code: `test`,
+      },
+      {
+        filename: '/src/test-utility.ts',
+        code: `test`,
+      },
     ],
     invalid: [
       {
@@ -52,14 +64,29 @@ describe('no-util', () => {
         errors: [{ message: `File name 'test-util.ts' contains banned 'util' pattern.` }],
       },
       {
-        filename: 'testUtil.ts',
+        filename: '/util/test-Util.ts',
         code: `test`,
-        errors: [{ message: `File name 'testUtil.ts' contains banned 'util' pattern.` }],
+        errors: [{ message: `File name '/util/test-Util.ts' contains banned 'util' pattern.` }],
       },
       {
-        filename: 'utilTest.ts',
+        filename: '/util/test-util.ts',
         code: `test`,
-        errors: [{ message: `File name 'utilTest.ts' contains banned 'util' pattern.` }],
+        errors: [{ message: `File name '/util/test-util.ts' contains banned 'util' pattern.` }],
+      },
+      {
+        filename: '/util/util-Test.ts',
+        code: `test`,
+        errors: [{ message: `File name '/util/util-Test.ts' contains banned 'util' pattern.` }],
+      },
+      {
+        filename: '/util/utility-Test.ts',
+        code: `test`,
+        errors: [{ message: `File name '/util/utility-Test.ts' contains banned 'util' pattern.` }],
+      },
+      {
+        filename: '/src/test-util.ts',
+        code: `test`,
+        errors: [{ message: `File name '/src/test-util.ts' contains banned 'util' pattern.` }],
       },
     ],
   });
