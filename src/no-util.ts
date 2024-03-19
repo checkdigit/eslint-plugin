@@ -25,11 +25,11 @@ export default {
             message: `File name '${filename}' contains banned 'util' pattern.`,
             loc: {
               start: {
-                line: 2,
+                line: 0,
                 column: 0,
               },
               end: {
-                line: 2,
+                line: 0,
                 column: 1,
               },
             },
