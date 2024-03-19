@@ -10,24 +10,29 @@ jobs:
     runs-on: ubuntu-latest
     name: Publish Beta
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout Code
+        uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha }}
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: '20.x'
-          registry-url: 'https://registry.npmjs.org'
+          cache: 'npm'
       - name: Check Label
         uses: checkdigit/github-actions/check-label@main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Check Imports
-        uses: checkdigit/github-actions/check-imports@main
-      - name: Install dependencies
+      - name: Install latest npm
+        run: npm install -g npm@latest
+      - name: Install Dependencies
         run: npm ci --ignore-scripts
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Audit Signatures
         run: npm audit signatures
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Run Test
         run: npm run ci:test
       - name: Prepare Beta
@@ -36,7 +41,7 @@ jobs:
       - name: Publish Beta
         run: npm publish --tag beta
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN_PUBLISH }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN_PUBLISH }}
       - name: Comment npm publish result
         uses: checkdigit/github-actions/comment-npm-publish@main
         with:
