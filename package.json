@@ -7,6 +7,7 @@
   "exports": {
     ".": {
       "types": "./dist-types/index.d.ts",
+      "require": "./dist-cjs/index.cjs",
       "import": "./dist-mjs/index.mjs",
       "default": "./dist-mjs/index.mjs"
     }
@@ -35,7 +36,7 @@
   "devDependencies": {
     "@checkdigit/jest-config": "^6.0.0",
     "@checkdigit/prettier-config": "^5.3.0",
-    "@checkdigit/typescript-config": "^7.0.0",
+    "@checkdigit/typescript-config": "^7.0.1",
     "@types/eslint": "^8.56.6",
     "@typescript-eslint/eslint-plugin": "^7.3.1",
     "@typescript-eslint/parser": "^7.3.1",
@@ -50,6 +51,7 @@
   "scripts": {
     "prepublishOnly": "npm run build:dist-types && npm run build:dist-mjs",
     "build:dist-types": "rimraf dist-types && npx builder --type=types --outDir=dist-types",
+    "build:dist-cjs": "rimraf dist-cjs && npx builder --type=commonjs --sourceMap --entryPoint=index.ts --outDir=dist-cjs --outFile=index.cjs && echo \"module.exports = module.exports.default;\" >> dist-cjs/index.cjs && node dist-cjs/index.cjs",
     "build:dist-mjs": "rimraf dist-mjs && npx builder --type=module --sourceMap --outDir=dist-mjs && node dist-mjs/index.mjs",
     "prettier": "prettier --ignore-path .gitignore --list-different .",
     "prettier:fix": "prettier --ignore-path .gitignore --write .",
@@ -69,10 +71,13 @@
     "src",
     "dist-types",
     "dist-mjs",
+    "dist-cjs",
     "!src/**/*.test.ts",
     "!src/**/*.spec.ts",
     "!dist-types/**/*.test.d.ts",
     "!dist-types/**/*.spec.d.ts",
+    "!dist-cjs/**/*.test.cjs",
+    "!dist-cjs/**/*.spec.cjs",
     "!dist-mjs/**/*.test.mjs",
     "!dist-mjs/**/*.spec.mjs",
     "SECURITY.md"
