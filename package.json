@@ -36,7 +36,7 @@
   "devDependencies": {
     "@checkdigit/jest-config": "^6.0.0",
     "@checkdigit/prettier-config": "^5.3.0",
-    "@checkdigit/typescript-config": "^7.0.1",
+    "@checkdigit/typescript-config": "^6.0.0",
     "@types/eslint": "^8.56.6",
     "@typescript-eslint/eslint-plugin": "^7.4.0",
     "@typescript-eslint/parser": "^7.4.0",
@@ -70,8 +70,8 @@
   "files": [
     "src",
     "dist-types",
-    "dist-mjs",
     "dist-cjs",
+    "dist-mjs",
     "!src/**/*.test.ts",
     "!src/**/*.spec.ts",
     "!dist-types/**/*.test.d.ts",
