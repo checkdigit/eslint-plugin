@@ -54,7 +54,7 @@ function processBlockComment(context: Rule.RuleContext, sourceCode: SourceCode, 
         let lineNumber = 0;
         while (startLine <= endLine) {
           const line = sourceCode.getLines()[startLine];
-          if (line !== undefined && line.includes(match.input)) {
+          if (line?.includes(match.input) ?? false) {
             lineNumber = startLine;
             break;
           }
