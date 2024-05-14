@@ -26,15 +26,26 @@ export default {
           callee.object.name === 'assert' &&
           callee.property.type === 'Identifier' &&
           (callee.property.name === 'rejects' || callee.property.name === 'throws') &&
-          node.arguments.length <= 2
+          node.arguments.length >= 1
         ) {
-          context.report({
-            node,
-            message: 'Missing message argument in {{method}} method.',
-            data: {
-              method: callee.property.name,
-            },
-          });
+          const assertPredicate = node.arguments[1];
+          if (
+            assertPredicate === undefined ||
+            (assertPredicate.type !== 'FunctionExpression' &&
+              assertPredicate.type !== 'ArrowFunctionExpression' &&
+              assertPredicate.type !== 'ObjectExpression' &&
+              assertPredicate.type !== 'Identifier' &&
+              assertPredicate.type === 'Literal' &&
+              typeof assertPredicate.value !== 'object')
+          ) {
+            context.report({
+              node,
+              message: 'Second argument in {{method}} method should be of type AssertPredicate.',
+              data: {
+                method: callee.property.name,
+              },
+            });
+          }
         }
       },
     };
