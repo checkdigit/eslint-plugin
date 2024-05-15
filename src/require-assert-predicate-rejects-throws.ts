@@ -17,7 +17,7 @@ export default {
     },
   },
   create(context) {
-    let assertIdentifier: string = '';
+    let assertIdentifier = '';
     return {
       ImportDeclaration(node) {
         if (node.source.value === 'node:assert') {
