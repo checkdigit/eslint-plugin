@@ -1,4 +1,4 @@
-// require-assert-message-rejects-throws.spec.ts
+// require-assert-predicate-rejects-throws.spec.ts
 
 /*
  * Copyright (c) 2024 Check Digit, LLC
@@ -9,11 +9,11 @@
 import { RuleTester } from 'eslint';
 import { describe } from '@jest/globals';
 
-import rule from './require-assert-message-rejects-throws';
+import rule from './require-assert-predicate-rejects-throws';
 
-describe('require-assert-message-rejects-throws', () => {
+describe('require-assert-predicate-rejects-throws', () => {
   const ruleTester = new RuleTester({ parserOptions: { ecmaVersion: 2020, sourceType: 'module' } });
-  ruleTester.run('require-assert-message-rejects-throws', rule, {
+  ruleTester.run('require-assert-predicate-rejects-throws', rule, {
     valid: [
       {
         code: `import { strict as assert } from 'node:assert';
@@ -24,11 +24,11 @@ describe('require-assert-message-rejects-throws', () => {
                    error => error.message === 'Expected error message',
                    'Expected error message',
                 );`,
-        filename: 'src/require-assert-message-rejects-throws.ts',
+        filename: 'src/require-assert-predicate-rejects-throws.ts',
       },
       {
-        code: `import { strict as assert } from 'node:assert';
-                  assert.rejects(
+        code: `import { strict as strictAssert } from 'node:assert';
+                  strictAssert.rejects(
                   async () => {
                     throw new TypeError('Wrong value');
                   },
@@ -37,7 +37,7 @@ describe('require-assert-message-rejects-throws', () => {
                     message: 'Wrong value',
                   },
                 );`,
-        filename: 'src/require-assert-message-rejects-throws.ts',
+        filename: 'src/require-assert-predicate-rejects-throws.ts',
       },
       {
         code: `import { strict as assert } from 'node:assert';
@@ -51,7 +51,7 @@ describe('require-assert-message-rejects-throws', () => {
                     return true;
                   },
                 );`,
-        filename: 'src/require-assert-message-rejects-throws.ts',
+        filename: 'src/require-assert-predicate-rejects-throws.ts',
       },
       {
         code: `import { strict as assert } from 'node:assert';
@@ -63,7 +63,7 @@ describe('require-assert-message-rejects-throws', () => {
                   }).catch((error) => {
                       console.error('Test case failed:', error.message);
                   });`,
-        filename: 'src/require-assert-message-rejects-throws.ts',
+        filename: 'src/require-assert-predicate-rejects-throws.ts',
       },
       {
         code: `import { strict as assert } from 'node:assert';
@@ -74,14 +74,14 @@ describe('require-assert-message-rejects-throws', () => {
                    error => error instanceof RangeError && error.code === 'ERR_OUT_OF_RANGE',
                    'Expected error message',
                 );`,
-        filename: 'src/require-assert-message-rejects-throws.ts',
+        filename: 'src/require-assert-predicate-rejects-throws.ts',
       },
       {
         code: `import { strict as assert } from 'node:assert';
                 assert.throws(() => new Date(), (error) => {
                     return error instanceof Error && error.message === 'Expected error message';
                 });`,
-        filename: 'src/require-assert-message-rejects-throws.ts',
+        filename: 'src/require-assert-predicate-rejects-throws.ts',
       },
       {
         code: `import assert from 'node:assert/strict';
@@ -107,7 +107,7 @@ describe('require-assert-message-rejects-throws', () => {
                   },
                 },
               );`,
-        filename: 'src/require-assert-message-rejects-throws.ts',
+        filename: 'src/require-assert-predicate-rejects-throws.ts',
       },
       {
         code: `import assert from 'node:assert/strict';
@@ -142,7 +142,7 @@ describe('require-assert-message-rejects-throws', () => {
                 reg: /abc/i,
               },
             );`,
-        filename: 'src/require-assert-message-rejects-throws.ts',
+        filename: 'src/require-assert-predicate-rejects-throws.ts',
       },
       {
         code: `import { strict as assert } from 'node:assert';
@@ -156,7 +156,7 @@ describe('require-assert-message-rejects-throws', () => {
                   },
                   err,
                );`,
-        filename: 'src/require-assert-message-rejects-throws.ts',
+        filename: 'src/require-assert-predicate-rejects-throws.ts',
       },
       {
         code: `import { strict as assert } from 'node:assert';
@@ -166,7 +166,7 @@ describe('require-assert-message-rejects-throws', () => {
                 },
                 /^Error: Wrong value$/,
               );`,
-        filename: 'src/require-assert-message-rejects-throws.ts',
+        filename: 'src/require-assert-predicate-rejects-throws.ts',
       },
       {
         code: `import { strict as assert } from 'node:assert';
@@ -181,7 +181,7 @@ describe('require-assert-message-rejects-throws', () => {
                   },
                   'unexpected error',
                );`,
-        filename: 'src/require-assert-message-rejects-throws.ts',
+        filename: 'src/require-assert-predicate-rejects-throws.ts',
       },
       {
         code: `import { strict as assert } from 'node:assert';
@@ -196,7 +196,7 @@ describe('require-assert-message-rejects-throws', () => {
                 console.error('Assertion failed:', error);
                 // You can handle the error or add additional assertions here
               });`,
-        filename: 'src/require-assert-message-rejects-throws.ts',
+        filename: 'src/require-assert-predicate-rejects-throws.ts',
       },
     ],
     invalid: [
@@ -204,13 +204,13 @@ describe('require-assert-message-rejects-throws', () => {
         code: `import { strict as assert } from 'node:assert';
                assert.throws(throwingSecond, 'Second');`,
         errors: [{ message: 'Second argument in throws method should be of type AssertPredicate.' }],
-        filename: 'src/require-assert-message-rejects-throws.ts',
+        filename: 'src/require-assert-predicate-rejects-throws.ts',
       },
       {
-        code: `import { strict as assert } from 'node:assert';
-               assert.rejects(() => new Date(), 'Test Error');`,
+        code: `import { strict as anyAssert } from 'node:assert';
+               anyAssert.rejects(() => new Date(), 'Test Error');`,
         errors: [{ message: 'Second argument in rejects method should be of type AssertPredicate.' }],
-        filename: 'src/require-assert-message-rejects-throws.ts',
+        filename: 'src/require-assert-predicate-rejects-throws.ts',
       },
       {
         code: `import { strict as assert } from 'node:assert';
@@ -218,7 +218,7 @@ describe('require-assert-message-rejects-throws', () => {
                 throw new TypeError('Wrong value');
               });`,
         errors: [{ message: 'Second argument in rejects method should be of type AssertPredicate.' }],
-        filename: 'src/require-assert-message-rejects-throws.ts',
+        filename: 'src/require-assert-predicate-rejects-throws.ts',
       },
     ],
   });
