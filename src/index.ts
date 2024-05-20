@@ -11,6 +11,7 @@ import noCardNumbers from './no-card-numbers';
 import noUuid from './no-uuid';
 import noWallabyComment from './no-wallaby-comment';
 import regexComment from './regular-expression-comment';
+import requireAssertPredicateRejectsThrows from './require-assert-predicate-rejects-throws';
 import requireStrictAssert from './require-strict-assert';
 
 export default {
@@ -21,6 +22,7 @@ export default {
     'require-strict-assert': requireStrictAssert,
     'no-wallaby-comment': noWallabyComment,
     'regular-expression-comment': regexComment,
+    'require-assert-predicate-rejects-throws': requireAssertPredicateRejectsThrows,
   },
   configs: {
     all: {
@@ -31,6 +33,7 @@ export default {
         '@checkdigit/require-strict-assert': 'error',
         '@checkdigit/no-wallaby-comment': 'error',
         '@checkdigit/regular-expression-comment': 'error',
+        '@checkdigit/require-assert-predicate-rejects-throws': 'error',
       },
     },
     recommended: {
@@ -41,6 +44,7 @@ export default {
         '@checkdigit/require-strict-assert': 'error',
         '@checkdigit/no-wallaby-comment': 'off',
         '@checkdigit/regular-expression-comment': 'error',
+        '@checkdigit/require-assert-predicate-rejects-throws': 'error',
       },
     },
   },
