@@ -1,6 +1,6 @@
 {
   "name": "@checkdigit/eslint-plugin",
-  "version": "6.0.1",
+  "version": "6.1.0",
   "description": "Check Digit eslint plugins",
   "prettier": "@checkdigit/prettier-config",
   "type": "module",
@@ -17,7 +17,7 @@
     "eslintplugin"
   ],
   "engines": {
-    "node": ">=20.11"
+    "node": ">=20.12"
   },
   "repository": {
     "type": "git",

@@ -1,6 +1,6 @@
 .DS_Store
+.idea
 coverage
 build
 dist-*
 node_modules
-.idea
