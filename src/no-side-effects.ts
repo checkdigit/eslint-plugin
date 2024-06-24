@@ -22,7 +22,7 @@ export default {
     return {
       Program(node) {
         const fileName = context.filename.split('src/')[1] ?? context.filename;
-        if (fileName.endsWith('spec.ts') || fileName.endsWith('test.ts')) {
+        if (fileName.endsWith('spec.ts') || fileName.endsWith('test.ts') || fileName.endsWith('test.js')) {
           return;
         }
         node.body.forEach((statement) => {
