@@ -8,7 +8,7 @@
 
 import type { Rule } from 'eslint';
 
-const EXCLUDED_IDENTIFIERS = ['debug'];
+const EXCLUDED_IDENTIFIERS = ['assert', 'debug', 'log'];
 
 export default {
   meta: {
@@ -33,7 +33,8 @@ export default {
               ((statement.expression.callee.type === 'MemberExpression' &&
                 statement.expression.callee.object.type === 'Identifier' &&
                 statement.expression.callee.object.name !== 'assert') ||
-                (statement.expression.callee.type === 'Identifier' && statement.expression.callee.name !== 'log'))) ||
+                (statement.expression.callee.type === 'Identifier' &&
+                  !EXCLUDED_IDENTIFIERS.includes(statement.expression.callee.name)))) ||
             (statement.type === 'VariableDeclaration' &&
               statement.declarations.length > 0 &&
               statement.declarations[0]?.id !== undefined &&

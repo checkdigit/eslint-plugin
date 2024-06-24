@@ -114,7 +114,7 @@ describe('no-side-effects', () => {
                 const prefix = formatUtc(createdAt, 'yyyy/MM/dd/HH');
                 return prefix;
               }
-              
+              assert(\`I'm a number, \${numberValue}\`);
               const jsonSchemaValidator = new Ajv({ allErrors: true }).compile(schema);`,
         errors: [{ message: 'No side effects can occur at the main module-level' }],
         filename: 'src/side-effects.ts',
