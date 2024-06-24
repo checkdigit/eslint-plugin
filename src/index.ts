@@ -8,6 +8,7 @@
 
 import filePathComment from './file-path-comment';
 import noCardNumbers from './no-card-numbers';
+import noSideEffects from './no-side-effects';
 import noUuid from './no-uuid';
 import noWallabyComment from './no-wallaby-comment';
 import objectLiteralResponse from './object-literal-response';
@@ -22,6 +23,7 @@ export default {
     'no-uuid': noUuid,
     'require-strict-assert': requireStrictAssert,
     'no-wallaby-comment': noWallabyComment,
+    'no-side-effects': noSideEffects,
     'regular-expression-comment': regexComment,
     'require-assert-predicate-rejects-throws': requireAssertPredicateRejectsThrows,
     'object-literal-response': objectLiteralResponse,
@@ -34,6 +36,7 @@ export default {
         '@checkdigit/no-uuid': 'error',
         '@checkdigit/require-strict-assert': 'error',
         '@checkdigit/no-wallaby-comment': 'error',
+        '@checkdigit/no-side-effects': 'error',
         '@checkdigit/regular-expression-comment': 'error',
         '@checkdigit/require-assert-predicate-rejects-throws': 'error',
         '@checkdigit/object-literal-response': 'error',
@@ -46,6 +49,7 @@ export default {
         '@checkdigit/no-uuid': 'error',
         '@checkdigit/require-strict-assert': 'error',
         '@checkdigit/no-wallaby-comment': 'off',
+        '@checkdigit/no-side-effects': 'error',
         '@checkdigit/regular-expression-comment': 'error',
         '@checkdigit/require-assert-predicate-rejects-throws': 'error',
         '@checkdigit/object-literal-response': 'error',
