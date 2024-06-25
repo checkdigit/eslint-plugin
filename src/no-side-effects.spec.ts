@@ -124,12 +124,11 @@ describe('no-side-effects', () => {
                 import http from 'node:http';
                 import debug from 'debug';
                 
-                import { getConfiguration, logger, root, service } from '@checkdigit/serve-runtime';
+                import { getConfiguration } from 'test';
                 
-                const log = debug('mngs:local');
+                const log = debug('test:local');
                 
                 const unresolvedConfiguration = getConfiguration(root());
-                // @ts-expect-error, workaround according to the executable loading mechanism change in the latest serve-runtime
                 unresolvedConfiguration.api.root = 'build';
                 const configuration = await service(unresolvedConfiguration);
                 
