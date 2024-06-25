@@ -36,7 +36,7 @@ export default {
         '@checkdigit/no-uuid': 'error',
         '@checkdigit/require-strict-assert': 'error',
         '@checkdigit/no-wallaby-comment': 'error',
-        '@checkdigit/no-side-effects': 'error',
+        '@checkdigit/no-side-effects': ['error', { excludedIdentifiers: ['assert', 'debug', 'log'] }],
         '@checkdigit/regular-expression-comment': 'error',
         '@checkdigit/require-assert-predicate-rejects-throws': 'error',
         '@checkdigit/object-literal-response': 'error',

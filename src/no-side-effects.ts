@@ -9,10 +9,8 @@
 import type { Node } from 'estree';
 import type { Rule } from 'eslint';
 
-const EXCLUDED_IDENTIFIERS = ['assert', 'debug', 'log'];
-
-function isTestFile(fileName: string): boolean {
-  return fileName.endsWith('spec.ts') || fileName.endsWith('test.ts') || fileName.endsWith('test.js');
+interface RuleOptions {
+  excludedIdentifiers: string[];
 }
 
 function isAwaitExpression(statement: Node): boolean {
@@ -29,12 +27,12 @@ function isCallExpressionCalleeMemberExpression(statement: Node): boolean {
   );
 }
 
-function isCallExpressionCalleeIdentifier(statement: Node): boolean {
+function isCallExpressionCalleeIdentifier(statement: Node, excludedIdentifiers: string[]): boolean {
   return (
     statement.type === 'ExpressionStatement' &&
     statement.expression.type === 'CallExpression' &&
     statement.expression.callee.type === 'Identifier' &&
-    !EXCLUDED_IDENTIFIERS.includes(statement.expression.callee.name)
+    !excludedIdentifiers.includes(statement.expression.callee.name)
   );
 }
 
@@ -50,7 +48,7 @@ function isVariableDeclarationAwaitExpression(statement: Node): boolean {
   );
 }
 
-function isVariableDeclarationIdentifier(statement: Node): boolean {
+function isVariableDeclarationIdentifier(statement: Node, excludedIdentifiers: string[]): boolean {
   return (
     statement.type === 'VariableDeclaration' &&
     statement.declarations.length > 0 &&
@@ -60,7 +58,7 @@ function isVariableDeclarationIdentifier(statement: Node): boolean {
     statement.declarations[0].init !== null &&
     statement.declarations[0].init.type === 'CallExpression' &&
     statement.declarations[0].init.callee.type === 'Identifier' &&
-    !EXCLUDED_IDENTIFIERS.includes(statement.declarations[0].init.callee.name)
+    !excludedIdentifiers.includes(statement.declarations[0].init.callee.name)
   );
 }
 
@@ -87,21 +85,32 @@ export default {
       description: 'Ensure no side effects can occur at the main module-level',
       url: 'https://github.com/checkdigit/eslint-plugin',
     },
+    schema: [
+      {
+        type: 'object',
+        properties: {
+          excludedIdentifiers: {
+            type: 'array',
+            items: { type: 'string' },
+          },
+        },
+        additionalProperties: false,
+      },
+    ],
   },
   create(context) {
+    const options: RuleOptions = (context.options[0] ?? {}) as RuleOptions;
+    const excludedIdentifiers = options.excludedIdentifiers.length > 0 ? options.excludedIdentifiers : [];
+
     return {
       Program(node) {
-        const fileName = context.filename.split('src/')[1] ?? context.filename;
-        if (isTestFile(fileName)) {
-          return;
-        }
         node.body.forEach((statement) => {
           if (
             isAwaitExpression(statement) ||
             isCallExpressionCalleeMemberExpression(statement) ||
-            isCallExpressionCalleeIdentifier(statement) ||
+            isCallExpressionCalleeIdentifier(statement, excludedIdentifiers) ||
             isVariableDeclarationAwaitExpression(statement) ||
-            isVariableDeclarationIdentifier(statement) ||
+            isVariableDeclarationIdentifier(statement, excludedIdentifiers) ||
             isVariableDeclarationMemberExpression(statement)
           ) {
             context.report({

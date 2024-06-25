@@ -47,40 +47,7 @@ describe('no-side-effects', () => {
                 return prefix;
               }`,
         filename: 'src/no-side-effects.ts',
-      },
-      {
-        code: `import { strict as assert } from 'node:assert';
-               import debug from 'debug';
-               import Koa from 'koa';
-               import { v4 as uuid } from 'uuid';
-               import Router from '@koa/router';
-               import { StatusCodes } from 'http-status-codes';    
-               
-               const log = debug('report:event');
-              
-               const reportName = 'TEST_REPORT';
-
-               type records = Record;
-               
-               interface Report {
-                  reportName: string;
-                  report: [];
-               }
-               
-               function createS3ObjectKey(
-                from: string,
-                to: string,
-                bin: string,
-                reportId: string,
-                createdAt = new Date().toISOString(),
-              ): string {
-                // YYYY/MM/DD/HH
-                const prefix = formatUtc(createdAt, 'yyyy/MM/dd/HH');
-                return prefix;
-              }
-              
-              const jsonSchemaValidator = new Ajv({ allErrors: true }).compile(schema);`,
-        filename: 'src/side-effects.spec.ts',
+        options: [{ excludedIdentifiers: ['assert', 'debug', 'log'] }],
       },
     ],
     invalid: [
@@ -118,6 +85,7 @@ describe('no-side-effects', () => {
               const jsonSchemaValidator = new Ajv({ allErrors: true }).compile(schema);`,
         errors: [{ message: 'No side effects can occur at the main module-level' }],
         filename: 'src/side-effects.ts',
+        options: [{ excludedIdentifiers: ['assert', 'debug', 'log'] }],
       },
       {
         code: `import { strict as assert } from 'node:assert';
@@ -154,6 +122,7 @@ describe('no-side-effects', () => {
           { message: 'No side effects can occur at the main module-level' },
         ],
         filename: 'local.ts',
+        options: [{ excludedIdentifiers: ['assert', 'debug', 'log'] }],
       },
     ],
   });
