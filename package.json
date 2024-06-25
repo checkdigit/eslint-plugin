@@ -36,7 +36,7 @@
   "devDependencies": {
     "@checkdigit/jest-config": "^6.0.2",
     "@checkdigit/prettier-config": "^5.4.1",
-    "@checkdigit/typescript-config": "^7.0.1",
+    "@checkdigit/typescript-config": "^6.0.0",
     "@types/eslint": "^8.56.10",
     "@typescript-eslint/eslint-plugin": "^7.14.1",
     "@typescript-eslint/parser": "^7.14.1",
