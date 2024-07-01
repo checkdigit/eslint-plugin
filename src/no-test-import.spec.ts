@@ -6,19 +6,17 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import rule, { NO_TEST_IMPORT } from './no-test-import';
+import rule, { NO_TEST_IMPORT, type NoTestImportRuleOptions } from './no-test-import';
 import { RuleTester } from 'eslint';
 import { describe } from '@jest/globals';
 
 describe('no-test-import', () => {
-  const ruleTester = new RuleTester({
+  new RuleTester({
     parserOptions: {
       ecmaVersion: 2020,
       sourceType: 'module',
     },
-  });
-
-  ruleTester.run('no-test-import-in-production-code', rule, {
+  }).run('no-test-import with default configuration', rule, {
     valid: [
       {
         filename: 'src/api/v1/message.ts',
@@ -76,6 +74,39 @@ describe('no-test-import', () => {
       {
         filename: 'src/api/v1/message.ts',
         code: `import util from './util.test.ts';`,
+        errors: [
+          {
+            messageId: NO_TEST_IMPORT,
+          },
+        ],
+      },
+    ],
+  });
+
+  const overwrittenConfiguration: NoTestImportRuleOptions = { testFilePattern: '\\.test\\.xyz$' };
+  new RuleTester({
+    parserOptions: {
+      ecmaVersion: 2020,
+      sourceType: 'module',
+    },
+  }).run('no-test-import with overwritten configuration', rule, {
+    valid: [
+      {
+        filename: 'src/api/v1/message.ts',
+        code: `import util from './util.test';`,
+        options: [overwrittenConfiguration],
+      },
+      {
+        filename: 'src/api/v1/message.ts',
+        code: `import util from './util.spec';`,
+        options: [overwrittenConfiguration],
+      },
+    ],
+    invalid: [
+      {
+        filename: 'src/api/v1/message.ts',
+        code: `import util from './util.test.xyz';`,
+        options: [overwrittenConfiguration],
         errors: [
           {
             messageId: NO_TEST_IMPORT,
