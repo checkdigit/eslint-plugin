@@ -8,7 +8,7 @@
 
 import filePathComment from './file-path-comment';
 import noCardNumbers from './no-card-numbers';
-import noTestImportInProductionCode from './no-test-import-in-production-code';
+import noTestImport from './no-test-import';
 import noUuid from './no-uuid';
 import noWallabyComment from './no-wallaby-comment';
 import objectLiteralResponse from './object-literal-response';
@@ -22,7 +22,7 @@ export default {
     'no-card-numbers': noCardNumbers,
     'no-uuid': noUuid,
     'require-strict-assert': requireStrictAssert,
-    'no-test-import-in-production-code': noTestImportInProductionCode,
+    'no-test-import': noTestImport,
     'no-wallaby-comment': noWallabyComment,
     'regular-expression-comment': regexComment,
     'require-assert-predicate-rejects-throws': requireAssertPredicateRejectsThrows,
@@ -38,8 +38,8 @@ export default {
         '@checkdigit/no-wallaby-comment': 'error',
         '@checkdigit/regular-expression-comment': 'error',
         '@checkdigit/require-assert-predicate-rejects-throws': 'error',
-        '@checkdigit/object-literal-response': 'error',
-        '@checkdigit/no-test-import-in-production-code': 'error',
+        '@checkdigit/object-literal-response': ['error', { abc: true }],
+        '@checkdigit/no-test-import': 'error',
       },
     },
     recommended: {
@@ -52,7 +52,7 @@ export default {
         '@checkdigit/regular-expression-comment': 'error',
         '@checkdigit/require-assert-predicate-rejects-throws': 'error',
         '@checkdigit/object-literal-response': 'error',
-        '@checkdigit/no-test-import-in-production-code': 'error',
+        '@checkdigit/no-test-import': 'error',
       },
     },
   },
