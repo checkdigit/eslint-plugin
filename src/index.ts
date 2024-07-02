@@ -9,6 +9,7 @@
 import filePathComment from './file-path-comment';
 import noCardNumbers from './no-card-numbers';
 import noSideEffects from './no-side-effects';
+import noTestImport from './no-test-import';
 import noUuid from './no-uuid';
 import noWallabyComment from './no-wallaby-comment';
 import objectLiteralResponse from './object-literal-response';
@@ -22,6 +23,7 @@ export default {
     'no-card-numbers': noCardNumbers,
     'no-uuid': noUuid,
     'require-strict-assert': requireStrictAssert,
+    'no-test-import': noTestImport,
     'no-wallaby-comment': noWallabyComment,
     'no-side-effects': noSideEffects,
     'regular-expression-comment': regexComment,
@@ -40,6 +42,7 @@ export default {
         '@checkdigit/regular-expression-comment': 'error',
         '@checkdigit/require-assert-predicate-rejects-throws': 'error',
         '@checkdigit/object-literal-response': 'error',
+        '@checkdigit/no-test-import': 'off',
       },
     },
     recommended: {
@@ -53,6 +56,7 @@ export default {
         '@checkdigit/regular-expression-comment': 'error',
         '@checkdigit/require-assert-predicate-rejects-throws': 'error',
         '@checkdigit/object-literal-response': 'error',
+        '@checkdigit/no-test-import': 'off',
       },
     },
   },
