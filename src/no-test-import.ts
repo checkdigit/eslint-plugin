@@ -15,8 +15,8 @@ import type { Rule } from 'eslint';
 export interface NoTestImportRuleOptions {
   testFilePattern?: string;
 }
+const DEFAULT_OPTIONS = { testFilePattern: '\\.(test|spec)(\\.\\w+)?$' };
 export const NO_TEST_IMPORT = 'NO_TEST_IMPORT';
-const DEFAULT_TEST_FILE_PATTERN = '\\.(test|spec)(\\.\\w+)?$';
 
 export default {
   meta: {
@@ -26,14 +26,25 @@ export default {
         'Importing test files is not allowed since it might lead to problems if the test files are removed from the build',
       url: 'https://github.com/checkdigit/eslint-plugin',
     },
+    schema: [
+      {
+        type: 'object',
+        properties: {
+          testFilePattern: {
+            description: 'Regular expression pattern to match test files',
+            type: 'string',
+          },
+        },
+        additionalProperties: false,
+      },
+    ],
     messages: {
       [NO_TEST_IMPORT]: `Importing test file "{{ importingFileName }}" matching pattern "{{ testFilePattern }}" is not allowed from: "{{ sourceFileName }}"`,
     },
   },
   create(context) {
-    const options = (context.options[0] ?? {}) as NoTestImportRuleOptions;
-    const testFilePattern = options.testFilePattern ?? DEFAULT_TEST_FILE_PATTERN;
-    const testFileRegexp = new RegExp(testFilePattern, 'u');
+    const options = { ...DEFAULT_OPTIONS, ...(context.options[0] as NoTestImportRuleOptions) };
+    const testFileRegexp = new RegExp(options.testFilePattern, 'u');
 
     return {
       ImportDeclaration(node) {
@@ -44,7 +55,7 @@ export default {
             data: {
               sourceFileName: context.filename,
               importingFileName: node.source.value,
-              testFilePattern,
+              testFilePattern: options.testFilePattern,
             },
           });
         }
