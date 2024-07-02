@@ -8,6 +8,10 @@ import type { Rule } from 'eslint';
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
+/**
+ *  this rule should be turned on with overrides for test files (e.g. *.test.ts, *.spec.ts) only
+ */
+
 export interface NoTestImportRuleOptions {
   testFilePattern?: string;
 }
