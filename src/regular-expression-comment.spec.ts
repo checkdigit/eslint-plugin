@@ -88,7 +88,10 @@ const testRegex1 = /[1-9]\\d* test records processed between.*UNMATCHED: 0/gmu;
 const testRegex2 = /successfully processed test1\\.test-1\\.test-file\\.test.*XYZ\\.XY\\.X123/gmu;
 `;
 
-const INVALID_TEST_6 = `const testRegex1 = /Transferred file sftp:.*test-xy-z\\.testClients\\.xyz.*XYZ098/gmu;`;
+const INVALID_TEST_6 = `
+const testRegex1 = /Transferred file sftp:.*test-xy-z\\.testClients\\.xyz.*XYZ098/gmu;
+const testRegex2 = /created test file for the new file TEST\\.123456789\\./gmu;
+`;
 
 const INVALID_TEST_7 = `const testRegex1 = /error processing x:test\\.test-xyz\\.test\\.xyz\\.abc/gmu;`;
 
@@ -183,6 +186,9 @@ describe('regular-expression-comment', () => {
       {
         code: INVALID_TEST_6,
         errors: [
+          {
+            message: 'Missing comment for regular expression',
+          },
           {
             message: 'Missing comment for regular expression',
           },
