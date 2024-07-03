@@ -27,7 +27,7 @@ export default {
           const previousLineComment = lines[previousLine - 1];
 
           // Check if the regular expression contains any simple text
-          const isSimpleTextPattern = /^[\w\s.,]*$/gu.test(node.value.source);
+          const isSimpleTextPattern = /^[\w\s.,/]*$/gu.test(node.value.source);
 
           if (!isSimpleTextPattern) {
             const regularExpressionComment = comments.find((comment) => {
