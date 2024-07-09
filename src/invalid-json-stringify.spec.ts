@@ -21,25 +21,54 @@ describe(ruleId, () => {
     invalid: [
       {
         code: `JSON.stringify(error);`,
-        output: `String(error);`,
-        errors: 1,
+        errors: [
+          {
+            suggestions: [
+              {
+                output: 'String(error);',
+              },
+            ],
+          },
+        ],
       },
       {
         code: `JSON.stringify(error, null, 2);`,
-        output: `String(error);`,
-        errors: 1,
+        errors: [
+          {
+            suggestions: [
+              {
+                output: 'String(error);',
+              },
+            ],
+          },
+        ],
       },
       {
         // eslint-disable-next-line no-template-curly-in-string
         code: 'console.log(`got an error: ${JSON.stringify(error)}`);',
-        // eslint-disable-next-line no-template-curly-in-string
-        output: 'console.log(`got an error: ${String(error)}`);',
-        errors: 1,
+        errors: [
+          {
+            suggestions: [
+              {
+                // eslint-disable-next-line no-template-curly-in-string
+                output: 'console.log(`got an error: ${String(error)}`);',
+              },
+            ],
+          },
+        ],
       },
       {
         code: `JSON.stringify(responseError);`,
-        output: `String(responseError);`,
-        errors: 1,
+        errors: [
+          {
+            suggestions: [
+              {
+                // eslint-disable-next-line no-template-curly-in-string
+                output: 'String(responseError);',
+              },
+            ],
+          },
+        ],
       },
     ],
   });

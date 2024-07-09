@@ -35,6 +35,7 @@ export default {
       [INVALID_JSON_STRINGIFY]: `Serializing paremeter "{{ parameterName }}" with JSON.stringify can potentially lose information.`,
     },
     fixable: 'code',
+    hasSuggestions: true,
   },
   create(context) {
     const options = (context.options[0] ?? DEFAULT_OPTIONS) as string[];
@@ -59,9 +60,14 @@ export default {
                   data: {
                     parameterName: argument.name,
                   },
-                  fix(fixer) {
-                    return fixer.replaceText(node, `String(${argument.name})`);
-                  },
+                  suggest: [
+                    {
+                      desc: `Replace JSON.stringify(${argument.name}) with String(${argument.name}).`,
+                      fix(fixer) {
+                        return fixer.replaceText(node, `String(${argument.name})`);
+                      },
+                    },
+                  ],
                 });
                 return true;
               }
