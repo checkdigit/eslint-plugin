@@ -32,7 +32,7 @@ export default {
       },
     ],
     messages: {
-      [INVALID_JSON_STRINGIFY]: `Serializing paremeter "{{ parameterName }}" with JSON.stringify can potentially lose information.`,
+      [INVALID_JSON_STRINGIFY]: `Serializing variable "{{ parameterName }}" with JSON.stringify() can potentially lose information. Use String() instead.`,
     },
     fixable: 'code',
     hasSuggestions: true,
@@ -62,7 +62,10 @@ export default {
                   },
                   suggest: [
                     {
-                      desc: `Replace JSON.stringify(${argument.name}) with String(${argument.name}).`,
+                      messageId: INVALID_JSON_STRINGIFY,
+                      data: {
+                        parameterName: argument.name,
+                      },
                       fix(fixer) {
                         return fixer.replaceText(node, `String(${argument.name})`);
                       },
