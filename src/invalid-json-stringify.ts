@@ -10,6 +10,7 @@ import getDocumentationUrl from './get-documentation-url';
  */
 
 export const INVALID_JSON_STRINGIFY = 'INVALID_JSON_STRINGIFY';
+const ruleId = 'invalid-json-stringify';
 const DEFAULT_OPTIONS = ['error|.*Error'];
 
 export default {
@@ -18,7 +19,7 @@ export default {
     docs: {
       description:
         'Serializing objects with JSON.stringify() can lose information for certain data payload (e.g. Error). This rule disallows serializing such objects by matching the name of the first parameter passed to JSON.stringify() using Regexp pattern.',
-      url: getDocumentationUrl(import.meta.url),
+      url: getDocumentationUrl(ruleId),
     },
     schema: [
       {
