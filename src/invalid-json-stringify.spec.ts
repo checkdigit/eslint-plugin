@@ -6,61 +6,40 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import rule, { INVALID_JSON_STRINGIFY } from './invalid-json-stringify';
+import rule, { ruleId } from './invalid-json-stringify';
 import { RuleTester } from 'eslint';
 import { describe } from '@jest/globals';
 
-describe('invalid-json-stringify', () => {
+describe(ruleId, () => {
   new RuleTester({
     parserOptions: {
       ecmaVersion: 2020,
       sourceType: 'module',
     },
-  }).run('invalid-json-stringify', rule, {
-    valid: [
-      {
-        code: `console.log(error);`,
-      },
-      {
-        code: `JSON.stringify(body);`,
-      },
-      {
-        code: `JSON.parse(error);`,
-      },
-    ],
+  }).run(ruleId, rule, {
+    valid: [`console.log(error);`, `JSON.stringify(body);`, `JSON.parse(error);`],
     invalid: [
       {
         code: `JSON.stringify(error);`,
-        errors: [
-          {
-            messageId: INVALID_JSON_STRINGIFY,
-          },
-        ],
+        output: `String(error);`,
+        errors: 1,
       },
       {
         code: `JSON.stringify(error, null, 2);`,
-        errors: [
-          {
-            messageId: INVALID_JSON_STRINGIFY,
-          },
-        ],
+        output: `String(error);`,
+        errors: 1,
       },
       {
         // eslint-disable-next-line no-template-curly-in-string
         code: 'console.log(`got an error: ${JSON.stringify(error)}`);',
-        errors: [
-          {
-            messageId: INVALID_JSON_STRINGIFY,
-          },
-        ],
+        // eslint-disable-next-line no-template-curly-in-string
+        output: 'console.log(`got an error: ${String(error)}`);',
+        errors: 1,
       },
       {
         code: `JSON.stringify(responseError);`,
-        errors: [
-          {
-            messageId: INVALID_JSON_STRINGIFY,
-          },
-        ],
+        output: `String(responseError);`,
+        errors: 1,
       },
     ],
   });

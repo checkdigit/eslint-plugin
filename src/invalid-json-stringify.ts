@@ -9,8 +9,8 @@ import getDocumentationUrl from './get-documentation-url';
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-export const INVALID_JSON_STRINGIFY = 'INVALID_JSON_STRINGIFY';
-const ruleId = 'invalid-json-stringify';
+export const ruleId = 'invalid-json-stringify';
+const INVALID_JSON_STRINGIFY = 'INVALID_JSON_STRINGIFY';
 const DEFAULT_OPTIONS = ['error|.*Error'];
 
 export default {
@@ -34,6 +34,7 @@ export default {
     messages: {
       [INVALID_JSON_STRINGIFY]: `Serializing paremeter "{{ parameterName }}" with JSON.stringify can potentially lose information.`,
     },
+    fixable: 'code',
   },
   create(context) {
     const options = (context.options[0] ?? DEFAULT_OPTIONS) as string[];
@@ -57,6 +58,9 @@ export default {
                   messageId: INVALID_JSON_STRINGIFY,
                   data: {
                     parameterName: argument.name,
+                  },
+                  fix(fixer) {
+                    return fixer.replaceText(node, `String(${argument.name})`);
                   },
                 });
                 return true;
