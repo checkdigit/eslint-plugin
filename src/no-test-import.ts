@@ -9,7 +9,7 @@ import type { Rule } from 'eslint';
  */
 
 /**
- *  this rule should be turned on with overrides for test files (e.g. *.test.ts, *.spec.ts) only
+ *  this rule should be turned off for test files (e.g. *.test.ts, *.spec.ts)
  */
 
 export interface NoTestImportRuleOptions {
