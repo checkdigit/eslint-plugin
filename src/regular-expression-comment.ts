@@ -25,6 +25,12 @@ export default {
           const regularExpressionLine = node.loc.start.line;
           const previousLine = regularExpressionLine - 1;
           const previousLineComment = lines[previousLine - 1];
+
+          // Check if the regular expression contains any simple text
+          const isSimpleTextPattern = /^[0-9:./,\sa-zA-Z-]*$/gu.test(node.value.source);
+          if (isSimpleTextPattern) {
+            return;
+          }
           const regularExpressionComment = comments.find((comment) => {
             if (!comment.loc) {
               return false;

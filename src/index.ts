@@ -6,6 +6,7 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
+import invalidJsonStringify, { ruleId as invalidJsonStringifyRuleId } from './invalid-json-stringify';
 import filePathComment from './file-path-comment';
 import noCardNumbers from './no-card-numbers';
 import noSideEffects from './no-side-effects';
@@ -29,6 +30,7 @@ export default {
     'regular-expression-comment': regexComment,
     'require-assert-predicate-rejects-throws': requireAssertPredicateRejectsThrows,
     'object-literal-response': objectLiteralResponse,
+    [invalidJsonStringifyRuleId]: invalidJsonStringify,
   },
   configs: {
     all: {
@@ -42,7 +44,8 @@ export default {
         '@checkdigit/regular-expression-comment': 'error',
         '@checkdigit/require-assert-predicate-rejects-throws': 'error',
         '@checkdigit/object-literal-response': 'error',
-        '@checkdigit/no-test-import': 'off',
+        '@checkdigit/no-test-import': 'error',
+        [`@checkdigit/${invalidJsonStringifyRuleId}`]: 'error',
       },
     },
     recommended: {
@@ -56,7 +59,8 @@ export default {
         '@checkdigit/regular-expression-comment': 'error',
         '@checkdigit/require-assert-predicate-rejects-throws': 'error',
         '@checkdigit/object-literal-response': 'error',
-        '@checkdigit/no-test-import': 'off',
+        '@checkdigit/no-test-import': 'error',
+        [`@checkdigit/${invalidJsonStringifyRuleId}`]: 'error',
       },
     },
   },
