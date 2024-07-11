@@ -1,8 +1,22 @@
 {
   "name": "@checkdigit/eslint-plugin",
-  "version": "6.4.0",
+  "version": "6.5.0",
   "description": "Check Digit eslint plugins",
-  "prettier": "@checkdigit/prettier-config",
+  "keywords": [
+    "eslint",
+    "eslintplugin"
+  ],
+  "homepage": "https://github.com/checkdigit/eslint-plugin#readme",
+  "bugs": {
+    "url": "https://github.com/checkdigit/eslint-plugin/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/checkdigit/eslint-plugin.git"
+  },
+  "license": "MIT",
+  "author": "Check Digit, LLC",
+  "sideEffects": false,
   "type": "module",
   "exports": {
     ".": {
@@ -12,27 +26,41 @@
       "default": "./dist-mjs/index.mjs"
     }
   },
-  "keywords": [
-    "eslint",
-    "eslintplugin"
+  "files": [
+    "src",
+    "dist-types",
+    "dist-cjs",
+    "dist-mjs",
+    "!src/**/*.test.ts",
+    "!src/**/*.spec.ts",
+    "!dist-types/**/*.test.d.ts",
+    "!dist-types/**/*.spec.d.ts",
+    "!dist-cjs/**/*.test.cjs",
+    "!dist-cjs/**/*.spec.cjs",
+    "!dist-mjs/**/*.test.mjs",
+    "!dist-mjs/**/*.spec.mjs",
+    "SECURITY.md"
   ],
-  "engines": {
-    "node": ">=20.13"
+  "scripts": {
+    "build:dist-cjs": "rimraf dist-cjs && npx builder --type=commonjs --sourceMap --entryPoint=index.ts --outDir=dist-cjs --outFile=index.cjs && echo \"module.exports = module.exports.default;\" >> dist-cjs/index.cjs && node dist-cjs/index.cjs",
+    "build:dist-mjs": "rimraf dist-mjs && npx builder --type=module --sourceMap --outDir=dist-mjs && node dist-mjs/index.mjs",
+    "build:dist-types": "rimraf dist-types && npx builder --type=types --outDir=dist-types",
+    "ci:compile": "tsc --noEmit",
+    "ci:coverage": "NODE_OPTIONS=\"--disable-warning ExperimentalWarning --experimental-vm-modules\" jest --coverage=true",
+    "ci:lint": "npm run lint",
+    "ci:style": "npm run prettier",
+    "ci:test": "NODE_OPTIONS=\"--disable-warning ExperimentalWarning --experimental-vm-modules\" jest --coverage=false",
+    "lint": "eslint --max-warnings 0 --ignore-path .gitignore .",
+    "lint:fix": "eslint --ignore-path .gitignore . --fix",
+    "prepublishOnly": "npm run build:dist-types && npm run build:dist-cjs && npm run build:dist-mjs",
+    "prettier": "prettier --ignore-path .gitignore --list-different .",
+    "prettier:fix": "prettier --ignore-path .gitignore --write .",
+    "test": "npm run ci:compile && npm run ci:test && npm run ci:lint && npm run ci:style"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/checkdigit/eslint-plugin.git"
+  "prettier": "@checkdigit/prettier-config",
+  "jest": {
+    "preset": "@checkdigit/jest-config"
   },
-  "author": "Check Digit, LLC",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/checkdigit/eslint-plugin/issues"
-  },
-  "homepage": "https://github.com/checkdigit/eslint-plugin#readme",
-  "peerDependencies": {
-    "eslint": ">=8 <9"
-  },
-  "sideEffects": false,
   "devDependencies": {
     "@checkdigit/jest-config": "^6.0.2",
     "@checkdigit/prettier-config": "^5.4.1",
@@ -49,38 +77,10 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-sonarjs": "^0.24.0"
   },
-  "scripts": {
-    "prepublishOnly": "npm run build:dist-types && npm run build:dist-cjs && npm run build:dist-mjs",
-    "build:dist-types": "rimraf dist-types && npx builder --type=types --outDir=dist-types",
-    "build:dist-cjs": "rimraf dist-cjs && npx builder --type=commonjs --sourceMap --entryPoint=index.ts --outDir=dist-cjs --outFile=index.cjs && echo \"module.exports = module.exports.default;\" >> dist-cjs/index.cjs && node dist-cjs/index.cjs",
-    "build:dist-mjs": "rimraf dist-mjs && npx builder --type=module --sourceMap --outDir=dist-mjs && node dist-mjs/index.mjs",
-    "prettier": "prettier --ignore-path .gitignore --list-different .",
-    "prettier:fix": "prettier --ignore-path .gitignore --write .",
-    "lint": "eslint --max-warnings 0 --ignore-path .gitignore .",
-    "lint:fix": "eslint --ignore-path .gitignore . --fix",
-    "test": "npm run ci:compile && npm run ci:test && npm run ci:lint && npm run ci:style",
-    "ci:compile": "tsc --noEmit",
-    "ci:test": "NODE_OPTIONS=\"--disable-warning ExperimentalWarning --experimental-vm-modules\" jest --coverage=false",
-    "ci:coverage": "NODE_OPTIONS=\"--disable-warning ExperimentalWarning --experimental-vm-modules\" jest --coverage=true",
-    "ci:lint": "npm run lint",
-    "ci:style": "npm run prettier"
+  "peerDependencies": {
+    "eslint": ">=8 <9"
   },
-  "jest": {
-    "preset": "@checkdigit/jest-config"
-  },
-  "files": [
-    "src",
-    "dist-types",
-    "dist-cjs",
-    "dist-mjs",
-    "!src/**/*.test.ts",
-    "!src/**/*.spec.ts",
-    "!dist-types/**/*.test.d.ts",
-    "!dist-types/**/*.spec.d.ts",
-    "!dist-cjs/**/*.test.cjs",
-    "!dist-cjs/**/*.spec.cjs",
-    "!dist-mjs/**/*.test.mjs",
-    "!dist-mjs/**/*.spec.mjs",
-    "SECURITY.md"
-  ]
+  "engines": {
+    "node": ">=20.13"
+  }
 }

@@ -17,13 +17,13 @@ function isAwaitExpression(statement: Node): boolean {
   return statement.type === 'ExpressionStatement' && statement.expression.type === 'AwaitExpression';
 }
 
-function isCallExpressionCalleeMemberExpression(statement: Node): boolean {
+function isCallExpressionCalleeMemberExpression(statement: Node, excludedIdentifiers: string[]): boolean {
   return (
     statement.type === 'ExpressionStatement' &&
     statement.expression.type === 'CallExpression' &&
     statement.expression.callee.type === 'MemberExpression' &&
     statement.expression.callee.object.type === 'Identifier' &&
-    statement.expression.callee.object.name !== 'assert'
+    !excludedIdentifiers.includes(statement.expression.callee.object.name)
   );
 }
 
@@ -107,7 +107,7 @@ export default {
         node.body.forEach((statement) => {
           if (
             isAwaitExpression(statement) ||
-            isCallExpressionCalleeMemberExpression(statement) ||
+            isCallExpressionCalleeMemberExpression(statement, excludedIdentifiers) ||
             isCallExpressionCalleeIdentifier(statement, excludedIdentifiers) ||
             isVariableDeclarationAwaitExpression(statement) ||
             isVariableDeclarationIdentifier(statement, excludedIdentifiers) ||
