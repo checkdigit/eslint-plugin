@@ -1,6 +1,6 @@
 {
   "name": "@checkdigit/eslint-plugin",
-  "version": "6.4.0",
+  "version": "6.5.0",
   "description": "Check Digit eslint plugins",
   "keywords": [
     "eslint",
@@ -68,6 +68,7 @@
     "@types/eslint": "^8.56.10",
     "@typescript-eslint/eslint-plugin": "^7.16.0",
     "@typescript-eslint/parser": "^7.16.0",
+    "@typescript-eslint/rule-tester": "^7.13.1",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-eslint-plugin": "^6.2.0",
     "eslint-plugin-import": "^2.29.1",
