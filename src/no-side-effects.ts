@@ -13,10 +13,12 @@ interface RuleOptions {
   excludedIdentifiers: string[];
 }
 
+// To check if it is an await expression i.e await someFunction()
 function isAwaitExpression(statement: Node): boolean {
   return statement.type === 'ExpressionStatement' && statement.expression.type === 'AwaitExpression';
 }
 
+// To check if it is a call expression with a member expression i.e module.method()
 function isCallExpressionCalleeMemberExpression(statement: Node, excludedIdentifiers: string[]): boolean {
   return (
     statement.type === 'ExpressionStatement' &&
@@ -27,54 +29,48 @@ function isCallExpressionCalleeMemberExpression(statement: Node, excludedIdentif
   );
 }
 
-function isCallExpressionCalleeIdentifier(statement: Node, excludedIdentifiers: string[]): boolean {
+// To check if it is a variable declaration with an await expression i.e  const configuration = await someFunction();
+function isVariableDeclarationAwaitExpression(node: Node): boolean {
   return (
-    statement.type === 'ExpressionStatement' &&
-    statement.expression.type === 'CallExpression' &&
-    statement.expression.callee.type === 'Identifier' &&
-    !excludedIdentifiers.includes(statement.expression.callee.name)
+    node.type === 'VariableDeclaration' &&
+    node.declarations.length > 0 &&
+    node.declarations[0]?.id !== undefined &&
+    node.declarations[0].id.type === 'Identifier' &&
+    node.declarations[0].init !== undefined &&
+    node.declarations[0].init !== null &&
+    node.declarations[0].init.type === 'AwaitExpression'
   );
 }
 
-function isVariableDeclarationAwaitExpression(statement: Node): boolean {
+// To check if it is a variable declaration with an identifier i.e function()
+function isVariableDeclarationIdentifier(node: Node, excludedIdentifiers: string[]): boolean {
   return (
-    statement.type === 'VariableDeclaration' &&
-    statement.declarations.length > 0 &&
-    statement.declarations[0]?.id !== undefined &&
-    statement.declarations[0].id.type === 'Identifier' &&
-    statement.declarations[0].init !== undefined &&
-    statement.declarations[0].init !== null &&
-    statement.declarations[0].init.type === 'AwaitExpression'
+    node.type === 'VariableDeclaration' &&
+    node.declarations.length > 0 &&
+    node.declarations[0]?.id !== undefined &&
+    node.declarations[0].id.type === 'Identifier' &&
+    node.declarations[0].init !== undefined &&
+    node.declarations[0].init !== null &&
+    node.declarations[0].init.type === 'CallExpression' &&
+    node.declarations[0].init.callee.type === 'Identifier' &&
+    !excludedIdentifiers.includes(node.declarations[0].init.callee.name)
   );
 }
 
-function isVariableDeclarationIdentifier(statement: Node, excludedIdentifiers: string[]): boolean {
+// To check if it is a variable declaration with a member expression i.e const test = module.method()
+function isVariableDeclarationMemberExpression(node: Node): boolean {
   return (
-    statement.type === 'VariableDeclaration' &&
-    statement.declarations.length > 0 &&
-    statement.declarations[0]?.id !== undefined &&
-    statement.declarations[0].id.type === 'Identifier' &&
-    statement.declarations[0].init !== undefined &&
-    statement.declarations[0].init !== null &&
-    statement.declarations[0].init.type === 'CallExpression' &&
-    statement.declarations[0].init.callee.type === 'Identifier' &&
-    !excludedIdentifiers.includes(statement.declarations[0].init.callee.name)
-  );
-}
-
-function isVariableDeclarationMemberExpression(statement: Node): boolean {
-  return (
-    statement.type === 'VariableDeclaration' &&
-    statement.declarations.length > 0 &&
-    statement.declarations[0]?.id !== undefined &&
-    statement.declarations[0].id.type === 'Identifier' &&
-    statement.declarations[0].init !== undefined &&
-    statement.declarations[0].init !== null &&
-    statement.declarations[0].init.type === 'CallExpression' &&
-    statement.declarations[0].init.callee.type === 'MemberExpression' &&
-    ((statement.declarations[0].init.callee.object.type === 'NewExpression' &&
-      statement.declarations[0].init.callee.object.callee.type === 'Identifier') ||
-      statement.declarations[0].init.callee.object.type === 'Identifier')
+    node.type === 'VariableDeclaration' &&
+    node.declarations.length > 0 &&
+    node.declarations[0]?.id !== undefined &&
+    node.declarations[0].id.type === 'Identifier' &&
+    node.declarations[0].init !== undefined &&
+    node.declarations[0].init !== null &&
+    node.declarations[0].init.type === 'CallExpression' &&
+    node.declarations[0].init.callee.type === 'MemberExpression' &&
+    ((node.declarations[0].init.callee.object.type === 'NewExpression' &&
+      node.declarations[0].init.callee.object.callee.type === 'Identifier') ||
+      node.declarations[0].init.callee.object.type === 'Identifier')
   );
 }
 
@@ -82,7 +78,7 @@ export default {
   meta: {
     type: 'problem',
     docs: {
-      description: 'Ensure no side effects can occur at the main module-level',
+      description: 'Ensure no side effects can occur at the module-level',
       url: 'https://github.com/checkdigit/eslint-plugin',
     },
     schema: [
@@ -108,14 +104,13 @@ export default {
           if (
             isAwaitExpression(statement) ||
             isCallExpressionCalleeMemberExpression(statement, excludedIdentifiers) ||
-            isCallExpressionCalleeIdentifier(statement, excludedIdentifiers) ||
             isVariableDeclarationAwaitExpression(statement) ||
             isVariableDeclarationIdentifier(statement, excludedIdentifiers) ||
             isVariableDeclarationMemberExpression(statement)
           ) {
             context.report({
               node: statement,
-              message: 'No side effects can occur at the main module-level',
+              message: 'No side effects can occur at the module-level',
             });
           }
         });
