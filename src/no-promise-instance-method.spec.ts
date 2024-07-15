@@ -70,6 +70,15 @@ describe(ruleId, () => {
         ],
       },
       {
+        code: `// test external async function call
+        fetch("http://example.com").then(()=>{});`,
+        errors: [
+          {
+            messageId: NO_PROMISE_INSTANCE_METHOD_THEN,
+          },
+        ],
+      },
+      {
         code: `// test '.catch' on async function call
         async function hi() {
           console.log('hi')
