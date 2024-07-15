@@ -11,7 +11,7 @@ import rule, {
   NO_PROMISE_INSTANCE_METHOD_THEN,
   ruleId,
 } from './no-promise-instance-method';
-import { createTester } from './tester.test';
+import createTester from './tester.test';
 import { describe } from '@jest/globals';
 
 describe(ruleId, () => {

@@ -8,7 +8,7 @@
 
 import { RuleTester } from 'eslint';
 
-export function createTester() {
+export default function createTester() {
   return new RuleTester({
     parserOptions: {
       ecmaVersion: 'latest',
