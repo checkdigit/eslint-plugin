@@ -13,6 +13,7 @@ Copyright (c) 2021-2023 [Check Digit, LLC](https://checkdigit.com)
 - `@checkdigit/require-assert-predicate-rejects-throws`
 - `@checkdigit/object-literal-response`
 - `@checkdigit/no-test-import`
+- `@checkdigit/no-promise-instance-method`
 
 ## Configurations
 
