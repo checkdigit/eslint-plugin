@@ -30,7 +30,8 @@ describe(ruleId, () => {
     ],
     invalid: [
       {
-        code: `(new Promise(()=>{})()).then(()=>{});`,
+        code: `// test new Promise instance
+        (new Promise(()=>{})()).then(()=>{});`,
         errors: [
           {
             messageId: NO_PROMISE_INSTANCE_METHOD_THEN,
@@ -38,7 +39,7 @@ describe(ruleId, () => {
         ],
       },
       {
-        code: `
+        code: `// test 'then' on async function call
         async function hi() {
           console.log('hi')
         };
@@ -50,7 +51,7 @@ describe(ruleId, () => {
         ],
       },
       {
-        code: `
+        code: `// test 'then' on reference of Promise
         const result = Promise.resolve();
         result.then(()=>{});`,
         errors: [
@@ -60,7 +61,8 @@ describe(ruleId, () => {
         ],
       },
       {
-        code: `Promise.all([]).then(()=>{});`,
+        code: `// test static method of Promise
+        Promise.all([]).then(()=>{});`,
         errors: [
           {
             messageId: NO_PROMISE_INSTANCE_METHOD_THEN,
@@ -68,7 +70,7 @@ describe(ruleId, () => {
         ],
       },
       {
-        code: `
+        code: `// test '.catch' on async function call
         async function hi() {
           console.log('hi')
         };
@@ -80,7 +82,7 @@ describe(ruleId, () => {
         ],
       },
       {
-        code: `
+        code: `// test '.finally' on async function call
         async function hi() {
           console.log('hi')
         };

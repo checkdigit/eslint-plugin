@@ -19,15 +19,18 @@ function isPromise(context: Rule.RuleContext, node: Node): boolean {
   if (node.type === 'NewExpression' && node.callee.type === 'Identifier' && node.callee.name === 'Promise') {
     return true;
   }
+
   // Promise.resolve(...), Promise.all(...), etc.
   if (node.type === 'MemberExpression' && node.object.type === 'Identifier' && node.object.name === 'Promise') {
     return true;
   }
 
+  // recursively check for async function call
   if (node.type === 'CallExpression') {
     return isPromise(context, node.callee);
   }
 
+  // recursively check for reference of Promise with the variable scope
   if (node.type === 'Identifier') {
     const variableDeclaration = context.getScope().variables.find((variable) => variable.name === node.name);
     if (variableDeclaration) {
