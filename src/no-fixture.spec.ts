@@ -65,7 +65,7 @@ describe(ruleId, () => {
         errors: 1,
       },
       {
-        // put with request body
+        // PUT with request body
         code: `
           it('PUT /card', async () => {
             await fixture.api.put(\`/vault/v2/card/\${uuid()}\`).send(cardCreationData).expect(StatusCodes.BAD_REQUEST);
@@ -83,11 +83,11 @@ describe(ruleId, () => {
         errors: 1,
       },
       {
-        // put with request header
+        // PUT with request header
         code: `
           it('PUT /card/:cardId/block', async () => {
             const noFraudResponse = await fixture.api
-              .put(\`/vault/v2/card/\${originalCard.card.cardId}/block/\${encodeURIComponent('BLOCKED NO FRAUD')}\`)
+              .post(\`/vault/v2/card/\${originalCard.card.cardId}/block/\${encodeURIComponent('BLOCKED NO FRAUD')}\`)
               .set(IF_MATCH_HEADER, originalCard.version)
               .set('abc', originalCard.name)
               .set('x-y-z', '123')
@@ -97,7 +97,7 @@ describe(ruleId, () => {
         output: `
           it('PUT /card/:cardId/block', async () => {
             const noFraudResponse = await fetch(\`\${BASE_PATH}/card/\${originalCard.card.cardId}/block/\${encodeURIComponent('BLOCKED NO FRAUD')}\`, {
-              method: 'PUT',
+              method: 'POST',
               headers: {
                 [IF_MATCH_HEADER]: originalCard.version,
                 abc: originalCard.name,
@@ -105,6 +105,25 @@ describe(ruleId, () => {
               },
             });
             assert.equal(noFraudResponse.status, StatusCodes.NO_CONTENT);
+          });
+        `,
+        errors: 1,
+      },
+      {
+        // POST without request header/body
+        code: `
+          it('PUT /card/:cardId/block', async () => {
+            await fixture.api
+              .post(\`/vault/v2/card/\${originalCard.card.cardId}/block/\${encodeURIComponent('BLOCKED NO FRAUD')}\`)
+              .expect(StatusCodes.NO_CONTENT);
+          });
+        `,
+        output: `
+          it('PUT /card/:cardId/block', async () => {
+            const response = await fetch(\`\${BASE_PATH}/card/\${originalCard.card.cardId}/block/\${encodeURIComponent('BLOCKED NO FRAUD')}\`, {
+              method: 'POST',
+            });
+            assert.equal(response.status, StatusCodes.NO_CONTENT);
           });
         `,
         errors: 1,

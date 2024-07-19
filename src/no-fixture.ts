@@ -197,7 +197,11 @@ const rule: Rule.RuleModule = {
           let fetchArgumentText = replaceEndpointUrlPrefixWithBasePath(fixtureArgumentText); // test - e.g. `${BASE_PATH}/ping`
 
           // add request argument if deeded
-          if (fixtureCallInformation.requestBody !== undefined || fixtureCallInformation.requestHeaders !== undefined) {
+          if (
+            methodNode.name !== 'get' ||
+            fixtureCallInformation.requestBody !== undefined ||
+            fixtureCallInformation.requestHeaders !== undefined
+          ) {
             fetchArgumentText += [
               ', {',
               `  method: '${methodNode.name.toUpperCase()}',`,
