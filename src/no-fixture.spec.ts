@@ -128,6 +128,33 @@ describe(ruleId, () => {
         `,
         errors: 1,
       },
+      {
+        // headers references should use getter
+        code: `
+          it('GET /ping', async () => {
+            const response = await fixture.api.get(\`/vault/v2/ping\`).expect(StatusCodes.OK);
+            assert.ok(response.headers.etag);
+            assert.ok(response.headers[ETAG]);
+            assert.ok(response.headers['content-type']);
+            assert.ok(response.header.etag);
+            assert.ok(response.header[ETAG]);
+            assert.ok(response.header['content-type']);
+          });
+        `,
+        output: `
+          it('GET /ping', async () => {
+            const response = await fetch(\`\${BASE_PATH}/ping\`);
+            assert.equal(response.status, StatusCodes.OK);
+            assert.ok(response.headers.get('etag'));
+            assert.ok(response.headers.get(ETAG));
+            assert.ok(response.headers.get('content-type'));
+            assert.ok(response.headers.get('etag'));
+            assert.ok(response.headers.get(ETAG));
+            assert.ok(response.headers.get('content-type'));
+          });
+        `,
+        errors: 1,
+      },
     ],
   });
 });

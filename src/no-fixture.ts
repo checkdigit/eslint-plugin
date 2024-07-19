@@ -8,7 +8,7 @@
 
 /* eslint-disable no-console */
 
-import type { AwaitExpression, Expression, Node, SimpleCallExpression } from 'estree';
+import type { AwaitExpression, Expression, MemberExpression, Node, SimpleCallExpression } from 'estree';
 import type { Rule, Scope, SourceCode } from 'eslint';
 import { strict as assert } from 'node:assert';
 import getDocumentationUrl from './get-documentation-url';
@@ -104,9 +104,14 @@ function getAncestor(node: Node, matchType: string, quitType: string) {
   return getAncestor(parent, matchType, quitType);
 }
 
-function getResponseBodyReferences(fixtureCallAwait: AwaitExpression, scopeManager: Scope.ScopeManager) {
-  const results: { responseVariableName?: string; responseBodyReferences: Node[] } = {
+function analyzeReferences(fixtureCallAwait: AwaitExpression, scopeManager: Scope.ScopeManager) {
+  const results: {
+    responseVariableName?: string;
+    responseBodyReferences: MemberExpression[];
+    responseHeadersReferences: MemberExpression[];
+  } = {
     responseBodyReferences: [],
+    responseHeadersReferences: [],
   };
 
   const variableDeclaration = getAncestor(fixtureCallAwait, 'VariableDeclaration', 'FunctionDeclaration');
@@ -117,13 +122,23 @@ function getResponseBodyReferences(fixtureCallAwait: AwaitExpression, scopeManag
     results.responseVariableName = responseVariable.name;
     results.responseBodyReferences = responseVariable.references
       .map((responseBodyReference) => getParent(responseBodyReference.identifier))
-      .filter<Node>(
-        (responseBodyNode): responseBodyNode is Node =>
-          responseBodyNode !== null &&
-          responseBodyNode !== undefined &&
-          responseBodyNode.type === 'MemberExpression' &&
-          responseBodyNode.property.type === 'Identifier' &&
-          responseBodyNode.property.name === 'body',
+      .filter(
+        (node): node is MemberExpression =>
+          node !== null &&
+          node !== undefined &&
+          node.type === 'MemberExpression' &&
+          node.property.type === 'Identifier' &&
+          node.property.name === 'body',
+      );
+    results.responseHeadersReferences = responseVariable.references
+      .map((responseHeadersReference) => getParent(responseHeadersReference.identifier))
+      .filter(
+        (node): node is MemberExpression =>
+          node !== null &&
+          node !== undefined &&
+          node.type === 'MemberExpression' &&
+          node.property.type === 'Identifier' &&
+          (node.property.name === 'header' || node.property.name === 'headers'),
       );
   }
   return results;
@@ -173,7 +188,7 @@ const rule: Rule.RuleModule = {
           const fixtureCallInformation = {} as FixtureCallInformation;
           analyze(fixtureCall, fixtureCallInformation);
 
-          const { responseVariableName, responseBodyReferences } = getResponseBodyReferences(
+          const { responseVariableName, responseBodyReferences, responseHeadersReferences } = analyzeReferences(
             fixtureCallInformation.root,
             scopeManager,
           );
@@ -245,6 +260,16 @@ const rule: Rule.RuleModule = {
 
               for (const responseBodyReference of responseBodyReferences) {
                 yield fixer.replaceText(responseBodyReference, `await ${variableNameToUse}.json()`);
+              }
+              for (const responseHeadersReference of responseHeadersReferences) {
+                const parent = getParent(responseHeadersReference);
+                assert.ok(parent?.type === 'MemberExpression');
+                const headerNameNode = parent.property;
+                const headerName =
+                  // eslint-disable-next-line no-nested-ternary, @typescript-eslint/restrict-template-expressions
+                  parent.computed ? sourceCode.getText(headerNameNode) : `'${sourceCode.getText(headerNameNode)}'`;
+                assert.ok(headerName);
+                yield fixer.replaceText(parent, `${variableNameToUse}.headers.get(${headerName})`);
               }
             },
           });
