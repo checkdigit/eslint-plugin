@@ -7,6 +7,7 @@
  */
 
 import invalidJsonStringify, { ruleId as invalidJsonStringifyRuleId } from './invalid-json-stringify';
+import noFixture, { ruleId as noFixtureRuleId } from './no-fixture';
 import noPromiseInstanceMethod, { ruleId as noPromiseInstanceMethodRuleId } from './no-promise-instance-method';
 import filePathComment from './file-path-comment';
 import noCardNumbers from './no-card-numbers';
@@ -31,6 +32,7 @@ export default {
     'object-literal-response': objectLiteralResponse,
     [invalidJsonStringifyRuleId]: invalidJsonStringify,
     [noPromiseInstanceMethodRuleId]: noPromiseInstanceMethod,
+    [noFixtureRuleId]: noFixture,
   },
   configs: {
     all: {
@@ -46,6 +48,7 @@ export default {
         '@checkdigit/no-test-import': 'error',
         [`@checkdigit/${invalidJsonStringifyRuleId}`]: 'error',
         [`@checkdigit/${noPromiseInstanceMethodRuleId}`]: 'error',
+        [`@checkdigit/${noFixtureRuleId}`]: 'error',
       },
     },
     recommended: {
@@ -61,6 +64,7 @@ export default {
         '@checkdigit/no-test-import': 'error',
         [`@checkdigit/${invalidJsonStringifyRuleId}`]: 'error',
         [`@checkdigit/${noPromiseInstanceMethodRuleId}`]: 'error',
+        [`@checkdigit/${noFixtureRuleId}`]: 'error',
       },
     },
   },
