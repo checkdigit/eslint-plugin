@@ -155,6 +155,29 @@ describe(ruleId, () => {
         `,
         errors: 1,
       },
+      {
+        // response headers assertion should be externalized with new variable declared if necessary
+        code: `
+          it('GET /ping', async () => {
+            await fixture.api.get(\`/vault/v2/ping\`)
+              .expect(StatusCodes.OK)
+              .expect('etag', '123')
+              .expect('content-type', 'application/json')
+              .expect(ETAG, correctVersion);
+          });
+        `,
+        output: `
+          it('GET /ping', async () => {
+            const response = await fetch(\`\${BASE_PATH}/ping\`);
+            assert.equal(response.status, StatusCodes.OK);
+            assert.equal(response.headers.get('etag'), '123');
+            assert.equal(response.headers.get('content-type'), 'application/json');
+            assert.equal(response.headers.get(ETAG), correctVersion);
+          });
+        `,
+        errors: 1,
+        only: true,
+      },
     ],
   });
 });

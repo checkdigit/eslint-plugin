@@ -89,6 +89,13 @@ function appendAssertions(expects: Expression[][], sourceCode: SourceCode, varia
       ) {
         assertions.push(`assert.equal(${variableName}.status, ${sourceCode.getText(assertionArgument)})`);
       }
+    } else if (expectArguments.length === 2) {
+      // header assertion
+      const [headerName, headerValue] = expectArguments;
+      assert.ok(headerName && headerValue);
+      assertions.push(
+        `assert.equal(${variableName}.headers.get(${sourceCode.getText(headerName)}), ${sourceCode.getText(headerValue)})`,
+      );
     }
   }
   return assertions;
