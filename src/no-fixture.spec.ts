@@ -178,7 +178,24 @@ describe(ruleId, () => {
           });
         `,
         errors: 1,
-        only: true,
+      },
+      {
+        // response callback assertion
+        code: `
+          it('GET /ping', async () => {
+            await fixture.api.get(\`/vault/v2/ping\`)
+              .expect(validate)
+              .expect((response)=>console.log(response));
+          });
+        `,
+        output: `
+          it('GET /ping', async () => {
+            const response = await fetch(\`\${BASE_PATH}/ping\`);
+            assert.ok(validate(response));
+            assert.ok((response)=>console.log(response));
+          });
+        `,
+        errors: 1,
       },
     ],
   });

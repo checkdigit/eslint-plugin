@@ -81,13 +81,21 @@ function appendAssertions(expects: Expression[][], sourceCode: SourceCode, varia
     if (expectArguments.length === 1) {
       const [assertionArgument] = expectArguments;
       assert.ok(assertionArgument);
-      // status
       if (
         assertionArgument.type === 'MemberExpression' &&
         assertionArgument.object.type === 'Identifier' &&
         assertionArgument.object.name === 'StatusCodes'
       ) {
+        // status code assertion
         assertions.push(`assert.equal(${variableName}.status, ${sourceCode.getText(assertionArgument)})`);
+      } else if (assertionArgument.type === 'ArrowFunctionExpression') {
+        // callback assertion
+        assertions.push(`assert.ok(${sourceCode.getText(assertionArgument)})`);
+      } else if (assertionArgument.type === 'Identifier') {
+        // callback assertion
+        assertions.push(`assert.ok(${sourceCode.getText(assertionArgument)}(${variableName}))`);
+      } else {
+        throw new Error(`Unexpected assertion argument: ${sourceCode.getText(assertionArgument)}`);
       }
     } else if (expectArguments.length === 2) {
       // header assertion
