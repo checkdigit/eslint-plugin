@@ -180,6 +180,21 @@ describe(ruleId, () => {
         errors: 1,
       },
       {
+        // response body assertion
+        code: `
+          it('GET /ping', async () => {
+            await fixture.api.get(\`/vault/v2/ping\`).expect({message:'pong'});
+          });
+        `,
+        output: `
+          it('GET /ping', async () => {
+            const response = await fetch(\`\${BASE_PATH}/ping\`);
+            assert.deepEqual(response.body, {message:'pong'});
+          });
+        `,
+        errors: 1,
+      },
+      {
         // response callback assertion
         code: `
           it('GET /ping', async () => {

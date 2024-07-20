@@ -94,6 +94,9 @@ function appendAssertions(expects: Expression[][], sourceCode: SourceCode, varia
       } else if (assertionArgument.type === 'Identifier') {
         // callback assertion
         assertions.push(`assert.ok(${sourceCode.getText(assertionArgument)}(${variableName}))`);
+      } else if (assertionArgument.type === 'ObjectExpression') {
+        // body deep equal assertion
+        assertions.push(`assert.deepEqual(${variableName}.body, ${sourceCode.getText(assertionArgument)})`);
       } else {
         throw new Error(`Unexpected assertion argument: ${sourceCode.getText(assertionArgument)}`);
       }
