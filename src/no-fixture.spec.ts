@@ -15,15 +15,19 @@ describe(ruleId, () => {
     valid: [],
     invalid: [
       {
-        // no assertion
+        // response callback assertion
         code: `
           it('GET /ping', async () => {
-            await fixture.api.get(\`/smartdata/v1/ping\`);
+            await fixture.api.get(\`/vault/v2/ping\`)
+              .expect(validate)
+              .expect((response)=>console.log(response));
           });
         `,
         output: `
           it('GET /ping', async () => {
-            await fetch(\`\${BASE_PATH}/ping\`);
+            const response = await fetch(\`\${BASE_PATH}/ping\`);
+            assert.ok(validate(response));
+            assert.ok((response)=>console.log(response));
           });
         `,
         errors: 1,
@@ -211,6 +215,31 @@ describe(ruleId, () => {
           });
         `,
         errors: 1,
+      },
+      {
+        // multiple fixture calls in the same test
+        code: `
+          it('GET /ping', async () => {
+            await fixture.api.get(\`/smartdata/v1/ping\`).expect(StatusCodes.OK);
+            const pingResponse = await fixture.api.get(\`/smartdata/v1/ping\`).expect(StatusCodes.OK);
+            await fixture.api.get(\`/smartdata/v1/ping?param=xxx\`).expect(StatusCodes.OK).expect({message:'pong'});
+            await fixture.api.get(\`/smartdata/v1/ping\`).expect(StatusCodes.OK);
+          });
+        `,
+        output: `
+          it('GET /ping', async () => {
+            const response = await fetch(\`\${BASE_PATH}/ping\`);
+            assert.equal(response.status, StatusCodes.OK);
+            const pingResponse = await fetch(\`\${BASE_PATH}/ping\`);
+            assert.equal(pingResponse.status, StatusCodes.OK);
+            const response1 = await fetch(\`\${BASE_PATH}/ping?param=xxx\`);
+            assert.equal(response1.status, StatusCodes.OK);
+            assert.deepEqual(response1.body, {message:'pong'});
+            const response2 = await fetch(\`\${BASE_PATH}/ping\`);
+            assert.equal(response2.status, StatusCodes.OK);
+          });
+        `,
+        errors: 4,
       },
     ],
   });
