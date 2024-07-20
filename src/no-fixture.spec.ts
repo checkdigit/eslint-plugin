@@ -163,7 +163,8 @@ describe(ruleId, () => {
               .expect(StatusCodes.OK)
               .expect('etag', '123')
               .expect('content-type', 'application/json')
-              .expect(ETAG, correctVersion);
+              .expect(ETAG, correctVersion)
+              .expect(ETAG, /1.*/u);
           });
         `,
         output: `
@@ -173,6 +174,7 @@ describe(ruleId, () => {
             assert.equal(response.headers.get('etag'), '123');
             assert.equal(response.headers.get('content-type'), 'application/json');
             assert.equal(response.headers.get(ETAG), correctVersion);
+            assert.ok(response.headers.get(ETAG).match(/1.*/u));
           });
         `,
         errors: 1,

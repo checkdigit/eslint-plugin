@@ -93,9 +93,15 @@ function appendAssertions(expects: Expression[][], sourceCode: SourceCode, varia
       // header assertion
       const [headerName, headerValue] = expectArguments;
       assert.ok(headerName && headerValue);
-      assertions.push(
-        `assert.equal(${variableName}.headers.get(${sourceCode.getText(headerName)}), ${sourceCode.getText(headerValue)})`,
-      );
+      if (headerValue.type === 'Literal' && headerValue.value instanceof RegExp) {
+        assertions.push(
+          `assert.ok(${variableName}.headers.get(${sourceCode.getText(headerName)}).match(${sourceCode.getText(headerValue)}))`,
+        );
+      } else {
+        assertions.push(
+          `assert.equal(${variableName}.headers.get(${sourceCode.getText(headerName)}), ${sourceCode.getText(headerValue)})`,
+        );
+      }
     }
   }
   return assertions;
