@@ -8,7 +8,14 @@
 
 /* eslint-disable no-console */
 
-import type { AwaitExpression, Expression, MemberExpression, Node, SimpleCallExpression } from 'estree';
+import type {
+  AwaitExpression,
+  Expression,
+  MemberExpression,
+  Node,
+  ReturnStatement,
+  SimpleCallExpression,
+} from 'estree';
 import type { Rule, Scope, SourceCode } from 'eslint';
 import { strict as assert } from 'node:assert';
 import getDocumentationUrl from './get-documentation-url';
@@ -22,7 +29,7 @@ interface NodeParentExtension {
 }
 
 interface FixtureCallInformation {
-  root: AwaitExpression;
+  root: AwaitExpression | ReturnStatement;
   requestBody?: Expression;
   requestHeaders?: { name: Expression; value: Expression }[];
   assertions?: Expression[][];
@@ -37,7 +44,7 @@ function analyze(call: SimpleCallExpression, results: FixtureCallInformation) {
   assert.ok(parent, 'parent should exist for fixture/supertest call node');
 
   let nextCall;
-  if (parent.type === 'AwaitExpression') {
+  if (parent.type === 'AwaitExpression' || parent.type === 'ReturnStatement') {
     // no more assertions, return the await expression of the fixture call
     results.root = parent;
   } else if (parent.type === 'MemberExpression' && parent.property.type === 'Identifier') {
@@ -128,7 +135,7 @@ function getAncestor(node: Node, matchType: string, quitType: string) {
   return getAncestor(parent, matchType, quitType);
 }
 
-function analyzeReferences(fixtureCallAwait: AwaitExpression, scopeManager: Scope.ScopeManager) {
+function analyzeReferences(fixtureCallAwait: AwaitExpression | ReturnStatement, scopeManager: Scope.ScopeManager) {
   const results: {
     responseVariableName?: string;
     responseBodyReferences: MemberExpression[];
@@ -229,7 +236,12 @@ const rule: Rule.RuleModule = {
           // convert fixture.api.get to fetch
           const fixtureApiCallText = sourceCode.getText(fixtureCall); // e.g. "fixture.api.get(`/smartdata/v1/ping`)""
           const fixtureMethodText = sourceCode.getText(fixtureFunction); // e.g. "fixture.api.get"
-          let replacedText = fixtureApiCallText.replace(fixtureMethodText, 'await fetch');
+
+          const fetchStatementStart =
+            fixtureCallInformation.root.type === 'ReturnStatement' && fixtureCallInformation.assertions === undefined
+              ? 'return'
+              : 'await';
+          let replacedText = fixtureApiCallText.replace(fixtureMethodText, `${fetchStatementStart} fetch`);
 
           // convert `/smartdata/v1/ping` to `${BASE_PATH}/ping`
           const fixtureArgumentText = sourceCode.getText(urlArgumentNode); // text - e.g. `/smartdata/v1/ping`
@@ -294,6 +306,15 @@ const rule: Rule.RuleModule = {
                   parent.computed ? sourceCode.getText(headerNameNode) : `'${sourceCode.getText(headerNameNode)}'`;
                 assert.ok(headerName);
                 yield fixer.replaceText(parent, `${variableNameToUse}.headers.get(${headerName})`);
+              }
+              if (
+                fixtureCallInformation.root.type === 'ReturnStatement' &&
+                fixtureCallInformation.assertions !== undefined
+              ) {
+                yield fixer.insertTextAfter(
+                  fixtureCallInformation.root,
+                  `;\n${indentation}return ${variableNameToUse};`,
+                );
               }
             },
           });

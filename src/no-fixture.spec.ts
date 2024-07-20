@@ -241,6 +241,58 @@ describe(ruleId, () => {
         `,
         errors: 4,
       },
+      {
+        // directly return (no await) fixture call
+        code: `
+          it('GET /ping', async () => {
+            return fixture.api.get(\`/smartdata/v1/ping\`);
+          });
+        `,
+        output: `
+          it('GET /ping', async () => {
+            return fetch(\`\${BASE_PATH}/ping\`)
+          });
+        `,
+        errors: 1,
+      },
+      {
+        // directly return (no await) fixture call with assertion
+        code: `
+          it('GET /ping', async () => {
+            return fixture.api.get(\`/smartdata/v1/ping\`).expect(StatusCodes.OK);
+          });
+        `,
+        output: `
+          it('GET /ping', async () => {
+            const response = await fetch(\`\${BASE_PATH}/ping\`);
+            assert.equal(response.status, StatusCodes.OK);
+            return response;
+          });
+        `,
+        errors: 1,
+      },
+      {
+        // directly return (no await) fixture call with body/headers
+        code: `
+          it('PUT /card', async () => {
+            return fixture.api.put(\`/vault/v2/card/\${uuid()}\`)
+              .set(IF_MATCH_HEADER, originalCard.version)
+              .send({});
+          });
+        `,
+        output: `
+          it('PUT /card', async () => {
+            return fetch(\`\${BASE_PATH}/card/\${uuid()}\`, {
+              method: 'PUT',
+              body: JSON.stringify({}),
+              headers: {
+                [IF_MATCH_HEADER]: originalCard.version,
+              },
+            })
+          });
+        `,
+        errors: 1,
+      },
     ],
   });
 });
