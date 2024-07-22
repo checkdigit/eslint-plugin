@@ -169,7 +169,7 @@ function analyzeReferences(fixtureCallAwait: AwaitExpression | ReturnStatement, 
           node !== undefined &&
           node.type === 'MemberExpression' &&
           node.property.type === 'Identifier' &&
-          (node.property.name === 'header' || node.property.name === 'headers'),
+          (node.property.name === 'header' || node.property.name === 'headers' || node.property.name === 'get'),
       );
   }
   return results;
@@ -302,11 +302,17 @@ const rule: Rule.RuleModule = {
               // handle response headers
               for (const responseHeadersReference of responseHeadersReferences) {
                 const parent = getParent(responseHeadersReference);
-                assert.ok(parent?.type === 'MemberExpression');
-                const headerNameNode = parent.property;
-                const headerName =
-                  // eslint-disable-next-line no-nested-ternary, @typescript-eslint/restrict-template-expressions
-                  parent.computed ? sourceCode.getText(headerNameNode) : `'${sourceCode.getText(headerNameNode)}'`;
+                assert.ok(parent);
+                let headerName;
+                if (parent.type === 'MemberExpression') {
+                  const headerNameNode = parent.property;
+                  headerName =
+                    // eslint-disable-next-line no-nested-ternary, @typescript-eslint/restrict-template-expressions
+                    parent.computed ? sourceCode.getText(headerNameNode) : `'${sourceCode.getText(headerNameNode)}'`;
+                } else if (parent.type === 'CallExpression') {
+                  const headerNameNode = parent.arguments[0];
+                  headerName = sourceCode.getText(headerNameNode);
+                }
                 assert.ok(headerName);
                 yield fixer.replaceText(parent, `${variableNameToUse}.headers.get(${headerName})`);
               }
@@ -339,6 +345,7 @@ const rule: Rule.RuleModule = {
             },
           });
         } catch (error) {
+          console.log(error);
           context.report({
             node: fixtureCall,
             messageId: 'unknownError',

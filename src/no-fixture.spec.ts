@@ -296,7 +296,7 @@ describe(ruleId, () => {
       {
         // replace statusCode with status
         code: `
-          it('PUT /card', async () => {
+          it('GET /ping', async () => {
             const response = await fixture.api.get(\`/vault/v2/ping\`);
             assert.equal(response.statusCode, StatusCodes.OK);
             console.log('status:', response.statusCode);
@@ -305,7 +305,7 @@ describe(ruleId, () => {
           });
         `,
         output: `
-          it('PUT /card', async () => {
+          it('GET /ping', async () => {
             const response = await fetch(\`\${BASE_PATH}/ping\`);
             assert.equal(response.status, StatusCodes.OK);
             console.log('status:', response.status);
@@ -314,6 +314,24 @@ describe(ruleId, () => {
           });
         `,
         errors: 2,
+      },
+      {
+        // replace header access through response.get() with response.headers.get()
+        code: `
+          it('PUT /ping', async () => {
+            const response = await fixture.api.get(\`/vault/v2/ping\`);
+            assert.equal(response.get(ETAG), correctVersion);
+            assert.equal(response.get('etag'), correctVersion);
+          });
+        `,
+        output: `
+          it('PUT /ping', async () => {
+            const response = await fetch(\`\${BASE_PATH}/ping\`);
+            assert.equal(response.headers.get(ETAG), correctVersion);
+            assert.equal(response.headers.get('etag'), correctVersion);
+          });
+        `,
+        errors: 1,
       },
     ],
   });
