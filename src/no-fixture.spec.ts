@@ -293,6 +293,28 @@ describe(ruleId, () => {
         `,
         errors: 1,
       },
+      {
+        // replace statusCode with status
+        code: `
+          it('PUT /card', async () => {
+            const response = await fixture.api.get(\`/vault/v2/ping\`);
+            assert.equal(response.statusCode, StatusCodes.OK);
+            console.log('status:', response.statusCode);
+            const response2 = await fixture.api.get(\`/vault/v2/ping\`);
+            assert.equal(response2.status, StatusCodes.OK);
+          });
+        `,
+        output: `
+          it('PUT /card', async () => {
+            const response = await fetch(\`\${BASE_PATH}/ping\`);
+            assert.equal(response.status, StatusCodes.OK);
+            console.log('status:', response.status);
+            const response2 = await fetch(\`\${BASE_PATH}/ping\`);
+            assert.equal(response2.status, StatusCodes.OK);
+          });
+        `,
+        errors: 2,
+      },
     ],
   });
 });

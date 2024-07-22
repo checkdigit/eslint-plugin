@@ -137,7 +137,7 @@ function getAncestor(node: Node, matchType: string, quitType: string) {
 
 function analyzeReferences(fixtureCallAwait: AwaitExpression | ReturnStatement, scopeManager: Scope.ScopeManager) {
   const results: {
-    responseVariableName?: string;
+    responseVariable?: Scope.Variable;
     responseBodyReferences: MemberExpression[];
     responseHeadersReferences: MemberExpression[];
   } = {
@@ -150,7 +150,7 @@ function analyzeReferences(fixtureCallAwait: AwaitExpression | ReturnStatement, 
     const [responseVariable] = scopeManager.getDeclaredVariables(variableDeclaration);
     assert.ok(responseVariable);
 
-    results.responseVariableName = responseVariable.name;
+    results.responseVariable = responseVariable;
     results.responseBodyReferences = responseVariable.references
       .map((responseBodyReference) => getParent(responseBodyReference.identifier))
       .filter(
@@ -219,18 +219,18 @@ const rule: Rule.RuleModule = {
           const fixtureCallInformation = {} as FixtureCallInformation;
           analyze(fixtureCall, fixtureCallInformation);
 
-          const { responseVariableName, responseBodyReferences, responseHeadersReferences } = analyzeReferences(
+          const { responseVariable, responseBodyReferences, responseHeadersReferences } = analyzeReferences(
             fixtureCallInformation.root,
             scopeManager,
           );
           let variableNameToUse: string;
           let isResponseVariableDeclared = false;
-          if (responseVariableName === undefined) {
+          if (responseVariable === undefined) {
             variableNameToUse = `response${variableCounter === 0 ? '' : variableCounter.toString()}`;
             variableCounter++;
           } else {
             isResponseVariableDeclared = true;
-            variableNameToUse = responseVariableName;
+            variableNameToUse = responseVariable.name;
           }
 
           // convert fixture.api.get to fetch
@@ -294,9 +294,12 @@ const rule: Rule.RuleModule = {
             *fix(fixer) {
               yield fixer.replaceText(fixtureCallInformation.root, replacedText);
 
+              // handle response body
               for (const responseBodyReference of responseBodyReferences) {
                 yield fixer.replaceText(responseBodyReference, `await ${variableNameToUse}.json()`);
               }
+
+              // handle response headers
               for (const responseHeadersReference of responseHeadersReferences) {
                 const parent = getParent(responseHeadersReference);
                 assert.ok(parent?.type === 'MemberExpression');
@@ -307,6 +310,8 @@ const rule: Rule.RuleModule = {
                 assert.ok(headerName);
                 yield fixer.replaceText(parent, `${variableNameToUse}.headers.get(${headerName})`);
               }
+
+              // handle direct return without await
               if (
                 fixtureCallInformation.root.type === 'ReturnStatement' &&
                 fixtureCallInformation.assertions !== undefined
@@ -315,6 +320,21 @@ const rule: Rule.RuleModule = {
                   fixtureCallInformation.root,
                   `;\n${indentation}return ${variableNameToUse};`,
                 );
+              }
+
+              // convert statusCode to status
+              function* statusCodeReplacer(reference: Scope.Reference) {
+                const parent = getParent(reference.identifier);
+                if (
+                  parent?.type === 'MemberExpression' &&
+                  parent.property.type === 'Identifier' &&
+                  parent.property.name === 'statusCode'
+                ) {
+                  yield fixer.replaceText(parent.property, 'status');
+                }
+              }
+              for (const reference of responseVariable?.references ?? []) {
+                yield* statusCodeReplacer(reference);
               }
             },
           });
