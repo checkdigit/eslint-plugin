@@ -102,11 +102,11 @@ function appendAssertions(expects: Expression[][], sourceCode: SourceCode, varia
       } else if (assertionArgument.type === 'Identifier') {
         // callback assertion
         assertions.push(`assert.ok(${sourceCode.getText(assertionArgument)}(${variableName}))`);
-      } else if (assertionArgument.type === 'ObjectExpression') {
+      } else if (assertionArgument.type === 'ObjectExpression' || assertionArgument.type === 'CallExpression') {
         // body deep equal assertion
-        assertions.push(`assert.deepEqual(${variableName}.body, ${sourceCode.getText(assertionArgument)})`);
+        assertions.push(`assert.deepEqual(await ${variableName}.json(), ${sourceCode.getText(assertionArgument)})`);
       } else {
-        throw new Error(`Unexpected assertion argument: ${sourceCode.getText(assertionArgument)}`);
+        throw new Error(`Unexpected Supertest assertion argument: ".expect(${sourceCode.getText(assertionArgument)})`);
       }
     } else if (expectArguments.length === 2) {
       // header assertion

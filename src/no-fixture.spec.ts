@@ -193,7 +193,7 @@ describe(ruleId, () => {
         output: `
           it('GET /ping', async () => {
             const response = await fetch(\`\${BASE_PATH}/ping\`);
-            assert.deepEqual(response.body, {message:'pong'});
+            assert.deepEqual(await response.json(), {message:'pong'});
           });
         `,
         errors: 1,
@@ -234,7 +234,7 @@ describe(ruleId, () => {
             assert.equal(pingResponse.status, StatusCodes.OK);
             const response1 = await fetch(\`\${BASE_PATH}/ping?param=xxx\`);
             assert.equal(response1.status, StatusCodes.OK);
-            assert.deepEqual(response1.body, {message:'pong'});
+            assert.deepEqual(await response1.json(), {message:'pong'});
             const response2 = await fetch(\`\${BASE_PATH}/ping\`);
             assert.equal(response2.status, StatusCodes.OK);
           });
@@ -344,6 +344,24 @@ describe(ruleId, () => {
           it('GET /ping', async () => {
             const response = await fetch(\`\${BASE_PATH}/ping\`);
             assert.equal(response.status, 200);
+          });
+        `,
+        errors: 1,
+      },
+      {
+        // assert response body against function call's return value ".expect(validateBody(response))"
+        code: `
+          it('GET /ping', async () => {
+            const createdOn = Date.now().toUTCString();
+            await fixture.api.get(\`/vault/v2/ping\`).expect(200).expect(validateBody(createdOn));
+          });
+        `,
+        output: `
+          it('GET /ping', async () => {
+            const createdOn = Date.now().toUTCString();
+            const response = await fetch(\`\${BASE_PATH}/ping\`);
+            assert.equal(response.status, 200);
+            assert.deepEqual(await response.json(), validateBody(createdOn));
           });
         `,
         errors: 1,
