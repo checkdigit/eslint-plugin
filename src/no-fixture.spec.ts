@@ -318,17 +318,32 @@ describe(ruleId, () => {
       {
         // replace header access through response.get() with response.headers.get()
         code: `
-          it('PUT /ping', async () => {
+          it('GET /ping', async () => {
             const response = await fixture.api.get(\`/vault/v2/ping\`);
             assert.equal(response.get(ETAG), correctVersion);
             assert.equal(response.get('etag'), correctVersion);
           });
         `,
         output: `
-          it('PUT /ping', async () => {
+          it('GET /ping', async () => {
             const response = await fetch(\`\${BASE_PATH}/ping\`);
             assert.equal(response.headers.get(ETAG), correctVersion);
             assert.equal(response.headers.get('etag'), correctVersion);
+          });
+        `,
+        errors: 1,
+      },
+      {
+        // work with response status literal (e.g. 200 instead of StatusCoodes.OK) as well
+        code: `
+          it('GET /ping', async () => {
+            await fixture.api.get(\`/vault/v2/ping\`).expect(200);
+          });
+        `,
+        output: `
+          it('GET /ping', async () => {
+            const response = await fetch(\`\${BASE_PATH}/ping\`);
+            assert.equal(response.status, 200);
           });
         `,
         errors: 1,

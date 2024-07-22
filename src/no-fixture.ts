@@ -89,9 +89,10 @@ function appendAssertions(expects: Expression[][], sourceCode: SourceCode, varia
       const [assertionArgument] = expectArguments;
       assert.ok(assertionArgument);
       if (
-        assertionArgument.type === 'MemberExpression' &&
-        assertionArgument.object.type === 'Identifier' &&
-        assertionArgument.object.name === 'StatusCodes'
+        (assertionArgument.type === 'MemberExpression' &&
+          assertionArgument.object.type === 'Identifier' &&
+          assertionArgument.object.name === 'StatusCodes') ||
+        assertionArgument.type === 'Literal'
       ) {
         // status code assertion
         assertions.push(`assert.equal(${variableName}.status, ${sourceCode.getText(assertionArgument)})`);
