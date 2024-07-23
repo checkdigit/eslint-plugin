@@ -319,7 +319,7 @@ describe(ruleId, () => {
         // replace header access through response.get() with response.headers.get()
         code: `
           it('GET /ping', async () => {
-            const response = await fixture.api.get(\`/vault/v2/ping\`);
+            const response = await fixture.api.get(\`/vault/v2/ping\`).expect(StatusCodes.OK);
             assert.equal(response.get(ETAG), correctVersion);
             assert.equal(response.get('etag'), correctVersion);
           });
@@ -327,6 +327,7 @@ describe(ruleId, () => {
         output: `
           it('GET /ping', async () => {
             const response = await fetch(\`\${BASE_PATH}/ping\`);
+            assert.equal(response.status, StatusCodes.OK);
             assert.equal(response.headers.get(ETAG), correctVersion);
             assert.equal(response.headers.get('etag'), correctVersion);
           });
@@ -362,6 +363,81 @@ describe(ruleId, () => {
             const response = await fetch(\`\${BASE_PATH}/ping\`);
             assert.equal(response.status, 200);
             assert.deepEqual(await response.json(), validateBody(createdOn));
+          });
+        `,
+        errors: 1,
+      },
+      {
+        // handle spreading variable declaration for body
+        code: `
+          it('returns current server time', async () => {
+            const { body: responseBody } = await fixture.api.get(\`$\{BASE_PATH}/ping\`).expect(StatusCodes.OK);
+            const timeDifference = Date.now() - new Date(responseBody.serverTime).getTime();
+            assert.ok(timeDifference >= 0 && timeDifference < 200);
+          });
+        `,
+        output: `
+          it('returns current server time', async () => {
+            const response = await fetch(\`$\{BASE_PATH}/ping\`);
+            const responseBody = await response.json();
+            assert.equal(response.status, StatusCodes.OK)
+            const timeDifference = Date.now() - new Date(responseBody.serverTime).getTime();
+            assert.ok(timeDifference >= 0 && timeDifference < 200);
+          });
+        `,
+        errors: 1,
+      },
+      {
+        // handle spreading variable declaration for headers when body is presented as well
+        code: `
+          it('returns current server time', async () => {
+            const { body, headers: headers2 } = await fixture.api.get(\`$\{BASE_PATH}/ping\`).expect(StatusCodes.OK);
+            assert(body);
+            assert.ok(headers2.get(ETAG));
+          });
+        `,
+        output: `
+          it('returns current server time', async () => {
+            const response = await fetch(\`$\{BASE_PATH}/ping\`);
+            const body = await response.json();
+            const headers2 = response.headers;
+            assert.equal(response.status, StatusCodes.OK)
+            assert(body);
+            assert.ok(headers2.get(ETAG));
+          });
+        `,
+        errors: 1,
+      },
+      {
+        // handle spreading variable declaration for headers without body presented but with assertions used
+        code: `
+          it('returns current server time', async () => {
+            const { headers } = await fixture.api.get(\`$\{BASE_PATH}/ping\`).expect(StatusCodes.OK);
+            assert.ok(headers.get(ETAG));
+          });
+        `,
+        output: `
+          it('returns current server time', async () => {
+            const response = await fetch(\`$\{BASE_PATH}/ping\`);
+            const headers = response.headers;
+            assert.equal(response.status, StatusCodes.OK)
+            assert.ok(headers.get(ETAG));
+          });
+        `,
+        errors: 1,
+      },
+      {
+        // handle spreading variable declaration for headers without body/assertion presented doesn't need to change
+        code: `
+          it('returns current server time', async () => {
+            const { headers } = await fixture.api.get(\`$\{BASE_PATH}/ping\`);
+            assert.ok(headers.get(ETAG));
+          });
+        `,
+        output: `
+          it('returns current server time', async () => {
+            const { headers } = await fetch(\`$\{BASE_PATH}/ping\`);
+            assert.ok(headers.get(ETAG));
           });
         `,
         errors: 1,

@@ -136,42 +136,63 @@ function getAncestor(node: Node, matchType: string, quitType: string) {
   return getAncestor(parent, matchType, quitType);
 }
 
-function analyzeReferences(fixtureCallAwait: AwaitExpression | ReturnStatement, scopeManager: Scope.ScopeManager) {
+function analyzeReferences(fixtureCall: AwaitExpression | ReturnStatement, scopeManager: Scope.ScopeManager) {
   const results: {
     responseVariable?: Scope.Variable;
     responseBodyReferences: MemberExpression[];
     responseHeadersReferences: MemberExpression[];
+    spreadResponseBodyVariable?: Scope.Variable;
+    spreadResponseHeadersVariable?: Scope.Variable;
   } = {
     responseBodyReferences: [],
     responseHeadersReferences: [],
   };
 
-  const variableDeclaration = getAncestor(fixtureCallAwait, 'VariableDeclaration', 'FunctionDeclaration');
+  const variableDeclaration = getAncestor(fixtureCall, 'VariableDeclaration', 'FunctionDeclaration');
   if (variableDeclaration && variableDeclaration.type === 'VariableDeclaration') {
-    const [responseVariable] = scopeManager.getDeclaredVariables(variableDeclaration);
-    assert.ok(responseVariable);
-
-    results.responseVariable = responseVariable;
-    results.responseBodyReferences = responseVariable.references
-      .map((responseBodyReference) => getParent(responseBodyReference.identifier))
-      .filter(
-        (node): node is MemberExpression =>
-          node !== null &&
-          node !== undefined &&
-          node.type === 'MemberExpression' &&
-          node.property.type === 'Identifier' &&
-          node.property.name === 'body',
-      );
-    results.responseHeadersReferences = responseVariable.references
-      .map((responseHeadersReference) => getParent(responseHeadersReference.identifier))
-      .filter(
-        (node): node is MemberExpression =>
-          node !== null &&
-          node !== undefined &&
-          node.type === 'MemberExpression' &&
-          node.property.type === 'Identifier' &&
-          (node.property.name === 'header' || node.property.name === 'headers' || node.property.name === 'get'),
-      );
+    const responseVariables = scopeManager.getDeclaredVariables(variableDeclaration);
+    for (const responseVariable of responseVariables) {
+      const identifier = responseVariable.identifiers[0];
+      assert.ok(identifier);
+      const identifierParent = getParent(identifier);
+      assert.ok(identifierParent);
+      if (identifierParent.type === 'VariableDeclarator') {
+        // if (declarator.id.type === 'Identifier') {
+        results.responseVariable = responseVariable;
+        results.responseBodyReferences = responseVariable.references
+          .map((responseBodyReference) => getParent(responseBodyReference.identifier))
+          .filter(
+            (node): node is MemberExpression =>
+              node !== null &&
+              node !== undefined &&
+              node.type === 'MemberExpression' &&
+              node.property.type === 'Identifier' &&
+              node.property.name === 'body',
+          );
+        results.responseHeadersReferences = responseVariable.references
+          .map((responseHeadersReference) => getParent(responseHeadersReference.identifier))
+          .filter(
+            (node): node is MemberExpression =>
+              node !== null &&
+              node !== undefined &&
+              node.type === 'MemberExpression' &&
+              node.property.type === 'Identifier' &&
+              (node.property.name === 'header' || node.property.name === 'headers' || node.property.name === 'get'),
+          );
+      } else if (
+        identifierParent.type === 'Property' &&
+        identifierParent.key.type === 'Identifier' &&
+        identifierParent.key.name === 'body'
+      ) {
+        results.spreadResponseBodyVariable = responseVariable;
+      } else if (
+        identifierParent.type === 'Property' &&
+        identifierParent.key.type === 'Identifier' &&
+        identifierParent.key.name === 'headers'
+      ) {
+        results.spreadResponseHeadersVariable = responseVariable;
+      }
+    }
   }
   return results;
 }
@@ -220,10 +241,13 @@ const rule: Rule.RuleModule = {
           const fixtureCallInformation = {} as FixtureCallInformation;
           analyze(fixtureCall, fixtureCallInformation);
 
-          const { responseVariable, responseBodyReferences, responseHeadersReferences } = analyzeReferences(
-            fixtureCallInformation.root,
-            scopeManager,
-          );
+          const {
+            responseVariable,
+            responseBodyReferences,
+            responseHeadersReferences,
+            spreadResponseBodyVariable,
+            spreadResponseHeadersVariable,
+          } = analyzeReferences(fixtureCallInformation.root, scopeManager);
           let variableNameToUse: string;
           let isResponseVariableDeclared = false;
           if (responseVariable === undefined) {
@@ -277,6 +301,22 @@ const rule: Rule.RuleModule = {
 
           replacedText = replacedText.replace(fixtureArgumentText, fetchArgumentText);
 
+          const needVariableRedefine =
+            spreadResponseBodyVariable !== undefined ||
+            (responseVariable === undefined && fixtureCallInformation.assertions) !== undefined;
+
+          if (needVariableRedefine) {
+            replacedText = [
+              replacedText,
+              ...(spreadResponseBodyVariable
+                ? [`const ${spreadResponseBodyVariable.name} = await ${variableNameToUse}.json()`]
+                : []),
+              ...(spreadResponseHeadersVariable
+                ? [`const ${spreadResponseHeadersVariable.name} = ${variableNameToUse}.headers`]
+                : []),
+            ].join(`;\n${indentation}`);
+          }
+
           if (fixtureCallInformation.assertions) {
             // add variable declaration if needed
             if (!isResponseVariableDeclared) {
@@ -293,7 +333,19 @@ const rule: Rule.RuleModule = {
             node: fixtureCall,
             messageId: 'preferNativeFetch',
             *fix(fixer) {
-              yield fixer.replaceText(fixtureCallInformation.root, replacedText);
+              let replacementRootNode: AwaitExpression | ReturnStatement | Node = fixtureCallInformation.root;
+              if (spreadResponseBodyVariable) {
+                const identifier = spreadResponseBodyVariable.identifiers[0];
+                assert.ok(identifier);
+                const variableDeclaration = getAncestor(identifier, 'VariableDeclaration', 'FunctionDeclaration');
+                assert.ok(variableDeclaration);
+                replacementRootNode = variableDeclaration;
+              } else if (fixtureCallInformation.assertions !== undefined && responseVariable === undefined) {
+                replacementRootNode =
+                  getAncestor(fixtureCallInformation.root, 'VariableDeclaration', 'FunctionDeclaration') ??
+                  fixtureCallInformation.root;
+              }
+              yield fixer.replaceText(replacementRootNode, replacedText);
 
               // handle response body
               for (const responseBodyReference of responseBodyReferences) {
@@ -346,7 +398,7 @@ const rule: Rule.RuleModule = {
             },
           });
         } catch (error) {
-          console.log(error);
+          console.error(`Failed to apply ${ruleId} rule. Error:`, error);
           context.report({
             node: fixtureCall,
             messageId: 'unknownError',
