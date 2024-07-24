@@ -1,4 +1,4 @@
-// no-fixture.ts
+// no-fixture.spec.ts
 
 /*
  * Copyright (c) 2021-2024 Check Digit, LLC
@@ -15,28 +15,10 @@ describe(ruleId, () => {
     valid: [],
     invalid: [
       {
-        // response callback assertion
+        name: 'assertion with variable declaration',
         code: `
           it('GET /ping', async () => {
-            await fixture.api.get(\`/vault/v2/ping\`)
-              .expect(validate)
-              .expect((response)=>console.log(response));
-          });
-        `,
-        output: `
-          it('GET /ping', async () => {
-            const response = await fetch(\`\${BASE_PATH}/ping\`);
-            assert.ok(validate(response));
-            assert.ok((response)=>console.log(response));
-          });
-        `,
-        errors: 1,
-      },
-      {
-        // assertion with variable declaration
-        code: `
-          it('GET /ping', async () => {
-            const pingResponse = await fixture.api.get(\`/smartdata/v1/ping\`).expect(StatusCodes.OK);
+            const pingResponse = await fixture.api.get(\`/sample-service/v1/ping\`).expect(StatusCodes.OK);
             const body = pingResponse.body;
             const timeDifference = Date.now() - new Date(body.serverTime).getTime();
             assert.ok(timeDifference >= 0 && timeDifference < 200);
@@ -44,7 +26,9 @@ describe(ruleId, () => {
         `,
         output: `
           it('GET /ping', async () => {
-            const pingResponse = await fetch(\`\${BASE_PATH}/ping\`);
+            const pingResponse = await fetch(\`\${BASE_PATH}/ping\`, {
+              method: 'GET',
+            });
             assert.equal(pingResponse.status, StatusCodes.OK);
             const body = await pingResponse.json();
             const timeDifference = Date.now() - new Date(body.serverTime).getTime();
@@ -54,25 +38,27 @@ describe(ruleId, () => {
         errors: 1,
       },
       {
-        // assertion without variable declaration
+        name: 'assertion without variable declaration',
         code: `
           it('GET /ping', async () => {
-            await fixture.api.get(\`/smartdata/v1/ping\`).expect(StatusCodes.OK);
+            await fixture.api.get(\`/sample-service/v1/ping\`).expect(StatusCodes.OK);
           });
         `,
         output: `
           it('GET /ping', async () => {
-            const response = await fetch(\`\${BASE_PATH}/ping\`);
+            const response = await fetch(\`\${BASE_PATH}/ping\`, {
+              method: 'GET',
+            });
             assert.equal(response.status, StatusCodes.OK);
           });
         `,
         errors: 1,
       },
       {
-        // PUT with request body
+        name: 'PUT with request body',
         code: `
           it('PUT /card', async () => {
-            await fixture.api.put(\`/vault/v2/card/\${uuid()}\`).send(cardCreationData).expect(StatusCodes.BAD_REQUEST);
+            await fixture.api.put(\`/sample-service/v2/card/\${uuid()}\`).send(cardCreationData).expect(StatusCodes.BAD_REQUEST);
           });
         `,
         output: `
@@ -87,11 +73,11 @@ describe(ruleId, () => {
         errors: 1,
       },
       {
-        // PUT with request header
+        name: 'PUT with request header',
         code: `
           it('PUT /card/:cardId/block', async () => {
             const noFraudResponse = await fixture.api
-              .post(\`/vault/v2/card/\${originalCard.card.cardId}/block/\${encodeURIComponent('BLOCKED NO FRAUD')}\`)
+              .post(\`/sample-service/v2/card/\${originalCard.card.cardId}/block/\${encodeURIComponent('BLOCKED NO FRAUD')}\`)
               .set(IF_MATCH_HEADER, originalCard.version)
               .set('abc', originalCard.name)
               .set('x-y-z', '123')
@@ -114,11 +100,11 @@ describe(ruleId, () => {
         errors: 1,
       },
       {
-        // POST without request header/body
+        name: 'POST without request header/body',
         code: `
           it('PUT /card/:cardId/block', async () => {
             await fixture.api
-              .post(\`/vault/v2/card/\${originalCard.card.cardId}/block/\${encodeURIComponent('BLOCKED NO FRAUD')}\`)
+              .post(\`/sample-service/v2/card/\${originalCard.card.cardId}/block/\${encodeURIComponent('BLOCKED NO FRAUD')}\`)
               .expect(StatusCodes.NO_CONTENT);
           });
         `,
@@ -133,10 +119,10 @@ describe(ruleId, () => {
         errors: 1,
       },
       {
-        // headers references should use getter
+        name: 'headers references should use getter',
         code: `
           it('GET /ping', async () => {
-            const response = await fixture.api.get(\`/vault/v2/ping\`).expect(StatusCodes.OK);
+            const response = await fixture.api.get(\`/sample-service/v2/ping\`).expect(StatusCodes.OK);
             assert.ok(response.headers.etag);
             assert.ok(response.headers[ETAG]);
             assert.ok(response.headers['content-type']);
@@ -147,7 +133,9 @@ describe(ruleId, () => {
         `,
         output: `
           it('GET /ping', async () => {
-            const response = await fetch(\`\${BASE_PATH}/ping\`);
+            const response = await fetch(\`\${BASE_PATH}/ping\`, {
+              method: 'GET',
+            });
             assert.equal(response.status, StatusCodes.OK);
             assert.ok(response.headers.get('etag'));
             assert.ok(response.headers.get(ETAG));
@@ -160,10 +148,10 @@ describe(ruleId, () => {
         errors: 1,
       },
       {
-        // response headers assertion should be externalized with new variable declared if necessary
+        name: 'response headers assertion should be externalized with new variable declared if necessary',
         code: `
           it('GET /ping', async () => {
-            await fixture.api.get(\`/vault/v2/ping\`)
+            await fixture.api.get(\`/sample-service/v2/ping\`)
               .expect(StatusCodes.OK)
               .expect('etag', '123')
               .expect('content-type', 'application/json')
@@ -173,7 +161,9 @@ describe(ruleId, () => {
         `,
         output: `
           it('GET /ping', async () => {
-            const response = await fetch(\`\${BASE_PATH}/ping\`);
+            const response = await fetch(\`\${BASE_PATH}/ping\`, {
+              method: 'GET',
+            });
             assert.equal(response.status, StatusCodes.OK);
             assert.equal(response.headers.get('etag'), '123');
             assert.equal(response.headers.get('content-type'), 'application/json');
@@ -184,87 +174,103 @@ describe(ruleId, () => {
         errors: 1,
       },
       {
-        // response body assertion
+        name: 'response body assertion',
         code: `
           it('GET /ping', async () => {
-            await fixture.api.get(\`/vault/v2/ping\`).expect({message:'pong'});
+            await fixture.api.get(\`/sample-service/v2/ping\`).expect({message:'pong'});
           });
         `,
         output: `
           it('GET /ping', async () => {
-            const response = await fetch(\`\${BASE_PATH}/ping\`);
+            const response = await fetch(\`\${BASE_PATH}/ping\`, {
+              method: 'GET',
+            });
             assert.deepEqual(await response.json(), {message:'pong'});
           });
         `,
         errors: 1,
       },
       {
-        // response callback assertion
+        name: 'response callback assertion',
         code: `
           it('GET /ping', async () => {
-            await fixture.api.get(\`/vault/v2/ping\`)
-              .expect(validate)
-              .expect((response)=>console.log(response));
+            await fixture.api.get(\`/sample-service/v2/ping\`)
+            .expect(validate)
+            .expect((response)=>console.log(response));
           });
-        `,
+          `,
         output: `
           it('GET /ping', async () => {
-            const response = await fetch(\`\${BASE_PATH}/ping\`);
+            const response = await fetch(\`\${BASE_PATH}/ping\`, {
+              method: 'GET',
+            });
             assert.ok(validate(response));
             assert.ok((response)=>console.log(response));
           });
-        `,
+          `,
         errors: 1,
       },
       {
-        // multiple fixture calls in the same test
+        name: 'multiple fixture calls in the same test',
         code: `
           it('GET /ping', async () => {
-            await fixture.api.get(\`/smartdata/v1/ping\`).expect(StatusCodes.OK);
-            const pingResponse = await fixture.api.get(\`/smartdata/v1/ping\`).expect(StatusCodes.OK);
-            await fixture.api.get(\`/smartdata/v1/ping?param=xxx\`).expect(StatusCodes.OK).expect({message:'pong'});
-            await fixture.api.get(\`/smartdata/v1/ping\`).expect(StatusCodes.OK);
+            await fixture.api.get(\`/sample-service/v1/ping\`).expect(StatusCodes.OK);
+            const pingResponse = await fixture.api.get(\`/sample-service/v1/ping\`).expect(StatusCodes.OK);
+            await fixture.api.get(\`/sample-service/v1/ping?param=xxx\`).expect(StatusCodes.OK).expect({message:'pong'});
+            await fixture.api.get(\`/sample-service/v1/ping\`).expect(StatusCodes.OK);
           });
-        `,
+          `,
         output: `
           it('GET /ping', async () => {
-            const response = await fetch(\`\${BASE_PATH}/ping\`);
+            const response = await fetch(\`\${BASE_PATH}/ping\`, {
+              method: 'GET',
+            });
             assert.equal(response.status, StatusCodes.OK);
-            const pingResponse = await fetch(\`\${BASE_PATH}/ping\`);
+            const pingResponse = await fetch(\`\${BASE_PATH}/ping\`, {
+              method: 'GET',
+            });
             assert.equal(pingResponse.status, StatusCodes.OK);
-            const response1 = await fetch(\`\${BASE_PATH}/ping?param=xxx\`);
+            const response1 = await fetch(\`\${BASE_PATH}/ping?param=xxx\`, {
+              method: 'GET',
+            });
             assert.equal(response1.status, StatusCodes.OK);
             assert.deepEqual(await response1.json(), {message:'pong'});
-            const response2 = await fetch(\`\${BASE_PATH}/ping\`);
+            const response2 = await fetch(\`\${BASE_PATH}/ping\`, {
+              method: 'GET',
+            });
             assert.equal(response2.status, StatusCodes.OK);
           });
-        `,
+          `,
         errors: 4,
       },
       {
-        // directly return (no await) fixture call
+        name: 'directly return (no await) fixture call',
         code: `
           it('GET /ping', async () => {
-            return fixture.api.get(\`/smartdata/v1/ping\`);
+            return fixture.api.get(\`/sample-service/v1/ping\`);
           });
         `,
         output: `
           it('GET /ping', async () => {
-            return fetch(\`\${BASE_PATH}/ping\`)
+            return fetch(\`\${BASE_PATH}/ping\`, {
+              method: 'GET',
+            });
           });
         `,
         errors: 1,
       },
       {
-        // directly return (no await) fixture call with assertion
+        name: 'directly return (no await) fixture call with assertion',
         code: `
           it('GET /ping', async () => {
-            return fixture.api.get(\`/smartdata/v1/ping\`).expect(StatusCodes.OK);
+            return fixture.api.get(\`/sample-service/v1/ping\`).expect(StatusCodes.OK);
           });
         `,
         output: `
           it('GET /ping', async () => {
-            const response = await fetch(\`\${BASE_PATH}/ping\`);
+            const response = await fetch(\`\${BASE_PATH}/ping\`, {
+              method: 'GET',
+            });
             assert.equal(response.status, StatusCodes.OK);
             return response;
           });
@@ -272,10 +278,10 @@ describe(ruleId, () => {
         errors: 1,
       },
       {
-        // directly return (no await) fixture call with body/headers
+        name: 'directly return (no await) fixture call with body/headers',
         code: `
           it('PUT /card', async () => {
-            return fixture.api.put(\`/vault/v2/card/\${uuid()}\`)
+            return fixture.api.put(\`/sample-service/v2/card/\${uuid()}\`)
               .set(IF_MATCH_HEADER, originalCard.version)
               .send({});
           });
@@ -288,45 +294,51 @@ describe(ruleId, () => {
               headers: {
                 [IF_MATCH_HEADER]: originalCard.version,
               },
-            })
+            });
           });
         `,
         errors: 1,
       },
       {
-        // replace statusCode with status
+        name: 'replace statusCode with status',
         code: `
           it('GET /ping', async () => {
-            const response = await fixture.api.get(\`/vault/v2/ping\`);
+            const response = await fixture.api.get(\`/sample-service/v2/ping\`);
             assert.equal(response.statusCode, StatusCodes.OK);
             console.log('status:', response.statusCode);
-            const response2 = await fixture.api.get(\`/vault/v2/ping\`);
+            const response2 = await fixture.api.get(\`/sample-service/v2/ping\`);
             assert.equal(response2.status, StatusCodes.OK);
           });
         `,
         output: `
           it('GET /ping', async () => {
-            const response = await fetch(\`\${BASE_PATH}/ping\`);
+            const response = await fetch(\`\${BASE_PATH}/ping\`, {
+              method: 'GET',
+            });
             assert.equal(response.status, StatusCodes.OK);
             console.log('status:', response.status);
-            const response2 = await fetch(\`\${BASE_PATH}/ping\`);
+            const response2 = await fetch(\`\${BASE_PATH}/ping\`, {
+              method: 'GET',
+            });
             assert.equal(response2.status, StatusCodes.OK);
           });
         `,
         errors: 2,
       },
       {
-        // replace header access through response.get() with response.headers.get()
+        name: 'replace header access through response.get() with response.headers.get()',
         code: `
           it('GET /ping', async () => {
-            const response = await fixture.api.get(\`/vault/v2/ping\`).expect(StatusCodes.OK);
+            const response = await fixture.api.get(\`/sample-service/v2/ping\`).expect(StatusCodes.OK);
             assert.equal(response.get(ETAG), correctVersion);
             assert.equal(response.get('etag'), correctVersion);
           });
         `,
         output: `
           it('GET /ping', async () => {
-            const response = await fetch(\`\${BASE_PATH}/ping\`);
+            const response = await fetch(\`\${BASE_PATH}/ping\`, {
+              method: 'GET',
+            });
             assert.equal(response.status, StatusCodes.OK);
             assert.equal(response.headers.get(ETAG), correctVersion);
             assert.equal(response.headers.get('etag'), correctVersion);
@@ -335,32 +347,36 @@ describe(ruleId, () => {
         errors: 1,
       },
       {
-        // work with response status literal (e.g. 200 instead of StatusCoodes.OK) as well
+        name: 'work with response status literal (e.g. 200 instead of StatusCoodes.OK) as well',
         code: `
           it('GET /ping', async () => {
-            await fixture.api.get(\`/vault/v2/ping\`).expect(200);
+            await fixture.api.get(\`/sample-service/v2/ping\`).expect(200);
           });
         `,
         output: `
           it('GET /ping', async () => {
-            const response = await fetch(\`\${BASE_PATH}/ping\`);
+            const response = await fetch(\`\${BASE_PATH}/ping\`, {
+              method: 'GET',
+            });
             assert.equal(response.status, 200);
           });
         `,
         errors: 1,
       },
       {
-        // assert response body against function call's return value ".expect(validateBody(response))"
+        name: 'assert response body against function call\'s return value ".expect(validateBody(response))"',
         code: `
           it('GET /ping', async () => {
             const createdOn = Date.now().toUTCString();
-            await fixture.api.get(\`/vault/v2/ping\`).expect(200).expect(validateBody(createdOn));
+            await fixture.api.get(\`/sample-service/v2/ping\`).expect(200).expect(validateBody(createdOn));
           });
         `,
         output: `
           it('GET /ping', async () => {
             const createdOn = Date.now().toUTCString();
-            const response = await fetch(\`\${BASE_PATH}/ping\`);
+            const response = await fetch(\`\${BASE_PATH}/ping\`, {
+              method: 'GET',
+            });
             assert.equal(response.status, 200);
             assert.deepEqual(await response.json(), validateBody(createdOn));
           });
@@ -368,7 +384,7 @@ describe(ruleId, () => {
         errors: 1,
       },
       {
-        // handle spreading variable declaration for body
+        name: 'handle spreading variable declaration for body',
         code: `
           it('returns current server time', async () => {
             const { body: responseBody } = await fixture.api.get(\`$\{BASE_PATH}/ping\`).expect(StatusCodes.OK);
@@ -378,9 +394,11 @@ describe(ruleId, () => {
         `,
         output: `
           it('returns current server time', async () => {
-            const response = await fetch(\`$\{BASE_PATH}/ping\`);
+            const response = await fetch(\`$\{BASE_PATH}/ping\`, {
+              method: 'GET',
+            });
+            assert.equal(response.status, StatusCodes.OK);
             const responseBody = await response.json();
-            assert.equal(response.status, StatusCodes.OK)
             const timeDifference = Date.now() - new Date(responseBody.serverTime).getTime();
             assert.ok(timeDifference >= 0 && timeDifference < 200);
           });
@@ -388,7 +406,7 @@ describe(ruleId, () => {
         errors: 1,
       },
       {
-        // handle spreading variable declaration for headers when body is presented as well
+        name: 'handle spreading variable declaration for headers when body is presented as well',
         code: `
           it('returns current server time', async () => {
             const { body, headers: headers2 } = await fixture.api.get(\`$\{BASE_PATH}/ping\`).expect(StatusCodes.OK);
@@ -398,10 +416,12 @@ describe(ruleId, () => {
         `,
         output: `
           it('returns current server time', async () => {
-            const response = await fetch(\`$\{BASE_PATH}/ping\`);
+            const response = await fetch(\`$\{BASE_PATH}/ping\`, {
+              method: 'GET',
+            });
+            assert.equal(response.status, StatusCodes.OK);
             const body = await response.json();
             const headers2 = response.headers;
-            assert.equal(response.status, StatusCodes.OK)
             assert(body);
             assert.ok(headers2.get(ETAG));
           });
@@ -409,7 +429,7 @@ describe(ruleId, () => {
         errors: 1,
       },
       {
-        // handle spreading variable declaration for headers without body presented but with assertions used
+        name: 'handle spreading variable declaration for headers without body presented but with assertions used',
         code: `
           it('returns current server time', async () => {
             const { headers } = await fixture.api.get(\`$\{BASE_PATH}/ping\`).expect(StatusCodes.OK);
@@ -418,16 +438,18 @@ describe(ruleId, () => {
         `,
         output: `
           it('returns current server time', async () => {
-            const response = await fetch(\`$\{BASE_PATH}/ping\`);
+            const response = await fetch(\`$\{BASE_PATH}/ping\`, {
+              method: 'GET',
+            });
+            assert.equal(response.status, StatusCodes.OK);
             const headers = response.headers;
-            assert.equal(response.status, StatusCodes.OK)
             assert.ok(headers.get(ETAG));
           });
         `,
         errors: 1,
       },
       {
-        // handle spreading variable declaration for headers without body/assertion presented doesn't need to change
+        name: 'handle spreading variable declaration for headers without body/assertion presented does not need to change',
         code: `
           it('returns current server time', async () => {
             const { headers } = await fixture.api.get(\`$\{BASE_PATH}/ping\`);
@@ -436,7 +458,9 @@ describe(ruleId, () => {
         `,
         output: `
           it('returns current server time', async () => {
-            const { headers } = await fetch(\`$\{BASE_PATH}/ping\`);
+            const { headers } = await fetch(\`$\{BASE_PATH}/ping\`, {
+              method: 'GET',
+            });
             assert.ok(headers.get(ETAG));
           });
         `,
