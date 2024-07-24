@@ -13,6 +13,7 @@ import type {
   CallExpression,
   Expression,
   MemberExpression,
+  Node,
   ReturnStatement,
   SimpleCallExpression,
   VariableDeclaration,
@@ -228,6 +229,45 @@ function createResponseAssertions(
   };
 }
 
+function getResponseVariableNameToUse(
+  scopeManager: Scope.ScopeManager,
+  fixtureCallInformation: FixtureCallInformation,
+  scopeVariablesMap: Map<Scope.Scope, string[]>,
+) {
+  if (fixtureCallInformation.variableDeclaration) {
+    const firstDeclaration = fixtureCallInformation.variableDeclaration.declarations[0];
+    // [TODO:] double check if it works for destruction/rename declaration
+    if (firstDeclaration && firstDeclaration.id.type === 'Identifier') {
+      return firstDeclaration.id.name;
+    }
+  }
+
+  const closestFunctionExpression = getAncestor(fixtureCallInformation.rootNode, (node: Node) =>
+    ['FunctionExpression', 'ArrowFunctionExpression'].includes(node.type),
+  );
+  scopeManager.getDeclaredVariables(fixtureCallInformation.rootNode); /*?*/
+  assert.ok(closestFunctionExpression);
+  const scope = scopeManager.acquire(closestFunctionExpression);
+  assert.ok(scope !== null);
+  let scopeVariables = scopeVariablesMap.get(scope);
+  if (!scopeVariables) {
+    scopeVariables = [...scope.set.keys()];
+    scopeVariablesMap.set(scope, scopeVariables);
+  }
+
+  let responseVariableCounter = 0;
+  let responseVariableNameToUse;
+  while (responseVariableNameToUse === undefined) {
+    responseVariableCounter++;
+    responseVariableNameToUse = `response${responseVariableCounter === 1 ? '' : responseVariableCounter.toString()}`;
+    if (scopeVariables.includes(responseVariableNameToUse)) {
+      responseVariableNameToUse = undefined;
+    }
+  }
+  scopeVariables.push(responseVariableNameToUse);
+  return responseVariableNameToUse;
+}
+
 const rule: Rule.RuleModule = {
   meta: {
     type: 'suggestion',
@@ -246,7 +286,7 @@ const rule: Rule.RuleModule = {
   create(context) {
     const sourceCode = context.sourceCode;
     const scopeManager = sourceCode.scopeManager;
-    let responseVariableCounter = 0;
+    const scopeVariablesMap = new Map<Scope.Scope, string[]>();
 
     return {
       'CallExpression[callee.object.object.name="fixture"][callee.object.property.name="api"]': (
@@ -300,13 +340,11 @@ const rule: Rule.RuleModule = {
             '}',
           ].join(`\n${indentation}`);
 
-          let responseVariableNameToUse: string;
-          if (responseVariable === undefined) {
-            responseVariableNameToUse = `response${responseVariableCounter === 0 ? '' : responseVariableCounter.toString()}`;
-            responseVariableCounter++;
-          } else {
-            responseVariableNameToUse = responseVariable.name;
-          }
+          const responseVariableNameToUse = getResponseVariableNameToUse(
+            scopeManager,
+            fixtureCallInformation,
+            scopeVariablesMap,
+          );
 
           const needResponseVariableRedefine =
             spreadResponseBodyVariable !== undefined ||

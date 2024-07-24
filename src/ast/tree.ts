@@ -18,12 +18,14 @@ export function getParent(node: Node): Node | undefined | null {
   return (node as unknown as NodeParentExtension).parent;
 }
 
-export function getAncestor(node: Node, typeToMatch: string, typeToExit: string) {
+export function getAncestor(node: Node, matcher: string | ((testNode: Node) => boolean), typeToExit?: string) {
   const parent = getParent(node);
-  if (!parent || parent.type === typeToExit) {
+  if (!parent || (typeToExit !== undefined && parent.type === typeToExit)) {
     return undefined;
-  } else if (parent.type === typeToMatch) {
+  } else if (typeof matcher === 'string' && parent.type === matcher) {
+    return parent;
+  } else if (typeof matcher === 'function' && matcher(parent)) {
     return parent;
   }
-  return getAncestor(parent, typeToMatch, typeToExit);
+  return getAncestor(parent, matcher, typeToExit);
 }

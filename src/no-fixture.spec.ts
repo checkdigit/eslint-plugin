@@ -230,15 +230,15 @@ describe(ruleId, () => {
               method: 'GET',
             });
             assert.equal(pingResponse.status, StatusCodes.OK);
-            const response1 = await fetch(\`\${BASE_PATH}/ping?param=xxx\`, {
-              method: 'GET',
-            });
-            assert.equal(response1.status, StatusCodes.OK);
-            assert.deepEqual(await response1.json(), {message:'pong'});
-            const response2 = await fetch(\`\${BASE_PATH}/ping\`, {
+            const response2 = await fetch(\`\${BASE_PATH}/ping?param=xxx\`, {
               method: 'GET',
             });
             assert.equal(response2.status, StatusCodes.OK);
+            assert.deepEqual(await response2.json(), {message:'pong'});
+            const response3 = await fetch(\`\${BASE_PATH}/ping\`, {
+              method: 'GET',
+            });
+            assert.equal(response3.status, StatusCodes.OK);
           });
           `,
         errors: 4,
@@ -465,6 +465,68 @@ describe(ruleId, () => {
           });
         `,
         errors: 1,
+      },
+      {
+        name: 'avoid response variable name conflict with existing variables in the same scope',
+        code: `
+          it('returns current server time', async () => {
+            const response = 'foo';
+            const response1 = 'bar';
+            await fixture.api.get(\`$\{BASE_PATH}/ping\`).expect(StatusCodes.OK);
+            await fixture.api.get(\`$\{BASE_PATH}/ping\`).expect(StatusCodes.OK);
+          });
+        `,
+        output: `
+          it('returns current server time', async () => {
+            const response = 'foo';
+            const response1 = 'bar';
+            const response2 = await fetch(\`$\{BASE_PATH}/ping\`, {
+              method: 'GET',
+            });
+            assert.equal(response2.status, StatusCodes.OK);
+            const response3 = await fetch(\`$\{BASE_PATH}/ping\`, {
+              method: 'GET',
+            });
+            assert.equal(response3.status, StatusCodes.OK);
+          });
+        `,
+        errors: 2,
+      },
+      {
+        name: 'response variable names in different scope do not conflict with each other',
+        code: `
+          it('#1', async () => {
+            const response = 'foo';
+          });
+          it('#2', async () => {
+            const response = 'foo';
+            await fixture.api.get(\`$\{BASE_PATH}/ping\`).expect(StatusCodes.OK);
+          });
+          it('#3', async () => {
+            const response3 = 'foo';
+            await fixture.api.get(\`$\{BASE_PATH}/ping\`).expect(StatusCodes.OK);
+          });
+        `,
+        output: `
+          it('#1', async () => {
+            const response = 'foo';
+          });
+          it('#2', async () => {
+            const response = 'foo';
+            const response2 = await fetch(\`$\{BASE_PATH}/ping\`, {
+              method: 'GET',
+            });
+            assert.equal(response2.status, StatusCodes.OK);
+          });
+          it('#3', async () => {
+            const response3 = 'foo';
+            const response = await fetch(\`$\{BASE_PATH}/ping\`, {
+              method: 'GET',
+            });
+            assert.equal(response.status, StatusCodes.OK);
+          });
+        `,
+        errors: 2,
       },
     ],
   });
