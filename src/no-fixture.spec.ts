@@ -55,6 +55,23 @@ describe(ruleId, () => {
         errors: 1,
       },
       {
+        name: 'assertion without variable declaration',
+        code: `
+          it('GET /ping', async () => {
+            await fixture.api.get(\`/sample-service/v1/ping\`).expect(options.expectedStatusCode ?? StatusCodes.CREATED);
+          });
+        `,
+        output: `
+          it('GET /ping', async () => {
+            const response = await fetch(\`\${BASE_PATH}/ping\`, {
+              method: 'GET',
+            });
+            assert.equal(response.status, options.expectedStatusCode ?? StatusCodes.CREATED);
+          });
+        `,
+        errors: 1,
+      },
+      {
         name: 'PUT with request body',
         code: `
           it('PUT /card', async () => {
@@ -205,7 +222,7 @@ describe(ruleId, () => {
               method: 'GET',
             });
             assert.ok(validate(response));
-            assert.ok((response)=>console.log(response));
+            assert.ok(console.log(response));
           });
           `,
         errors: 1,
@@ -527,6 +544,74 @@ describe(ruleId, () => {
           });
         `,
         errors: 2,
+      },
+      {
+        name: 'inline access to response body should be extracted to a variable',
+        code: `
+        export async function validatePin(
+          fixture,
+        ) {
+          const paymentSecurityServicePublicKey = (await fixture.api.get(\`\${BASE_PATH}/public-key\`).expect(StatusCodes.OK)).body.publicKey;
+        }
+        `,
+        output: `
+        export async function validatePin(
+          fixture,
+        ) {
+          const response = await fetch(\`\${BASE_PATH}/public-key\`, {
+            method: 'GET',
+          });
+          assert.equal(response.status, StatusCodes.OK);
+          const responseBody = await response.json();
+          const paymentSecurityServicePublicKey = responseBody.publicKey;
+        }
+        `,
+        errors: 1,
+      },
+      {
+        name: 'callback assertion using arrow function that accesses to response might conflict with the new/redefined response variable',
+        code: `
+          it.each(temporalHeaders)('imports key using a $createdOnHeaderName header', async ({ createdOnHeaderName: _ }) => {
+            const createdOn = new Date().toISOString();
+            const zoneKeyId = uuid();
+
+            // Import Key
+            const keyId = uuid();
+            await fixture.api
+              .put(\`\${BASE_PATH}/key/\${keyId}?zoneKeyId=\${zoneKeyId}\`)
+              .set(CREATED_ON_HEADER, createdOn)
+              .send({
+                key: '71CA52F757D7C0B45A16C6C04EAFD704',
+                checkValue: '4F35C4',
+              })
+              .expect(StatusCodes.NO_CONTENT)
+              .expect(ETAG_HEADER, '1')
+              .expect((res) => verifyTemporalHeaders(res, createdOn));
+          });
+        `,
+        output: `
+          it.each(temporalHeaders)('imports key using a $createdOnHeaderName header', async ({ createdOnHeaderName: _ }) => {
+            const createdOn = new Date().toISOString();
+            const zoneKeyId = uuid();
+
+            // Import Key
+            const keyId = uuid();
+            const response = await fetch(\`\${BASE_PATH}/key/\${keyId}?zoneKeyId=\${zoneKeyId}\`, {
+              method: 'PUT',
+              body: JSON.stringify({
+                key: '71CA52F757D7C0B45A16C6C04EAFD704',
+                checkValue: '4F35C4',
+              }),
+              headers: {
+                [CREATED_ON_HEADER]: createdOn,
+              },
+            });
+            assert.equal(response.status, StatusCodes.NO_CONTENT);
+            assert.equal(response.headers.get(ETAG_HEADER), '1');
+            assert.ok(verifyTemporalHeaders(response, createdOn));
+          });
+        `,
+        errors: 1,
       },
     ],
   });
