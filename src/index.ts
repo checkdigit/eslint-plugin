@@ -8,6 +8,7 @@
 
 import invalidJsonStringify, { ruleId as invalidJsonStringifyRuleId } from './invalid-json-stringify';
 import noFixture, { ruleId as noFixtureRuleId } from './no-fixture';
+import noFixtureHeaders, { ruleId as noFixtureHeadersRuleId } from './no-fixture-headers';
 import noPromiseInstanceMethod, { ruleId as noPromiseInstanceMethodRuleId } from './no-promise-instance-method';
 import filePathComment from './file-path-comment';
 import noCardNumbers from './no-card-numbers';
@@ -33,6 +34,7 @@ export default {
     [invalidJsonStringifyRuleId]: invalidJsonStringify,
     [noPromiseInstanceMethodRuleId]: noPromiseInstanceMethod,
     [noFixtureRuleId]: noFixture,
+    [noFixtureHeadersRuleId]: noFixtureHeaders,
   },
   configs: {
     all: {
@@ -49,6 +51,7 @@ export default {
         [`@checkdigit/${invalidJsonStringifyRuleId}`]: 'error',
         [`@checkdigit/${noPromiseInstanceMethodRuleId}`]: 'error',
         [`@checkdigit/${noFixtureRuleId}`]: 'error',
+        [`@checkdigit/${noFixtureHeadersRuleId}`]: 'error',
       },
     },
     recommended: {
@@ -64,7 +67,6 @@ export default {
         '@checkdigit/no-test-import': 'error',
         [`@checkdigit/${invalidJsonStringifyRuleId}`]: 'error',
         [`@checkdigit/${noPromiseInstanceMethodRuleId}`]: 'error',
-        [`@checkdigit/${noFixtureRuleId}`]: 'error',
       },
     },
   },

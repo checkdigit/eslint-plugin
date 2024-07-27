@@ -16,7 +16,7 @@ import type {
   SimpleCallExpression,
   VariableDeclaration,
 } from 'estree';
-import type { Rule, Scope, SourceCode } from 'eslint';
+import { type Rule, type Scope, SourceCode } from 'eslint';
 import { getEnclosingScopeNode, getEnclosingStatement, getParent } from './ast/tree';
 import { strict as assert } from 'node:assert';
 import getDocumentationUrl from './get-documentation-url';
@@ -36,7 +36,7 @@ interface FixtureCallInformation {
 }
 
 // recursively analyze the fixture/supertest call chain to collect information of request/response
-function analyzeFixtureCall(call: SimpleCallExpression, results: FixtureCallInformation) {
+function analyzeFixtureCall(call: SimpleCallExpression, results: FixtureCallInformation, sourceCode: SourceCode) {
   const parent = getParent(call);
   assert.ok(parent, 'parent should exist for fixture/supertest call node');
 
@@ -84,10 +84,10 @@ function analyzeFixtureCall(call: SimpleCallExpression, results: FixtureCallInfo
       nextCall = setRequestHeaderCall;
     }
   } else {
-    throw new Error(`Unexpected expression in fixture/supertest call ${String(parent)}`);
+    throw new Error(`Unexpected expression in fixture/supertest call ${sourceCode.getText(parent)}`);
   }
   if (nextCall) {
-    analyzeFixtureCall(nextCall, results);
+    analyzeFixtureCall(nextCall, results, sourceCode);
   }
 }
 
@@ -100,6 +100,7 @@ function analyzeResponseReferences(fixtureInformation: FixtureCallInformation, s
     statusReferences: MemberExpression[];
     destructuringBodyVariable?: Scope.Variable;
     destructuringHeadersVariable?: Scope.Variable;
+    destructuringHeadersReferences?: MemberExpression[] | undefined;
   } = {
     bodyReferences: [],
     headersReferences: [],
@@ -109,6 +110,7 @@ function analyzeResponseReferences(fixtureInformation: FixtureCallInformation, s
   if (fixtureInformation.variableDeclaration) {
     const responseVariables = scopeManager.getDeclaredVariables(fixtureInformation.variableDeclaration);
     for (const responseVariable of responseVariables) {
+      const scope = responseVariable.scope;
       const identifier = responseVariable.identifiers[0];
       assert.ok(identifier);
       const identifierParent = getParent(identifier);
@@ -116,39 +118,36 @@ function analyzeResponseReferences(fixtureInformation: FixtureCallInformation, s
       if (identifierParent.type === 'VariableDeclarator') {
         // e.g. const response = ...
         results.variable = responseVariable;
+        const responseReferences = responseVariable.references.map((responseReference) =>
+          getParent(responseReference.identifier),
+        );
         // e.g. response.body
-        results.bodyReferences = responseVariable.references
-          .map((responseBodyReference) => getParent(responseBodyReference.identifier))
-          .filter(
-            (node): node is MemberExpression =>
-              node !== null &&
-              node !== undefined &&
-              node.type === 'MemberExpression' &&
-              node.property.type === 'Identifier' &&
-              node.property.name === 'body',
-          );
+        results.bodyReferences = responseReferences.filter(
+          (node): node is MemberExpression =>
+            node !== null &&
+            node !== undefined &&
+            node.type === 'MemberExpression' &&
+            node.property.type === 'Identifier' &&
+            node.property.name === 'body',
+        );
         // e.g. response.headers / response.header / response.get()
-        results.headersReferences = responseVariable.references
-          .map((responseHeadersReference) => getParent(responseHeadersReference.identifier))
-          .filter(
-            (node): node is MemberExpression =>
-              node !== null &&
-              node !== undefined &&
-              node.type === 'MemberExpression' &&
-              node.property.type === 'Identifier' &&
-              (node.property.name === 'header' || node.property.name === 'headers' || node.property.name === 'get'),
-          );
+        results.headersReferences = responseReferences.filter(
+          (node): node is MemberExpression =>
+            node !== null &&
+            node !== undefined &&
+            node.type === 'MemberExpression' &&
+            node.property.type === 'Identifier' &&
+            (node.property.name === 'header' || node.property.name === 'headers' || node.property.name === 'get'),
+        );
         // e.g. response.status / response.statusCode
-        results.statusReferences = responseVariable.references
-          .map((responseHeadersReference) => getParent(responseHeadersReference.identifier))
-          .filter(
-            (node): node is MemberExpression =>
-              node !== null &&
-              node !== undefined &&
-              node.type === 'MemberExpression' &&
-              node.property.type === 'Identifier' &&
-              (node.property.name === 'status' || node.property.name === 'statusCode'),
-          );
+        results.statusReferences = responseReferences.filter(
+          (node): node is MemberExpression =>
+            node !== null &&
+            node !== undefined &&
+            node.type === 'MemberExpression' &&
+            node.property.type === 'Identifier' &&
+            (node.property.name === 'status' || node.property.name === 'statusCode'),
+        );
       } else if (
         // body reference through destruction/renaming, e.g. "const { body } = ..."
         identifierParent.type === 'Property' &&
@@ -163,6 +162,17 @@ function analyzeResponseReferences(fixtureInformation: FixtureCallInformation, s
         identifierParent.key.name === 'headers'
       ) {
         results.destructuringHeadersVariable = responseVariable;
+        results.destructuringHeadersReferences = scope.set
+          .get(responseVariable.name)
+          ?.references.map((reference) => reference.identifier)
+          .map(getParent)
+          .filter(
+            (parent): parent is MemberExpression =>
+              parent?.type === 'MemberExpression' &&
+              parent.property.type === 'Identifier' &&
+              parent.property.name !== 'get' &&
+              getParent(parent)?.type !== 'CallExpression',
+          );
       } else {
         throw new Error(`Unknown response variable reference: ${responseVariable.name}`);
       }
@@ -186,6 +196,7 @@ function createResponseAssertions(
   fixtureCallInformation: FixtureCallInformation,
   sourceCode: SourceCode,
   responseVariableName: string,
+  destructuringResponseHeadersVariable: Scope.Variable | undefined,
 ) {
   let statusAssertion: string | undefined;
   const nonStatusAssertions: string[] = [];
@@ -231,13 +242,17 @@ function createResponseAssertions(
       // header assertion
       const [headerName, headerValue] = expectArguments;
       assert.ok(headerName && headerValue);
+      const headersReference =
+        destructuringResponseHeadersVariable !== undefined
+          ? destructuringResponseHeadersVariable.name
+          : `${responseVariableName}.headers`;
       if (headerValue.type === 'Literal' && headerValue.value instanceof RegExp) {
         nonStatusAssertions.push(
-          `assert.ok(${responseVariableName}.headers.get(${sourceCode.getText(headerName)}).match(${sourceCode.getText(headerValue)}))`,
+          `assert.ok(${headersReference}.get(${sourceCode.getText(headerName)}).match(${sourceCode.getText(headerValue)}))`,
         );
       } else {
         nonStatusAssertions.push(
-          `assert.equal(${responseVariableName}.headers.get(${sourceCode.getText(headerName)}), ${sourceCode.getText(headerValue)})`,
+          `assert.equal(${headersReference}.get(${sourceCode.getText(headerName)}), ${sourceCode.getText(headerValue)})`,
         );
       }
     }
@@ -255,7 +270,6 @@ function getResponseVariableNameToUse(
 ) {
   if (fixtureCallInformation.variableDeclaration) {
     const firstDeclaration = fixtureCallInformation.variableDeclaration.declarations[0];
-    // [TODO:] double check if it works for destruction/rename declaration
     if (firstDeclaration && firstDeclaration.id.type === 'Identifier') {
       return firstDeclaration.id.name;
     }
@@ -316,6 +330,7 @@ const rule: Rule.RuleModule = {
     const scopeVariablesMap = new Map<Scope.Scope, string[]>();
 
     return {
+      // eslint-disable-next-line max-lines-per-function
       'CallExpression[callee.object.object.name="fixture"][callee.object.property.name="api"]': (
         fixtureCall: CallExpression,
       ) => {
@@ -329,7 +344,7 @@ const rule: Rule.RuleModule = {
           assert.ok(urlArgumentNode !== undefined);
 
           const fixtureCallInformation = {} as FixtureCallInformation;
-          analyzeFixtureCall(fixtureCall, fixtureCallInformation);
+          analyzeFixtureCall(fixtureCall, fixtureCallInformation, sourceCode);
 
           const {
             variable: responseVariable,
@@ -338,6 +353,7 @@ const rule: Rule.RuleModule = {
             statusReferences: responseStatusReferences,
             destructuringBodyVariable: destructuringResponseBodyVariable,
             destructuringHeadersVariable: destructuringResponseHeadersVariable,
+            // destructuringHeadersReferences: destructuringResponseHeadersReferences,
           } = analyzeResponseReferences(fixtureCallInformation, scopeManager);
 
           // convert url from `/sample-service/v1/ping` to `${BASE_PATH}/ping`
@@ -405,6 +421,7 @@ const rule: Rule.RuleModule = {
             fixtureCallInformation,
             sourceCode,
             responseVariableNameToUse,
+            destructuringResponseHeadersVariable,
           );
 
           // add variable declaration if needed
@@ -426,6 +443,7 @@ const rule: Rule.RuleModule = {
           context.report({
             node: fixtureCall,
             messageId: 'preferNativeFetch',
+            // eslint-disable-next-line sonarjs/cognitive-complexity
             *fix(fixer) {
               if (fixtureCallInformation.inlineStatementNode) {
                 const preInlineDeclaration = [
@@ -473,6 +491,19 @@ const rule: Rule.RuleModule = {
                 assert.ok(headerName);
                 yield fixer.replaceText(parent, `${responseVariableNameToUse}.headers.get(${headerName})`);
               }
+              // if (destructuringResponseHeadersVariable !== undefined) {
+              //   for (const destructuringResponseHeadersReference of destructuringResponseHeadersReferences ?? []) {
+              //     const headerNameNode = destructuringResponseHeadersReference.property;
+              //     const headerName = destructuringResponseHeadersReference.computed
+              //       ? sourceCode.getText(headerNameNode)
+              //       : `'${sourceCode.getText(headerNameNode)}'`;
+
+              //     yield fixer.replaceText(
+              //       destructuringResponseHeadersReference,
+              //       `${destructuringResponseHeadersVariable.name}.get(${headerName})`,
+              //     );
+              //   }
+              // }
 
               // convert response.statusCode to response.status
               for (const responseStatusReference of responseStatusReferences) {
