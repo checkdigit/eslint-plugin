@@ -488,7 +488,7 @@ const rule: Rule.RuleModule = {
                   const headerNameNode = parent.arguments[0];
                   headerName = sourceCode.getText(headerNameNode);
                 }
-                assert.ok(headerName);
+                assert.ok(headerName !== undefined);
                 yield fixer.replaceText(parent, `${responseVariableNameToUse}.headers.get(${headerName})`);
               }
               // if (destructuringResponseHeadersVariable !== undefined) {

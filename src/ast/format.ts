@@ -13,7 +13,7 @@ import { strict as assert } from 'node:assert';
 export function getIndentation(node: Node, sourceCode: SourceCode) {
   assert.ok(node.loc);
   const line = sourceCode.lines[node.loc.start.line - 1];
-  assert.ok(line);
+  assert.ok(line !== undefined);
   const indentMatch = line.match(/^\s*/u);
   return indentMatch ? indentMatch[0] : '';
 }

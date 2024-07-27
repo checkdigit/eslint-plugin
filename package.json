@@ -42,7 +42,7 @@
     "SECURITY.md"
   ],
   "scripts": {
-    "build:dist-cjs": "rimraf dist-cjs && npx builder --type=commonjs --sourceMap --entryPoint=index.ts --outDir=dist-cjs --outFile=index.cjs --external=espree && echo \"module.exports = module.exports.default;\" >> dist-cjs/index.cjs && node dist-cjs/index.cjs",
+    "build:dist-cjs": "rimraf dist-cjs && npx builder --type=commonjs --sourceMap --entryPoint=index.ts --outDir=dist-cjs --outFile=index.cjs && echo \"module.exports = module.exports.default;\" >> dist-cjs/index.cjs && node dist-cjs/index.cjs",
     "build:dist-mjs": "rimraf dist-mjs && npx builder --type=module --sourceMap --outDir=dist-mjs && node dist-mjs/index.mjs",
     "build:dist-types": "rimraf dist-types && npx builder --type=types --outDir=dist-types",
     "ci:compile": "tsc --noEmit",
@@ -64,7 +64,7 @@
   "devDependencies": {
     "@checkdigit/jest-config": "^6.0.2",
     "@checkdigit/prettier-config": "^5.5.0",
-    "@checkdigit/typescript-config": "6.0.0",
+    "@checkdigit/typescript-config": "7.1.3-PR.64-9fc8",
     "@types/eslint": "^8.56.10",
     "@typescript-eslint/eslint-plugin": "^7.16.1",
     "@typescript-eslint/parser": "^7.16.1",
