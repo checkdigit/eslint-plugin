@@ -6,11 +6,7 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import type {
-  Identifier,
-  MemberExpression,
-  VariableDeclarator,
-} from 'estree';
+import type { Identifier, MemberExpression, VariableDeclarator } from 'estree';
 import { getEnclosingScopeNode, getParent } from './ast/tree';
 import { type Rule } from 'eslint';
 import { strict as assert } from 'node:assert';
