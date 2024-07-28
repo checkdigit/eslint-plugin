@@ -1,4 +1,4 @@
-// no-fixture.ts
+// fixture/response-reference.ts
 
 /*
  * Copyright (c) 2021-2024 Check Digit, LLC

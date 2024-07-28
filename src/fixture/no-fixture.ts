@@ -1,4 +1,4 @@
-// no-fixture.ts
+// fixture/no-fixture.ts
 
 /*
  * Copyright (c) 2021-2024 Check Digit, LLC
@@ -22,6 +22,9 @@ import { analyzeResponseReferences } from './response-reference';
 import { strict as assert } from 'node:assert';
 import getDocumentationUrl from '../get-documentation-url';
 import { getIndentation } from '../ast/format';
+import { getResponseBodyRetrievalText } from './fetch';
+import { isValidPropertyName } from './variable';
+import { replaceEndpointUrlPrefixWithBasePath } from './url';
 
 export const ruleId = 'no-fixture';
 
@@ -90,16 +93,6 @@ function analyzeFixtureCall(call: SimpleCallExpression, results: FixtureCallInfo
   if (nextCall) {
     analyzeFixtureCall(nextCall, results, sourceCode);
   }
-}
-
-// `/sample-service/v1/ping` -> `${BASE_PATH}/ping`
-function replaceEndpointUrlPrefixWithBasePath(url: string) {
-  // eslint-disable-next-line no-template-curly-in-string
-  return url.replace(/`\/\w+(?<parts>-\w+)*\/v\d+\//u, '`${BASE_PATH}/');
-}
-
-function isValidPropertyName(name: unknown) {
-  return typeof name === 'string' && /^[a-zA-Z_$][a-zA-Z_$0-9]*$/u.test(name);
 }
 
 // eslint-disable-next-line sonarjs/cognitive-complexity
@@ -213,10 +206,6 @@ function getResponseVariableNameToUse(
 function isResponseBodyRedefinition(responseBodyReference: MemberExpression): boolean {
   const parent = getParent(responseBodyReference);
   return parent?.type === 'VariableDeclarator' && parent.id.type === 'Identifier';
-}
-
-function getResponseBodyRetrievalText(responseVariableName: string) {
-  return `await ${responseVariableName}.json()`;
 }
 
 const rule: Rule.RuleModule = {
