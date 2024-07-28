@@ -47,6 +47,6 @@ export function getEnclosingStatement(node: Node) {
 
 export function getEnclosingScopeNode(node: Node) {
   return getAncestor(node, (parentNode) =>
-    ['FunctionExpression', 'FunctionDeclaration', 'ArrowFunctionExpression'].includes(parentNode.type),
+    ['FunctionExpression', 'FunctionDeclaration', 'ArrowFunctionExpression', 'Program'].includes(parentNode.type),
   );
 }

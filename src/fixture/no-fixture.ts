@@ -17,10 +17,11 @@ import type {
   VariableDeclaration,
 } from 'estree';
 import { type Rule, type Scope, SourceCode } from 'eslint';
-import { getEnclosingScopeNode, getEnclosingStatement, getParent } from './ast/tree';
+import { getEnclosingScopeNode, getEnclosingStatement, getParent } from '../ast/tree';
+import { analyzeResponseReferences } from './response-reference';
 import { strict as assert } from 'node:assert';
-import getDocumentationUrl from './get-documentation-url';
-import { getIndentation } from './ast/format';
+import getDocumentationUrl from '../get-documentation-url';
+import { getIndentation } from '../ast/format';
 
 export const ruleId = 'no-fixture';
 
@@ -42,7 +43,7 @@ function analyzeFixtureCall(call: SimpleCallExpression, results: FixtureCallInfo
 
   let nextCall;
   if (parent.type === 'ReturnStatement') {
-    // direct return, no variable declaration / await
+    // direct return, no variable declaration or await
     results.fixtureNode = call;
     results.rootNode = parent;
   } else if (parent.type === 'AwaitExpression') {
@@ -84,101 +85,11 @@ function analyzeFixtureCall(call: SimpleCallExpression, results: FixtureCallInfo
       nextCall = setRequestHeaderCall;
     }
   } else {
-    throw new Error(`Unexpected expression in fixture/supertest call ${sourceCode.getText(parent)}`);
+    throw new Error(`Unexpected expression in fixture/supertest call ${sourceCode.getText(parent)}.`);
   }
   if (nextCall) {
     analyzeFixtureCall(nextCall, results, sourceCode);
   }
-}
-
-// analyze response related variables and their references0
-function analyzeResponseReferences(fixtureInformation: FixtureCallInformation, scopeManager: Scope.ScopeManager) {
-  const results: {
-    variable?: Scope.Variable;
-    bodyReferences: MemberExpression[];
-    headersReferences: MemberExpression[];
-    statusReferences: MemberExpression[];
-    destructuringBodyVariable?: Scope.Variable;
-    destructuringHeadersVariable?: Scope.Variable;
-    destructuringHeadersReferences?: MemberExpression[] | undefined;
-  } = {
-    bodyReferences: [],
-    headersReferences: [],
-    statusReferences: [],
-  };
-
-  if (fixtureInformation.variableDeclaration) {
-    const responseVariables = scopeManager.getDeclaredVariables(fixtureInformation.variableDeclaration);
-    for (const responseVariable of responseVariables) {
-      const scope = responseVariable.scope;
-      const identifier = responseVariable.identifiers[0];
-      assert.ok(identifier);
-      const identifierParent = getParent(identifier);
-      assert.ok(identifierParent);
-      if (identifierParent.type === 'VariableDeclarator') {
-        // e.g. const response = ...
-        results.variable = responseVariable;
-        const responseReferences = responseVariable.references.map((responseReference) =>
-          getParent(responseReference.identifier),
-        );
-        // e.g. response.body
-        results.bodyReferences = responseReferences.filter(
-          (node): node is MemberExpression =>
-            node !== null &&
-            node !== undefined &&
-            node.type === 'MemberExpression' &&
-            node.property.type === 'Identifier' &&
-            node.property.name === 'body',
-        );
-        // e.g. response.headers / response.header / response.get()
-        results.headersReferences = responseReferences.filter(
-          (node): node is MemberExpression =>
-            node !== null &&
-            node !== undefined &&
-            node.type === 'MemberExpression' &&
-            node.property.type === 'Identifier' &&
-            (node.property.name === 'header' || node.property.name === 'headers' || node.property.name === 'get'),
-        );
-        // e.g. response.status / response.statusCode
-        results.statusReferences = responseReferences.filter(
-          (node): node is MemberExpression =>
-            node !== null &&
-            node !== undefined &&
-            node.type === 'MemberExpression' &&
-            node.property.type === 'Identifier' &&
-            (node.property.name === 'status' || node.property.name === 'statusCode'),
-        );
-      } else if (
-        // body reference through destruction/renaming, e.g. "const { body } = ..."
-        identifierParent.type === 'Property' &&
-        identifierParent.key.type === 'Identifier' &&
-        identifierParent.key.name === 'body'
-      ) {
-        results.destructuringBodyVariable = responseVariable;
-      } else if (
-        // header reference through destruction/renaming, e.g. "const { headers } = ..."
-        identifierParent.type === 'Property' &&
-        identifierParent.key.type === 'Identifier' &&
-        identifierParent.key.name === 'headers'
-      ) {
-        results.destructuringHeadersVariable = responseVariable;
-        results.destructuringHeadersReferences = scope.set
-          .get(responseVariable.name)
-          ?.references.map((reference) => reference.identifier)
-          .map(getParent)
-          .filter(
-            (parent): parent is MemberExpression =>
-              parent?.type === 'MemberExpression' &&
-              parent.property.type === 'Identifier' &&
-              parent.property.name !== 'get' &&
-              getParent(parent)?.type !== 'CallExpression',
-          );
-      } else {
-        throw new Error(`Unknown response variable reference: ${responseVariable.name}`);
-      }
-    }
-  }
-  return results;
 }
 
 // `/sample-service/v1/ping` -> `${BASE_PATH}/ping`
@@ -353,8 +264,7 @@ const rule: Rule.RuleModule = {
             statusReferences: responseStatusReferences,
             destructuringBodyVariable: destructuringResponseBodyVariable,
             destructuringHeadersVariable: destructuringResponseHeadersVariable,
-            // destructuringHeadersReferences: destructuringResponseHeadersReferences,
-          } = analyzeResponseReferences(fixtureCallInformation, scopeManager);
+          } = analyzeResponseReferences(fixtureCallInformation.variableDeclaration, scopeManager);
 
           // convert url from `/sample-service/v1/ping` to `${BASE_PATH}/ping`
           const originalUrlArgumentText = sourceCode.getText(urlArgumentNode);
@@ -491,19 +401,6 @@ const rule: Rule.RuleModule = {
                 assert.ok(headerName !== undefined);
                 yield fixer.replaceText(parent, `${responseVariableNameToUse}.headers.get(${headerName})`);
               }
-              // if (destructuringResponseHeadersVariable !== undefined) {
-              //   for (const destructuringResponseHeadersReference of destructuringResponseHeadersReferences ?? []) {
-              //     const headerNameNode = destructuringResponseHeadersReference.property;
-              //     const headerName = destructuringResponseHeadersReference.computed
-              //       ? sourceCode.getText(headerNameNode)
-              //       : `'${sourceCode.getText(headerNameNode)}'`;
-
-              //     yield fixer.replaceText(
-              //       destructuringResponseHeadersReference,
-              //       `${destructuringResponseHeadersVariable.name}.get(${headerName})`,
-              //     );
-              //   }
-              // }
 
               // convert response.statusCode to response.status
               for (const responseStatusReference of responseStatusReferences) {

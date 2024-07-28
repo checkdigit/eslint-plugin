@@ -6,9 +6,9 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
+import fetchHeaderGetter, { ruleId as fetchHeaderGetterRuleId } from './fixture/fetch-header-getter';
 import invalidJsonStringify, { ruleId as invalidJsonStringifyRuleId } from './invalid-json-stringify';
-import noFixture, { ruleId as noFixtureRuleId } from './no-fixture';
-import noFixtureHeaders, { ruleId as noFixtureHeadersRuleId } from './no-fixture-headers';
+import noFixture, { ruleId as noFixtureRuleId } from './fixture/no-fixture';
 import noPromiseInstanceMethod, { ruleId as noPromiseInstanceMethodRuleId } from './no-promise-instance-method';
 import filePathComment from './file-path-comment';
 import noCardNumbers from './no-card-numbers';
@@ -34,7 +34,7 @@ export default {
     [invalidJsonStringifyRuleId]: invalidJsonStringify,
     [noPromiseInstanceMethodRuleId]: noPromiseInstanceMethod,
     [noFixtureRuleId]: noFixture,
-    [noFixtureHeadersRuleId]: noFixtureHeaders,
+    [fetchHeaderGetterRuleId]: fetchHeaderGetter,
   },
   configs: {
     all: {
@@ -51,7 +51,7 @@ export default {
         [`@checkdigit/${invalidJsonStringifyRuleId}`]: 'error',
         [`@checkdigit/${noPromiseInstanceMethodRuleId}`]: 'error',
         [`@checkdigit/${noFixtureRuleId}`]: 'error',
-        [`@checkdigit/${noFixtureHeadersRuleId}`]: 'error',
+        [`@checkdigit/${fetchHeaderGetterRuleId}`]: 'error',
       },
     },
     recommended: {
