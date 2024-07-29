@@ -1,4 +1,4 @@
-// fixture/concurrent-promises.ts
+// fixture/fetch-then.ts
 
 /*
  * Copyright (c) 2021-2024 Check Digit, LLC
@@ -8,15 +8,15 @@
 
 import type { CallExpression, Expression, MemberExpression, SimpleCallExpression } from 'estree';
 import { type Rule, type Scope, SourceCode } from 'eslint';
-import { getEnclosingStatement, getParent } from '../ast/tree';
+import { getEnclosingFunction, getEnclosingStatement, getParent, isUsedInArrayOrAsArgument } from '../ast/tree';
+import { hasAssertions, isInvalidResponseHeadersAccess } from './fetch';
 import { strict as assert } from 'node:assert';
 import getDocumentationUrl from '../get-documentation-url';
 import { getIndentation } from '../ast/format';
-import { isInvalidResponseHeadersAccess } from './fetch';
 import { isValidPropertyName } from './variable';
 import { replaceEndpointUrlPrefixWithBasePath } from './url';
 
-export const ruleId = 'concurrent-promises';
+export const ruleId = 'fetch-then';
 
 interface FixtureCallInformation {
   fixtureNode: SimpleCallExpression;
@@ -33,9 +33,12 @@ function analyzeFixtureCall(call: SimpleCallExpression, results: FixtureCallInfo
   }
 
   let nextCall;
-  if (parent.type === 'ArrayExpression') {
+  if (parent.type !== 'MemberExpression') {
     results.fixtureNode = call;
-  } else if (parent.type === 'MemberExpression' && parent.property.type === 'Identifier') {
+    return;
+  }
+
+  if (parent.property.type === 'Identifier') {
     if (parent.property.name === 'expect') {
       // supertest assertions
       const assertionCall = getParent(parent);
@@ -203,137 +206,148 @@ const rule: Rule.RuleModule = {
 
     return {
       // eslint-disable-next-line max-lines-per-function
-      'CallExpression[callee.object.name="Promise"] > ArrayExpression CallExpression[callee.object.object.name="fixture"][callee.object.property.name="api"]':
-        (fixtureCall: CallExpression) => {
-          try {
-            assert.ok(fixtureCall.type === 'CallExpression');
-            const fixtureFunction = fixtureCall.callee; // e.g. fixture.api.get
-            assert.ok(fixtureFunction.type === 'MemberExpression');
-            const indentation = getIndentation(fixtureCall, sourceCode);
+      'CallExpression[callee.object.object.name="fixture"][callee.object.property.name="api"]': (
+        fixtureCall: CallExpression,
+        // eslint-disable-next-line sonarjs/cognitive-complexity
+      ) => {
+        try {
+          if (!hasAssertions(fixtureCall)) {
+            // skip if there are no assertions, let "no-fixture" rule to handle the conversion
+            return;
+          }
 
-            const [urlArgumentNode] = fixtureCall.arguments; // e.g. `/sample-service/v1/ping`
-            assert.ok(urlArgumentNode !== undefined);
+          if (!(isUsedInArrayOrAsArgument(fixtureCall) || getEnclosingFunction(fixtureCall)?.async === false)) {
+            return;
+          }
 
-            const fixtureCallInformation = {} as FixtureCallInformation;
-            analyzeFixtureCall(fixtureCall, fixtureCallInformation, sourceCode);
+          assert.ok(fixtureCall.type === 'CallExpression');
+          const fixtureFunction = fixtureCall.callee; // e.g. fixture.api.get
+          assert.ok(fixtureFunction.type === 'MemberExpression');
+          const indentation = getIndentation(fixtureCall, sourceCode);
 
-            // convert url from `/sample-service/v1/ping` to `${BASE_PATH}/ping`
-            const originalUrlArgumentText = sourceCode.getText(urlArgumentNode);
-            const fetchUrlArgumentText = replaceEndpointUrlPrefixWithBasePath(originalUrlArgumentText);
+          const [urlArgumentNode] = fixtureCall.arguments; // e.g. `/sample-service/v1/ping`
+          assert.ok(urlArgumentNode !== undefined);
 
-            // fetch request argument
-            const methodNode = fixtureFunction.property; // get/put/etc.
-            assert.ok(methodNode.type === 'Identifier');
-            const fetchRequestArgumentLines = [
-              '{',
-              `  method: '${methodNode.name.toUpperCase()}',`,
-              ...(fixtureCallInformation.requestBody
-                ? [`  body: JSON.stringify(${sourceCode.getText(fixtureCallInformation.requestBody)}),`]
-                : []),
-              ...(fixtureCallInformation.requestHeaders
-                ? [
-                    `  headers: {`,
-                    ...fixtureCallInformation.requestHeaders.map(
-                      ({ name, value }) =>
-                        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions, no-nested-ternary, sonarjs/no-nested-template-literals
-                        `    ${name.type === 'Literal' ? (isValidPropertyName(name.value) ? name.value : `'${name.value}'`) : `[${sourceCode.getText(name)}]`}: ${sourceCode.getText(value)},`,
-                    ),
-                    `  },`,
-                  ]
-                : []),
-              '}',
-            ].join(`\n${indentation}`);
+          const fixtureCallInformation = {} as FixtureCallInformation;
+          analyzeFixtureCall(fixtureCall, fixtureCallInformation, sourceCode);
 
-            const responseVariableNameToUse = 'res';
-            const { statusAssertion, nonStatusAssertions } = createResponseAssertions(
-              fixtureCallInformation,
-              sourceCode,
-              responseVariableNameToUse,
-            );
+          // convert url from `/sample-service/v1/ping` to `${BASE_PATH}/ping`
+          const originalUrlArgumentText = sourceCode.getText(urlArgumentNode);
+          const fetchUrlArgumentText = replaceEndpointUrlPrefixWithBasePath(originalUrlArgumentText);
 
-            // add variable declaration if needed
-            const disableLintComment = '// eslint-disable-next-line @checkdigit/no-promise-instance-method';
-            const fetchCallText = `fetch(${fetchUrlArgumentText}, ${fetchRequestArgumentLines})`;
-            const appendingAssignmentAndAssertionText = [
-              ...(statusAssertion !== undefined ? [statusAssertion] : []),
-              ...nonStatusAssertions,
-            ].join(`;\n${indentation}`);
-            const replacementText = fixtureCallInformation.assertions
+          // fetch request argument
+          const methodNode = fixtureFunction.property; // get/put/etc.
+          assert.ok(methodNode.type === 'Identifier');
+          const fetchRequestArgumentLines = [
+            '{',
+            `  method: '${methodNode.name.toUpperCase()}',`,
+            ...(fixtureCallInformation.requestBody
+              ? [`  body: JSON.stringify(${sourceCode.getText(fixtureCallInformation.requestBody)}),`]
+              : []),
+            ...(fixtureCallInformation.requestHeaders
               ? [
-                  disableLintComment,
-                  `${fetchCallText}.then((${responseVariableNameToUse}) => {`,
-                  appendingAssignmentAndAssertionText === '' ? '' : `  ${appendingAssignmentAndAssertionText};`,
-                  `  return ${responseVariableNameToUse};`,
-                  `})`,
-                ].join(`\n${indentation}`)
-              : fetchCallText;
+                  `  headers: {`,
+                  ...fixtureCallInformation.requestHeaders.map(
+                    ({ name, value }) =>
+                      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions, no-nested-ternary, sonarjs/no-nested-template-literals
+                      `    ${name.type === 'Literal' ? (isValidPropertyName(name.value) ? name.value : `'${name.value}'`) : `[${sourceCode.getText(name)}]`}: ${sourceCode.getText(value)},`,
+                  ),
+                  `  },`,
+                ]
+              : []),
+            '}',
+          ].join(`\n${indentation}`);
 
-            context.report({
-              node: fixtureCall,
-              messageId: 'preferNativeFetch',
-              fix(fixer) {
-                return fixer.replaceText(fixtureCallInformation.fixtureNode, replacementText);
-              },
-            });
+          const responseVariableNameToUse = 'res';
+          const { statusAssertion, nonStatusAssertions } = createResponseAssertions(
+            fixtureCallInformation,
+            sourceCode,
+            responseVariableNameToUse,
+          );
 
-            const responsesVariable = getEnclosingStatement(fixtureCallInformation.fixtureNode);
-            if (!responsesVariable) {
-              return;
-            }
+          // add variable declaration if needed
+          const disableLintComment = '// eslint-disable-next-line @checkdigit/no-promise-instance-method';
+          const fetchCallText = `fetch(${fetchUrlArgumentText}, ${fetchRequestArgumentLines})`;
+          const appendingAssignmentAndAssertionText = [
+            ...(statusAssertion !== undefined ? [statusAssertion] : []),
+            ...nonStatusAssertions,
+          ].join(`;\n${indentation}`);
+          const replacementText = fixtureCallInformation.assertions
+            ? [
+                disableLintComment,
+                `${fetchCallText}.then((${responseVariableNameToUse}) => {`,
+                appendingAssignmentAndAssertionText === '' ? '' : `  ${appendingAssignmentAndAssertionText};`,
+                `  return ${responseVariableNameToUse};`,
+                `})`,
+              ].join(`\n${indentation}`)
+            : fetchCallText;
 
-            const responseVariableReferences = scopeManager.getDeclaredVariables(responsesVariable);
-            const responseHeadersAccesses = getResponseHeadersAccesses(
-              responseVariableReferences,
-              scopeManager,
-              sourceCode,
-            );
-            for (const responseHeadersAccess of responseHeadersAccesses) {
-              if (isInvalidResponseHeadersAccess(responseHeadersAccess)) {
-                const headerAccess = getParent(responseHeadersAccess);
-                if (headerAccess?.type === 'MemberExpression') {
-                  const headerNameNode = headerAccess.property;
-                  const headerName = headerAccess.computed
-                    ? sourceCode.getText(headerNameNode)
-                    : `'${sourceCode.getText(headerNameNode)}'`;
-                  const headerAccessReplacementText = `${sourceCode.getText(headerAccess.object)}.get(${headerName})`;
+          context.report({
+            node: fixtureCall,
+            messageId: 'preferNativeFetch',
+            fix(fixer) {
+              return fixer.replaceText(fixtureCallInformation.fixtureNode, replacementText);
+            },
+          });
 
-                  context.report({
-                    node: headerAccess,
-                    messageId: 'shouldUseHeaderGetter',
-                    fix(fixer) {
-                      return fixer.replaceText(headerAccess, headerAccessReplacementText);
-                    },
-                  });
-                } else if (
-                  headerAccess?.type === 'CallExpression' &&
-                  responseHeadersAccess.property.type === 'Identifier' &&
-                  responseHeadersAccess.property.name === 'get'
-                ) {
-                  const headerAccessReplacementText = `${sourceCode.getText(responseHeadersAccess.object)}.headers.get(${sourceCode.getText(headerAccess.arguments[0])})`;
+          const responsesVariable = getEnclosingStatement(fixtureCallInformation.fixtureNode);
+          if (!responsesVariable) {
+            return;
+          }
 
-                  context.report({
-                    node: headerAccess,
-                    messageId: 'shouldUseHeaderGetter',
-                    fix(fixer) {
-                      return fixer.replaceText(headerAccess, headerAccessReplacementText);
-                    },
-                  });
-                }
+          const responseVariableReferences = scopeManager.getDeclaredVariables(responsesVariable);
+          const responseHeadersAccesses = getResponseHeadersAccesses(
+            responseVariableReferences,
+            scopeManager,
+            sourceCode,
+          );
+          for (const responseHeadersAccess of responseHeadersAccesses) {
+            if (isInvalidResponseHeadersAccess(responseHeadersAccess)) {
+              const headerAccess = getParent(responseHeadersAccess);
+              if (headerAccess?.type === 'MemberExpression') {
+                const headerNameNode = headerAccess.property;
+                const headerName = headerAccess.computed
+                  ? sourceCode.getText(headerNameNode)
+                  : `'${sourceCode.getText(headerNameNode)}'`;
+                const headerAccessReplacementText = `${sourceCode.getText(headerAccess.object)}.get(${headerName})`;
+
+                context.report({
+                  node: headerAccess,
+                  messageId: 'shouldUseHeaderGetter',
+                  fix(fixer) {
+                    return fixer.replaceText(headerAccess, headerAccessReplacementText);
+                  },
+                });
+              } else if (
+                headerAccess?.type === 'CallExpression' &&
+                responseHeadersAccess.property.type === 'Identifier' &&
+                responseHeadersAccess.property.name === 'get'
+              ) {
+                const headerAccessReplacementText = `${sourceCode.getText(responseHeadersAccess.object)}.headers.get(${sourceCode.getText(headerAccess.arguments[0])})`;
+
+                context.report({
+                  node: headerAccess,
+                  messageId: 'shouldUseHeaderGetter',
+                  fix(fixer) {
+                    return fixer.replaceText(headerAccess, headerAccessReplacementText);
+                  },
+                });
               }
             }
-          } catch (error) {
-            // eslint-disable-next-line no-console
-            console.error(`Failed to apply ${ruleId} rule for file "${context.filename}":`, error);
-            context.report({
-              node: fixtureCall,
-              messageId: 'unknownError',
-              data: {
-                fileName: context.filename,
-                error: error instanceof Error ? error.toString() : JSON.stringify(error),
-              },
-            });
           }
-        },
+        } catch (error) {
+          // eslint-disable-next-line no-console
+          console.error(`Failed to apply ${ruleId} rule for file "${context.filename}":`, error);
+          context.report({
+            node: fixtureCall,
+            messageId: 'unknownError',
+            data: {
+              fileName: context.filename,
+              error: error instanceof Error ? error.toString() : JSON.stringify(error),
+            },
+          });
+        }
+      },
     };
   },
 };

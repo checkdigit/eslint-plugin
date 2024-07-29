@@ -6,8 +6,8 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import concurrentPromises, { ruleId as concurrentPromisesRuleId } from './fixture/concurrent-promises';
 import fetchHeaderGetter, { ruleId as fetchHeaderGetterRuleId } from './fixture/fetch-header-getter';
+import fetchThen, { ruleId as fetchThenRuleId } from './fixture/fetch-then';
 import invalidJsonStringify, { ruleId as invalidJsonStringifyRuleId } from './invalid-json-stringify';
 import noFixture, { ruleId as noFixtureRuleId } from './fixture/no-fixture';
 import noPromiseInstanceMethod, { ruleId as noPromiseInstanceMethodRuleId } from './no-promise-instance-method';
@@ -36,7 +36,7 @@ export default {
     [noPromiseInstanceMethodRuleId]: noPromiseInstanceMethod,
     [noFixtureRuleId]: noFixture,
     [fetchHeaderGetterRuleId]: fetchHeaderGetter,
-    [concurrentPromisesRuleId]: concurrentPromises,
+    [fetchThenRuleId]: fetchThen,
   },
   configs: {
     all: {
@@ -54,7 +54,7 @@ export default {
         [`@checkdigit/${noPromiseInstanceMethodRuleId}`]: 'error',
         [`@checkdigit/${noFixtureRuleId}`]: 'error',
         [`@checkdigit/${fetchHeaderGetterRuleId}`]: 'error',
-        [`@checkdigit/${concurrentPromisesRuleId}`]: 'error',
+        [`@checkdigit/${fetchThenRuleId}`]: 'error',
       },
     },
     recommended: {

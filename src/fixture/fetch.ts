@@ -1,7 +1,7 @@
 // fixture/fetch.ts
 
+import { getParent, isBlockStatement } from '../ast/tree';
 import type { Node } from 'estree';
-import { getParent } from '../ast/tree';
 
 export function getResponseBodyRetrievalText(responseVariableName: string) {
   return `await ${responseVariableName}.json()`;
@@ -27,4 +27,26 @@ export function isInvalidResponseHeadersAccess(responseHeadersAccess: Node) {
     responseHeaderAccessParent.property.type === 'Identifier' &&
     responseHeaderAccessParent.property.name === 'get'
   );
+}
+
+export function hasAssertions(fixtureCall: Node) {
+  if (isBlockStatement(fixtureCall)) {
+    return false;
+  }
+
+  const parent = getParent(fixtureCall);
+  if (!parent) {
+    return false;
+  }
+
+  if (
+    parent.type === 'MemberExpression' &&
+    parent.property.type === 'Identifier' &&
+    parent.property.name === 'expect' &&
+    getParent(parent)?.type === 'CallExpression'
+  ) {
+    return true;
+  }
+
+  return hasAssertions(parent);
 }

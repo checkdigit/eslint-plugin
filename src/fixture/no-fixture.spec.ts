@@ -25,6 +25,28 @@ describe(ruleId, () => {
     ],
     invalid: [
       {
+        name: 'without assertions',
+        code: `
+          const responses = await Promise.all([
+            fixture.api.put(\`\${BASE_PATH}/key\`).send(keyData),
+            fixture.api.put(\`\${BASE_PATH}/key\`).send(keyData),
+          ]);
+        `,
+        output: `
+          const responses = await Promise.all([
+            fetch(\`\${BASE_PATH}/key\`, {
+              method: 'PUT',
+              body: JSON.stringify(keyData),
+            }),
+            fetch(\`\${BASE_PATH}/key\`, {
+              method: 'PUT',
+              body: JSON.stringify(keyData),
+            }),
+          ]);
+        `,
+        errors: 2,
+      },
+      {
         name: 'assertion with variable declaration',
         code: `
           const pingResponse = await fixture.api.get(\`/sample-service/v1/ping\`).expect(StatusCodes.OK);
@@ -503,6 +525,27 @@ describe(ruleId, () => {
           assert.equal(response.status, StatusCodes.NO_CONTENT);
           assert.equal(response.headers.get(ETAG_HEADER), '1');
           assert.ok(verifyTemporalHeaders(response, createdOn));
+        `,
+        errors: 1,
+      },
+      {
+        name: 'in arrow function without concurrent promises',
+        code: `
+          const delayedCardCreationPromise = new Promise((delayedExecution) => {
+            setTimeout(() => {
+              delayedExecution(fixture.api.put(\`\${BASE_PATH}/card/\${cardId}\`).send(otherTestCard));
+            }, 600);
+          });
+        `,
+        output: `
+          const delayedCardCreationPromise = new Promise((delayedExecution) => {
+            setTimeout(() => {
+              delayedExecution(fetch(\`\${BASE_PATH}/card/\${cardId}\`, {
+                method: 'PUT',
+                body: JSON.stringify(otherTestCard),
+              }));
+            }, 600);
+          });
         `,
         errors: 1,
       },

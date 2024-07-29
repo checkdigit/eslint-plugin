@@ -6,7 +6,7 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import type { Node } from 'estree';
+import type { Expression, Node } from 'estree';
 
 type NodeParent = Node | undefined | null;
 
@@ -38,15 +38,53 @@ export function getAncestor(
   return getAncestor(parent, matcher, exitMatcher);
 }
 
+export function isBlockStatement(node: Node) {
+  return node.type.endsWith('Statement') || node.type.endsWith('Declaration');
+}
+
 export function getEnclosingStatement(node: Node) {
-  return getAncestor(
-    node,
-    (parentNode) => parentNode.type.endsWith('Statement') || parentNode.type.endsWith('Declaration'),
-  );
+  return getAncestor(node, isBlockStatement);
 }
 
 export function getEnclosingScopeNode(node: Node) {
   return getAncestor(node, (parentNode) =>
     ['FunctionExpression', 'FunctionDeclaration', 'ArrowFunctionExpression', 'Program'].includes(parentNode.type),
   );
+}
+
+export function isUsedInArrayOrAsArgument(node: Node) {
+  if (isBlockStatement(node)) {
+    return false;
+  }
+
+  const parent = getParent(node);
+  if (!parent) {
+    return false;
+  }
+
+  if (
+    parent.type === 'ArrayExpression' ||
+    (parent.type === 'CallExpression' && parent.arguments.includes(node as Expression))
+  ) {
+    return true;
+  }
+
+  // recurse up the tree until hitting a block statement
+  return isUsedInArrayOrAsArgument(parent);
+}
+
+export function getEnclosingFunction(node: Node) {
+  if (
+    node.type === 'FunctionDeclaration' ||
+    node.type === 'FunctionExpression' ||
+    node.type === 'ArrowFunctionExpression'
+  ) {
+    return node;
+  }
+
+  const parent = getParent(node);
+  if (!parent) {
+    return;
+  }
+  return getEnclosingFunction(parent);
 }

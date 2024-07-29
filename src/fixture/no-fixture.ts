@@ -17,19 +17,25 @@ import type {
   VariableDeclaration,
 } from 'estree';
 import { type Rule, type Scope, SourceCode } from 'eslint';
-import { getEnclosingScopeNode, getEnclosingStatement, getParent } from '../ast/tree';
+import {
+  getEnclosingFunction,
+  getEnclosingScopeNode,
+  getEnclosingStatement,
+  getParent,
+  isUsedInArrayOrAsArgument,
+} from '../ast/tree';
+import { getResponseBodyRetrievalText, hasAssertions } from './fetch';
 import { analyzeResponseReferences } from './response-reference';
 import { strict as assert } from 'node:assert';
 import getDocumentationUrl from '../get-documentation-url';
 import { getIndentation } from '../ast/format';
-import { getResponseBodyRetrievalText } from './fetch';
 import { isValidPropertyName } from './variable';
 import { replaceEndpointUrlPrefixWithBasePath } from './url';
 
 export const ruleId = 'no-fixture';
 
 interface FixtureCallInformation {
-  rootNode: AwaitExpression | ReturnStatement | VariableDeclaration;
+  rootNode: AwaitExpression | ReturnStatement | VariableDeclaration | SimpleCallExpression;
   fixtureNode: AwaitExpression | SimpleCallExpression;
   variableDeclaration?: VariableDeclaration;
   requestBody?: Expression;
@@ -37,10 +43,10 @@ interface FixtureCallInformation {
   assertions?: Expression[][];
   inlineStatementNode?: Node;
   inlineBodyReference?: MemberExpression;
-  isConcurrent?: boolean;
 }
 
 // recursively analyze the fixture/supertest call chain to collect information of request/response
+// eslint-disable-next-line sonarjs/cognitive-complexity
 function analyzeFixtureCall(call: SimpleCallExpression, results: FixtureCallInformation, sourceCode: SourceCode) {
   const parent = getParent(call);
   assert.ok(parent, 'parent should exist for fixture/supertest call node');
@@ -50,8 +56,10 @@ function analyzeFixtureCall(call: SimpleCallExpression, results: FixtureCallInfo
     // direct return, no variable declaration or await
     results.fixtureNode = call;
     results.rootNode = parent;
-  } else if (parent.type === 'ArrayExpression') {
-    results.isConcurrent = true;
+  } else if (parent.type === 'ArrayExpression' || parent.type === 'CallExpression') {
+    // direct return, no variable declaration or await
+    results.fixtureNode = call;
+    results.rootNode = call;
   } else if (parent.type === 'AwaitExpression') {
     results.fixtureNode = call;
     const enclosingStatement = getEnclosingStatement(parent);
@@ -238,6 +246,14 @@ const rule: Rule.RuleModule = {
         fixtureCall: CallExpression,
       ) => {
         try {
+          if (
+            hasAssertions(fixtureCall) &&
+            (isUsedInArrayOrAsArgument(fixtureCall) || getEnclosingFunction(fixtureCall)?.async === false)
+          ) {
+            // skip and leave it to "fetch-then" rule to handle it because no "await" can be used here
+            return;
+          }
+
           assert.ok(fixtureCall.type === 'CallExpression');
           const fixtureFunction = fixtureCall.callee; // e.g. fixture.api.get
           assert.ok(fixtureFunction.type === 'MemberExpression');
@@ -248,9 +264,6 @@ const rule: Rule.RuleModule = {
 
           const fixtureCallInformation = {} as FixtureCallInformation;
           analyzeFixtureCall(fixtureCall, fixtureCallInformation, sourceCode);
-          if (fixtureCallInformation.isConcurrent === true) {
-            return;
-          }
 
           const {
             variable: responseVariable,
