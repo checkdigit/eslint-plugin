@@ -6,12 +6,13 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import type { CallExpression, Expression, SimpleCallExpression } from 'estree';
-import { type Rule, SourceCode } from 'eslint';
+import type { CallExpression, Expression, MemberExpression, SimpleCallExpression } from 'estree';
+import { type Rule, type Scope, SourceCode } from 'eslint';
+import { getEnclosingStatement, getParent } from '../ast/tree';
 import { strict as assert } from 'node:assert';
 import getDocumentationUrl from '../get-documentation-url';
 import { getIndentation } from '../ast/format';
-import { getParent } from '../ast/tree';
+import { isInvalidResponseHeadersAccess } from './fetch';
 import { isValidPropertyName } from './variable';
 import { replaceEndpointUrlPrefixWithBasePath } from './url';
 
@@ -131,6 +132,54 @@ function createResponseAssertions(
   };
 }
 
+function getResponseHeadersAccesses(
+  responseVariables: Scope.Variable[],
+  scopeManager: Scope.ScopeManager,
+  sourceCode: SourceCode,
+) {
+  const responseHeadersAccesses: MemberExpression[] = [];
+  for (const responseVariable of responseVariables) {
+    for (const responseReference of responseVariable.references) {
+      const responseAccess = getParent(responseReference.identifier);
+      if (!responseAccess || responseAccess.type !== 'MemberExpression') {
+        continue;
+      }
+
+      const responseAccessParent = getParent(responseAccess);
+      if (!responseAccessParent) {
+        continue;
+      }
+
+      if (
+        responseAccessParent.type === 'CallExpression' &&
+        responseAccessParent.arguments[0]?.type === 'ArrowFunctionExpression'
+      ) {
+        // map-like operation against responses, e.g. responses.map((response) => response.headers.etag)
+        responseHeadersAccesses.push(
+          ...getResponseHeadersAccesses(
+            scopeManager.getDeclaredVariables(responseAccessParent.arguments[0]),
+            scopeManager,
+            sourceCode,
+          ),
+        );
+        continue;
+      }
+
+      if (
+        responseAccess.computed &&
+        responseAccess.property.type === 'Literal' &&
+        responseAccessParent.type === 'MemberExpression'
+      ) {
+        // header access through indexed responses array, e.g. responses[0].headers, responses[1].get(...), etc.
+        responseHeadersAccesses.push(responseAccessParent);
+      } else {
+        responseHeadersAccesses.push(responseAccess);
+      }
+    }
+  }
+  return responseHeadersAccesses;
+}
+
 const rule: Rule.RuleModule = {
   meta: {
     type: 'suggestion',
@@ -140,6 +189,7 @@ const rule: Rule.RuleModule = {
     },
     messages: {
       preferNativeFetch: 'Prefer native fetch API over customized fixture API.',
+      shouldUseHeaderGetter: 'Getter should be used to access response headers.',
       unknownError:
         'Unknown error occurred in file "{{fileName}}": {{ error }}. Please manually convert the fixture API call to fetch API call.',
     },
@@ -149,6 +199,7 @@ const rule: Rule.RuleModule = {
   // eslint-disable-next-line max-lines-per-function
   create(context) {
     const sourceCode = context.sourceCode;
+    const scopeManager = sourceCode.scopeManager;
 
     return {
       // eslint-disable-next-line max-lines-per-function
@@ -207,13 +258,15 @@ const rule: Rule.RuleModule = {
               ...(statusAssertion !== undefined ? [statusAssertion] : []),
               ...nonStatusAssertions,
             ].join(`;\n${indentation}`);
-            const replacementText = [
-              disableLintComment,
-              `${fetchCallText}.then((${responseVariableNameToUse}) => {`,
-              appendingAssignmentAndAssertionText === '' ? '' : `  ${appendingAssignmentAndAssertionText};`,
-              `  return ${responseVariableNameToUse};`,
-              `})`,
-            ].join(`\n${indentation}`);
+            const replacementText = fixtureCallInformation.assertions
+              ? [
+                  disableLintComment,
+                  `${fetchCallText}.then((${responseVariableNameToUse}) => {`,
+                  appendingAssignmentAndAssertionText === '' ? '' : `  ${appendingAssignmentAndAssertionText};`,
+                  `  return ${responseVariableNameToUse};`,
+                  `})`,
+                ].join(`\n${indentation}`)
+              : fetchCallText;
 
             context.report({
               node: fixtureCall,
@@ -222,6 +275,52 @@ const rule: Rule.RuleModule = {
                 return fixer.replaceText(fixtureCallInformation.fixtureNode, replacementText);
               },
             });
+
+            const responsesVariable = getEnclosingStatement(fixtureCallInformation.fixtureNode);
+            if (!responsesVariable) {
+              return;
+            }
+
+            const responseVariableReferences = scopeManager.getDeclaredVariables(responsesVariable);
+            const responseHeadersAccesses = getResponseHeadersAccesses(
+              responseVariableReferences,
+              scopeManager,
+              sourceCode,
+            );
+            for (const responseHeadersAccess of responseHeadersAccesses) {
+              if (isInvalidResponseHeadersAccess(responseHeadersAccess)) {
+                const headerAccess = getParent(responseHeadersAccess);
+                if (headerAccess?.type === 'MemberExpression') {
+                  const headerNameNode = headerAccess.property;
+                  const headerName = headerAccess.computed
+                    ? sourceCode.getText(headerNameNode)
+                    : `'${sourceCode.getText(headerNameNode)}'`;
+                  const headerAccessReplacementText = `${sourceCode.getText(headerAccess.object)}.get(${headerName})`;
+
+                  context.report({
+                    node: headerAccess,
+                    messageId: 'shouldUseHeaderGetter',
+                    fix(fixer) {
+                      return fixer.replaceText(headerAccess, headerAccessReplacementText);
+                    },
+                  });
+                } else if (
+                  headerAccess?.type === 'CallExpression' &&
+                  responseHeadersAccess.property.type === 'Identifier' &&
+                  responseHeadersAccess.property.name === 'get'
+                ) {
+                  const headerAccessReplacementText = `${sourceCode.getText(responseHeadersAccess.object)}.headers.get(${sourceCode.getText(headerAccess.arguments[0])})`;
+
+                  context.report({
+                    node: headerAccess,
+                    messageId: 'shouldUseHeaderGetter',
+                    fix(fixer) {
+                      return fixer.replaceText(headerAccess, headerAccessReplacementText);
+                    },
+                  });
+                }
+              }
+            }
           } catch (error) {
             // eslint-disable-next-line no-console
             console.error(`Failed to apply ${ruleId} rule for file "${context.filename}":`, error);

@@ -37,6 +37,7 @@ interface FixtureCallInformation {
   assertions?: Expression[][];
   inlineStatementNode?: Node;
   inlineBodyReference?: MemberExpression;
+  isConcurrent?: boolean;
 }
 
 // recursively analyze the fixture/supertest call chain to collect information of request/response
@@ -49,6 +50,8 @@ function analyzeFixtureCall(call: SimpleCallExpression, results: FixtureCallInfo
     // direct return, no variable declaration or await
     results.fixtureNode = call;
     results.rootNode = parent;
+  } else if (parent.type === 'ArrayExpression') {
+    results.isConcurrent = true;
   } else if (parent.type === 'AwaitExpression') {
     results.fixtureNode = call;
     const enclosingStatement = getEnclosingStatement(parent);
@@ -245,6 +248,9 @@ const rule: Rule.RuleModule = {
 
           const fixtureCallInformation = {} as FixtureCallInformation;
           analyzeFixtureCall(fixtureCall, fixtureCallInformation, sourceCode);
+          if (fixtureCallInformation.isConcurrent === true) {
+            return;
+          }
 
           const {
             variable: responseVariable,

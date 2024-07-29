@@ -52,27 +52,19 @@ export function analyzeResponseReferences(
       // e.g. response.body
       results.bodyReferences = responseReferences.filter(
         (node): node is MemberExpression =>
-          node !== null &&
-          node !== undefined &&
-          node.type === 'MemberExpression' &&
-          node.property.type === 'Identifier' &&
-          node.property.name === 'body',
+          node?.type === 'MemberExpression' && node.property.type === 'Identifier' && node.property.name === 'body',
       );
       // e.g. response.headers / response.header / response.get()
       results.headersReferences = responseReferences.filter(
         (node): node is MemberExpression =>
-          node !== null &&
-          node !== undefined &&
-          node.type === 'MemberExpression' &&
+          node?.type === 'MemberExpression' &&
           node.property.type === 'Identifier' &&
           (node.property.name === 'header' || node.property.name === 'headers' || node.property.name === 'get'),
       );
       // e.g. response.status / response.statusCode
       results.statusReferences = responseReferences.filter(
         (node): node is MemberExpression =>
-          node !== null &&
-          node !== undefined &&
-          node.type === 'MemberExpression' &&
+          node?.type === 'MemberExpression' &&
           node.property.type === 'Identifier' &&
           (node.property.name === 'status' || node.property.name === 'statusCode'),
       );

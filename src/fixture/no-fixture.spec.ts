@@ -12,7 +12,17 @@ import { describe } from '@jest/globals';
 
 describe(ruleId, () => {
   createTester().run(ruleId, rule, {
-    valid: [],
+    valid: [
+      {
+        name: 'skip concurrent fixture calls which will be handled in concurrent-promises rule',
+        code: `
+          const responses = await Promise.all([
+            fixture.api.put(\`\${BASE_PATH}/key\`).send(keyData).expect(StatusCodes.NO_CONTENT),
+            fixture.api.put(\`\${BASE_PATH}/key\`).send(keyData).expect(StatusCodes.NO_CONTENT),
+          ]);
+        `,
+      },
+    ],
     invalid: [
       {
         name: 'assertion with variable declaration',

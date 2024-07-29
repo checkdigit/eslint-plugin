@@ -6,12 +6,13 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import type { Identifier, MemberExpression, VariableDeclarator } from 'estree';
+import type { Identifier, VariableDeclarator } from 'estree';
 import type { Rule } from 'eslint';
 import { analyzeResponseReferences } from './response-reference';
 import { strict as assert } from 'node:assert';
 import getDocumentationUrl from '../get-documentation-url';
 import { getParent } from '../ast/tree';
+import { isInvalidResponseHeadersAccess } from './fetch';
 
 export const ruleId = 'fetch-header-getter';
 
@@ -42,12 +43,13 @@ const rule: Rule.RuleModule = {
         );
         assert.ok(responseVariable);
 
-        const directHeaderReferences = responseHeadersReferences
-          .map(getParent)
-          .filter((parent): parent is MemberExpression => parent?.type === 'MemberExpression');
+        const directHeadersReferences = responseHeadersReferences.filter((headersReference) => {
+          const headersAccess = getParent(headersReference);
+          return headersAccess?.type !== 'VariableDeclarator';
+        });
 
-        const indirectHeaderReferences = responseHeadersReferences
-          .map((reference) => getParent(reference))
+        const indirectHeadersReferences = responseHeadersReferences
+          .map(getParent)
           .filter((parent): parent is VariableDeclarator => parent?.type === 'VariableDeclarator')
           .map((declarator) => (declarator.id as Identifier).name)
           .map((redefinedHeadersVariableName) => {
@@ -55,32 +57,31 @@ const rule: Rule.RuleModule = {
               const identifier = variable.identifiers[0];
               return identifier?.type === 'Identifier' && identifier.name === redefinedHeadersVariableName;
             });
-            return (
-              headersVariable?.references
-                .map((reference) => getParent(reference.identifier))
-                .filter((parent): parent is MemberExpression => parent?.type === 'MemberExpression') ?? []
-            );
+            return headersVariable?.references.map((reference) => reference.identifier) ?? [];
           })
           .flat();
 
-        const invalidHeaderReferences = [...directHeaderReferences, ...indirectHeaderReferences].filter(
-          (reference) => !(reference.property.type === 'Identifier' && reference.property.name === 'get'),
+        const invalidHeadersReferences = [...directHeadersReferences, ...indirectHeadersReferences].filter(
+          isInvalidResponseHeadersAccess,
         );
 
-        invalidHeaderReferences.forEach((reference) => {
-          const headerNameNode = reference.property;
-          const headerName = reference.computed
-            ? sourceCode.getText(headerNameNode)
-            : `'${sourceCode.getText(headerNameNode)}'`;
-          const replacementText = `${sourceCode.getText(reference.object)}.get(${headerName})`;
+        invalidHeadersReferences.forEach((headersReference) => {
+          const headerAccess = getParent(headersReference);
+          if (headerAccess?.type === 'MemberExpression') {
+            const headerNameNode = headerAccess.property;
+            const headerName = headerAccess.computed
+              ? sourceCode.getText(headerNameNode)
+              : `'${sourceCode.getText(headerNameNode)}'`;
+            const replacementText = `${sourceCode.getText(headerAccess.object)}.get(${headerName})`;
 
-          context.report({
-            node: reference,
-            messageId: 'shouldUseHeaderGetter',
-            fix(fixer) {
-              return fixer.replaceText(reference, replacementText);
-            },
-          });
+            context.report({
+              node: headerAccess,
+              messageId: 'shouldUseHeaderGetter',
+              fix(fixer) {
+                return fixer.replaceText(headerAccess, replacementText);
+              },
+            });
+          }
         });
       },
     };
