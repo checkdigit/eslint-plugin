@@ -11,6 +11,7 @@ import fetchThen, { ruleId as fetchThenRuleId } from './fixture/fetch-then';
 import invalidJsonStringify, { ruleId as invalidJsonStringifyRuleId } from './invalid-json-stringify';
 import noFixture, { ruleId as noFixtureRuleId } from './fixture/no-fixture';
 import noPromiseInstanceMethod, { ruleId as noPromiseInstanceMethodRuleId } from './no-promise-instance-method';
+import noServiceWrapper, { ruleId as noServiceWrapperRuleId } from './fixture/no-service-wrapper';
 import filePathComment from './file-path-comment';
 import noCardNumbers from './no-card-numbers';
 import noTestImport from './no-test-import';
@@ -37,6 +38,7 @@ export default {
     [noFixtureRuleId]: noFixture,
     [fetchHeaderGetterRuleId]: fetchHeaderGetter,
     [fetchThenRuleId]: fetchThen,
+    [noServiceWrapperRuleId]: noServiceWrapper,
   },
   configs: {
     all: {
@@ -55,6 +57,7 @@ export default {
         [`@checkdigit/${noFixtureRuleId}`]: 'error',
         [`@checkdigit/${fetchHeaderGetterRuleId}`]: 'error',
         [`@checkdigit/${fetchThenRuleId}`]: 'error',
+        [`@checkdigit/${noServiceWrapperRuleId}`]: 'error',
       },
     },
     recommended: {
