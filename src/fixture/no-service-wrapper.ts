@@ -7,21 +7,11 @@
  */
 
 import { AST_NODE_TYPES, ESLintUtils, TSESTree } from '@typescript-eslint/utils';
-import { type Scope, ScopeManager } from '@typescript-eslint/scope-manager';
-import {
-  getEnclosingFunction,
-  getEnclosingScopeNode,
-  getEnclosingStatement,
-  getParent,
-  isUsedInArrayOrAsArgument,
-} from '../ast/ts-tree';
-import { getResponseBodyRetrievalText, hasAssertions } from './fetch';
-import { analyzeResponseReferences } from './response-reference';
+import { type Scope } from '@typescript-eslint/scope-manager';
 import { strict as assert } from 'node:assert';
 import getDocumentationUrl from '../get-documentation-url';
+import { getEnclosingScopeNode } from '../ast/ts-tree';
 import { getIndentation } from '../ast/format';
-import { isValidPropertyName } from './variable';
-import { replaceEndpointUrlPrefixWithBasePath } from './url';
 
 export const ruleId = 'no-service-wrapper';
 
@@ -48,8 +38,10 @@ const rule = createRule({
     },
     messages: {
       preferNativeFetch: 'Prefer native fetch over customized service wrapper.',
-      unknownError:
-        'Unknown error occurred in file "{{fileName}}": {{ error }}. Please manually convert the usage of customized service wrapper call to native fetch.',
+      invalidOptions:
+        '"options" argument should be provided with "resolveWithFullResponse" property set as "true". Otherwise, it indicates that the response body will be obtained without status code assertion which could result in unexpected issue. Please manually convert the usage of customized service wrapper call to native fetch.',
+      // unknownError:
+      //   'Unknown error occurred in file "{{fileName}}": {{ error }}. Please manually convert the usage of customized service wrapper call to native fetch.',
     },
     fixable: 'code',
     schema: [],
@@ -61,6 +53,14 @@ const rule = createRule({
     const scopeManager = sourceCode.scopeManager;
     const parserService = ESLintUtils.getParserServices(context);
     const typeChecker = parserService.program.getTypeChecker();
+
+    // function reportUnknownError(node: TSESTree.Node, error: string) {
+    //   context.report({
+    //     node,
+    //     messageId: 'unknownError',
+    //     data: { error, fileName: context.filename },
+    //   });
+    // }
 
     function isUrlArgumentTemplateLiteral(urlArgument: TSESTree.Node | undefined, scope: Scope) {
       return (
@@ -156,35 +156,48 @@ const rule = createRule({
         assert.ok(serviceCall.callee.type === AST_NODE_TYPES.MemberExpression);
         assert.ok(serviceCall.callee.property.type === AST_NODE_TYPES.Identifier);
 
-        const method = serviceCall.callee.property.name; /*?*/
+        // method
+        const method = serviceCall.callee.property.name;
+
+        // body
+        const requestBodyProperty = ['put', 'post', 'options'].includes(method) ? serviceCall.arguments[1] : undefined;
+
+        // options
         const optionsArgument = ['get', 'head', 'del'].includes(method)
           ? serviceCall.arguments[1]
           : serviceCall.arguments[2];
-        if (optionsArgument !== undefined && optionsArgument.type !== AST_NODE_TYPES.ObjectExpression) {
-          throw new Error('optionsArgument is not an ObjectExpression');
+        if (optionsArgument === undefined || optionsArgument.type !== AST_NODE_TYPES.ObjectExpression) {
+          context.report({
+            node: serviceCall,
+            messageId: 'invalidOptions',
+          });
+          return;
         }
-        const resolveWithFullResponse = optionsArgument?.properties.find(
+        const resolveWithFullResponseProperty = optionsArgument.properties.find(
           (property) =>
             property.type === AST_NODE_TYPES.Property &&
             property.key.type === AST_NODE_TYPES.Identifier &&
             property.key.name === 'resolveWithFullResponse',
         );
         if (
-          resolveWithFullResponse?.type !== AST_NODE_TYPES.Property ||
-          resolveWithFullResponse.value.type !== AST_NODE_TYPES.Literal ||
-          resolveWithFullResponse.value.value !== true
+          resolveWithFullResponseProperty?.type !== AST_NODE_TYPES.Property ||
+          resolveWithFullResponseProperty.value.type !== AST_NODE_TYPES.Literal ||
+          resolveWithFullResponseProperty.value.value !== true
         ) {
-          throw new Error('resolveWithFullResponse is not true');
+          context.report({
+            node: optionsArgument,
+            messageId: 'invalidOptions',
+          });
+          return;
         }
 
-        const requestHeadersProperty = optionsArgument?.properties.find(
+        // headers
+        const requestHeadersProperty = optionsArgument.properties.find(
           (property) =>
             property.type === AST_NODE_TYPES.Property &&
             property.key.type === AST_NODE_TYPES.Identifier &&
             property.key.name === 'headers',
         );
-
-        const requestBodyProperty = ['put', 'post', 'options'].includes(method) ? serviceCall.arguments[1] : undefined;
 
         context.report({
           messageId: 'preferNativeFetch',

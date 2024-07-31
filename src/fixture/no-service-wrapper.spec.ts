@@ -8,16 +8,12 @@
 
 import rule, { ruleId } from './no-service-wrapper';
 import { RuleTester } from '@typescript-eslint/rule-tester';
-// import { dirname } from 'node:path';
-// import { fileURLToPath } from 'node:url';
-
-// const currentDirname = dirname(fileURLToPath(import.meta.url));
 
 const ruleTester = new RuleTester({
   parser: '@typescript-eslint/parser',
   parserOptions: {
-    project: '../../tsconfig.json',
-    tsconfigRootDir: `/Users/lcong/workspace/eslint-plugin/src/ts-init`,
+    project: '../tsconfig.json',
+    tsconfigRootDir: `${process.cwd()}/ts-init`,
   },
 });
 
