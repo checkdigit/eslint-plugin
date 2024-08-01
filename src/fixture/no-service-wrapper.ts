@@ -157,10 +157,14 @@ const rule = createRule({
           const method = serviceCall.callee.property.name;
 
           // body
-          const requestBodyProperty = ['put', 'post', 'options'].includes(method)
-            ? serviceCall.arguments[1]
-            : undefined;
-
+          let requestBodyProperty = ['put', 'post', 'options'].includes(method) ? serviceCall.arguments[1] : undefined;
+          if (
+            requestBodyProperty !== undefined &&
+            requestBodyProperty.type === AST_NODE_TYPES.Identifier &&
+            requestBodyProperty.name === 'undefined'
+          ) {
+            requestBodyProperty = undefined;
+          }
           // options
           const optionsArgument = ['get', 'head', 'del'].includes(method)
             ? serviceCall.arguments[1]

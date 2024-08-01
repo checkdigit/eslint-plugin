@@ -181,6 +181,30 @@ ruleTester.run(ruleId, rule, {
       errors: [{ messageId: 'preferNativeFetch' }],
     },
     {
+      name: 'handle PUT request with undefined body',
+      code: `
+          async function getKey(
+            fixture: Fixture,
+          ) {
+            const pingService = fixture.config.service.ping(EMPTY_CONTEXT);
+            const response = await pingService.put(\`\${PING_BASE_PATH}/key/\${keyId}\`, undefined, {
+              resolveWithFullResponse: true,
+            });
+          }
+        `,
+      output: `
+          async function getKey(
+            fixture: Fixture,
+          ) {
+            const pingService = fixture.config.service.ping(EMPTY_CONTEXT);
+            const response = await fetch(\`\${PING_BASE_PATH}/key/\${keyId}\`, {
+              method: 'PUT',
+            });
+          }
+        `,
+      errors: [{ messageId: 'preferNativeFetch' }],
+    },
+    {
       name: 'handle request with both body and headers',
       code: `
           async function getKey(
