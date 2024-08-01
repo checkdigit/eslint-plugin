@@ -1,7 +1,7 @@
 // fixture/url.ts
 
 export const PLAIN_URL_REGEXP = /^[`']\/\w+(?<serviceNamePart>-\w+)*\/v\d+\/.+[`']$/u;
-export const TOKENIZED_URL_REGEXP = /^`\$\{(?<serviceNamePart>\w+_)*BASE_PATH\}\/.+`$/u;
+export const TOKENIZED_URL_REGEXP = /^`\$\{(?<serviceNamePart>[A-Z]+_)*BASE_PATH\}\/.+`$/u;
 
 export function replaceEndpointUrlPrefixWithBasePath(url: string) {
   // eslint-disable-next-line no-template-curly-in-string
