@@ -7,6 +7,7 @@
  */
 
 import fetchHeaderGetter, { ruleId as fetchHeaderGetterRuleId } from './fixture/fetch-header-getter';
+import fetchResponseBodyJson, { ruleId as fetchResponseBodyJsonRuleId } from './fixture/fetch-response-body-json';
 import fetchThen, { ruleId as fetchThenRuleId } from './fixture/fetch-then';
 import invalidJsonStringify, { ruleId as invalidJsonStringifyRuleId } from './invalid-json-stringify';
 import noFixture, { ruleId as noFixtureRuleId } from './fixture/no-fixture';
@@ -41,6 +42,7 @@ export default {
     [fetchThenRuleId]: fetchThen,
     [noServiceWrapperRuleId]: noServiceWrapper,
     [noStatusCodeRuleId]: noStatusCode,
+    [fetchResponseBodyJsonRuleId]: fetchResponseBodyJson,
   },
   configs: {
     all: {
@@ -61,6 +63,7 @@ export default {
         [`@checkdigit/${fetchThenRuleId}`]: 'error',
         [`@checkdigit/${noServiceWrapperRuleId}`]: 'error',
         [`@checkdigit/${noStatusCodeRuleId}`]: 'error',
+        [`@checkdigit/${fetchResponseBodyJsonRuleId}`]: 'error',
       },
     },
     recommended: {

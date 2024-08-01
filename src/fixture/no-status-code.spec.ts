@@ -20,7 +20,7 @@ const ruleTester = new RuleTester({
 ruleTester.run(ruleId, rule, {
   valid: [
     {
-      name: 'no change if no "status" property is found in response type',
+      name: 'no change if no "status" property is found in the response type',
       code: `
         const response = {statusCode: 200};
         const status = response.statusCode;
