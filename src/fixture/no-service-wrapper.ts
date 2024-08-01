@@ -56,7 +56,7 @@ const rule = createRule({
         (urlArgument?.type === AST_NODE_TYPES.Literal && typeof urlArgument.value === 'string') ||
         urlArgument?.type === AST_NODE_TYPES.TemplateLiteral
       ) {
-        const urlText = sourceCode.getText(urlArgument); 
+        const urlText = sourceCode.getText(urlArgument);
         return PLAIN_URL_REGEXP.test(urlText) || TOKENIZED_URL_REGEXP.test(urlText);
       }
 
