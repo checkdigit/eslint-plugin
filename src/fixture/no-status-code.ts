@@ -28,7 +28,6 @@ const rule = createRule({
     schema: [],
   },
   defaultOptions: [],
-  // eslint-disable-next-line max-lines-per-function
   create(context) {
     const parserServices = ESLintUtils.getParserServices(context);
     const typeChecker = parserServices.program.getTypeChecker();

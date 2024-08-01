@@ -12,6 +12,7 @@ import invalidJsonStringify, { ruleId as invalidJsonStringifyRuleId } from './in
 import noFixture, { ruleId as noFixtureRuleId } from './fixture/no-fixture';
 import noPromiseInstanceMethod, { ruleId as noPromiseInstanceMethodRuleId } from './no-promise-instance-method';
 import noServiceWrapper, { ruleId as noServiceWrapperRuleId } from './fixture/no-service-wrapper';
+import noStatusCode, { ruleId as noStatusCodeRuleId } from './fixture/no-status-code';
 import filePathComment from './file-path-comment';
 import noCardNumbers from './no-card-numbers';
 import noTestImport from './no-test-import';
@@ -39,6 +40,7 @@ export default {
     [fetchHeaderGetterRuleId]: fetchHeaderGetter,
     [fetchThenRuleId]: fetchThen,
     [noServiceWrapperRuleId]: noServiceWrapper,
+    [noStatusCodeRuleId]: noStatusCode,
   },
   configs: {
     all: {
@@ -58,6 +60,7 @@ export default {
         [`@checkdigit/${fetchHeaderGetterRuleId}`]: 'error',
         [`@checkdigit/${fetchThenRuleId}`]: 'error',
         [`@checkdigit/${noServiceWrapperRuleId}`]: 'error',
+        [`@checkdigit/${noStatusCodeRuleId}`]: 'error',
       },
     },
     recommended: {

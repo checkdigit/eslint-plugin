@@ -36,20 +36,11 @@ const rule = createRule({
     schema: [],
   },
   defaultOptions: [],
-  // eslint-disable-next-line max-lines-per-function
   create(context) {
     const sourceCode = context.sourceCode;
     const scopeManager = sourceCode.scopeManager;
     const parserService = ESLintUtils.getParserServices(context);
     const typeChecker = parserService.program.getTypeChecker();
-
-    // function reportUnknownError(node: TSESTree.Node, error: string) {
-    //   context.report({
-    //     node,
-    //     messageId: 'unknownError',
-    //     data: { error, fileName: context.filename },
-    //   });
-    // }
 
     function isUrlArgumentValid(urlArgument: TSESTree.Node | undefined, scope: Scope) {
       if (
@@ -62,13 +53,14 @@ const rule = createRule({
 
       if (urlArgument?.type === AST_NODE_TYPES.Identifier) {
         const foundVariable = scope.variables.find((variable) => variable.name === urlArgument.name);
-        assert.ok(foundVariable, `Variable "${urlArgument.name}" not found in scope`);
-        const variableDefinition = foundVariable.defs.find((def) => def.type === DefinitionType.Variable);
-        assert.ok(variableDefinition, `Variable "${urlArgument.name}" not defined in scope`);
-        const variableDefinitionNode = variableDefinition.node;
-        assert.ok(variableDefinitionNode.type === AST_NODE_TYPES.VariableDeclarator);
-        assert.ok(variableDefinitionNode.init, 'Variable definition node has no init property');
-        return isUrlArgumentValid(variableDefinitionNode.init, scope);
+        if (foundVariable) {
+          const variableDefinition = foundVariable.defs.find((def) => def.type === DefinitionType.Variable);
+          assert.ok(variableDefinition, `Variable "${urlArgument.name}" not defined in scope`);
+          const variableDefinitionNode = variableDefinition.node;
+          assert.ok(variableDefinitionNode.type === AST_NODE_TYPES.VariableDeclarator);
+          assert.ok(variableDefinitionNode.init, 'Variable definition node has no init property');
+          return isUrlArgumentValid(variableDefinitionNode.init, scope);
+        }
       }
 
       return false;
