@@ -18,7 +18,12 @@ const ruleTester = new RuleTester({
 });
 
 ruleTester.run(ruleId, rule, {
-  valid: [],
+  valid: [
+    {
+      name: 'none service wrapper call will not trigger an error',
+      code: `response.headers.get('foo');`,
+    },
+  ],
   invalid: [
     {
       name: 'service wrapper passed in as a function argument with type as Endpoint',
@@ -253,6 +258,62 @@ ruleTester.run(ruleId, rule, {
             return newKeyResponse.body;
           }
         `,
+      errors: [{ messageId: 'preferNativeFetch' }],
+    },
+    {
+      name: 'convert url to add domain',
+      code: `
+        await pingService.get(\`/ping/v1/key/\${keyId}\`, {
+          resolveWithFullResponse: true,
+        });
+      `,
+      output: `
+        await fetch(\`https://ping.checkdigit/ping/v1/key/\${keyId}\`, {
+          method: 'GET',
+        });
+      `,
+      errors: [{ messageId: 'preferNativeFetch' }],
+    },
+    {
+      name: 'works with string literal url as well',
+      code: `
+        await pingService.get('/ping/v1/ping', {
+          resolveWithFullResponse: true,
+        });
+      `,
+      output: `
+        await fetch('https://ping.checkdigit/ping/v1/ping', {
+          method: 'GET',
+        });
+      `,
+      errors: [{ messageId: 'preferNativeFetch' }],
+    },
+    {
+      name: 'do not convert url containing BASE_PATH constant for the main service',
+      code: `
+        await service.get(\`\${BASE_PATH}/key/\${keyId}\`, {
+          resolveWithFullResponse: true,
+        });
+      `,
+      output: `
+        await fetch(\`\${BASE_PATH}/key/\${keyId}\`, {
+          method: 'GET',
+        });
+      `,
+      errors: [{ messageId: 'preferNativeFetch' }],
+    },
+    {
+      name: 'do not convert url containing BASE_PATH like constant for the dependent service',
+      code: `
+        await pingService.get(\`\${PING_BASE_PATH}/key/\${keyId}\`, {
+          resolveWithFullResponse: true,
+        });
+      `,
+      output: `
+        await fetch(\`\${PING_BASE_PATH}/key/\${keyId}\`, {
+          method: 'GET',
+        });
+      `,
       errors: [{ messageId: 'preferNativeFetch' }],
     },
   ],
