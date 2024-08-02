@@ -6,7 +6,7 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import { ESLintUtils, TSESTree } from '@typescript-eslint/utils';
+import { AST_NODE_TYPES, ESLintUtils, TSESTree } from '@typescript-eslint/utils';
 import getDocumentationUrl from '../get-documentation-url';
 
 export const ruleId = 'fetch-response-body-json';
@@ -45,11 +45,14 @@ const rule = createRule({
 
           if (shouldReplace) {
             const responseText = sourceCode.getText(responseBody.object);
+            const needAwait = responseBody.parent.type !== AST_NODE_TYPES.ReturnStatement;
+            const replacementText = needAwait ? `(await ${responseText}.json())` : `${responseText}.json()`;
+
             context.report({
               messageId: 'replaceBodyWithJson',
               node: responseBody,
               fix(fixer) {
-                return fixer.replaceText(responseBody, `(await ${responseText}.json())`);
+                return fixer.replaceText(responseBody, replacementText);
               },
             });
           }

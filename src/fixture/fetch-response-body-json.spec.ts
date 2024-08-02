@@ -52,5 +52,21 @@ ruleTester.run(ruleId, rule, {
       `,
       errors: [{ messageId: 'replaceBodyWithJson' }],
     },
+    {
+      name: 'no redundant "await" for return statement.',
+      code: `
+        async function foo() {
+          const response = await fetch(\`https://ping.checkdigit/ping/v1/key/\${keyId}\`);
+          return response.body;
+        }
+      `,
+      output: `
+        async function foo() {
+          const response = await fetch(\`https://ping.checkdigit/ping/v1/key/\${keyId}\`);
+          return response.json();
+        }
+      `,
+      errors: [{ messageId: 'replaceBodyWithJson' }],
+    },
   ],
 });
