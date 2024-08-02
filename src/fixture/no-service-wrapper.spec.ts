@@ -340,5 +340,27 @@ ruleTester.run(ruleId, rule, {
       `,
       errors: [{ messageId: 'preferNativeFetch' }],
     },
+    {
+      name: 'handle multi-line url string literal',
+      code: `
+        await pingService.get(\`/message/v1/picked-request?cardId=\${cardIds.toString()}fromDate={encodeURIComponent(
+          fromDate,
+        )}toDate=\${encodeURIComponent(
+          toDate,
+        )}fields=ADVICE_RESPONSE,CATEGORIZATION,CREATED_ON,MATCHED_MESSAGE_ID,SETTLEMENT_AMOUNT,MESSAGE_ID,RECEIVED_DATE_TIME\`, {
+          resolveWithFullResponse: true,
+        });
+      `,
+      output: `
+        await fetch(\`/message/v1/picked-request?cardId=\${cardIds.toString()}fromDate={encodeURIComponent(
+          fromDate,
+        )}toDate=\${encodeURIComponent(
+          toDate,
+        )}fields=ADVICE_RESPONSE,CATEGORIZATION,CREATED_ON,MATCHED_MESSAGE_ID,SETTLEMENT_AMOUNT,MESSAGE_ID,RECEIVED_DATE_TIME\`, {
+          method: 'GET',
+        });
+      `,
+      errors: [{ messageId: 'preferNativeFetch' }],
+    },
   ],
 });
