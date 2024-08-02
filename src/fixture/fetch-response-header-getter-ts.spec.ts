@@ -33,6 +33,15 @@ ruleTester.run(ruleId, rule, {
         response.get(ETAG);
       `,
     },
+    {
+      name: 'no change of request.get() if the type the request is InboundContext',
+      code: `
+        type InboundContext = { get: (string)=>string };
+        async function doSomething(request: InboundContext) {
+          const etagRequestHeader = request.get(ETAG);
+        }
+      `,
+    },
   ],
   invalid: [
     {

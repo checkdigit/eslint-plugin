@@ -135,18 +135,16 @@ const rule = createRule({
         serviceCall: TSESTree.CallExpression,
       ) => {
         try {
+          if (!isCalleeServiceWrapper(serviceCall)) {
+            return;
+          }
+
           const enclosingScopeNode = getEnclosingScopeNode(serviceCall);
           assert.ok(enclosingScopeNode, 'enclosingScopeNode is undefined');
           const scope = scopeManager?.acquire(enclosingScopeNode);
           assert.ok(scope, 'scope is undefined');
-
           const urlArgument = serviceCall.arguments[0];
-
           if (!isUrlArgumentValid(urlArgument, scope)) {
-            return;
-          }
-
-          if (!isCalleeServiceWrapper(serviceCall)) {
             return;
           }
 
