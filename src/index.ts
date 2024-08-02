@@ -6,6 +6,7 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
+import addUrlDomain, { ruleId as addUrlDomainRuleId } from './fixture/add-url-domain';
 import fetchHeaderGetter, { ruleId as fetchHeaderGetterRuleId } from './fixture/fetch-header-getter';
 import fetchResponseBodyJson, { ruleId as fetchResponseBodyJsonRuleId } from './fixture/fetch-response-body-json';
 import fetchResponseHeaderGetterTs, {
@@ -47,6 +48,7 @@ export default {
     [noStatusCodeRuleId]: noStatusCode,
     [fetchResponseBodyJsonRuleId]: fetchResponseBodyJson,
     [fetchResponseHeaderGetterTsRuleId]: fetchResponseHeaderGetterTs,
+    [addUrlDomainRuleId]: addUrlDomain,
   },
   configs: {
     all: {
@@ -69,6 +71,7 @@ export default {
         [`@checkdigit/${noStatusCodeRuleId}`]: 'error',
         [`@checkdigit/${fetchResponseBodyJsonRuleId}`]: 'error',
         [`@checkdigit/${fetchResponseHeaderGetterTsRuleId}`]: 'error',
+        [`@checkdigit/${addUrlDomainRuleId}`]: 'error',
       },
     },
     recommended: {

@@ -9,9 +9,15 @@ export function replaceEndpointUrlPrefixWithBasePath(url: string) {
 }
 
 export function replaceEndpointUrlPrefixWithDomain(url: string) {
-  // eslint-disable-next-line no-template-curly-in-string
   return url.replace(
     /^(?<quotStart>[`'])\/(?<servicename>\w+(?<parts>-\w+)*)(?<path>\/v\d+\/(?<any>.|\r|\n)+(?<quotEnd>[`'])$)/u,
+    '$1https://$2.checkdigit/$2$4',
+  );
+}
+
+export function addBasePathUrlDomain(url: string) {
+  return url.replace(
+    /^(?<quotStart>[`'])\/(?<servicename>\w+(?<parts>-\w+)*)(?<path>\/v\d+(?<quotEnd>[`'])$)/u,
     '$1https://$2.checkdigit/$2$4',
   );
 }
