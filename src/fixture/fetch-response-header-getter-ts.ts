@@ -89,6 +89,41 @@ const rule = createRule({
           });
         }
       },
+      'CallExpression[callee.property.name="get"]': (responseHeadersAccess: TSESTree.CallExpression) => {
+        try {
+          if (responseHeadersAccess.callee.type !== AST_NODE_TYPES.MemberExpression) {
+            return;
+          }
+
+          const responseNode = responseHeadersAccess.callee.object;
+          const responseHeadersTsNode = parserServices.esTreeNodeToTSNodeMap.get(responseNode);
+          const responseType = typeChecker.getTypeAtLocation(responseHeadersTsNode);
+          const hasHeadersProperty = responseType.getProperties().some((symbol) => symbol.name === 'headers');
+          if (!hasHeadersProperty) {
+            return;
+          }
+
+          const replacementText = `${sourceCode.getText(responseNode)}.headers`;
+          context.report({
+            messageId: 'useGetter',
+            node: responseHeadersAccess,
+            fix(fixer) {
+              return fixer.replaceText(responseNode, replacementText);
+            },
+          });
+        } catch (error) {
+          // eslint-disable-next-line no-console
+          console.error(`Failed to apply ${ruleId} rule for file "${context.filename}":`, error);
+          context.report({
+            node: responseHeadersAccess,
+            messageId: 'unknownError',
+            data: {
+              fileName: context.filename,
+              error: error instanceof Error ? error.toString() : JSON.stringify(error),
+            },
+          });
+        }
+      },
     };
   },
 });

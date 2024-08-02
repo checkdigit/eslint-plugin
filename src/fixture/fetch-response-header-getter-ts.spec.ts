@@ -26,6 +26,13 @@ ruleTester.run(ruleId, rule, {
         response.headers.get(ETAG);
       `,
     },
+    {
+      name: 'no change of response.get() if the type of response does not include "headers" property',
+      code: `
+        const response : Record<string,string> = await getResponse();
+        response.get(ETAG);
+      `,
+    },
   ],
   invalid: [
     {
@@ -61,6 +68,18 @@ ruleTester.run(ruleId, rule, {
       output: `
         const response : { headers: {get: (string)=>string} } = await getResponse();
         response.headers.get(\`etag\`);
+      `,
+      errors: [{ messageId: 'useGetter' }],
+    },
+    {
+      name: 'response.get() should be changed to response.headers.get()',
+      code: `
+        const response : { headers: {get: (string)=>string} } = await getResponse();
+        response.get(ETAG);
+      `,
+      output: `
+        const response : { headers: {get: (string)=>string} } = await getResponse();
+        response.headers.get(ETAG);
       `,
       errors: [{ messageId: 'useGetter' }],
     },
