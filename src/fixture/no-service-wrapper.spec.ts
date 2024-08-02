@@ -352,7 +352,7 @@ ruleTester.run(ruleId, rule, {
         });
       `,
       output: `
-        await fetch(\`/message/v1/picked-request?cardId=\${cardIds.toString()}fromDate={encodeURIComponent(
+        await fetch(\`https://message.checkdigit/message/v1/picked-request?cardId=\${cardIds.toString()}fromDate={encodeURIComponent(
           fromDate,
         )}toDate=\${encodeURIComponent(
           toDate,

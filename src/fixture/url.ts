@@ -10,5 +10,8 @@ export function replaceEndpointUrlPrefixWithBasePath(url: string) {
 
 export function replaceEndpointUrlPrefixWithDomain(url: string) {
   // eslint-disable-next-line no-template-curly-in-string
-  return url.replace(/\/(?<servicename>\w+(?<parts>-\w+)*)(?<path>\/v\d+\/.*$)/u, 'https://$1.checkdigit/$1$3');
+  return url.replace(
+    /^(?<quotStart>[`'])\/(?<servicename>\w+(?<parts>-\w+)*)(?<path>\/v\d+\/(?<any>.|\r|\n)+(?<quotEnd>[`'])$)/u,
+    '$1https://$2.checkdigit/$2$4',
+  );
 }
