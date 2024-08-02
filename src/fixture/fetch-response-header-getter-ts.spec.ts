@@ -34,11 +34,36 @@ ruleTester.run(ruleId, rule, {
       `,
     },
     {
+      name: 'no change of request.get() if the type the request do not have "headers" property',
+      code: `
+        type Context = { get: (string)=>string };
+        async function doSomething(req: Context) {
+          const etagRequestHeader = req.get(ETAG);
+        }
+      `,
+    },
+    {
+      name: 'no change of request.get() if the variable name is "request"',
+      code: `
+        type Context = { get: (string)=>string, headers: Record<string,string> };
+        async function doSomething(request: Context) {
+          const etagRequestHeader = request.get(ETAG);
+        }
+      `,
+    },
+    {
       name: 'no change of request.get() if the type the request is InboundContext',
       code: `
-        type InboundContext = { get: (string)=>string };
-        async function doSomething(request: InboundContext) {
-          const etagRequestHeader = request.get(ETAG);
+        async function doSomething(req: InboundContext) {
+          const etagRequestHeader = req.get(ETAG);
+        }
+      `,
+    },
+    {
+      name: 'no change of request.get() if the type the request is xxxRequestType',
+      code: `
+        async function doSomething(fooReq: FooRequestType) {
+          const etagRequestHeader = fooReq.get(ETAG);
         }
       `,
     },

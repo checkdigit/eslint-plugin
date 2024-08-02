@@ -89,7 +89,9 @@ const rule = createRule({
           });
         }
       },
-      'CallExpression[callee.property.name="get"]': (responseHeadersAccess: TSESTree.CallExpression) => {
+      'CallExpression[callee.property.name="get"]:not([callee.object.name="request"])': (
+        responseHeadersAccess: TSESTree.CallExpression,
+      ) => {
         try {
           if (responseHeadersAccess.callee.type !== AST_NODE_TYPES.MemberExpression) {
             return;
@@ -98,6 +100,10 @@ const rule = createRule({
           const responseNode = responseHeadersAccess.callee.object;
           const responseHeadersTsNode = parserServices.esTreeNodeToTSNodeMap.get(responseNode);
           const responseType = typeChecker.getTypeAtLocation(responseHeadersTsNode);
+          const typeName = typeChecker.typeToString(responseType);
+          if (typeName === 'InboundContext' || typeName.endsWith('RequestType')) {
+            return;
+          }
           const hasHeadersProperty = responseType.getProperties().some((symbol) => symbol.name === 'headers');
           if (!hasHeadersProperty) {
             return;
