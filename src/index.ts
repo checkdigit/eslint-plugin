@@ -15,6 +15,7 @@ import fetchResponseHeaderGetterTs, {
 import fetchThen, { ruleId as fetchThenRuleId } from './fixture/fetch-then';
 import invalidJsonStringify, { ruleId as invalidJsonStringifyRuleId } from './invalid-json-stringify';
 import noFixture, { ruleId as noFixtureRuleId } from './fixture/no-fixture';
+import noFullResponse, { ruleId as noFullResponseRuleId } from './fixture/no-full-response';
 import noPromiseInstanceMethod, { ruleId as noPromiseInstanceMethodRuleId } from './no-promise-instance-method';
 import noServiceWrapper, { ruleId as noServiceWrapperRuleId } from './fixture/no-service-wrapper';
 import noStatusCode, { ruleId as noStatusCodeRuleId } from './fixture/no-status-code';
@@ -49,6 +50,7 @@ export default {
     [fetchResponseBodyJsonRuleId]: fetchResponseBodyJson,
     [fetchResponseHeaderGetterTsRuleId]: fetchResponseHeaderGetterTs,
     [addUrlDomainRuleId]: addUrlDomain,
+    [noFullResponseRuleId]: noFullResponse,
   },
   configs: {
     all: {
@@ -72,6 +74,7 @@ export default {
         [`@checkdigit/${fetchResponseBodyJsonRuleId}`]: 'error',
         [`@checkdigit/${fetchResponseHeaderGetterTsRuleId}`]: 'error',
         [`@checkdigit/${addUrlDomainRuleId}`]: 'error',
+        [`@checkdigit/${noFullResponseRuleId}`]: 'error',
       },
     },
     recommended: {
