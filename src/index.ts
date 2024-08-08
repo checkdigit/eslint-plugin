@@ -83,18 +83,18 @@ export default {
         [`@checkdigit/${noPromiseInstanceMethodRuleId}`]: 'error',
       },
     },
-  },
-  agent: {
-    rules: {
-      [`@checkdigit/${noFixtureRuleId}`]: 'error',
-      [`@checkdigit/${fetchHeaderGetterRuleId}`]: 'error',
-      [`@checkdigit/${fetchThenRuleId}`]: 'error',
-      [`@checkdigit/${noServiceWrapperRuleId}`]: 'error',
-      [`@checkdigit/${noStatusCodeRuleId}`]: 'error',
-      [`@checkdigit/${fetchResponseBodyJsonRuleId}`]: 'error',
-      [`@checkdigit/${fetchResponseHeaderGetterTsRuleId}`]: 'error',
-      [`@checkdigit/${addUrlDomainRuleId}`]: 'error',
-      [`@checkdigit/${noFullResponseRuleId}`]: 'error',
+    agent: {
+      rules: {
+        [`@checkdigit/${noFixtureRuleId}`]: 'error',
+        [`@checkdigit/${fetchHeaderGetterRuleId}`]: 'error',
+        [`@checkdigit/${fetchThenRuleId}`]: 'error',
+        [`@checkdigit/${noServiceWrapperRuleId}`]: 'error',
+        [`@checkdigit/${noStatusCodeRuleId}`]: 'error',
+        [`@checkdigit/${fetchResponseBodyJsonRuleId}`]: 'error',
+        [`@checkdigit/${fetchResponseHeaderGetterTsRuleId}`]: 'error',
+        [`@checkdigit/${addUrlDomainRuleId}`]: 'error',
+        [`@checkdigit/${noFullResponseRuleId}`]: 'error',
+      },
     },
   },
 };
