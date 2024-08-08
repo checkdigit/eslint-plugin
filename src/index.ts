@@ -6,8 +6,19 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
+import addUrlDomain, { ruleId as addUrlDomainRuleId } from './fixture/add-url-domain';
+import fetchHeaderGetter, { ruleId as fetchHeaderGetterRuleId } from './fixture/fetch-header-getter';
+import fetchResponseBodyJson, { ruleId as fetchResponseBodyJsonRuleId } from './fixture/fetch-response-body-json';
+import fetchResponseHeaderGetterTs, {
+  ruleId as fetchResponseHeaderGetterTsRuleId,
+} from './fixture/fetch-response-header-getter-ts';
+import fetchThen, { ruleId as fetchThenRuleId } from './fixture/fetch-then';
 import invalidJsonStringify, { ruleId as invalidJsonStringifyRuleId } from './invalid-json-stringify';
+import noFixture, { ruleId as noFixtureRuleId } from './fixture/no-fixture';
+import noFullResponse, { ruleId as noFullResponseRuleId } from './fixture/no-full-response';
 import noPromiseInstanceMethod, { ruleId as noPromiseInstanceMethodRuleId } from './no-promise-instance-method';
+import noServiceWrapper, { ruleId as noServiceWrapperRuleId } from './fixture/no-service-wrapper';
+import noStatusCode, { ruleId as noStatusCodeRuleId } from './fixture/no-status-code';
 import filePathComment from './file-path-comment';
 import noCardNumbers from './no-card-numbers';
 import noTestImport from './no-test-import';
@@ -31,6 +42,15 @@ export default {
     'object-literal-response': objectLiteralResponse,
     [invalidJsonStringifyRuleId]: invalidJsonStringify,
     [noPromiseInstanceMethodRuleId]: noPromiseInstanceMethod,
+    [noFixtureRuleId]: noFixture,
+    [fetchHeaderGetterRuleId]: fetchHeaderGetter,
+    [fetchThenRuleId]: fetchThen,
+    [noServiceWrapperRuleId]: noServiceWrapper,
+    [noStatusCodeRuleId]: noStatusCode,
+    [fetchResponseBodyJsonRuleId]: fetchResponseBodyJson,
+    [fetchResponseHeaderGetterTsRuleId]: fetchResponseHeaderGetterTs,
+    [addUrlDomainRuleId]: addUrlDomain,
+    [noFullResponseRuleId]: noFullResponse,
   },
   configs: {
     all: {
@@ -61,6 +81,19 @@ export default {
         '@checkdigit/no-test-import': 'error',
         [`@checkdigit/${invalidJsonStringifyRuleId}`]: 'error',
         [`@checkdigit/${noPromiseInstanceMethodRuleId}`]: 'error',
+      },
+    },
+    agent: {
+      rules: {
+        [`@checkdigit/${noFixtureRuleId}`]: 'error',
+        [`@checkdigit/${fetchHeaderGetterRuleId}`]: 'error',
+        [`@checkdigit/${fetchThenRuleId}`]: 'error',
+        [`@checkdigit/${noServiceWrapperRuleId}`]: 'error',
+        [`@checkdigit/${noStatusCodeRuleId}`]: 'error',
+        [`@checkdigit/${fetchResponseBodyJsonRuleId}`]: 'error',
+        [`@checkdigit/${fetchResponseHeaderGetterTsRuleId}`]: 'error',
+        [`@checkdigit/${addUrlDomainRuleId}`]: 'error',
+        [`@checkdigit/${noFullResponseRuleId}`]: 'error',
       },
     },
   },
