@@ -18,6 +18,9 @@ import noFullResponse, { ruleId as noFullResponseRuleId } from './agent/no-full-
 import noPromiseInstanceMethod, { ruleId as noPromiseInstanceMethodRuleId } from './no-promise-instance-method';
 import noServiceWrapper, { ruleId as noServiceWrapperRuleId } from './agent/no-service-wrapper';
 import noStatusCode, { ruleId as noStatusCodeRuleId } from './agent/no-status-code';
+import requireResolveFullResponse, {
+  ruleId as requireResolveFullResponseRuleId,
+} from './require-resolve-full-response';
 import filePathComment from './file-path-comment';
 import noCardNumbers from './no-card-numbers';
 import noTestImport from './no-test-import';
@@ -49,6 +52,7 @@ export default {
     [fetchResponseHeaderGetterRuleId]: fetchResponseHeaderGetter,
     [addUrlDomainRuleId]: addUrlDomain,
     [noFullResponseRuleId]: noFullResponse,
+    [requireResolveFullResponseRuleId]: requireResolveFullResponse,
   },
   configs: {
     all: {
@@ -64,6 +68,8 @@ export default {
         '@checkdigit/no-test-import': 'error',
         [`@checkdigit/${invalidJsonStringifyRuleId}`]: 'error',
         [`@checkdigit/${noPromiseInstanceMethodRuleId}`]: 'error',
+        [`@checkdigit/${noFullResponseRuleId}`]: 'error',
+        [`@checkdigit/${requireResolveFullResponseRuleId}`]: 'error',
       },
     },
     recommended: {

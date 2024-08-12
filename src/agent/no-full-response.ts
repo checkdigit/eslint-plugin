@@ -23,7 +23,7 @@ const rule = createRule({
       description: 'Remove the usage of FullResponse type.',
     },
     messages: {
-      removeFullResponse: 'Remove the usage of FullResponse type.',
+      removeFullResponse: 'Removing the usage of FullResponse type.',
       unknownError: 'Unknown error occurred in file "{{fileName}}": {{ error }}.',
     },
     fixable: 'code',

@@ -228,8 +228,7 @@ const rule: Rule.RuleModule = {
     },
     messages: {
       preferNativeFetch: 'Prefer native fetch API over customized fixture API.',
-      unknownError:
-        'Unknown error occurred in file "{{fileName}}": {{ error }}. Please manually convert the fixture API call to fetch API call.',
+      unknownError: 'Unknown error occurred in file "{{fileName}}": {{ error }}.',
     },
     fixable: 'code',
     schema: [],

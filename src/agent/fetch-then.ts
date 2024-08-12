@@ -193,8 +193,7 @@ const rule: Rule.RuleModule = {
     messages: {
       preferNativeFetch: 'Prefer native fetch API over customized fixture API.',
       shouldUseHeaderGetter: 'Getter should be used to access response headers.',
-      unknownError:
-        'Unknown error occurred in file "{{fileName}}": {{ error }}. Please manually convert the fixture API call to fetch API call.',
+      unknownError: 'Unknown error occurred in file "{{fileName}}": {{ error }}.',
     },
     fixable: 'code',
     schema: [],
