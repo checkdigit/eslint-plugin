@@ -11,8 +11,8 @@ import { DefinitionType, type Scope } from '@typescript-eslint/scope-manager';
 import { PLAIN_URL_REGEXP, TOKENIZED_URL_REGEXP, replaceEndpointUrlPrefixWithDomain } from './url';
 import { strict as assert } from 'node:assert';
 import getDocumentationUrl from '../get-documentation-url';
-import { getEnclosingScopeNode } from '../ast/ts-tree';
-import { getIndentation } from '../ast/format';
+import { getEnclosingScopeNode } from '../library/ts-tree';
+import { getIndentation } from '../library/format';
 
 export const ruleId = 'no-service-wrapper';
 

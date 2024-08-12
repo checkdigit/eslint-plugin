@@ -1,6 +1,6 @@
 // fixture/fetch.ts
 
-import { getParent, isBlockStatement } from '../ast/tree';
+import { getParent, isBlockStatement } from '../library/tree';
 import type { Node } from 'estree';
 
 export function getResponseBodyRetrievalText(responseVariableName: string) {

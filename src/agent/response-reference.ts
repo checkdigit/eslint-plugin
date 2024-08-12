@@ -9,7 +9,7 @@
 import type { MemberExpression, VariableDeclaration } from 'estree';
 import { type Scope } from 'eslint';
 import { strict as assert } from 'node:assert';
-import { getParent } from '../ast/tree';
+import { getParent } from '../library/tree';
 
 /**
  * analyze response related variables and their references

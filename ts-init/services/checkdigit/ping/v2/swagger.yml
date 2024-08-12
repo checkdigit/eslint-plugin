@@ -1,0 +1,81 @@
+openapi: 3.0.0
+info:
+  title: Ping Service
+  description: |
+    A service that accepts incoming pings. This is only used for testing.
+
+    © Check Digit LLC. 2019-2024
+  version: 2.0.6
+  contact:
+    name: Check Digit
+servers:
+  - url: /ping/v2
+
+tags:
+  - name: Service Health
+
+x-firehose-logged: false
+
+paths:
+  /ping:
+    get:
+      description: Test service connectivity
+      tags:
+        - Service Health
+      operationId: ping-get
+      responses:
+        '200':
+          $ref: '#/components/responses/Ping'
+        default:
+          $ref: '#/components/responses/ServerError'
+    head:
+      description: Test service connectivity
+      tags:
+        - Service Health
+      operationId: ping-head
+      responses:
+        '200':
+          description: ping HEAD successful
+          content:
+            application/json:
+              schema: {}
+        default:
+          $ref: '#/components/responses/ServerError'
+
+components:
+  schemas:
+    Ping:
+      type: object
+      additionalProperties: false
+      required:
+        - serverTime
+      properties:
+        serverTime:
+          type: string
+          format: date-time
+          description: Current server time
+
+    Error:
+      type: object
+      additionalProperties: false
+      description: Error message
+      properties:
+        message:
+          type: string
+        code:
+          type: string
+
+  responses:
+    ServerError:
+      description: Server Error response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    Ping:
+      description: ping successful response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Ping'

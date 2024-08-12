@@ -7,32 +7,26 @@
  */
 
 import rule, { ruleId } from './add-url-domain';
-import { RuleTester } from '@typescript-eslint/rule-tester';
+import createTester from '../ts-tester.test';
 
-const ruleTester = new RuleTester({
-  parser: '@typescript-eslint/parser',
-  parserOptions: {
-    project: '../tsconfig.json',
-    tsconfigRootDir: `${process.cwd()}/ts-init`,
-  },
-});
+const ruleTester = createTester();
 
 ruleTester.run(ruleId, rule, {
   valid: [
     {
-      name: 'no change if no "status" property is found in the response type',
+      name: 'no change if the url already has domain',
       code: `export const BASE_PATH = 'https://ping.checkdigit/ping/v1';`,
     },
   ],
   invalid: [
     {
-      name: 'add domain to url constant variable BASE_PATH',
+      name: 'add domain to url constant variable BASE_PATH as string',
       code: `export const BASE_PATH = '/ping/v1';`,
       output: `export const BASE_PATH = 'https://ping.checkdigit/ping/v1';`,
       errors: [{ messageId: 'addDomain' }],
     },
     {
-      name: 'add domain to url constant variable BASE_PATH defined with template literal',
+      name: 'add domain to url constant variable BASE_PATH as template literal',
       code: `export const BASE_PATH = \`/ping/v1\`;`,
       output: `export const BASE_PATH = \`https://ping.checkdigit/ping/v1\`;`,
       errors: [{ messageId: 'addDomain' }],

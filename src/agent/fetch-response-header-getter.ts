@@ -10,6 +10,7 @@ import { AST_NODE_TYPES, ESLintUtils, TSESTree } from '@typescript-eslint/utils'
 import getDocumentationUrl from '../get-documentation-url';
 
 export const ruleId = 'fetch-response-header-getter-ts';
+const HEADER_BUILTIN_FUNCTIONS = Object.keys(Headers.prototype);
 
 const createRule = ESLintUtils.RuleCreator((name) => getDocumentationUrl(name));
 
@@ -34,37 +35,38 @@ const rule = createRule({
     const sourceCode = context.sourceCode;
 
     return {
-      'MemberExpression[object.property.name="headers"]': (responseHeadersAccess: TSESTree.MemberExpression) => {
+      MemberExpression: (responseHeadersAccess: TSESTree.MemberExpression) => {
         try {
           if (
             responseHeadersAccess.property.type === AST_NODE_TYPES.Identifier &&
-            responseHeadersAccess.property.name === 'get'
+            HEADER_BUILTIN_FUNCTIONS.includes(responseHeadersAccess.property.name)
           ) {
-            // getter is already being used
+            // skip Headers's built-in function calls
             return;
           }
 
           const responseHeadersTsNode = parserServices.esTreeNodeToTSNodeMap.get(responseHeadersAccess.object);
-          const responseType = typeChecker.getTypeAtLocation(responseHeadersTsNode);
-
-          const shouldReplace = responseType.getProperties().some((symbol) => symbol.name === 'get');
-          if (!shouldReplace) {
+          let responseHeadersType = typeChecker.getTypeAtLocation(responseHeadersTsNode);
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          responseHeadersType = responseHeadersType.isUnion() ? responseHeadersType.types[0]! : responseHeadersType;
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+          const responseHeadersTypeName = // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+            (responseHeadersType.symbol ?? responseHeadersType.aliasSymbol)?.escapedName;
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
+          if (responseHeadersTypeName !== 'Headers' && responseHeadersTypeName !== 'HeaderGetter') {
             return;
           }
 
-          // let replacementText = 'xxx';
-          // if (responseHeadersAccess.property.type === AST_NODE_TYPES.Identifier) {
-          //   replacementText = `${sourceCode.getText(responseHeadersAccess.object)}.get(${sourceCode.getText(responseHeadersAccess.property)})`;
-          // }
           let replacementText: string;
-          if (responseHeadersAccess.property.type === AST_NODE_TYPES.Identifier) {
+          if (!responseHeadersAccess.computed) {
+            // e.g. headers.etag
+            replacementText = `${sourceCode.getText(responseHeadersAccess.object)}.get('${sourceCode.getText(responseHeadersAccess.property)}')`;
+          } else if (
+            responseHeadersAccess.property.type === AST_NODE_TYPES.Identifier ||
+            responseHeadersAccess.property.type === AST_NODE_TYPES.Literal ||
+            responseHeadersAccess.property.type === AST_NODE_TYPES.TemplateLiteral
+          ) {
             replacementText = `${sourceCode.getText(responseHeadersAccess.object)}.get(${sourceCode.getText(responseHeadersAccess.property)})`;
-          } else if (responseHeadersAccess.property.type === AST_NODE_TYPES.TemplateLiteral) {
-            replacementText = `${sourceCode.getText(responseHeadersAccess.object)}.get(${sourceCode.getText(responseHeadersAccess.property)})`;
-          } else if (responseHeadersAccess.property.type === AST_NODE_TYPES.Literal) {
-            replacementText = responseHeadersAccess.computed
-              ? `${sourceCode.getText(responseHeadersAccess.object)}.get(${sourceCode.getText(responseHeadersAccess.property)})`
-              : `${sourceCode.getText(responseHeadersAccess.object)}.get('${sourceCode.getText(responseHeadersAccess.property)}')`;
           } else {
             throw new Error(`Unexpected property type: ${responseHeadersAccess.property.type}`);
           }
@@ -89,14 +91,21 @@ const rule = createRule({
           });
         }
       },
-      'CallExpression[callee.property.name="get"]:not([callee.object.name="request"])': (
-        responseHeadersAccess: TSESTree.CallExpression,
-      ) => {
+
+      // convert response.get() to response.headers.get()
+      'CallExpression[callee.property.name="get"]': (responseHeadersAccess: TSESTree.CallExpression) => {
         try {
           if (responseHeadersAccess.callee.type !== AST_NODE_TYPES.MemberExpression) {
             return;
           }
 
+          // skip request-like calls
+          if (
+            responseHeadersAccess.callee.object.type !== AST_NODE_TYPES.Identifier ||
+            responseHeadersAccess.callee.object.name === 'request'
+          ) {
+            return;
+          }
           const responseNode = responseHeadersAccess.callee.object;
           const responseHeadersTsNode = parserServices.esTreeNodeToTSNodeMap.get(responseNode);
           const responseType = typeChecker.getTypeAtLocation(responseHeadersTsNode);
@@ -104,6 +113,8 @@ const rule = createRule({
           if (typeName === 'InboundContext' || typeName.endsWith('RequestType')) {
             return;
           }
+
+          // make sure the response type has "headers" property
           const hasHeadersProperty = responseType.getProperties().some((symbol) => symbol.name === 'headers');
           if (!hasHeadersProperty) {
             return;

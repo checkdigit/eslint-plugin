@@ -9,7 +9,7 @@
 import { ESLintUtils, TSESTree } from '@typescript-eslint/utils';
 import { strict as assert } from 'node:assert';
 import getDocumentationUrl from '../get-documentation-url';
-import { getTypeParentNode } from './ts-tree';
+import { getTypeParentNode } from '../library/ts-tree';
 
 export const ruleId = 'no-full-response';
 

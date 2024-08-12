@@ -8,12 +8,12 @@
 
 import type { CallExpression, Expression, MemberExpression, SimpleCallExpression } from 'estree';
 import { type Rule, type Scope, SourceCode } from 'eslint';
-import { getEnclosingFunction, getEnclosingStatement, getParent, isUsedInArrayOrAsArgument } from '../ast/tree';
+import { getEnclosingFunction, getEnclosingStatement, getParent, isUsedInArrayOrAsArgument } from '../library/tree';
 import { hasAssertions, isInvalidResponseHeadersAccess } from './fetch';
 import { strict as assert } from 'node:assert';
 import getDocumentationUrl from '../get-documentation-url';
-import { getIndentation } from '../ast/format';
-import { isValidPropertyName } from './variable';
+import { getIndentation } from '../library/format';
+import { isValidPropertyName } from '../library/variable';
 import { replaceEndpointUrlPrefixWithBasePath } from './url';
 
 export const ruleId = 'fetch-then';

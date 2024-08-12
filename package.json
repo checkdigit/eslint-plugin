@@ -80,7 +80,8 @@
     "eslint-plugin-no-only-tests": "^3.1.0",
     "eslint-plugin-no-secrets": "^1.0.2",
     "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-sonarjs": "0.24.0"
+    "eslint-plugin-sonarjs": "0.24.0",
+    "http-status-codes": "^2.3.0"
   },
   "peerDependencies": {
     "eslint": ">=8 <9"

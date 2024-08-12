@@ -43,8 +43,8 @@ const rule = createRule({
             return;
           }
 
-          const urlText = sourceCode.getText(basePathDeclarator.init); /*?*/
-          const replacement = addBasePathUrlDomain(urlText); /*?*/
+          const urlText = sourceCode.getText(basePathDeclarator.init);
+          const replacement = addBasePathUrlDomain(urlText);
 
           if (replacement !== urlText) {
             context.report({

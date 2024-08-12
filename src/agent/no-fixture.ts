@@ -23,13 +23,13 @@ import {
   getEnclosingStatement,
   getParent,
   isUsedInArrayOrAsArgument,
-} from '../ast/tree';
+} from '../library/tree';
 import { getResponseBodyRetrievalText, hasAssertions } from './fetch';
 import { analyzeResponseReferences } from './response-reference';
 import { strict as assert } from 'node:assert';
 import getDocumentationUrl from '../get-documentation-url';
-import { getIndentation } from '../ast/format';
-import { isValidPropertyName } from './variable';
+import { getIndentation } from '../library/format';
+import { isValidPropertyName } from '../library/variable';
 import { replaceEndpointUrlPrefixWithBasePath } from './url';
 
 export const ruleId = 'no-fixture';

@@ -1,0 +1,209 @@
+openapi: 3.0.0
+info:
+  title: Sample Service
+  description: Sample Service
+  version: 0.0.1
+  contact:
+    name: Check Digit
+tags:
+  - name: API
+  - name: Health Check
+
+servers:
+  - url: /sample/v1
+
+x-firehose-logged: false
+
+paths:
+  /ping:
+    get:
+      description: Test service connectivity
+      operationId: ping-get
+      tags:
+        - Health Check
+      responses:
+        '200':
+          $ref: '#/components/responses/Ping'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+  /tenant/{tenantId}/rsa-key-pair/{rsaKeyPairId}:
+    put:
+      x-firehose-logged: true
+      description: Generate a RSA 2048 public/private key pair.  This operation will always return the same key pair for the given rsaKeyPairId.  The passphrase for privateKey is set to the rsaKeyPairId.
+      operationId: rsa-key-pair-put
+      tags:
+        - API
+      parameters:
+        - $ref: '#/components/parameters/tenantId'
+        - $ref: '#/components/parameters/rsaKeyPairId'
+        - $ref: '#/components/parameters/createdOn'
+      requestBody:
+        $ref: '#/components/requestBodies/RSAKeyPairRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/RSAKeyPairResponse'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+components:
+  schemas:
+    Ping:
+      type: object
+      additionalProperties: false
+      required:
+        - serverTime
+      properties:
+        serverTime:
+          type: string
+          format: date-time
+          description: Current server time
+
+    Error:
+      type: object
+      additionalProperties: false
+      description: Server error message
+      required:
+        - code
+      properties:
+        message:
+          type: string
+        code:
+          type: string
+          enum:
+            - INVALID_AT
+            - INVALID_FROM
+            - INVALID_TO
+            - TO_LESS_THAN_FROM
+            - HASH_MISMATCH
+            - INVALID_SCHEMA
+            - SCHEMA_VALIDATION_FAILURE
+            - INVALID_JSON
+            - INVALID_JSON_OBJECT
+            - INVALID_ENCRYPTED_DATA
+            - INVALID_KEY
+            - KEY_MISMATCH
+            - INVALID_PUBLIC_KEY_ID
+            - INVALID_IF_MATCH
+            - INVALID_CREATED_ON
+            - INVALID_TENANT_ID
+            - INVALID_ID
+
+    PublicKey:
+      description: Public key in PEM format
+      type: string
+
+    RSAKeyPairRequest:
+      type: object
+      additionalProperties: false
+      description: Request to generate an RSA key-pair
+      required:
+        - transmissionKey
+      properties:
+        transmissionKey:
+          $ref: '#/components/schemas/PublicKey'
+
+    RSAKeyPairResponse:
+      type: object
+      additionalProperties: false
+      description: Encrypted RSA key-pair
+      required:
+        - publicKey
+        - encryptedPrivateKey
+        - transmissionSecretKey
+      properties:
+        transmissionSecretKey:
+          description: AES-256-CBC secret key data encrypted with the request tranmissionKey, encoded using base-64
+          type: string
+        publicKey:
+          $ref: '#/components/schemas/PublicKey'
+        encryptedPrivateKey:
+          description: Private key part of generated RSA key pair, encrypted with transmissionSecretKey and base-64 encoded
+          type: string
+
+  parameters:
+    tenantId:
+      in: path
+      name: tenantId
+      description: Specifies tenant of Sentinel service
+      required: true
+      schema:
+        type: string
+
+    rsaKeyPairId:
+      in: path
+      name: rsaKeyPairId
+      description: Parameter used to represent a generated RSA key pair
+      required: true
+      schema:
+        type: string
+
+    createdOn:
+      name: Created-On
+      in: header
+      description: Created-On header
+      required: false
+      schema:
+        type: string
+        format: date-time
+
+  requestBodies:
+    RSAKeyPairRequest:
+      description: Request to generate an RSA key-pair
+      required: false
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RSAKeyPairRequest'
+
+  responses:
+    RSAKeyPairResponse:
+      description: Encrypted RSA key-pair
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RSAKeyPairResponse'
+      headers:
+        Created-On:
+          required: true
+          $ref: '#/components/headers/Created-On'
+        Updated-On:
+          required: false
+          $ref: '#/components/headers/Updated-On'
+
+    Ping:
+      description: ping successful response
+      headers:
+        Created-On:
+          $ref: '#/components/headers/Created-On'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Ping'
+
+    Conflict:
+      description: Conflict
+
+    ServerError:
+      description: Server Error response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  headers:
+    Created-On:
+      description: CreatedOn timestamp for the newly created record
+      required: true
+      schema:
+        type: string
+        format: date-time
+
+    Updated-On:
+      description: UpdatedOn timestamp for the existing record
+      required: false
+      schema:
+        type: string
+        format: date-time

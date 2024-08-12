@@ -88,3 +88,14 @@ export function getEnclosingFunction(node: TSESTree.Node) {
   }
   return getEnclosingFunction(parent);
 }
+
+export function getTypeParentNode(
+  node: TSESTree.Node | undefined,
+): TSESTree.TSTypeAnnotation | TSESTree.TSAsExpression | undefined {
+  if (!node) {
+    return undefined;
+  }
+  return node.type === AST_NODE_TYPES.TSTypeAnnotation || node.type === AST_NODE_TYPES.TSAsExpression
+    ? node
+    : getTypeParentNode(node.parent);
+}
