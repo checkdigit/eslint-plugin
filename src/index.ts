@@ -7,6 +7,7 @@
  */
 
 import invalidJsonStringify, { ruleId as invalidJsonStringifyRuleId } from './invalid-json-stringify';
+import noPromiseInstanceMethod, { ruleId as noPromiseInstanceMethodRuleId } from './no-promise-instance-method';
 import filePathComment from './file-path-comment';
 import noCardNumbers from './no-card-numbers';
 import noSideEffects from './no-side-effects';
@@ -31,6 +32,7 @@ export default {
     'require-assert-predicate-rejects-throws': requireAssertPredicateRejectsThrows,
     'object-literal-response': objectLiteralResponse,
     [invalidJsonStringifyRuleId]: invalidJsonStringify,
+    [noPromiseInstanceMethodRuleId]: noPromiseInstanceMethod,
   },
   configs: {
     all: {
@@ -46,6 +48,7 @@ export default {
         '@checkdigit/object-literal-response': 'error',
         '@checkdigit/no-test-import': 'error',
         [`@checkdigit/${invalidJsonStringifyRuleId}`]: 'error',
+        [`@checkdigit/${noPromiseInstanceMethodRuleId}`]: 'error',
       },
     },
     recommended: {
@@ -61,6 +64,7 @@ export default {
         '@checkdigit/object-literal-response': 'error',
         '@checkdigit/no-test-import': 'error',
         [`@checkdigit/${invalidJsonStringifyRuleId}`]: 'error',
+        [`@checkdigit/${noPromiseInstanceMethodRuleId}`]: 'error',
       },
     },
   },
