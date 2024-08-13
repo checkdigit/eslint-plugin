@@ -280,9 +280,11 @@ const rule: Rule.RuleModule = {
           // fetch request argument
           const methodNode = fixtureFunction.property; // get/put/etc.
           assert.ok(methodNode.type === 'Identifier');
+          const methodName = methodNode.name.toUpperCase();
+
           const fetchRequestArgumentLines = [
             '{',
-            `  method: '${methodNode.name.toUpperCase()}',`,
+            `  method: '${methodName === 'DEL' ? 'DELETE' : methodName}',`,
             ...(fixtureCallInformation.requestBody
               ? [`  body: JSON.stringify(${sourceCode.getText(fixtureCallInformation.requestBody)}),`]
               : []),

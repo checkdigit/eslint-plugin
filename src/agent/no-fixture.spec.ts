@@ -144,6 +144,21 @@ describe(ruleId, () => {
         errors: 1,
       },
       {
+        name: 'replace del with DELETE',
+        code: `
+          await fixture.api
+            .del(\`/sample-service/v2/card/\${originalCard.card.cardId}/block/\${encodeURIComponent('BLOCKED NO FRAUD')}\`)
+            .expect(StatusCodes.NO_CONTENT);
+        `,
+        output: `
+          const response = await fetch(\`\${BASE_PATH}/card/\${originalCard.card.cardId}/block/\${encodeURIComponent('BLOCKED NO FRAUD')}\`, {
+            method: 'DELETE',
+          });
+          assert.equal(response.status, StatusCodes.NO_CONTENT);
+        `,
+        errors: 1,
+      },
+      {
         name: 'response headers assertion should be externalized with new variable declared if necessary',
         code: `
           await fixture.api.get(\`/sample-service/v2/ping\`)

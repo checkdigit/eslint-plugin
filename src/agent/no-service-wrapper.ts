@@ -210,7 +210,7 @@ const rule = createRule({
 
               const fetchText = [
                 `fetch(${replacedUrl}, {`,
-                `  method: '${method.toUpperCase()}',`,
+                `  method: '${method.toLowerCase() === 'del' ? 'DELETE' : method.toUpperCase()}',`,
                 ...(requestHeadersProperty ? [`  ${sourceCode.getText(requestHeadersProperty)},`] : []),
                 ...(requestBodyProperty ? [`  body: JSON.stringify(${sourceCode.getText(requestBodyProperty)}),`] : []),
                 '})',

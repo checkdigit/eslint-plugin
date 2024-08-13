@@ -23,6 +23,10 @@ ruleTester.run(ruleId, rule, {
       name: 'none service wrapper call will not trigger an error',
       code: `response.headers.get('foo');`,
     },
+    {
+      name: 'no change if already converted to fetch',
+      code: `fetch(\`https://ping.checkdigit/ping/v1/ping\`);`,
+    },
   ],
   invalid: [
     {
@@ -235,6 +239,22 @@ ruleTester.run(ruleId, rule, {
             });
           }
         `,
+      errors: [{ messageId: 'preferNativeFetch' }],
+    },
+    {
+      name: 'replace del method as DELETE',
+      code: `
+        const pingService = fixture.config.service.ping(EMPTY_CONTEXT);
+        const response = await pingService.del(\`\${PING_BASE_PATH}/key/\${keyId}\`, {
+          resolveWithFullResponse: true,
+        });
+      `,
+      output: `
+        const pingService = fixture.config.service.ping(EMPTY_CONTEXT);
+        const response = await fetch(\`\${PING_BASE_PATH}/key/\${keyId}\`, {
+          method: 'DELETE',
+        });
+      `,
       errors: [{ messageId: 'preferNativeFetch' }],
     },
     {
