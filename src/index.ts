@@ -15,6 +15,7 @@ import fetchThen, { ruleId as fetchThenRuleId } from './agent/fetch-then';
 import invalidJsonStringify, { ruleId as invalidJsonStringifyRuleId } from './invalid-json-stringify';
 import noFixture, { ruleId as noFixtureRuleId } from './agent/no-fixture';
 import noFullResponse, { ruleId as noFullResponseRuleId } from './agent/no-full-response';
+import noMappedResponse, { ruleId as noMappedResponseRuleId } from './agent/no-mapped-response';
 import noPromiseInstanceMethod, { ruleId as noPromiseInstanceMethodRuleId } from './no-promise-instance-method';
 import noServiceWrapper, { ruleId as noServiceWrapperRuleId } from './agent/no-service-wrapper';
 import noStatusCode, { ruleId as noStatusCodeRuleId } from './agent/no-status-code';
@@ -52,6 +53,7 @@ export default {
     [fetchResponseHeaderGetterRuleId]: fetchResponseHeaderGetter,
     [addUrlDomainRuleId]: addUrlDomain,
     [noFullResponseRuleId]: noFullResponse,
+    [noMappedResponseRuleId]: noMappedResponse,
     [requireResolveFullResponseRuleId]: requireResolveFullResponse,
   },
   configs: {
@@ -94,13 +96,14 @@ export default {
         [`@checkdigit/${noPromiseInstanceMethodRuleId}`]: 'error',
       },
     },
-    'agent-serve-runtime': {
-      ignorePatterns: ['*.spec.ts', '*.test.ts'],
+    'agent-phase-1-test': {
+      files: ['*.spec.ts', '*.test.ts', 'src/api/v*/index.ts'],
       rules: {
         [`@checkdigit/${noFullResponseRuleId}`]: 'error',
         [`@checkdigit/${requireResolveFullResponseRuleId}`]: 'error',
+        [`@checkdigit/${noMappedResponseRuleId}`]: 'error',
         [`@checkdigit/${addUrlDomainRuleId}`]: 'error',
-        [`@checkdigit/${noFixtureRuleId}`]: 'off',
+        [`@checkdigit/${noFixtureRuleId}`]: 'error',
         [`@checkdigit/${noServiceWrapperRuleId}`]: 'error',
         [`@checkdigit/${noStatusCodeRuleId}`]: 'error',
         [`@checkdigit/${fetchResponseBodyJsonRuleId}`]: 'error',
@@ -108,12 +111,14 @@ export default {
         [`@checkdigit/${fetchThenRuleId}`]: 'error',
       },
     },
-    'agent-fixture': {
+    'agent-phase-2-production': {
+      ignorePatterns: ['*.spec.ts', '*.test.ts'],
       rules: {
         [`@checkdigit/${noFullResponseRuleId}`]: 'error',
         [`@checkdigit/${requireResolveFullResponseRuleId}`]: 'error',
+        [`@checkdigit/${noMappedResponseRuleId}`]: 'error',
         [`@checkdigit/${addUrlDomainRuleId}`]: 'error',
-        [`@checkdigit/${noFixtureRuleId}`]: 'error',
+        [`@checkdigit/${noFixtureRuleId}`]: 'off',
         [`@checkdigit/${noServiceWrapperRuleId}`]: 'error',
         [`@checkdigit/${noStatusCodeRuleId}`]: 'error',
         [`@checkdigit/${fetchResponseBodyJsonRuleId}`]: 'error',
