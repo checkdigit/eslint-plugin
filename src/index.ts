@@ -97,7 +97,11 @@ export default {
       },
     },
     'agent-phase-1-test': {
-      files: ['*.spec.ts', '*.test.ts', 'src/api/v*/index.ts'],
+      overrides: [
+        {
+          files: ['*.spec.ts', '*.test.ts', 'src/api/v*/index.ts'],
+        },
+      ],
       rules: {
         [`@checkdigit/${noFullResponseRuleId}`]: 'error',
         [`@checkdigit/${requireResolveFullResponseRuleId}`]: 'error',
