@@ -12,6 +12,7 @@
     "plugin:sonarjs/recommended",
     "prettier"
   ],
+  "ignorePatterns": ["ts-init/**/*.ts"],
   "rules": {
     "sort-keys": "off",
     "capitalized-comments": "off",
