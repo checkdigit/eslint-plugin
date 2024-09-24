@@ -13,6 +13,7 @@ import fetchResponseHeaderGetter, {
 } from './agent/fetch-response-header-getter';
 import fetchThen, { ruleId as fetchThenRuleId } from './agent/fetch-then';
 import invalidJsonStringify, { ruleId as invalidJsonStringifyRuleId } from './invalid-json-stringify';
+import noDuplicatedImports, { ruleId as noDuplicatedImportsRuleId } from './no-duplicated-imports';
 import noFixture, { ruleId as noFixtureRuleId } from './agent/no-fixture';
 import noFullResponse, { ruleId as noFullResponseRuleId } from './agent/no-full-response';
 import noMappedResponse, { ruleId as noMappedResponseRuleId } from './agent/no-mapped-response';
@@ -55,6 +56,7 @@ export default {
     [noFullResponseRuleId]: noFullResponse,
     [noMappedResponseRuleId]: noMappedResponse,
     [requireResolveFullResponseRuleId]: requireResolveFullResponse,
+    [noDuplicatedImportsRuleId]: noDuplicatedImports,
   },
   configs: {
     all: {
@@ -72,13 +74,7 @@ export default {
         [`@checkdigit/${noPromiseInstanceMethodRuleId}`]: 'error',
         [`@checkdigit/${noFullResponseRuleId}`]: 'error',
         [`@checkdigit/${requireResolveFullResponseRuleId}`]: 'error',
-        [`@checkdigit/${addUrlDomainRuleId}`]: 'off',
-        [`@checkdigit/${noFixtureRuleId}`]: 'off',
-        [`@checkdigit/${noServiceWrapperRuleId}`]: 'off',
-        [`@checkdigit/${noStatusCodeRuleId}`]: 'off',
-        [`@checkdigit/${fetchResponseBodyJsonRuleId}`]: 'off',
-        [`@checkdigit/${fetchResponseHeaderGetterRuleId}`]: 'off',
-        [`@checkdigit/${fetchThenRuleId}`]: 'off',
+        [`@checkdigit/${noDuplicatedImportsRuleId}`]: 'error',
       },
     },
     recommended: {
@@ -103,8 +99,6 @@ export default {
         },
       ],
       rules: {
-        [`@checkdigit/${noFullResponseRuleId}`]: 'error',
-        [`@checkdigit/${requireResolveFullResponseRuleId}`]: 'error',
         [`@checkdigit/${noMappedResponseRuleId}`]: 'error',
         [`@checkdigit/${addUrlDomainRuleId}`]: 'error',
         [`@checkdigit/${noFixtureRuleId}`]: 'error',
@@ -118,8 +112,6 @@ export default {
     'agent-phase-2-production': {
       ignorePatterns: ['*.spec.ts', '*.test.ts'],
       rules: {
-        [`@checkdigit/${noFullResponseRuleId}`]: 'error',
-        [`@checkdigit/${requireResolveFullResponseRuleId}`]: 'error',
         [`@checkdigit/${noMappedResponseRuleId}`]: 'error',
         [`@checkdigit/${addUrlDomainRuleId}`]: 'error',
         [`@checkdigit/${noFixtureRuleId}`]: 'off',
