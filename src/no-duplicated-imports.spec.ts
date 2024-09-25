@@ -1,4 +1,4 @@
-// fixture/no-duplicated-imports.spec.ts
+// no-duplicated-imports.spec.ts
 
 /*
  * Copyright (c) 2021-2024 Check Digit, LLC

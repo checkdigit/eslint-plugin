@@ -1,4 +1,4 @@
-// fixture/fetch-then.ts
+// agent/fetch-then.ts
 
 /*
  * Copyright (c) 2021-2024 Check Digit, LLC

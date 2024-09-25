@@ -1,4 +1,4 @@
-// fixture/concurrent-promises.spec.ts
+// agent/concurrent-promises.spec.ts
 
 /*
  * Copyright (c) 2021-2024 Check Digit, LLC

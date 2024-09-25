@@ -1,4 +1,4 @@
-// fixture/no-full-response.spec.ts
+// agent/no-full-response.spec.ts
 
 /*
  * Copyright (c) 2021-2024 Check Digit, LLC

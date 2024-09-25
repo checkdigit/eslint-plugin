@@ -20,9 +20,15 @@ import noMappedResponse, { ruleId as noMappedResponseRuleId } from './agent/no-m
 import noPromiseInstanceMethod, { ruleId as noPromiseInstanceMethodRuleId } from './no-promise-instance-method';
 import noServiceWrapper, { ruleId as noServiceWrapperRuleId } from './agent/no-service-wrapper';
 import noStatusCode, { ruleId as noStatusCodeRuleId } from './agent/no-status-code';
+import requireFixedServicesImport, {
+  ruleId as requireFixedServicesImportRuleId,
+} from './require-fixed-services-import';
 import requireResolveFullResponse, {
   ruleId as requireResolveFullResponseRuleId,
 } from './require-resolve-full-response';
+import requireTypeOutOfTypeOnlyImports, {
+  ruleId as requireTypeOutOfTypeOnlyImportsRuleId,
+} from './require-type-out-of-type-only-imports';
 import filePathComment from './file-path-comment';
 import noCardNumbers from './no-card-numbers';
 import noTestImport from './no-test-import';
@@ -57,6 +63,8 @@ export default {
     [noMappedResponseRuleId]: noMappedResponse,
     [requireResolveFullResponseRuleId]: requireResolveFullResponse,
     [noDuplicatedImportsRuleId]: noDuplicatedImports,
+    [requireFixedServicesImportRuleId]: requireFixedServicesImport,
+    [requireTypeOutOfTypeOnlyImportsRuleId]: requireTypeOutOfTypeOnlyImports,
   },
   configs: {
     all: {
@@ -75,6 +83,8 @@ export default {
         [`@checkdigit/${noFullResponseRuleId}`]: 'error',
         [`@checkdigit/${requireResolveFullResponseRuleId}`]: 'error',
         [`@checkdigit/${noDuplicatedImportsRuleId}`]: 'error',
+        [`@checkdigit/${requireFixedServicesImportRuleId}`]: 'error',
+        [`@checkdigit/${requireTypeOutOfTypeOnlyImportsRuleId}`]: 'error',
       },
     },
     recommended: {

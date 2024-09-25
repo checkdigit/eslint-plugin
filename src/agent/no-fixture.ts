@@ -1,4 +1,4 @@
-// fixture/no-fixture.ts
+// agent/no-fixture.ts
 
 /*
  * Copyright (c) 2021-2024 Check Digit, LLC

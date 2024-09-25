@@ -1,4 +1,4 @@
-// agent/ts-tester.test.ts
+// ts-tester.test.ts
 
 /*
  * Copyright (c) 2021-2024 Check Digit, LLC

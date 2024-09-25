@@ -1,4 +1,4 @@
-// fixture/fetch.ts
+// agent/fetch.ts
 
 import { getParent, isBlockStatement } from '../library/tree';
 import type { Node } from 'estree';

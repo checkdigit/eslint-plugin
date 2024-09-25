@@ -1,4 +1,4 @@
-// fixture/no-duplicated-imports.ts
+// no-duplicated-imports.ts
 
 /*
  * Copyright (c) 2021-2024 Check Digit, LLC
@@ -58,7 +58,7 @@ const rule = createRule({
                 (specifier) =>
                   specifier.type === TSESTree.AST_NODE_TYPES.ImportSpecifier && specifier.importKind === 'type',
               ),
-          ); /*?*/
+          );
 
           context.report({
             messageId: 'mergeDuplicatedImports',
@@ -72,10 +72,8 @@ const rule = createRule({
                     specifier.type === TSESTree.AST_NODE_TYPES.ImportDefaultSpecifier ? specifier : undefined,
                   ),
                 )
-                .filter(Boolean); /*?*/
-              const defaultSpecifierText = defaultSpecifier[0]
-                ? sourceCode.getText(defaultSpecifier[0])
-                : undefined; /*?*/
+                .filter(Boolean);
+              const defaultSpecifierText = defaultSpecifier[0] ? sourceCode.getText(defaultSpecifier[0]) : undefined;
 
               const mergedSpecifiers = declarations.flatMap((declaration) => {
                 const isCurrentDeclarationTypeOnly =
@@ -83,7 +81,7 @@ const rule = createRule({
                   declaration.specifiers.every(
                     (specifier) =>
                       specifier.type === TSESTree.AST_NODE_TYPES.ImportSpecifier && specifier.importKind === 'type',
-                  ); /*?*/
+                  );
                 return declaration.specifiers
                   .filter((specifier) => specifier.type !== TSESTree.AST_NODE_TYPES.ImportDefaultSpecifier)
                   .map((specifier) =>
@@ -95,7 +93,7 @@ const rule = createRule({
                         : sourceCode.getText(specifier),
                   );
               });
-              const mergedSpecifiersText = `${isAllTypeOnly ? 'type ' : ''}{ ${[...mergedSpecifiers].join(', ')} }`;
+              const mergedSpecifiersText = `${isAllTypeOnly ? 'type ' : ''}{ ${mergedSpecifiers.join(', ')} }`;
 
               // Replace the first import with the merged import
               const mergedImport = `import ${[defaultSpecifierText, mergedSpecifiersText].filter(Boolean).join(', ')} from '${moduleName}';`;

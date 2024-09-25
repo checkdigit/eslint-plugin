@@ -1,4 +1,4 @@
-// fixture/no-status-code.ts
+// agent/no-status-code.ts
 
 /*
  * Copyright (c) 2021-2024 Check Digit, LLC

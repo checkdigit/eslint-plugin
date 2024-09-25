@@ -1,4 +1,4 @@
-// fixture/fetch-response-header-getter-ts.ts
+// agent/fetch-response-header-getter-ts.ts
 
 /*
  * Copyright (c) 2021-2024 Check Digit, LLC

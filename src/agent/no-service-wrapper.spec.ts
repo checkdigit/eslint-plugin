@@ -1,4 +1,4 @@
-// fixture/no-service-wrapper.spec.ts
+// agent/no-service-wrapper.spec.ts
 
 /*
  * Copyright (c) 2021-2024 Check Digit, LLC
