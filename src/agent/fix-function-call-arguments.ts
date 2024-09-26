@@ -10,7 +10,6 @@ import { ESLintUtils, TSESTree } from '@typescript-eslint/utils';
 import { strict as assert } from 'node:assert';
 import debug from 'debug';
 import getDocumentationUrl from '../get-documentation-url';
-import { getParent } from '../library/ts-tree';
 
 export const ruleId = 'fix-function-call-arguments';
 
@@ -69,32 +68,49 @@ const rule = createRule({
           }
 
           const signatureParameters = signature.getParameters();
-          const expectedArgsCount = signatureParameters.length;
-          const providedArgs = callExpression.arguments;
-          const providedArgsCount = providedArgs.length;
-          if (providedArgsCount === 0 || providedArgsCount === expectedArgsCount) {
+          const expectedParametersCount = signatureParameters.length;
+          const actualParameters = callExpression.arguments;
+          const actualParametersCount = actualParameters.length;
+          if (actualParametersCount === 0 || actualParametersCount === expectedParametersCount) {
             return;
           }
-          const argsToKeep: TSESTree.CallExpressionArgument[] = [];
+          const parametersToKeep: TSESTree.CallExpressionArgument[] = [];
 
-          if (expectedArgsCount > 0) {
-            let parameterIndex = 0;
-            for (const arg of providedArgs) {
-              const currentExpectedArg = signatureParameters[parameterIndex];
-              assert.ok(currentExpectedArg, 'Expected argument not found.');
+          if (expectedParametersCount > 0) {
+            let expectedParameterIndex = 0;
+            for (const [actualParameterIndex, actualParameter] of actualParameters.entries()) {
+              if (expectedParameterIndex >= expectedParametersCount) {
+                parametersToKeep.push(actualParameter);
+                continue;
+              }
 
-              const expectedType = typeChecker.getTypeOfSymbol(currentExpectedArg);
-              const actualType = typeChecker.getTypeAtLocation(parserServices.esTreeNodeToTSNodeMap.get(arg));
+              const expectedParameter = signatureParameters[expectedParameterIndex];
+              assert.ok(expectedParameter, 'Expected parameter not found.');
+
+              const expectedType = typeChecker.getTypeOfSymbol(expectedParameter);
+              const actualType = typeChecker.getTypeAtLocation(
+                parserServices.esTreeNodeToTSNodeMap.get(actualParameter),
+              );
 
               // eslint-disable-next-line no-console
-              log('expected type:', currentExpectedArg.escapedName, typeChecker.typeToString(expectedType));
+              log(
+                'expected type: #',
+                expectedParameterIndex,
+                expectedParameter.escapedName,
+                typeChecker.typeToString(expectedType),
+              );
               // eslint-disable-next-line no-console
-              log('actual type:', sourceCode.getText(arg), typeChecker.typeToString(actualType));
+              log(
+                'actual type: #',
+                actualParameterIndex,
+                sourceCode.getText(actualParameter),
+                typeChecker.typeToString(actualType),
+              );
               // @ts-expect-error: internal API
               // eslint-disable-next-line @typescript-eslint/no-unsafe-call
               if (typeChecker.isTypeAssignableTo(actualType, expectedType) === true) {
-                argsToKeep.push(arg);
-                parameterIndex++;
+                parametersToKeep.push(actualParameter);
+                expectedParameterIndex++;
                 log('matched');
               } else {
                 log('not matched');
@@ -102,12 +118,12 @@ const rule = createRule({
             }
           }
 
-          if (argsToKeep.length === providedArgsCount) {
+          if (parametersToKeep.length === actualParametersCount) {
             return;
           }
 
-          const firstParameter = providedArgs[0];
-          const lastParameter = providedArgs.at(-1);
+          const firstParameter = actualParameters[0];
+          const lastParameter = actualParameters.at(-1);
           assert.ok(firstParameter !== undefined && lastParameter !== undefined);
           const tokenAfterParameters = sourceCode.getTokenAfter(lastParameter);
 
@@ -120,7 +136,7 @@ const rule = createRule({
                   firstParameter.range[0],
                   tokenAfterParameters?.value === ',' ? tokenAfterParameters.range[1] : lastParameter.range[1],
                 ],
-                argsToKeep.map((arg) => sourceCode.getText(arg)).join(', '),
+                parametersToKeep.map((arg) => sourceCode.getText(arg)).join(', '),
               );
             },
           });

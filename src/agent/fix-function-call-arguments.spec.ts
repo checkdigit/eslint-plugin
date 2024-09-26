@@ -67,7 +67,7 @@ createTester().run(ruleId, rule, {
       errors: [{ messageId: 'removeIncompatibleFunctionArguments' }],
     },
     {
-      name: 'remove incompatible function arguments - original function call has no arguments',
+      name: 'remove incompatible function arguments - original function has no arguments',
       code: `
         function doSomething() {
           // do something
@@ -79,6 +79,22 @@ createTester().run(ruleId, rule, {
           // do something
         };
         doSomething();
+      `,
+      errors: [{ messageId: 'removeIncompatibleFunctionArguments' }],
+    },
+    {
+      name: 'remove incompatible function arguments - original function has less arguments',
+      code: `
+        function doSomething(id: string) {
+          // do something
+        };
+        doSomething({},'abc', 1);
+      `,
+      output: `
+        function doSomething(id: string) {
+          // do something
+        };
+        doSomething('abc', 1);
       `,
       errors: [{ messageId: 'removeIncompatibleFunctionArguments' }],
     },
