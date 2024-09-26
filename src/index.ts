@@ -12,6 +12,9 @@ import fetchResponseHeaderGetter, {
   ruleId as fetchResponseHeaderGetterRuleId,
 } from './agent/fetch-response-header-getter';
 import fetchThen, { ruleId as fetchThenRuleId } from './agent/fetch-then';
+import fixFunctionCallArguments, {
+  ruleId as fixFunctionCallArgumentsRuleId,
+} from './agent/fix-function-call-arguments';
 import invalidJsonStringify, { ruleId as invalidJsonStringifyRuleId } from './invalid-json-stringify';
 import noDuplicatedImports, { ruleId as noDuplicatedImportsRuleId } from './no-duplicated-imports';
 import noFixture, { ruleId as noFixtureRuleId } from './agent/no-fixture';
@@ -73,6 +76,7 @@ export default {
     [noUnusedFunctionArgumentsRuleId]: noUnusedFunctionArguments,
     [noUnusedServiceVariablesRuleId]: noUnusedServiceVariables,
     [noUnusedImportsRuleId]: noUnusedImports,
+    [fixFunctionCallArgumentsRuleId]: fixFunctionCallArguments,
   },
   configs: {
     all: {
@@ -128,6 +132,7 @@ export default {
         [`@checkdigit/${noUnusedFunctionArgumentsRuleId}`]: 'error',
         [`@checkdigit/${noUnusedServiceVariablesRuleId}`]: 'error',
         [`@checkdigit/${noUnusedImportsRuleId}`]: 'error',
+        [`@checkdigit/${fixFunctionCallArgumentsRuleId}`]: 'error',
       },
     },
     'agent-phase-2-production': {
@@ -144,6 +149,7 @@ export default {
         [`@checkdigit/${noUnusedFunctionArgumentsRuleId}`]: 'error',
         [`@checkdigit/${noUnusedServiceVariablesRuleId}`]: 'error',
         [`@checkdigit/${noUnusedImportsRuleId}`]: 'error',
+        [`@checkdigit/${fixFunctionCallArgumentsRuleId}`]: 'error',
       },
     },
   },
