@@ -10,7 +10,12 @@ import rule, { ruleId } from './no-unused-function-argument';
 import createTester from '../ts-tester.test';
 
 createTester().run(ruleId, rule, {
-  valid: [],
+  valid: [
+    {
+      name: 'all function arguments are used',
+      code: `function doSomething(a: string, b: number, c: unknown) { console.log(a,b,c); }`,
+    },
+  ],
   invalid: [
     {
       name: 'remove unused function arguments - first argument',

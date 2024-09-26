@@ -51,6 +51,9 @@ const rule = createRule({
 
           const body = functionDeclaration.body;
           const parametersToKeep = parameters.filter((parameter) => isParameterUsed(parameter, body));
+          if (parametersToKeep.length === parameters.length) {
+            return;
+          }
 
           const updatedParameters = parametersToKeep.map((parameter) => sourceCode.getText(parameter)).join(', ');
           context.report({
