@@ -23,6 +23,7 @@ import noStatusCode, { ruleId as noStatusCodeRuleId } from './agent/no-status-co
 import noUnusedFunctionArguments, {
   ruleId as noUnusedFunctionArgumentsRuleId,
 } from './agent/no-unused-function-argument';
+import noUnusedImports, { ruleId as noUnusedImportsRuleId } from './agent/no-unused-imports';
 import noUnusedServiceVariables, { ruleId as noUnusedServiceVariablesRuleId } from './agent/no-unused-service-variable';
 import requireFixedServicesImport, {
   ruleId as requireFixedServicesImportRuleId,
@@ -71,6 +72,7 @@ export default {
     [requireTypeOutOfTypeOnlyImportsRuleId]: requireTypeOutOfTypeOnlyImports,
     [noUnusedFunctionArgumentsRuleId]: noUnusedFunctionArguments,
     [noUnusedServiceVariablesRuleId]: noUnusedServiceVariables,
+    [noUnusedImportsRuleId]: noUnusedImports,
   },
   configs: {
     all: {
@@ -125,6 +127,7 @@ export default {
         [`@checkdigit/${fetchThenRuleId}`]: 'error',
         [`@checkdigit/${noUnusedFunctionArgumentsRuleId}`]: 'error',
         [`@checkdigit/${noUnusedServiceVariablesRuleId}`]: 'error',
+        [`@checkdigit/${noUnusedImportsRuleId}`]: 'error',
       },
     },
     'agent-phase-2-production': {
@@ -140,6 +143,7 @@ export default {
         [`@checkdigit/${fetchThenRuleId}`]: 'error',
         [`@checkdigit/${noUnusedFunctionArgumentsRuleId}`]: 'error',
         [`@checkdigit/${noUnusedServiceVariablesRuleId}`]: 'error',
+        [`@checkdigit/${noUnusedImportsRuleId}`]: 'error',
       },
     },
   },
