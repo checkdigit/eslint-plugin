@@ -20,6 +20,9 @@ import noMappedResponse, { ruleId as noMappedResponseRuleId } from './agent/no-m
 import noPromiseInstanceMethod, { ruleId as noPromiseInstanceMethodRuleId } from './no-promise-instance-method';
 import noServiceWrapper, { ruleId as noServiceWrapperRuleId } from './agent/no-service-wrapper';
 import noStatusCode, { ruleId as noStatusCodeRuleId } from './agent/no-status-code';
+import noUnusedFunctionArguments, {
+  ruleId as noUnusedFunctionArgumentsRuleId,
+} from './agent/no-unused-function-argument';
 import requireFixedServicesImport, {
   ruleId as requireFixedServicesImportRuleId,
 } from './require-fixed-services-import';
@@ -65,6 +68,7 @@ export default {
     [noDuplicatedImportsRuleId]: noDuplicatedImports,
     [requireFixedServicesImportRuleId]: requireFixedServicesImport,
     [requireTypeOutOfTypeOnlyImportsRuleId]: requireTypeOutOfTypeOnlyImports,
+    [noUnusedFunctionArgumentsRuleId]: noUnusedFunctionArguments,
   },
   configs: {
     all: {
@@ -117,6 +121,7 @@ export default {
         [`@checkdigit/${fetchResponseBodyJsonRuleId}`]: 'error',
         [`@checkdigit/${fetchResponseHeaderGetterRuleId}`]: 'error',
         [`@checkdigit/${fetchThenRuleId}`]: 'error',
+        [`@checkdigit/${noUnusedFunctionArgumentsRuleId}`]: 'error',
       },
     },
     'agent-phase-2-production': {
@@ -130,6 +135,7 @@ export default {
         [`@checkdigit/${fetchResponseBodyJsonRuleId}`]: 'error',
         [`@checkdigit/${fetchResponseHeaderGetterRuleId}`]: 'error',
         [`@checkdigit/${fetchThenRuleId}`]: 'error',
+        [`@checkdigit/${noUnusedFunctionArgumentsRuleId}`]: 'error',
       },
     },
   },
