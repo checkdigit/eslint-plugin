@@ -7,6 +7,7 @@
  */
 
 import { ESLintUtils, TSESTree } from '@typescript-eslint/utils';
+import type { Scope } from '@typescript-eslint/utils/ts-eslint';
 import { strict as assert } from 'node:assert';
 import getDocumentationUrl from '../get-documentation-url';
 
@@ -32,13 +33,11 @@ const rule = createRule({
   create(context) {
     const sourceCode = context.sourceCode;
 
-    // Function to check if a parameter is used in the function body
-    function isParameterUsed(parameter: TSESTree.Parameter, body: TSESTree.BlockStatement) {
-      if (parameter.type !== TSESTree.AST_NODE_TYPES.Identifier) {
-        return true;
-      }
-      const parameterName = parameter.name;
-      return sourceCode.getScope(body).references.some((ref) => ref.identifier.name === parameterName);
+    function isParameterUsed(parameter: TSESTree.Identifier, scope: Scope.Scope): boolean {
+      return (
+        scope.references.some((ref) => ref.identifier.name === parameter.name) ||
+        scope.childScopes.some((childScope) => isParameterUsed(parameter, childScope))
+      );
     }
 
     return {
@@ -49,8 +48,11 @@ const rule = createRule({
             return;
           }
 
-          const body = functionDeclaration.body;
-          const parametersToKeep = parameters.filter((parameter) => isParameterUsed(parameter, body));
+          const functionScope = sourceCode.getScope(functionDeclaration);
+          const parametersToKeep = parameters.filter(
+            (parameter) =>
+              parameter.type !== TSESTree.AST_NODE_TYPES.Identifier || isParameterUsed(parameter, functionScope),
+          );
           if (parametersToKeep.length === parameters.length) {
             return;
           }
@@ -63,7 +65,15 @@ const rule = createRule({
               const firstParameter = parameters[0];
               const lastParameter = parameters.at(-1);
               assert.ok(firstParameter !== undefined && lastParameter !== undefined);
-              return fixer.replaceTextRange([firstParameter.range[0], lastParameter.range[1]], updatedParameters);
+              const tokenAfterParameters = sourceCode.getTokenAfter(lastParameter);
+
+              return fixer.replaceTextRange(
+                [
+                  firstParameter.range[0],
+                  tokenAfterParameters?.value === ',' ? tokenAfterParameters.range[1] : lastParameter.range[1],
+                ],
+                updatedParameters,
+              );
             },
           });
         } catch (error) {

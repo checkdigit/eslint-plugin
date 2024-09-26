@@ -15,24 +15,46 @@ createTester().run(ruleId, rule, {
       name: 'all function arguments are used',
       code: `function doSomething(a: string, b: number, c: unknown) { console.log(a,b,c); }`,
     },
+    {
+      name: 'argument referenced not directly in function body can be associated',
+      code: `
+        function doSomething(a: string) {
+          try {
+            console.log(a);
+          } catch (error) {
+            //
+          }
+        }
+      `,
+    },
+    {
+      name: 'argument referenced in child function declaration',
+      code: `
+        function doSomething(a: string) {
+          function doSomethingElse() {
+            console.log(a);
+          }
+        }
+      `,
+    },
   ],
   invalid: [
     {
       name: 'remove unused function arguments - first argument',
-      code: `function doSomething(a: string, b: number, c: unknown) { console.log(b,c); }`,
+      code: `function doSomething(a: string, b: number, c: unknown,) { console.log(b,c); }`,
       output: `function doSomething(b: number, c: unknown) { console.log(b,c); }`,
       errors: [{ messageId: 'removeUnusedFunctionArguments' }],
     },
     {
       name: 'remove unused function arguments - last argument',
-      code: `function doSomething(a: string, b: number, c: unknown) { console.log(a,b); }`,
+      code: `function doSomething(a: string, b: number, c: unknown,) { console.log(a,b); }`,
       output: `function doSomething(a: string, b: number) { console.log(a,b); }`,
       errors: [{ messageId: 'removeUnusedFunctionArguments' }],
     },
     {
       name: 'remove unused function arguments - middle argument',
       code: `
-        function doSomething(a: string, b: number, c: unknown) {
+        function doSomething(a: string, b: number, c: unknown,) {
           console.log(a,c);
         }
       `,
@@ -45,13 +67,13 @@ createTester().run(ruleId, rule, {
     },
     {
       name: 'remove unused function arguments - first and second arguments',
-      code: `function doSomething(a: string, b: number, c: unknown) { console.log(c); }`,
+      code: `function doSomething(a: string, b: number, c: unknown,) { console.log(c); }`,
       output: `function doSomething(c: unknown) { console.log(c); }`,
       errors: [{ messageId: 'removeUnusedFunctionArguments' }],
     },
     {
       name: 'remove unused function arguments - all arguments',
-      code: `function doSomething(a: string, b: number, c: unknown) {}`,
+      code: `function doSomething(a: string, b: number, c: unknown,) {}`,
       output: `function doSomething() {}`,
       errors: [{ messageId: 'removeUnusedFunctionArguments' }],
     },
