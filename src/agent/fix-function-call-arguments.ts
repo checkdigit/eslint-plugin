@@ -8,11 +8,14 @@
 
 import { ESLintUtils, TSESTree } from '@typescript-eslint/utils';
 import { strict as assert } from 'node:assert';
+import debug from 'debug';
 import getDocumentationUrl from '../get-documentation-url';
+import { getParent } from '../library/ts-tree';
 
 export const ruleId = 'fix-function-call-arguments';
 
 const createRule = ESLintUtils.RuleCreator((name) => getDocumentationUrl(name));
+const log = debug('eslint-plugin:fix-function-call-arguments');
 
 const rule = createRule({
   name: ruleId,
@@ -36,18 +39,30 @@ const rule = createRule({
 
     return {
       CallExpression(callExpression) {
+        // ignore calls like `foo.bar()` which are likely to be 3rd party module calls
+        // we only focus on calls against local functions or functions imported from the same module
+        if (getParent(callExpression)?.type === TSESTree.AST_NODE_TYPES.MemberExpression) {
+          return;
+        }
+
+        log('===================================');
+        log('callExpression:', sourceCode.getText(callExpression));
         try {
           const calleeTsNode = parserServices.esTreeNodeToTSNodeMap.get(callExpression.callee);
           const calleeType = typeChecker.getTypeAtLocation(calleeTsNode);
           const signature = calleeType.getCallSignatures()[0];
-          if (!signature) {
+          if (
+            !signature ||
+            // ignore complex signatures
+            (signature.typeParameters !== undefined && signature.typeParameters.length > 0)
+          ) {
             return;
           }
 
           const signatureParameters = signature.getParameters();
-          const expectedArgsCount = signatureParameters.length;
-          const providedArgs = callExpression.arguments;
-          const providedArgsCount = providedArgs.length;
+          const expectedArgsCount = signatureParameters.length; /*?*/
+          const providedArgs = callExpression.arguments; /*?*/
+          const providedArgsCount = providedArgs.length; /*?*/
           if (providedArgsCount === 0 || providedArgsCount === expectedArgsCount) {
             return;
           }
@@ -60,16 +75,20 @@ const rule = createRule({
               assert.ok(currentExpectedArg, 'Expected argument not found.');
 
               const expectedType = typeChecker.getTypeOfSymbol(currentExpectedArg);
-              // eslint-disable-next-line no-console
-              console.log(currentExpectedArg.escapedName, typeChecker.typeToString(expectedType));
-              typeChecker.typeToString(expectedType);
               const actualType = typeChecker.getTypeAtLocation(parserServices.esTreeNodeToTSNodeMap.get(arg));
-              typeChecker.typeToString(actualType);
+
+              // eslint-disable-next-line no-console
+              log('expected type:', currentExpectedArg.escapedName, typeChecker.typeToString(expectedType));
+              // eslint-disable-next-line no-console
+              log('actual type:', sourceCode.getText(arg), typeChecker.typeToString(actualType));
               // @ts-expect-error: internal API
               // eslint-disable-next-line @typescript-eslint/no-unsafe-call
               if (typeChecker.isTypeAssignableTo(actualType, expectedType) === true) {
                 argsToKeep.push(arg);
                 parameterIndex++;
+                log('matched');
+              } else {
+                log('not matched');
               }
             }
           }

@@ -20,6 +20,14 @@ createTester().run(ruleId, rule, {
         doSomething('abc', 1);
       `,
     },
+    {
+      name: 'regular node assertion call should not be affected',
+      code: `
+        import { strict as assert } from 'node:assert';
+        const valueA = 'abc';
+        assert.equal(valueA, 'abc');
+      `,
+    },
   ],
   invalid: [
     {
