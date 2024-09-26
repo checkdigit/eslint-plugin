@@ -21,6 +21,10 @@ createTester().run(ruleId, rule, {
       `,
     },
     {
+      name: 'regular node library call should not be affected',
+      code: `Buffer.from('some data', 'base64')`,
+    },
+    {
       name: 'regular node assertion call should not be affected',
       code: `
         import { strict as assert } from 'node:assert';

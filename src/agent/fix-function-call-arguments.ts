@@ -41,16 +41,25 @@ const rule = createRule({
       CallExpression(callExpression) {
         // ignore calls like `foo.bar()` which are likely to be 3rd party module calls
         // we only focus on calls against local functions or functions imported from the same module
-        if (getParent(callExpression)?.type === TSESTree.AST_NODE_TYPES.MemberExpression) {
+        if (callExpression.callee.type === TSESTree.AST_NODE_TYPES.MemberExpression) {
           return;
         }
 
-        log('===================================');
+        log('===== file name:', context.filename);
         log('callExpression:', sourceCode.getText(callExpression));
         try {
           const calleeTsNode = parserServices.esTreeNodeToTSNodeMap.get(callExpression.callee);
           const calleeType = typeChecker.getTypeAtLocation(calleeTsNode);
-          const signature = calleeType.getCallSignatures()[0];
+
+          const signatures = calleeType.getCallSignatures();
+          if (
+            // ignore complex signatures with overloads
+            signatures.length > 1
+          ) {
+            return;
+          }
+
+          const signature = signatures[0];
           if (
             !signature ||
             // ignore complex signatures
@@ -60,9 +69,9 @@ const rule = createRule({
           }
 
           const signatureParameters = signature.getParameters();
-          const expectedArgsCount = signatureParameters.length; /*?*/
-          const providedArgs = callExpression.arguments; /*?*/
-          const providedArgsCount = providedArgs.length; /*?*/
+          const expectedArgsCount = signatureParameters.length;
+          const providedArgs = callExpression.arguments;
+          const providedArgsCount = providedArgs.length;
           if (providedArgsCount === 0 || providedArgsCount === expectedArgsCount) {
             return;
           }
