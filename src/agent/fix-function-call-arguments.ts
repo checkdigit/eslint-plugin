@@ -53,20 +53,24 @@ const rule = createRule({
           }
           const argsToKeep: TSESTree.CallExpressionArgument[] = [];
 
-          let parameterIndex = 0;
-          for (const arg of providedArgs) {
-            const currentExpectedArg = signatureParameters[parameterIndex];
-            assert.ok(currentExpectedArg, 'Expected argument not found.');
+          if (expectedArgsCount > 0) {
+            let parameterIndex = 0;
+            for (const arg of providedArgs) {
+              const currentExpectedArg = signatureParameters[parameterIndex];
+              assert.ok(currentExpectedArg, 'Expected argument not found.');
 
-            const expectedType = typeChecker.getTypeOfSymbol(currentExpectedArg);
-            typeChecker.typeToString(expectedType);
-            const actualType = typeChecker.getTypeAtLocation(parserServices.esTreeNodeToTSNodeMap.get(arg));
-            typeChecker.typeToString(actualType);
-            // @ts-expect-error: internal API
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-            if (typeChecker.isTypeAssignableTo(actualType, expectedType) === true) {
-              argsToKeep.push(arg);
-              parameterIndex++;
+              const expectedType = typeChecker.getTypeOfSymbol(currentExpectedArg);
+              // eslint-disable-next-line no-console
+              console.log(currentExpectedArg.escapedName, typeChecker.typeToString(expectedType));
+              typeChecker.typeToString(expectedType);
+              const actualType = typeChecker.getTypeAtLocation(parserServices.esTreeNodeToTSNodeMap.get(arg));
+              typeChecker.typeToString(actualType);
+              // @ts-expect-error: internal API
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+              if (typeChecker.isTypeAssignableTo(actualType, expectedType) === true) {
+                argsToKeep.push(arg);
+                parameterIndex++;
+              }
             }
           }
 
