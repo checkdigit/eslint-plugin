@@ -17,7 +17,12 @@ export interface FixFunctionCallArgumentsRuleOptions {
   typesToCheck: string[];
 }
 const DEFAULT_OPTIONS = {
-  typesToCheck: ['Configuration<ResolvedServices>', 'EMPTY_CONTEXT', 'Fixture'],
+  typesToCheck: [
+    'Configuration<ResolvedServices>',
+    'Fixture<ResolvedServices>',
+    'InboundContext',
+    '{ get: () => string; }',
+  ],
 };
 
 const createRule = ESLintUtils.RuleCreator((name) => getDocumentationUrl(name));
@@ -53,7 +58,7 @@ const rule = createRule({
   },
   defaultOptions: [DEFAULT_OPTIONS],
   create(context) {
-    const { typesToCheck } = context.options[0] as FixFunctionCallArgumentsRuleOptions;
+    const { typesToCheck } = context.options[0] ?? DEFAULT_OPTIONS;
     const parserServices = ESLintUtils.getParserServices(context);
     const typeChecker = parserServices.program.getTypeChecker();
     const sourceCode = context.sourceCode;
