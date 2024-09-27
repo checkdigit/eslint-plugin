@@ -7,6 +7,7 @@
  */
 
 import addUrlDomain, { ruleId as addUrlDomainRuleId } from './agent/add-url-domain';
+import agentTestWiring, { ruleId as agentTestWiringRuleId } from './agent/agent-test-wiring';
 import fetchResponseBodyJson, { ruleId as fetchResponseBodyJsonRuleId } from './agent/fetch-response-body-json';
 import fetchResponseHeaderGetter, {
   ruleId as fetchResponseHeaderGetterRuleId,
@@ -77,6 +78,7 @@ export default {
     [noUnusedServiceVariablesRuleId]: noUnusedServiceVariables,
     [noUnusedImportsRuleId]: noUnusedImports,
     [fixFunctionCallArgumentsRuleId]: fixFunctionCallArguments,
+    [agentTestWiringRuleId]: agentTestWiring,
   },
   configs: {
     all: {
@@ -110,6 +112,7 @@ export default {
         [`@checkdigit/${noUnusedServiceVariablesRuleId}`]: 'off',
         [`@checkdigit/${noUnusedImportsRuleId}`]: 'off',
         [`@checkdigit/${fixFunctionCallArgumentsRuleId}`]: 'off',
+        [`@checkdigit/${agentTestWiringRuleId}`]: 'off',
         // --- agent rules END ---
       },
     },
@@ -145,6 +148,12 @@ export default {
             [`@checkdigit/${noUnusedServiceVariablesRuleId}`]: 'error',
             [`@checkdigit/${noUnusedImportsRuleId}`]: 'error',
             [`@checkdigit/${fixFunctionCallArgumentsRuleId}`]: 'error',
+          },
+        },
+        {
+          files: ['*.spec.ts'],
+          rules: {
+            [`@checkdigit/${agentTestWiringRuleId}`]: 'error',
           },
         },
       ],
