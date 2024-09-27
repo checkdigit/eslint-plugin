@@ -13,6 +13,13 @@ import getDocumentationUrl from '../get-documentation-url';
 
 export const ruleId = 'fix-function-call-arguments';
 
+export interface FixFunctionCallArgumentsRuleOptions {
+  typesToCheck: string[];
+}
+const DEFAULT_OPTIONS = {
+  typesToCheck: ['Configuration<ResolvedServices>', 'EMPTY_CONTEXT', 'Fixture'],
+};
+
 const createRule = ESLintUtils.RuleCreator((name) => getDocumentationUrl(name));
 const log = debug('eslint-plugin:fix-function-call-arguments');
 
@@ -28,10 +35,25 @@ const rule = createRule({
       unknownError: 'Unknown error occurred in file "{{fileName}}": {{ error }}.',
     },
     fixable: 'code',
-    schema: [],
+    schema: [
+      {
+        type: 'object',
+        properties: {
+          typesToCheck: {
+            description: 'Text representation of the types of which the function call parameters will be examine',
+            type: 'array',
+            items: {
+              type: 'string',
+            },
+          },
+        },
+        additionalProperties: false,
+      },
+    ],
   },
-  defaultOptions: [],
+  defaultOptions: [DEFAULT_OPTIONS],
   create(context) {
+    const { typesToCheck } = context.options[0] as FixFunctionCallArgumentsRuleOptions;
     const parserServices = ESLintUtils.getParserServices(context);
     const typeChecker = parserServices.program.getTypeChecker();
     const sourceCode = context.sourceCode;
@@ -51,70 +73,69 @@ const rule = createRule({
           const calleeType = typeChecker.getTypeAtLocation(calleeTsNode);
 
           const signatures = calleeType.getCallSignatures();
-          if (
+          if (signatures.length > 1) {
             // ignore complex signatures with overloads
-            signatures.length > 1
-          ) {
             return;
           }
 
           const signature = signatures[0];
-          if (
-            !signature ||
-            // ignore complex signatures
-            (signature.typeParameters !== undefined && signature.typeParameters.length > 0)
-          ) {
+          assert.ok(signature, 'Signature not found.');
+          if (signature.typeParameters !== undefined && signature.typeParameters.length > 0) {
+            // ignore complex signatures with type parameters
             return;
           }
 
-          const signatureParameters = signature.getParameters();
-          const expectedParametersCount = signatureParameters.length;
+          log('signature:', signature.getDeclaration().getText());
+          const expectedParameters = signature.getParameters();
+          log(
+            'expected parameters:',
+            expectedParameters.map((expectedParameter) =>
+              typeChecker.typeToString(typeChecker.getTypeOfSymbol(expectedParameter)),
+            ),
+          );
+          const expectedParametersCount = expectedParameters.length;
           const actualParameters = callExpression.arguments;
           const actualParametersCount = actualParameters.length;
           if (actualParametersCount === 0 || actualParametersCount === expectedParametersCount) {
             return;
           }
+
           const parametersToKeep: TSESTree.CallExpressionArgument[] = [];
+          let expectedParameterIndex = 0;
+          for (const [actualParameterIndex, actualParameter] of actualParameters.entries()) {
+            // eslint-disable-next-line max-depth
+            if (expectedParameterIndex >= expectedParametersCount) {
+              break;
+            }
 
-          if (expectedParametersCount > 0) {
-            let expectedParameterIndex = 0;
-            for (const [actualParameterIndex, actualParameter] of actualParameters.entries()) {
-              if (expectedParameterIndex >= expectedParametersCount) {
-                parametersToKeep.push(actualParameter);
-                continue;
-              }
+            const expectedParameter = expectedParameters[expectedParameterIndex];
+            assert.ok(expectedParameter, 'Expected parameter not found.');
 
-              const expectedParameter = signatureParameters[expectedParameterIndex];
-              assert.ok(expectedParameter, 'Expected parameter not found.');
+            const expectedType = typeChecker.getTypeOfSymbol(expectedParameter);
+            const actualType = typeChecker.getTypeAtLocation(parserServices.esTreeNodeToTSNodeMap.get(actualParameter));
+            const actualTypeString = typeChecker.typeToString(actualType);
+            log(
+              'expected type: #',
+              expectedParameterIndex,
+              expectedParameter.escapedName,
+              typeChecker.typeToString(expectedType),
+            );
+            log('actual type: #', actualParameterIndex, sourceCode.getText(actualParameter), actualTypeString);
 
-              const expectedType = typeChecker.getTypeOfSymbol(expectedParameter);
-              const actualType = typeChecker.getTypeAtLocation(
-                parserServices.esTreeNodeToTSNodeMap.get(actualParameter),
-              );
-
-              // eslint-disable-next-line no-console
-              log(
-                'expected type: #',
-                expectedParameterIndex,
-                expectedParameter.escapedName,
-                typeChecker.typeToString(expectedType),
-              );
-              // eslint-disable-next-line no-console
-              log(
-                'actual type: #',
-                actualParameterIndex,
-                sourceCode.getText(actualParameter),
-                typeChecker.typeToString(actualType),
-              );
-              // @ts-expect-error: internal API
+            if (!typesToCheck.includes(actualTypeString)) {
+              // skip the parameter type checking if it's not in the candidate types
+              parametersToKeep.push(actualParameter);
+              log('skipped');
+            } else if (
+              // @ts-expect-error: this is typescript's internal API
               // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-              if (typeChecker.isTypeAssignableTo(actualType, expectedType) === true) {
-                parametersToKeep.push(actualParameter);
-                expectedParameterIndex++;
-                log('matched');
-              } else {
-                log('not matched');
-              }
+              typeChecker.isTypeAssignableTo(actualType, expectedType) === true
+            ) {
+              parametersToKeep.push(actualParameter);
+              log('matched');
+              expectedParameterIndex++;
+            } else {
+              log('not matched');
             }
           }
 
