@@ -34,6 +34,18 @@ const rule = createRule({
           messageId: NO_ENUM,
         });
       },
+      Property(node: TSESTree.Property) {
+        if (
+          node.key.type === TSESTree.AST_NODE_TYPES.Identifier &&
+          node.key.name === 'enum' &&
+          node.value.type === TSESTree.AST_NODE_TYPES.ArrayExpression
+        ) {
+          context.report({
+            node,
+            messageId: NO_ENUM,
+          });
+        }
+      },
     };
   },
 });
