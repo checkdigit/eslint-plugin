@@ -112,8 +112,6 @@ const rule = createRule({
                       'await fixture.reset();',
                     ].join('\n'),
                   );
-              }
-              if (!beforeAllBodyText.includes('let agent: Agent;')) {
                 agentDeclarationFixer = (fixer: RuleFixer) =>
                   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                   fixer.insertTextBefore(beforeAllCallExpression!, 'let agent: Agent;\n');
