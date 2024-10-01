@@ -34,7 +34,13 @@ describe(ruleId, () => {
                   report: [];
                }
                
-               function createS3ObjectKey(
+              async function* test() {
+                throw new Error('should not be called');
+              }
+             
+              test();
+              
+              function createS3ObjectKey(
                 from: string,
                 to: string,
                 bin: string,
