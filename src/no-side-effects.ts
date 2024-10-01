@@ -6,80 +6,66 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import type { Node } from 'estree';
-import type { Rule } from 'eslint';
+import { ESLintUtils } from '@typescript-eslint/utils';
+import { TSESTree } from '@typescript-eslint/typescript-estree';
 
 interface RuleOptions {
   excludedIdentifiers: string[];
 }
 
-// To check if it is an await expression i.e await someFunction()
-function isAwaitExpression(statement: Node): boolean {
-  return statement.type === 'ExpressionStatement' && statement.expression.type === 'AwaitExpression';
+export const ruleId = 'no-side-effects';
+const NO_SIDE_EFFECTS = 'NO_SIDE_EFFECTS';
+
+// Type guard to check if a node is an ExpressionStatement
+function isExpressionStatement(node: TSESTree.Node): node is TSESTree.ExpressionStatement {
+  return node.type === TSESTree.AST_NODE_TYPES.ExpressionStatement;
 }
 
-// To check if it is a call expression with a member expression i.e module.method()
-function isCallExpressionCalleeMemberExpression(statement: Node, excludedIdentifiers: string[]): boolean {
+// Type guard to check if a node is an AwaitExpression
+function isAwaitExpression(statement: TSESTree.Node): boolean {
+  return isExpressionStatement(statement) && statement.expression.type === TSESTree.AST_NODE_TYPES.AwaitExpression;
+}
+
+// To check if it is a call expression with a member expression i.e. module.method()
+function isCallExpressionCalleeMemberExpression(statement: TSESTree.Node, excludedIdentifiers: string[]): boolean {
   return (
-    statement.type === 'ExpressionStatement' &&
-    statement.expression.type === 'CallExpression' &&
-    statement.expression.callee.type === 'MemberExpression' &&
-    statement.expression.callee.object.type === 'Identifier' &&
+    isExpressionStatement(statement) &&
+    statement.expression.type === TSESTree.AST_NODE_TYPES.CallExpression &&
+    statement.expression.callee.type === TSESTree.AST_NODE_TYPES.MemberExpression &&
+    statement.expression.callee.object.type === TSESTree.AST_NODE_TYPES.Identifier &&
     !excludedIdentifiers.includes(statement.expression.callee.object.name)
   );
 }
 
-// To check if it is a variable declaration with an await expression i.e  const configuration = await someFunction();
-function isVariableDeclarationAwaitExpression(node: Node): boolean {
+// To check if it is a variable declaration with an await expression i.e. const configuration = await someFunction();
+function isVariableDeclarationAwaitExpression(node: TSESTree.Node): boolean {
   return (
-    node.type === 'VariableDeclaration' &&
+    node.type === TSESTree.AST_NODE_TYPES.VariableDeclaration &&
     node.declarations.length > 0 &&
-    node.declarations[0]?.id !== undefined &&
-    node.declarations[0].id.type === 'Identifier' &&
-    node.declarations[0].init !== undefined &&
-    node.declarations[0].init !== null &&
-    node.declarations[0].init.type === 'AwaitExpression'
+    node.declarations[0]?.init?.type === TSESTree.AST_NODE_TYPES.AwaitExpression
   );
 }
 
-// To check if it is a variable declaration with an identifier i.e function()
-function isVariableDeclarationIdentifier(node: Node, excludedIdentifiers: string[]): boolean {
+// To check if it is a variable declaration with a call expression
+function isVariableDeclarationCallExpression(node: TSESTree.Node, excludedIdentifiers: string[]): boolean {
   return (
-    node.type === 'VariableDeclaration' &&
+    node.type === TSESTree.AST_NODE_TYPES.VariableDeclaration &&
     node.declarations.length > 0 &&
-    node.declarations[0]?.id !== undefined &&
-    node.declarations[0].id.type === 'Identifier' &&
-    node.declarations[0].init !== undefined &&
-    node.declarations[0].init !== null &&
-    node.declarations[0].init.type === 'CallExpression' &&
-    node.declarations[0].init.callee.type === 'Identifier' &&
-    !excludedIdentifiers.includes(node.declarations[0].init.callee.name)
+    node.declarations[0]?.init?.type === TSESTree.AST_NODE_TYPES.CallExpression &&
+    ((node.declarations[0].init.callee.type === TSESTree.AST_NODE_TYPES.Identifier &&
+      !excludedIdentifiers.includes(node.declarations[0].init.callee.name)) ||
+      node.declarations[0].init.callee.type === TSESTree.AST_NODE_TYPES.MemberExpression)
   );
 }
 
-// To check if it is a variable declaration with a member expression i.e const test = module.method()
-function isVariableDeclarationMemberExpression(node: Node): boolean {
-  return (
-    node.type === 'VariableDeclaration' &&
-    node.declarations.length > 0 &&
-    node.declarations[0]?.id !== undefined &&
-    node.declarations[0].id.type === 'Identifier' &&
-    node.declarations[0].init !== undefined &&
-    node.declarations[0].init !== null &&
-    node.declarations[0].init.type === 'CallExpression' &&
-    node.declarations[0].init.callee.type === 'MemberExpression' &&
-    ((node.declarations[0].init.callee.object.type === 'NewExpression' &&
-      node.declarations[0].init.callee.object.callee.type === 'Identifier') ||
-      node.declarations[0].init.callee.object.type === 'Identifier')
-  );
-}
+const createRule = ESLintUtils.RuleCreator((name) => name);
 
-export default {
+const rule = createRule({
+  name: ruleId,
   meta: {
     type: 'problem',
     docs: {
       description: 'Ensure no side effects can occur at the module-level',
-      url: 'https://github.com/checkdigit/eslint-plugin',
     },
     schema: [
       {
@@ -93,28 +79,33 @@ export default {
         additionalProperties: false,
       },
     ],
+    messages: {
+      [NO_SIDE_EFFECTS]: 'No side effects can occur at the module-level',
+    },
   },
+  defaultOptions: [{ excludedIdentifiers: [''] }],
   create(context) {
     const options: RuleOptions = (context.options[0] ?? {}) as RuleOptions;
     const excludedIdentifiers = options.excludedIdentifiers.length > 0 ? options.excludedIdentifiers : [];
 
     return {
-      Program(node) {
+      Program(node: TSESTree.Program) {
         node.body.forEach((statement) => {
           if (
             isAwaitExpression(statement) ||
             isCallExpressionCalleeMemberExpression(statement, excludedIdentifiers) ||
             isVariableDeclarationAwaitExpression(statement) ||
-            isVariableDeclarationIdentifier(statement, excludedIdentifiers) ||
-            isVariableDeclarationMemberExpression(statement)
+            isVariableDeclarationCallExpression(statement, excludedIdentifiers)
           ) {
             context.report({
               node: statement,
-              message: 'No side effects can occur at the module-level',
+              messageId: NO_SIDE_EFFECTS,
             });
           }
         });
       },
     };
   },
-} as Rule.RuleModule;
+});
+
+export default rule;

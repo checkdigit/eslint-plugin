@@ -6,15 +6,14 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
+import rule, { ruleId } from './no-side-effects';
+
 import { RuleTester } from '@typescript-eslint/rule-tester';
 import { describe } from '@jest/globals';
 
-import rule from './no-side-effects';
-
-describe('no-side-effects', () => {
+describe(ruleId, () => {
   const ruleTester = new RuleTester();
-  // @ts-expect-error, workaround for the type definition
-  ruleTester.run('no-side-effects', rule, {
+  ruleTester.run(ruleId, rule, {
     valid: [
       {
         code: `import { strict as assert } from 'node:assert';
@@ -83,7 +82,7 @@ describe('no-side-effects', () => {
               }
               assert(\`I'm a number, \${numberValue}\`);
               const jsonSchemaValidator = new Ajv({ allErrors: true }).compile(schema);`,
-        errors: [{ message: 'No side effects can occur at the module-level' }],
+        errors: [{ messageId: 'NO_SIDE_EFFECTS' }],
         filename: 'src/side-effects.ts',
         options: [{ excludedIdentifiers: ['assert', 'debug', 'log'] }],
       },
@@ -104,11 +103,11 @@ describe('no-side-effects', () => {
                   server.on('listening', resolve);
                 });`,
         errors: [
-          { message: 'No side effects can occur at the module-level' },
-          { message: 'No side effects can occur at the module-level' },
-          { message: 'No side effects can occur at the module-level' },
-          { message: 'No side effects can occur at the module-level' },
-          { message: 'No side effects can occur at the module-level' },
+          { messageId: 'NO_SIDE_EFFECTS' },
+          { messageId: 'NO_SIDE_EFFECTS' },
+          { messageId: 'NO_SIDE_EFFECTS' },
+          { messageId: 'NO_SIDE_EFFECTS' },
+          { messageId: 'NO_SIDE_EFFECTS' },
         ],
         filename: 'local.ts',
         options: [{ excludedIdentifiers: ['assert', 'debug', 'log'] }],
