@@ -10,6 +10,7 @@ import invalidJsonStringify, { ruleId as invalidJsonStringifyRuleId } from './in
 import noPromiseInstanceMethod, { ruleId as noPromiseInstanceMethodRuleId } from './no-promise-instance-method';
 import filePathComment from './file-path-comment';
 import noCardNumbers from './no-card-numbers';
+import noSideEffects from './no-side-effects';
 import noTestImport from './no-test-import';
 import noUuid from './no-uuid';
 import noWallabyComment from './no-wallaby-comment';
@@ -26,6 +27,7 @@ export default {
     'require-strict-assert': requireStrictAssert,
     'no-test-import': noTestImport,
     'no-wallaby-comment': noWallabyComment,
+    'no-side-effects': noSideEffects,
     'regular-expression-comment': regexComment,
     'require-assert-predicate-rejects-throws': requireAssertPredicateRejectsThrows,
     'object-literal-response': objectLiteralResponse,
@@ -40,6 +42,7 @@ export default {
         '@checkdigit/no-uuid': 'error',
         '@checkdigit/require-strict-assert': 'error',
         '@checkdigit/no-wallaby-comment': 'error',
+        '@checkdigit/no-side-effects': ['error', { excludedIdentifiers: ['assert', 'debug', 'log', 'promisify'] }],
         '@checkdigit/regular-expression-comment': 'error',
         '@checkdigit/require-assert-predicate-rejects-throws': 'error',
         '@checkdigit/object-literal-response': 'error',
@@ -55,6 +58,7 @@ export default {
         '@checkdigit/no-uuid': 'error',
         '@checkdigit/require-strict-assert': 'error',
         '@checkdigit/no-wallaby-comment': 'off',
+        '@checkdigit/no-side-effects': 'error',
         '@checkdigit/regular-expression-comment': 'error',
         '@checkdigit/require-assert-predicate-rejects-throws': 'error',
         '@checkdigit/object-literal-response': 'error',
