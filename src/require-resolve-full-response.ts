@@ -8,12 +8,13 @@
 
 import { AST_NODE_TYPES, ESLintUtils, TSESTree } from '@typescript-eslint/utils';
 import { DefinitionType, type Scope } from '@typescript-eslint/scope-manager';
-import { PLAIN_URL_REGEXP, TOKENIZED_URL_REGEXP } from './agent/url';
 import { strict as assert } from 'node:assert';
 import getDocumentationUrl from './get-documentation-url';
 import { getEnclosingScopeNode } from './library/ts-tree';
 
 export const ruleId = 'require-resolve-full-response';
+export const PLAIN_URL_REGEXP = /^[`']\/\w+(?<serviceNamePart>-\w+)*\/v\d+\/(?<any>.|\r|\n)+[`']$/u;
+export const TOKENIZED_URL_REGEXP = /^`\$\{(?<serviceNamePart>[A-Z]+_)*BASE_PATH\}\/(?<any>.|\r|\n)+`$/u;
 
 const createRule = ESLintUtils.RuleCreator((name) => getDocumentationUrl(name));
 
