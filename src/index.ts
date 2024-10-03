@@ -8,6 +8,9 @@
 
 import invalidJsonStringify, { ruleId as invalidJsonStringifyRuleId } from './invalid-json-stringify';
 import noPromiseInstanceMethod, { ruleId as noPromiseInstanceMethodRuleId } from './no-promise-instance-method';
+import requireResolveFullResponse, {
+  ruleId as requireResolveFullResponseRuleId,
+} from './require-resolve-full-response';
 import filePathComment from './file-path-comment';
 import noCardNumbers from './no-card-numbers';
 import noTestImport from './no-test-import';
@@ -31,6 +34,7 @@ export default {
     'object-literal-response': objectLiteralResponse,
     [invalidJsonStringifyRuleId]: invalidJsonStringify,
     [noPromiseInstanceMethodRuleId]: noPromiseInstanceMethod,
+    [requireResolveFullResponseRuleId]: requireResolveFullResponse,
   },
   configs: {
     all: {
@@ -46,6 +50,7 @@ export default {
         '@checkdigit/no-test-import': 'error',
         [`@checkdigit/${invalidJsonStringifyRuleId}`]: 'error',
         [`@checkdigit/${noPromiseInstanceMethodRuleId}`]: 'error',
+        [`@checkdigit/${requireResolveFullResponseRuleId}`]: 'error',
       },
     },
     recommended: {
