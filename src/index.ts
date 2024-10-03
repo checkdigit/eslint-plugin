@@ -11,6 +11,9 @@ import noPromiseInstanceMethod, { ruleId as noPromiseInstanceMethodRuleId } from
 import requireResolveFullResponse, {
   ruleId as requireResolveFullResponseRuleId,
 } from './require-resolve-full-response';
+import requireTypeOutOfTypeOnlyImports, {
+  ruleId as requireTypeOutOfTypeOnlyImportsRuleId,
+} from './require-type-out-of-type-only-imports';
 import filePathComment from './file-path-comment';
 import noCardNumbers from './no-card-numbers';
 import noTestImport from './no-test-import';
@@ -35,6 +38,7 @@ export default {
     [invalidJsonStringifyRuleId]: invalidJsonStringify,
     [noPromiseInstanceMethodRuleId]: noPromiseInstanceMethod,
     [requireResolveFullResponseRuleId]: requireResolveFullResponse,
+    [requireTypeOutOfTypeOnlyImportsRuleId]: requireTypeOutOfTypeOnlyImports,
   },
   configs: {
     all: {
@@ -51,6 +55,7 @@ export default {
         [`@checkdigit/${invalidJsonStringifyRuleId}`]: 'error',
         [`@checkdigit/${noPromiseInstanceMethodRuleId}`]: 'error',
         [`@checkdigit/${requireResolveFullResponseRuleId}`]: 'error',
+        [`@checkdigit/${requireTypeOutOfTypeOnlyImportsRuleId}`]: 'error',
       },
     },
     recommended: {

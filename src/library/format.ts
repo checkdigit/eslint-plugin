@@ -1,4 +1,4 @@
-// format.ts
+// library/format.ts
 
 /*
  * Copyright (c) 2021-2024 Check Digit, LLC
