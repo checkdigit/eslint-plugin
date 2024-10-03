@@ -1,44 +1,19 @@
 // no-enum.spec.ts
 
-/*
- * Copyright (c) 2021-2024 Check Digit, LLC
- *
- * This code is licensed under the MIT license (see LICENSE.txt for details).
- */
-
 import rule, { ruleId } from './no-enum';
 import { RuleTester } from '@typescript-eslint/rule-tester';
 import { describe } from '@jest/globals';
 
 describe(ruleId, () => {
   const ruleTester = new RuleTester();
-  ruleTester.run('no-side-effects', rule, {
+  ruleTester.run(ruleId, rule, {
     valid: [
       {
+        name: 'Valid case with status object and type alias',
         code: `const status = { SUCCESS: 'success', FAILURE: 'failure' }; type Status = 'success' | 'failure';`,
       },
       {
-        code: `const shapes = { CIRCLE: 'circle', SQUARE: 'square', TRIANGLE: 'triangle' }; type Shape = 'circle' | 'square' | 'triangle';`,
-      },
-    ],
-    invalid: [
-      {
-        code: `enum Status { SUCCESS = 'success', FAILURE = 'failure' };`,
-        errors: [
-          {
-            messageId: 'NO_ENUM',
-          },
-        ],
-      },
-      {
-        code: `enum Days { MONDAY = 'Monday', TUESDAY = 'Tuesday', WEDNESDAY = 'Wednesday' };`,
-        errors: [
-          {
-            messageId: 'NO_ENUM',
-          },
-        ],
-      },
-      {
+        name: 'Valid case with enum property with in JSON schema definition',
         code: `export const test = {
                 properties: {
                   testString1: {
@@ -58,6 +33,12 @@ describe(ruleId, () => {
                 required: ['testString1', 'testType', 'testString2', 'testString3'],
                 type: 'object',
               };`,
+      },
+    ],
+    invalid: [
+      {
+        name: 'Invalid case with enum declaration',
+        code: `enum Days { MONDAY = 'Monday', TUESDAY = 'Tuesday', WEDNESDAY = 'Wednesday' };`,
         errors: [
           {
             messageId: 'NO_ENUM',
@@ -65,6 +46,7 @@ describe(ruleId, () => {
         ],
       },
       {
+        name: 'Invalid case with export enum declaration',
         code: `export enum TEST_NAMES {
                 testString1 = 'testString1',
                 testString2 = 'testString2',
@@ -80,6 +62,7 @@ describe(ruleId, () => {
         errors: [{ messageId: 'NO_ENUM' }],
       },
       {
+        name: 'Invalid case with nested enum properties',
         code: `
             const complexStructure = {
               nested: {
@@ -100,6 +83,7 @@ describe(ruleId, () => {
         ],
       },
       {
+        name: 'Invalid case with deeply nested enum properties',
         code: `
           const complexStructure = {
             level1: {
@@ -129,6 +113,7 @@ describe(ruleId, () => {
         ],
       },
       {
+        name: 'Invalid case with enum properties in array',
         code: `
           const complexStructure = {
             level1: [
