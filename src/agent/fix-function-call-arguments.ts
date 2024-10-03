@@ -127,7 +127,7 @@ const rule = createRule({
             );
             log('actual type: #', actualParameterIndex, sourceCode.getText(actualParameter), actualTypeString);
 
-            if (!typesToCheck.includes(actualTypeString)) {
+            if (!typesToCheck.includes(actualTypeString) && !actualTypeString.endsWith('RequestType')) {
               // skip the parameter type checking if it's not in the candidate types
               parametersToKeep.push(actualParameter);
               log('skipped');
