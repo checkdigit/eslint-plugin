@@ -7,10 +7,9 @@
  */
 
 import { RuleTester } from 'eslint';
+import { describe } from '@jest/globals';
 
 import rule from './no-card-numbers';
-
-import { describe } from '@jest/globals';
 
 const CARD_NUMBER_FOUND = 'CARD_NUMBER_FOUND';
 const CARD_NUMBERS_FOUND = 'CARD_NUMBERS_FOUND';

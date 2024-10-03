@@ -1,47 +1,107 @@
 // require-assert-message.ts
 
 /*
- * Copyright (c) 2021-2022 Check Digit, LLC
+ * Copyright (c) 2022-2024 Check Digit, LLC
  *
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import { TSESTree } from '@typescript-eslint/types';
-import type {Rule} from 'eslint';
+// require-assert-message.ts
 
-export default {
+import { ESLintUtils, TSESTree } from '@typescript-eslint/utils';
+
+export const ruleId = 'require-assert-message';
+const MISSING_ASSERT_MESSAGE = 'MISSING_ASSERT_MESSAGE';
+
+const createRule = ESLintUtils.RuleCreator((name) => name);
+
+const rule = createRule({
+  name: ruleId,
   meta: {
     type: 'problem',
     docs: {
       description: 'Validate that message argument is always supplied to node:assert methods',
-      url: 'https://github.com/checkdigit/eslint-plugin',
+    },
+    schema: [],
+    messages: {
+      [MISSING_ASSERT_MESSAGE]: 'Missing message argument in {{methodName}}() method.',
     },
   },
+  defaultOptions: [],
   create(context) {
+    let assertAlias = 'assert';
+
+    // List of assert methods and their parameter names
+    const assertMethods: Record<string, string[]> = {
+      assert: ['value', 'message'],
+      deepEqual: ['actual', 'expected', 'message'],
+      deepStrictEqual: ['actual', 'expected', 'message'],
+      doesNotMatch: ['string', 'regexp', 'message'],
+      doesNotReject: ['asyncFn', 'error', 'message'],
+      doesNotThrow: ['fn', 'error', 'message'],
+      equal: ['actual', 'expected', 'message'],
+      fail: ['message'],
+      ifError: ['value'],
+      match: ['string', 'regexp', 'message'],
+      notDeepEqual: ['actual', 'expected', 'message'],
+      notDeepStrictEqual: ['actual', 'expected', 'message'],
+      notEqual: ['actual', 'expected', 'message'],
+      notStrictEqual: ['actual', 'expected', 'message'],
+      ok: ['value', 'message'],
+      rejects: ['asyncFn', 'error', 'message'],
+      strictEqual: ['actual', 'expected', 'message'],
+      throws: ['fn', 'error', 'message'],
+    };
+
     return {
+      ImportDeclaration(node: TSESTree.ImportDeclaration) {
+        if (node.source.value === 'node:assert') {
+          const specifier = node.specifiers.find(
+              (importSpecifier) =>  importSpecifier.type === TSESTree.AST_NODE_TYPES.ImportDefaultSpecifier ||
+                  importSpecifier.type === TSESTree.AST_NODE_TYPES.ImportSpecifier,
+          );
+          if (specifier) {
+            assertAlias = specifier.local.name;
+          }
+        }
+      },
       CallExpression(node: TSESTree.CallExpression) {
         const callee = node.callee;
-        console.log(callee);
-        const isSpec = context.filename.includes('spec');
-        if (!isSpec && callee.type === 'MemberExpression' &&
-            callee.object.type === 'Identifier' &&
-            callee.property.type === 'Identifier'
+        if (
+            callee.type === TSESTree.AST_NODE_TYPES.MemberExpression &&
+            callee.object.type === TSESTree.AST_NODE_TYPES.Identifier &&
+            callee.property.type === TSESTree.AST_NODE_TYPES.Identifier
         ) {
+          const objectName = callee.object.name;
+          const methodName = callee.property.name;
 
-          const objectName = (callee.object as TSESTree.Identifier).name;
-          const methodName = (callee.property as TSESTree.Identifier).name;
-
-          if (objectName === 'assert' && methodName !== 'ifError') {
-            const expectedMessageArgIndex = methodName === 'ok' || methodName === 'strict' ? 1 : 2;
-            if (node.arguments.length <= expectedMessageArgIndex) {
-              context.report({
-                loc: node.loc,
-                message: `Missing message argument in ${methodName}() method.`,
-              });
+          if (objectName === assertAlias && methodName in assertMethods) {
+            const paramNames = assertMethods[methodName];
+            if (paramNames) {
+              const messageIndex = paramNames.indexOf('message');
+              if (messageIndex !== -1 && node.arguments.length <= messageIndex) {
+                context.report({
+                  node,
+                  messageId: MISSING_ASSERT_MESSAGE,
+                  data: {
+                    methodName,
+                  },
+                });
+              }
             }
           }
+        } else if (callee.type === TSESTree.AST_NODE_TYPES.Identifier && callee.name === assertAlias && node.arguments.length < 2) {
+          context.report({
+            node,
+            messageId: MISSING_ASSERT_MESSAGE,
+            data: {
+              methodName: 'assert',
+            },
+          });
         }
       },
     };
   },
-} as Rule.RuleModule;
+});
+
+export default rule;

@@ -1,17 +1,22 @@
 // index.ts
 
 /*
- * Copyright (c) 2021-2022 Check Digit, LLC
+ * Copyright (c) 2021-2024 Check Digit, LLC
  *
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
+import invalidJsonStringify, { ruleId as invalidJsonStringifyRuleId } from './invalid-json-stringify';
+import noPromiseInstanceMethod, { ruleId as noPromiseInstanceMethodRuleId } from './no-promise-instance-method';
 import filePathComment from './file-path-comment';
 import noCardNumbers from './no-card-numbers';
+import noTestImport from './no-test-import';
 import noUuid from './no-uuid';
-import requireAssertMessage from './require-assert-message';
 import noWallabyComment from './no-wallaby-comment';
+import objectLiteralResponse from './object-literal-response';
 import regexComment from './regular-expression-comment';
+import requireAssertMessage from './require-assert-message';
+import requireAssertPredicateRejectsThrows from './require-assert-predicate-rejects-throws';
 import requireStrictAssert from './require-strict-assert';
 
 export default {
@@ -21,8 +26,13 @@ export default {
     'no-uuid': noUuid,
     'require-assert-message': requireAssertMessage,
     'require-strict-assert': requireStrictAssert,
+    'no-test-import': noTestImport,
     'no-wallaby-comment': noWallabyComment,
     'regular-expression-comment': regexComment,
+    'require-assert-predicate-rejects-throws': requireAssertPredicateRejectsThrows,
+    'object-literal-response': objectLiteralResponse,
+    [invalidJsonStringifyRuleId]: invalidJsonStringify,
+    [noPromiseInstanceMethodRuleId]: noPromiseInstanceMethod,
   },
   configs: {
     all: {
@@ -34,6 +44,11 @@ export default {
         '@checkdigit/require-strict-assert': 'error',
         '@checkdigit/no-wallaby-comment': 'error',
         '@checkdigit/regular-expression-comment': 'error',
+        '@checkdigit/require-assert-predicate-rejects-throws': 'error',
+        '@checkdigit/object-literal-response': 'error',
+        '@checkdigit/no-test-import': 'error',
+        [`@checkdigit/${invalidJsonStringifyRuleId}`]: 'error',
+        [`@checkdigit/${noPromiseInstanceMethodRuleId}`]: 'error',
       },
     },
     recommended: {
@@ -45,6 +60,11 @@ export default {
         '@checkdigit/require-strict-assert': 'error',
         '@checkdigit/no-wallaby-comment': 'off',
         '@checkdigit/regular-expression-comment': 'error',
+        '@checkdigit/require-assert-predicate-rejects-throws': 'error',
+        '@checkdigit/object-literal-response': 'error',
+        '@checkdigit/no-test-import': 'error',
+        [`@checkdigit/${invalidJsonStringifyRuleId}`]: 'error',
+        [`@checkdigit/${noPromiseInstanceMethodRuleId}`]: 'error',
       },
     },
   },

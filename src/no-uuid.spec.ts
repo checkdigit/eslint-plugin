@@ -1,17 +1,15 @@
 // no-uuid.spec.ts
 
 /*
- * Copyright (c) 2022 Check Digit, LLC
+ * Copyright (c) 2022-2024 Check Digit, LLC
  *
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
 import { RuleTester } from 'eslint';
-
-import rule from './no-uuid';
-
 import { describe } from '@jest/globals';
 
+import rule from './no-uuid';
 
 const UUID_FOUND = 'UUID_FOUND';
 const UUIDS_FOUND = 'UUIDS_FOUND';

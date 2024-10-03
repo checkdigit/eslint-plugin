@@ -1,7 +1,7 @@
 // no-card-numbers.ts
 
 /*
- * Copyright (c) 2021-2022 Check Digit, LLC
+ * Copyright (c) 2021-2024 Check Digit, LLC
  *
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
@@ -137,7 +137,7 @@ export default {
         if (typeof node.value !== 'string' && typeof node.value !== 'number') {
           return;
         }
-        const value = `${node.value}`;
+        const value = String(node.value);
         checkForCardNumbers(value, context, node);
       },
       TemplateElement(node) {
