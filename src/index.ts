@@ -13,6 +13,7 @@ import requireResolveFullResponse, {
 } from './require-resolve-full-response';
 import filePathComment from './file-path-comment';
 import noCardNumbers from './no-card-numbers';
+import noEnum from './no-enum';
 import noTestImport from './no-test-import';
 import noUuid from './no-uuid';
 import noWallabyComment from './no-wallaby-comment';
@@ -25,6 +26,7 @@ export default {
   rules: {
     'file-path-comment': filePathComment,
     'no-card-numbers': noCardNumbers,
+    'no-enum': noEnum,
     'no-uuid': noUuid,
     'require-strict-assert': requireStrictAssert,
     'no-test-import': noTestImport,
@@ -40,6 +42,7 @@ export default {
     all: {
       rules: {
         '@checkdigit/no-card-numbers': 'error',
+        '@checkdigit/no-enum': 'error',
         '@checkdigit/file-path-comment': 'error',
         '@checkdigit/no-uuid': 'error',
         '@checkdigit/require-strict-assert': 'error',
@@ -56,6 +59,7 @@ export default {
     recommended: {
       rules: {
         '@checkdigit/no-card-numbers': 'error',
+        '@checkdigit/no-enum': 'error',
         '@checkdigit/file-path-comment': 'off',
         '@checkdigit/no-uuid': 'error',
         '@checkdigit/require-strict-assert': 'error',
