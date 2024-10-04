@@ -35,6 +35,10 @@ ruleTester.run(ruleId, rule, {
       name: 'correct import with mixed type and value',
       code: `import { type TypeOne, ValueOne } from 'abc';`,
     },
+    {
+      name: 'correct import without import specifier',
+      code: `import 'dotenv';`,
+    },
   ],
   invalid: [
     {

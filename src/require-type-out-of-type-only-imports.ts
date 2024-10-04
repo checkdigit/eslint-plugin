@@ -21,7 +21,7 @@ const rule = createRule({
       description: 'Require "type" to be out side of type-only imports.',
     },
     messages: {
-      moveTypeOutside: 'Update the type-only imports to use "tpe" outside of the curly braces.',
+      moveTypeOutside: 'Update the type-only imports to put "type" specifier outside of the curly braces.',
     },
     fixable: 'code',
     schema: [],
@@ -34,6 +34,7 @@ const rule = createRule({
       ImportDeclaration(declaration) {
         if (
           declaration.importKind === 'type' ||
+          declaration.specifiers.length === 0 ||
           !declaration.specifiers.every(
             (specifier) =>
               specifier.type === TSESTree.AST_NODE_TYPES.ImportSpecifier && specifier.importKind === 'type',
