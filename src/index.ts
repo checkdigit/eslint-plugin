@@ -7,6 +7,7 @@
  */
 
 import invalidJsonStringify, { ruleId as invalidJsonStringifyRuleId } from './invalid-json-stringify';
+import noFullResponse, { ruleId as noFullResponseRuleId } from './agent/no-full-response';
 import noPromiseInstanceMethod, { ruleId as noPromiseInstanceMethodRuleId } from './no-promise-instance-method';
 import requireResolveFullResponse, {
   ruleId as requireResolveFullResponseRuleId,
@@ -37,6 +38,7 @@ export default {
     'object-literal-response': objectLiteralResponse,
     [invalidJsonStringifyRuleId]: invalidJsonStringify,
     [noPromiseInstanceMethodRuleId]: noPromiseInstanceMethod,
+    [noFullResponseRuleId]: noFullResponse,
     [requireResolveFullResponseRuleId]: requireResolveFullResponse,
     [requireTypeOutOfTypeOnlyImportsRuleId]: requireTypeOutOfTypeOnlyImports,
   },
@@ -54,6 +56,7 @@ export default {
         '@checkdigit/no-test-import': 'error',
         [`@checkdigit/${invalidJsonStringifyRuleId}`]: 'error',
         [`@checkdigit/${noPromiseInstanceMethodRuleId}`]: 'error',
+        [`@checkdigit/${noFullResponseRuleId}`]: 'error',
         [`@checkdigit/${requireResolveFullResponseRuleId}`]: 'error',
         [`@checkdigit/${requireTypeOutOfTypeOnlyImportsRuleId}`]: 'error',
       },
