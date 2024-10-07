@@ -7,8 +7,12 @@
  */
 
 import invalidJsonStringify, { ruleId as invalidJsonStringifyRuleId } from './invalid-json-stringify';
+import noDuplicatedImports, { ruleId as noDuplicatedImportsRuleId } from './no-duplicated-imports';
 import noFullResponse, { ruleId as noFullResponseRuleId } from './agent/no-full-response';
 import noPromiseInstanceMethod, { ruleId as noPromiseInstanceMethodRuleId } from './no-promise-instance-method';
+import requireFixedServicesImport, {
+  ruleId as requireFixedServicesImportRuleId,
+} from './require-fixed-services-import';
 import requireResolveFullResponse, {
   ruleId as requireResolveFullResponseRuleId,
 } from './require-resolve-full-response';
@@ -40,6 +44,8 @@ export default {
     [noPromiseInstanceMethodRuleId]: noPromiseInstanceMethod,
     [noFullResponseRuleId]: noFullResponse,
     [requireResolveFullResponseRuleId]: requireResolveFullResponse,
+    [noDuplicatedImportsRuleId]: noDuplicatedImports,
+    [requireFixedServicesImportRuleId]: requireFixedServicesImport,
     [requireTypeOutOfTypeOnlyImportsRuleId]: requireTypeOutOfTypeOnlyImports,
   },
   configs: {
@@ -58,6 +64,8 @@ export default {
         [`@checkdigit/${noPromiseInstanceMethodRuleId}`]: 'error',
         [`@checkdigit/${noFullResponseRuleId}`]: 'error',
         [`@checkdigit/${requireResolveFullResponseRuleId}`]: 'error',
+        [`@checkdigit/${noDuplicatedImportsRuleId}`]: 'error',
+        [`@checkdigit/${requireFixedServicesImportRuleId}`]: 'error',
         [`@checkdigit/${requireTypeOutOfTypeOnlyImportsRuleId}`]: 'error',
       },
     },
