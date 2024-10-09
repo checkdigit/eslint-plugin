@@ -12,15 +12,17 @@ import { describe } from '@jest/globals';
 import rule from './file-path-comment';
 
 describe('file-path-comment', () => {
-  const ruleTester = new RuleTester({ parserOptions: { ecmaVersion: 2020 } });
+  const ruleTester = new RuleTester({ languageOptions: { parserOptions: { ecmaVersion: 2020 } } });
 
   ruleTester.run('file-path-comment', rule, {
     valid: [
       {
         filename: 'src/world/hello.ts',
         code: `// world/hello.ts`,
-        parserOptions: {
-          project: './tsconfig.json',
+        languageOptions: {
+          parserOptions: {
+            project: './tsconfig.json',
+          },
         },
       },
       {

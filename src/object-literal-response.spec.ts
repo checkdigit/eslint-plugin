@@ -61,7 +61,11 @@ setResponse(response, {
   `;
 
 describe('object-literal-response', () => {
-  const ruleTester = new RuleTester({ parserOptions: { ecmaVersion: 2020, project: true } });
+  const ruleTester = new RuleTester({
+    languageOptions: {
+      parserOptions: { ecmaVersion: 2020, project: true },
+    },
+  });
   ruleTester.run('object-literal-response', rule, {
     valid: [
       {

@@ -52,7 +52,11 @@ const foo = 'nothing wrong here';
 `;
 
 describe('no-uuid', () => {
-  const ruleTester = new RuleTester({ parserOptions: { ecmaVersion: 2020 } });
+  const ruleTester = new RuleTester({
+    languageOptions: {
+      parserOptions: { ecmaVersion: 2020 },
+    },
+  });
   ruleTester.run('no-uuid', rule, {
     valid: [
       {

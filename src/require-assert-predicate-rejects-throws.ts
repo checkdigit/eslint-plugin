@@ -22,7 +22,10 @@ export default {
       ImportDeclaration(node) {
         if (node.source.value === 'node:assert') {
           const strictImportSpecifier = node.specifiers.filter(
-            (specifier) => specifier.type === 'ImportSpecifier' && specifier.imported.name === 'strict',
+            (specifier) =>
+              specifier.type === 'ImportSpecifier' &&
+              specifier.imported.type === 'Identifier' &&
+              specifier.imported.name === 'strict',
           )[0];
           if (strictImportSpecifier !== undefined) {
             assertIdentifier = strictImportSpecifier.local.name;

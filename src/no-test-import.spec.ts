@@ -12,9 +12,11 @@ import { describe } from '@jest/globals';
 
 describe('no-test-import', () => {
   new RuleTester({
-    parserOptions: {
-      ecmaVersion: 2020,
-      sourceType: 'module',
+    languageOptions: {
+      parserOptions: {
+        ecmaVersion: 2020,
+        sourceType: 'module',
+      },
     },
   }).run('no-test-import with default configuration', rule, {
     valid: [
@@ -85,9 +87,11 @@ describe('no-test-import', () => {
 
   const overwrittenConfiguration: NoTestImportRuleOptions = { testFilePattern: '\\.test\\.xyz$' };
   new RuleTester({
-    parserOptions: {
-      ecmaVersion: 2020,
-      sourceType: 'module',
+    languageOptions: {
+      parserOptions: {
+        ecmaVersion: 2020,
+        sourceType: 'module',
+      },
     },
   }).run('no-test-import with overwritten configuration', rule, {
     valid: [

@@ -10,9 +10,11 @@ import { RuleTester } from 'eslint';
 
 export default function createTester() {
   return new RuleTester({
-    parserOptions: {
-      ecmaVersion: 'latest',
-      sourceType: 'module',
+    languageOptions: {
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+      },
     },
   });
 }
