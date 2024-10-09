@@ -6,8 +6,8 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import rule, { ruleId } from './require-type-out-of-type-only-imports';
 import { RuleTester } from '@typescript-eslint/rule-tester';
+import rule, { ruleId } from './require-type-out-of-type-only-imports';
 
 const ruleTester = new RuleTester({
   languageOptions: {

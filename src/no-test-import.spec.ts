@@ -6,9 +6,9 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import rule, { NO_TEST_IMPORT, type NoTestImportRuleOptions } from './no-test-import';
 import { RuleTester } from 'eslint';
 import { describe } from '@jest/globals';
+import rule, { NO_TEST_IMPORT, type NoTestImportRuleOptions } from './no-test-import';
 
 describe('no-test-import', () => {
   new RuleTester({

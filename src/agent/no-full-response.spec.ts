@@ -6,8 +6,8 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import rule, { ruleId } from './no-full-response';
 import { RuleTester } from '@typescript-eslint/rule-tester';
+import rule, { ruleId } from './no-full-response';
 
 const ruleTester = new RuleTester({
   languageOptions: {

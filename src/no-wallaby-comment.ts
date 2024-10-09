@@ -44,12 +44,11 @@ function processBlockComment(context: Rule.RuleContext, sourceCode: SourceCode, 
     const endLine = comment.loc?.end.line ?? 0;
     let match;
     while (comment.loc && (match = wallabyRegex.exec(commentValue)) !== null) {
-      let start = 0;
-      let end = 0;
       const removeEntireComment = blockCommentRegex.test(comment.value.trim());
       if (removeEntireComment) {
-        start = sourceCode.getIndexFromLoc({ line: comment.loc.start.line, column: comment.loc.start.column });
-        end = sourceCode.getIndexFromLoc({ line: comment.loc.end.line, column: comment.loc.end.column });
+        const start = sourceCode.getIndexFromLoc({ line: comment.loc.start.line, column: comment.loc.start.column });
+        const end = sourceCode.getIndexFromLoc({ line: comment.loc.end.line, column: comment.loc.end.column });
+        removeWallabyComment(context, sourceCode, start, end);
       } else {
         let lineNumber = 0;
         while (startLine <= endLine) {
@@ -60,10 +59,10 @@ function processBlockComment(context: Rule.RuleContext, sourceCode: SourceCode, 
           }
           startLine++;
         }
-        start = sourceCode.getIndexFromLoc({ line: lineNumber + 1, column: comment.loc.start.column });
-        end = sourceCode.getIndexFromLoc({ line: lineNumber + 2, column: 0 });
+        const start = sourceCode.getIndexFromLoc({ line: lineNumber + 1, column: comment.loc.start.column });
+        const end = sourceCode.getIndexFromLoc({ line: lineNumber + 2, column: 0 });
+        removeWallabyComment(context, sourceCode, start, end);
       }
-      removeWallabyComment(context, sourceCode, start, end);
     }
   });
 }

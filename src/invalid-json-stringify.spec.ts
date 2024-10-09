@@ -6,9 +6,9 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import rule, { INVALID_JSON_STRINGIFY, ruleId } from './invalid-json-stringify';
 import { RuleTester } from 'eslint';
 import { describe } from '@jest/globals';
+import rule, { INVALID_JSON_STRINGIFY, ruleId } from './invalid-json-stringify';
 
 describe(ruleId, () => {
   new RuleTester({
@@ -73,7 +73,6 @@ describe(ruleId, () => {
             suggestions: [
               {
                 messageId: INVALID_JSON_STRINGIFY,
-                // eslint-disable-next-line no-template-curly-in-string
                 output: 'String(responseError);',
               },
             ],

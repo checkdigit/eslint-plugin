@@ -6,14 +6,13 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
+import { RuleTester } from 'eslint';
+import { describe } from '@jest/globals';
 import rule, {
   REQUIRE_OBJECT_LITERAL_FOR_ERROR_RESPONSE_MESSAGE_ID,
   REQUIRE_OBJECT_LITERAL_FOR_HEADERS_MESSAGE_ID,
   REQUIRE_OBJECT_LITERAL_MESSAGE_ID,
 } from './object-literal-response';
-
-import { RuleTester } from 'eslint';
-import { describe } from '@jest/globals';
 
 const RESPONSE_200_OBJECT_LITERAL = `
 setResponse(response, {status: StatusCodes.OK, body: {foo: 'bar'}});

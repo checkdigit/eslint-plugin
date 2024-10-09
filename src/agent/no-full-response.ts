@@ -6,8 +6,8 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import { ESLintUtils, TSESTree } from '@typescript-eslint/utils';
 import { strict as assert } from 'node:assert';
+import { ESLintUtils, TSESTree } from '@typescript-eslint/utils';
 import getDocumentationUrl from '../get-documentation-url';
 import { getTypeParentNode } from '../library/ts-tree';
 
