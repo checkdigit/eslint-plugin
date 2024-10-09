@@ -84,7 +84,8 @@
     "eslint-plugin-no-secrets": "^1.0.2",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-sonarjs": "1.0.4",
-    "http-status-codes": "^2.3.0"
+    "http-status-codes": "^2.3.0",
+    "rimraf": "^6.0.1"
   },
   "peerDependencies": {
     "eslint": ">=9 <10"
