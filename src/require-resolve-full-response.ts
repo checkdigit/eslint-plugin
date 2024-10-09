@@ -54,6 +54,7 @@ const rule = createRule({
           const variableDefinition = foundVariable.defs.find((def) => def.type === DefinitionType.Variable);
           assert.ok(variableDefinition, `Variable "${urlArgument.name}" not defined in scope`);
           const variableDefinitionNode = variableDefinition.node;
+          assert.ok(variableDefinitionNode.type === AST_NODE_TYPES.VariableDeclarator);
           assert.ok(variableDefinitionNode.init, 'Variable definition node has no init property');
           return isUrlArgumentValid(variableDefinitionNode.init, scope);
         }
