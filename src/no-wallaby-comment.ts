@@ -43,9 +43,10 @@ function processBlockComment(context: Rule.RuleContext, sourceCode: SourceCode, 
     let startLine = comment.loc?.start.line ?? 0;
     const endLine = comment.loc?.end.line ?? 0;
     let match;
+
+    let start;
+    let end;
     while (comment.loc && (match = wallabyRegex.exec(commentValue)) !== null) {
-      let start = 0;
-      let end = 0;
       const removeEntireComment = blockCommentRegex.test(comment.value.trim());
       if (removeEntireComment) {
         start = sourceCode.getIndexFromLoc({ line: comment.loc.start.line, column: comment.loc.start.column });

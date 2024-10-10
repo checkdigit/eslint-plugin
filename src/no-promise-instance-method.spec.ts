@@ -6,13 +6,13 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
+import { describe } from '@jest/globals';
 import rule, {
   NO_PROMISE_INSTANCE_METHOD_CATCH_FINALLY,
   NO_PROMISE_INSTANCE_METHOD_THEN,
   ruleId,
 } from './no-promise-instance-method';
 import createTester from './tester.test';
-import { describe } from '@jest/globals';
 
 describe(ruleId, () => {
   createTester().run(ruleId, rule, {

@@ -6,9 +6,9 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
+import { strict as assert } from 'node:assert';
 import { AST_NODE_TYPES, ESLintUtils, TSESTree } from '@typescript-eslint/utils';
 import { DefinitionType, type Scope } from '@typescript-eslint/scope-manager';
-import { strict as assert } from 'node:assert';
 import getDocumentationUrl from './get-documentation-url';
 import { getEnclosingScopeNode } from './library/ts-tree';
 
