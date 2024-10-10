@@ -6,7 +6,7 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import { promises as fs } from 'node:fs';
+import fs from 'node:fs';
 
 import invalidJsonStringify, { ruleId as invalidJsonStringifyRuleId } from './invalid-json-stringify';
 import noFullResponse, { ruleId as noFullResponseRuleId } from './agent/no-full-response';
@@ -27,7 +27,7 @@ import regexComment from './regular-expression-comment';
 import requireAssertPredicateRejectsThrows from './require-assert-predicate-rejects-throws';
 import requireStrictAssert from './require-strict-assert';
 
-const pkg = JSON.parse(await fs.readFile('./package.json', 'utf-8')) as {
+const pkg = JSON.parse(fs.readFileSync('./package.json', 'utf-8')) as {
   name: string;
   version: string;
 };
