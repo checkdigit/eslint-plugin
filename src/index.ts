@@ -27,7 +27,7 @@ import regexComment from './regular-expression-comment';
 import requireAssertPredicateRejectsThrows from './require-assert-predicate-rejects-throws';
 import requireStrictAssert from './require-strict-assert';
 
-const pkg = JSON.parse(await fs.readFile(new URL('./package.json', import.meta.url), 'utf8')) as {
+const pkg = JSON.parse(await fs.readFile('./package.json', 'utf-8')) as {
   name: string;
   version: string;
 };
