@@ -6,6 +6,7 @@ Copyright (c) 2021-2023 [Check Digit, LLC](https://checkdigit.com)
 
 - `@checkdigit/no-card-numbers`
 - `@checkdigit/file-path-comment`
+- `@checkdigit/no-random-v4-uuid`
 - `@checkdigit/no-uuid`
 - `@checkdigit/require-strict-assert`
 - `@checkdigit/no-wallaby-comment`
