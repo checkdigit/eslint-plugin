@@ -8,7 +8,7 @@
 
 import type { TSESLint } from '@typescript-eslint/utils';
 
-import { name, version } from '../package.json';
+import _package from '../package.json' with { type: 'json' };
 import invalidJsonStringify, { ruleId as invalidJsonStringifyRuleId } from './invalid-json-stringify';
 import noFullResponse, { ruleId as noFullResponseRuleId } from './agent/no-full-response';
 import noPromiseInstanceMethod, { ruleId as noPromiseInstanceMethodRuleId } from './no-promise-instance-method';
@@ -47,8 +47,8 @@ const rules: Record<string, TSESLint.LooseRuleDefinition> = {
 
 const plugin: TSESLint.FlatConfig.Plugin = {
   meta: {
-    name,
-    version,
+    name: _package.name,
+    version: _package.version,
   },
   rules,
 };
