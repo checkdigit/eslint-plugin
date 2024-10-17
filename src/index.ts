@@ -95,7 +95,8 @@ const configs: Record<string, TSESLint.FlatConfig.Config> = {
   },
 };
 
-export default {
+const pluginToExport: TSESLint.FlatConfig.Plugin = {
   ...plugin,
   configs,
 };
+export default pluginToExport;

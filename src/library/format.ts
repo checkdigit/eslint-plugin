@@ -11,7 +11,7 @@ import { TSESLint, TSESTree } from '@typescript-eslint/utils';
 import type { Node } from 'estree';
 import type { SourceCode } from 'eslint';
 
-export function getIndentation(node: Node | TSESTree.Node, sourceCode: SourceCode | TSESLint.SourceCode) {
+export function getIndentation(node: Node | TSESTree.Node, sourceCode: SourceCode | TSESLint.SourceCode): string {
   assert.ok(node.loc);
   const line = sourceCode.lines[node.loc.start.line - 1];
   assert.ok(line !== undefined);

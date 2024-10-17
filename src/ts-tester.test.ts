@@ -8,7 +8,7 @@
 
 import { RuleTester } from '@typescript-eslint/rule-tester';
 
-export default function createTester() {
+export default function createTester(): RuleTester {
   return new RuleTester({
     languageOptions: {
       parserOptions: {

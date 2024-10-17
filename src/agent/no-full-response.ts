@@ -15,7 +15,7 @@ export const ruleId = 'no-full-response';
 
 const createRule = ESLintUtils.RuleCreator((name) => getDocumentationUrl(name));
 
-const rule = createRule({
+const rule: ESLintUtils.RuleModule<'removeFullResponse' | 'unknownError'> = createRule({
   name: ruleId,
   meta: {
     type: 'suggestion',
