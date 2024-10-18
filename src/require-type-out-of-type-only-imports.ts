@@ -13,7 +13,7 @@ export const ruleId = 'require-type-out-of-type-only-imports';
 
 const createRule = ESLintUtils.RuleCreator((name) => getDocumentationUrl(name));
 
-const rule = createRule({
+const rule: ESLintUtils.RuleModule<'moveTypeOutside'> = createRule({
   name: ruleId,
   meta: {
     type: 'suggestion',

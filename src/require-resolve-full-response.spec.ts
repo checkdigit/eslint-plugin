@@ -81,10 +81,12 @@ createTester().run(ruleId, rule, {
     {
       name: 'url declared as a variable',
       code: `
-        const url = \`\${PING_BASE_PATH}/key/\${keyId}\`;
-        await pingService.get(url, {
-          resolveWithFullResponse: false,
-        });
+        async function doSomething() {
+          const url = \`\${PING_BASE_PATH}/key/\${keyId}\`;
+          await pingService.get(url, {
+            resolveWithFullResponse: false,
+          });
+        }
       `,
       errors: [{ messageId: 'invalidOptions' }],
     },

@@ -6,19 +6,21 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
+import { strict as assert } from 'node:assert';
 import { AST_NODE_TYPES, ESLintUtils, TSESTree } from '@typescript-eslint/utils';
 import { DefinitionType, type Scope } from '@typescript-eslint/scope-manager';
-import { strict as assert } from 'node:assert';
 import getDocumentationUrl from './get-documentation-url';
 import { getEnclosingScopeNode } from './library/ts-tree';
 
 export const ruleId = 'require-resolve-full-response';
-export const PLAIN_URL_REGEXP = /^[`']\/\w+(?<serviceNamePart>-\w+)*\/v\d+\/(?<any>.|\r|\n)+[`']$/u;
-export const TOKENIZED_URL_REGEXP = /^`\$\{(?<serviceNamePart>[A-Z]+_)*BASE_PATH\}\/(?<any>.|\r|\n)+`$/u;
+// eslint-disable-next-line @typescript-eslint/no-inferrable-types
+export const PLAIN_URL_REGEXP: RegExp = /^[`']\/\w+(?<serviceNamePart>-\w+)*\/v\d+\/(?<any>.|\r|\n)+[`']$/u;
+// eslint-disable-next-line @typescript-eslint/no-inferrable-types
+export const TOKENIZED_URL_REGEXP: RegExp = /^`\$\{(?<serviceNamePart>[A-Z]+_)*BASE_PATH\}\/(?<any>.|\r|\n)+`$/u;
 
 const createRule = ESLintUtils.RuleCreator((name) => getDocumentationUrl(name));
 
-const rule = createRule({
+const rule: ESLintUtils.RuleModule<'invalidOptions' | 'unknownError'> = createRule({
   name: ruleId,
   meta: {
     type: 'suggestion',
@@ -54,7 +56,6 @@ const rule = createRule({
           const variableDefinition = foundVariable.defs.find((def) => def.type === DefinitionType.Variable);
           assert.ok(variableDefinition, `Variable "${urlArgument.name}" not defined in scope`);
           const variableDefinitionNode = variableDefinition.node;
-          assert.ok(variableDefinitionNode.type === AST_NODE_TYPES.VariableDeclarator);
           assert.ok(variableDefinitionNode.init, 'Variable definition node has no init property');
           return isUrlArgumentValid(variableDefinitionNode.init, scope);
         }

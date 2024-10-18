@@ -11,7 +11,11 @@ import { describe } from '@jest/globals';
 import rule from './require-strict-assert';
 
 describe('require-strict-assert', () => {
-  const ruleTester = new RuleTester({ parserOptions: { ecmaVersion: 2020, sourceType: 'module' } });
+  const ruleTester = new RuleTester({
+    languageOptions: {
+      parserOptions: { ecmaVersion: 2020, sourceType: 'module' },
+    },
+  });
   ruleTester.run('require-strict-assert', rule, {
     valid: [
       {
