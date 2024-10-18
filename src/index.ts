@@ -6,9 +6,10 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
+import fs from 'node:fs';
+
 import type { TSESLint } from '@typescript-eslint/utils';
 
-import _package from '../package.json' with { type: 'json' };
 import invalidJsonStringify, { ruleId as invalidJsonStringifyRuleId } from './invalid-json-stringify';
 import noFullResponse, { ruleId as noFullResponseRuleId } from './agent/no-full-response';
 import noPromiseInstanceMethod, { ruleId as noPromiseInstanceMethodRuleId } from './no-promise-instance-method';
@@ -45,10 +46,11 @@ const rules: Record<string, TSESLint.LooseRuleDefinition> = {
   [requireTypeOutOfTypeOnlyImportsRuleId]: requireTypeOutOfTypeOnlyImports,
 };
 
+const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf-8')) as { name: string; version: string };
 const plugin: TSESLint.FlatConfig.Plugin = {
   meta: {
-    name: _package.name,
-    version: _package.version,
+    name: packageJson.name,
+    version: packageJson.version,
   },
   rules,
 };
