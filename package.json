@@ -21,7 +21,6 @@
   "exports": {
     ".": {
       "types": "./dist-types/index.d.ts",
-      "require": "./dist-cjs/index.cjs",
       "import": "./dist-mjs/index.mjs",
       "default": "./dist-mjs/index.mjs"
     }
@@ -50,7 +49,7 @@
     "ci:style": "npm run prettier",
     "ci:test": "NODE_OPTIONS=\"--disable-warning ExperimentalWarning --experimental-vm-modules\" jest --coverage=false",
     "lint": "eslint --max-warnings 0 .",
-    "lint:fix": "eslint . --fix",
+    "lint:fix": "eslint --max-warnings 0 --fix .",
     "prepare": "",
     "prepublishOnly": "npm run build:dist-types && npm run build:dist-mjs",
     "prettier": "prettier --ignore-path .gitignore --list-different .",
