@@ -6,8 +6,6 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import fs from 'node:fs';
-
 import type { TSESLint } from '@typescript-eslint/utils';
 
 import invalidJsonStringify, { ruleId as invalidJsonStringifyRuleId } from './invalid-json-stringify';
@@ -52,12 +50,7 @@ const rules: Record<string, TSESLint.LooseRuleDefinition> = {
   [requireFixedServicesImportRuleId]: requireFixedServicesImport,
 };
 
-const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf-8')) as { name: string; version: string };
 const plugin: TSESLint.FlatConfig.Plugin = {
-  meta: {
-    name: packageJson.name,
-    version: packageJson.version,
-  },
   rules,
 };
 
