@@ -6,15 +6,17 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import { ESLintUtils, TSESTree } from '@typescript-eslint/utils';
 import { strict as assert } from 'node:assert';
+
+import { ESLintUtils, TSESTree } from '@typescript-eslint/utils';
+
 import getDocumentationUrl from './get-documentation-url';
 
 export const ruleId = 'no-duplicated-imports';
 
 const createRule = ESLintUtils.RuleCreator((name) => getDocumentationUrl(name));
 
-const rule = createRule({
+const rule: ESLintUtils.RuleModule<'mergeDuplicatedImports'> = createRule({
   name: ruleId,
   meta: {
     type: 'suggestion',

@@ -38,21 +38,21 @@ export function getAncestor(
   return getAncestor(parent, matcher, exitMatcher);
 }
 
-export function isBlockStatement(node: TSESTree.Node) {
+export function isBlockStatement(node: TSESTree.Node): boolean {
   return node.type.endsWith('Statement') || node.type.endsWith('Declaration');
 }
 
-export function getEnclosingStatement(node: TSESTree.Node) {
+export function getEnclosingStatement(node: TSESTree.Node): TSESTree.Node | undefined {
   return getAncestor(node, isBlockStatement);
 }
 
-export function getEnclosingScopeNode(node: TSESTree.Node) {
+export function getEnclosingScopeNode(node: TSESTree.Node): TSESTree.Node | undefined {
   return getAncestor(node, (parentNode) =>
     ['FunctionExpression', 'FunctionDeclaration', 'ArrowFunctionExpression', 'Program'].includes(parentNode.type),
   );
 }
 
-export function isUsedInArrayOrAsArgument(node: TSESTree.Node) {
+export function isUsedInArrayOrAsArgument(node: TSESTree.Node): boolean {
   if (isBlockStatement(node)) {
     return false;
   }
@@ -73,7 +73,13 @@ export function isUsedInArrayOrAsArgument(node: TSESTree.Node) {
   return isUsedInArrayOrAsArgument(parent);
 }
 
-export function getEnclosingFunction(node: TSESTree.Node) {
+export function getEnclosingFunction(
+  node: TSESTree.Node,
+):
+  | TSESTree.ArrowFunctionExpression
+  | TSESTree.FunctionDeclarationWithOptionalName
+  | TSESTree.FunctionExpression
+  | undefined {
   if (
     node.type === AST_NODE_TYPES.FunctionDeclaration ||
     node.type === AST_NODE_TYPES.FunctionExpression ||

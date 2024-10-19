@@ -7,17 +7,9 @@
  */
 
 import rule, { ruleId } from './require-fixed-services-import';
-import { RuleTester } from '@typescript-eslint/rule-tester';
+import createTester from './ts-tester.test';
 
-const ruleTester = new RuleTester({
-  parser: '@typescript-eslint/parser',
-  parserOptions: {
-    project: '../tsconfig.json',
-    tsconfigRootDir: `${process.cwd()}/ts-init`,
-  },
-});
-
-ruleTester.run(ruleId, rule, {
+createTester().run(ruleId, rule, {
   valid: [
     {
       name: 'correctly import service typing',
