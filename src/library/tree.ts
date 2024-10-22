@@ -1,4 +1,4 @@
-// tree.ts
+// library/tree.ts
 
 /*
  * Copyright (c) 2021-2024 Check Digit, LLC
@@ -38,21 +38,21 @@ export function getAncestor(
   return getAncestor(parent, matcher, exitMatcher);
 }
 
-export function isBlockStatement(node: Node) {
+export function isBlockStatement(node: Node): boolean {
   return node.type.endsWith('Statement') || node.type.endsWith('Declaration');
 }
 
-export function getEnclosingStatement(node: Node) {
+export function getEnclosingStatement(node: Node): Node | undefined {
   return getAncestor(node, isBlockStatement);
 }
 
-export function getEnclosingScopeNode(node: Node) {
+export function getEnclosingScopeNode(node: Node): Node | undefined {
   return getAncestor(node, (parentNode) =>
     ['FunctionExpression', 'FunctionDeclaration', 'ArrowFunctionExpression', 'Program'].includes(parentNode.type),
   );
 }
 
-export function isUsedInArrayOrAsArgument(node: Node) {
+export function isUsedInArrayOrAsArgument(node: Node): boolean {
   if (isBlockStatement(node)) {
     return false;
   }
@@ -73,7 +73,13 @@ export function isUsedInArrayOrAsArgument(node: Node) {
   return isUsedInArrayOrAsArgument(parent);
 }
 
-export function getEnclosingFunction(node: Node) {
+export function getEnclosingFunction(
+  node: Node,
+):
+  | import('estree').ArrowFunctionExpression
+  | import('estree').FunctionExpression
+  | import('estree').FunctionDeclaration
+  | undefined {
   if (
     node.type === 'FunctionDeclaration' ||
     node.type === 'FunctionExpression' ||

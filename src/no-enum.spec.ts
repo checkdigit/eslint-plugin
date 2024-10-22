@@ -1,8 +1,8 @@
 // no-enum.spec.ts
 
-import rule, { ruleId } from './no-enum';
 import { RuleTester } from '@typescript-eslint/rule-tester';
 import { describe } from '@jest/globals';
+import rule, { ruleId } from './no-enum';
 
 describe(ruleId, () => {
   const ruleTester = new RuleTester();

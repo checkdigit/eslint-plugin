@@ -27,7 +27,7 @@ function isJsonSchemaProperty(node?: TSESTree.Node): boolean {
   return isJsonSchemaProperty(node.parent);
 }
 
-const rule = createRule({
+const rule: ESLintUtils.RuleModule<typeof NO_ENUM> = createRule({
   name: ruleId,
   meta: {
     type: 'problem',

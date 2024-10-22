@@ -1,6 +1,6 @@
 {
   "name": "@checkdigit/eslint-plugin",
-  "version": "6.7.0",
+  "version": "7.1.0",
   "description": "Check Digit eslint plugins",
   "keywords": [
     "eslint",
@@ -21,7 +21,6 @@
   "exports": {
     ".": {
       "types": "./dist-types/index.d.ts",
-      "require": "./dist-cjs/index.cjs",
       "import": "./dist-mjs/index.mjs",
       "default": "./dist-mjs/index.mjs"
     }
@@ -29,20 +28,19 @@
   "files": [
     "src",
     "dist-types",
-    "dist-cjs",
     "dist-mjs",
+    "!src/**/test/**",
     "!src/**/*.test.ts",
     "!src/**/*.spec.ts",
+    "!dist-types/**/test/**",
     "!dist-types/**/*.test.d.ts",
     "!dist-types/**/*.spec.d.ts",
-    "!dist-cjs/**/*.test.cjs",
-    "!dist-cjs/**/*.spec.cjs",
+    "!dist-mjs/**/test/**",
     "!dist-mjs/**/*.test.mjs",
     "!dist-mjs/**/*.spec.mjs",
     "SECURITY.md"
   ],
   "scripts": {
-    "build:dist-cjs": "rimraf dist-cjs && npx builder --type=commonjs --sourceMap --entryPoint=index.ts --outDir=dist-cjs --outFile=index.cjs --external=espree && echo \"module.exports = module.exports.default;\" >> dist-cjs/index.cjs && node dist-cjs/index.cjs",
     "build:dist-mjs": "rimraf dist-mjs && npx builder --type=module --sourceMap --outDir=dist-mjs && node dist-mjs/index.mjs",
     "build:dist-types": "rimraf dist-types && npx builder --type=types --outDir=dist-types",
     "ci:compile": "tsc --noEmit",
@@ -50,9 +48,10 @@
     "ci:lint": "npm run lint",
     "ci:style": "npm run prettier",
     "ci:test": "NODE_OPTIONS=\"--disable-warning ExperimentalWarning --experimental-vm-modules\" jest --coverage=false",
-    "lint": "eslint --max-warnings 0 --ignore-path .gitignore .",
-    "lint:fix": "eslint --ignore-path .gitignore . --fix",
-    "prepublishOnly": "npm run build:dist-types && npm run build:dist-cjs && npm run build:dist-mjs",
+    "lint": "eslint --max-warnings 0 .",
+    "lint:fix": "eslint --max-warnings 0 --fix .",
+    "prepare": "",
+    "prepublishOnly": "npm run build:dist-types && npm run build:dist-mjs",
     "prettier": "prettier --ignore-path .gitignore --list-different .",
     "prettier:fix": "prettier --ignore-path .gitignore --write .",
     "test": "npm run ci:compile && npm run ci:test && npm run ci:lint && npm run ci:style"
@@ -62,31 +61,36 @@
     "preset": "@checkdigit/jest-config"
   },
   "dependencies": {
-    "@typescript-eslint/type-utils": "7.18.0",
-    "@typescript-eslint/utils": "7.18.0",
+    "@typescript-eslint/type-utils": "^8.10.0",
+    "@typescript-eslint/utils": "^8.10.0",
     "ts-api-utils": "^1.3.0"
   },
   "devDependencies": {
     "@checkdigit/jest-config": "^6.0.2",
-    "@checkdigit/prettier-config": "^5.5.0",
-    "@checkdigit/typescript-config": "6.0.0",
-    "@types/eslint": "8.56.10",
-    "@typescript-eslint/eslint-plugin": "7.18.0",
-    "@typescript-eslint/parser": "7.18.0",
-    "@typescript-eslint/rule-tester": "7.18.0",
+    "@checkdigit/prettier-config": "^5.5.1",
+    "@checkdigit/typescript-config": "8.0.0",
+    "@eslint/js": "^9.12.0",
+    "@types/eslint": "^9.6.1",
+    "@types/eslint-config-prettier": "^6.11.3",
+    "@typescript-eslint/parser": "^8.10.0",
+    "@typescript-eslint/rule-tester": "^8.10.0",
+    "eslint": "^9.12.0",
     "eslint-config-prettier": "^9.1.0",
+    "eslint-import-resolver-typescript": "^3.6.3",
     "eslint-plugin-eslint-plugin": "^6.2.0",
-    "eslint-plugin-import": "^2.29.1",
-    "eslint-plugin-no-only-tests": "^3.1.0",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-no-only-tests": "^3.3.0",
     "eslint-plugin-no-secrets": "^1.0.2",
     "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-sonarjs": "0.24.0",
-    "http-status-codes": "^2.3.0"
+    "eslint-plugin-sonarjs": "1.0.4",
+    "http-status-codes": "^2.3.0",
+    "rimraf": "^6.0.1",
+    "typescript-eslint": "^8.10.0"
   },
   "peerDependencies": {
-    "eslint": ">=8 <9"
+    "eslint": ">=9 <10"
   },
   "engines": {
-    "node": ">=20.14"
+    "node": ">=20.17"
   }
 }
