@@ -6,7 +6,7 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import { AST_NODE_TYPES, ESLintUtils, TSESTree } from '@typescript-eslint/utils';
+import { AST_NODE_TYPES, ESLintUtils, TSESLint, TSESTree } from '@typescript-eslint/utils';
 import getDocumentationUrl from './get-documentation-url';
 
 export const ruleId = 'no-random-v4-uuid';
@@ -25,7 +25,7 @@ const processImportDeclaration = (
   node.specifiers.forEach((specifier) => {
     switch (specifier.type) {
       case AST_NODE_TYPES.ImportSpecifier:
-        if (specifier.imported.name === 'v4') {
+        if (specifier.imported.type === AST_NODE_TYPES.Identifier && specifier.imported.name === 'v4') {
           updatedUuid4Alias = specifier.local.name;
         }
         break;
@@ -50,7 +50,7 @@ const isUuid4Call = (
     node.callee.property.type === AST_NODE_TYPES.Identifier &&
     node.callee.property.name === 'v4');
 
-const rule = createRule({
+const rule: TSESLint.RuleModule<typeof NO_RANDOM_V4_UUID> = createRule({
   name: ruleId,
   meta: {
     type: 'problem',

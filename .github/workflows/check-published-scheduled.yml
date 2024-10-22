@@ -18,6 +18,6 @@ jobs:
         uses: checkdigit/github-actions/check-published@main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN_PUBLISH }}
           DEBUG: '*'
           SLACK_PUBLISH_MISMATCH: ${{ secrets.SLACK_PUBLISH_MISMATCH }}

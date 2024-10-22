@@ -1,12 +1,18 @@
 // no-random-v4-uuid.spec.ts
 
-import rule, { ruleId } from './no-random-v4-uuid';
 import { RuleTester } from '@typescript-eslint/rule-tester';
 import { describe } from '@jest/globals';
+import rule, { ruleId } from './no-random-v4-uuid';
 
 describe(ruleId, () => {
   const ruleTester = new RuleTester({
-    parser: '@typescript-eslint/parser',
+    languageOptions: {
+      parserOptions: {
+        parser: '@typescript-eslint/parser',
+        ecmaVersion: 2020,
+        sourceType: 'module',
+      },
+    },
   });
 
   ruleTester.run(ruleId, rule, {
