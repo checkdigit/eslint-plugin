@@ -23,6 +23,7 @@ import requireTypeOutOfTypeOnlyImports, {
 } from './require-type-out-of-type-only-imports';
 import filePathComment from './file-path-comment';
 import noCardNumbers from './no-card-numbers';
+import noEnum from './no-enum';
 import noTestImport from './no-test-import';
 import noUuid from './no-uuid';
 import noWallabyComment from './no-wallaby-comment';
@@ -34,6 +35,7 @@ import requireStrictAssert from './require-strict-assert';
 const rules: Record<string, TSESLint.LooseRuleDefinition> = {
   'file-path-comment': filePathComment,
   'no-card-numbers': noCardNumbers,
+  'no-enum': noEnum,
   'no-uuid': noUuid,
   'require-strict-assert': requireStrictAssert,
   'no-test-import': noTestImport,
@@ -61,6 +63,7 @@ const configs: Record<string, TSESLint.FlatConfig.Config> = {
     },
     rules: {
       '@checkdigit/no-card-numbers': 'error',
+      '@checkdigit/no-enum': 'error',
       '@checkdigit/file-path-comment': 'error',
       '@checkdigit/no-uuid': 'error',
       '@checkdigit/require-strict-assert': 'error',
@@ -84,6 +87,7 @@ const configs: Record<string, TSESLint.FlatConfig.Config> = {
     },
     rules: {
       '@checkdigit/no-card-numbers': 'error',
+      '@checkdigit/no-enum': 'error',
       '@checkdigit/file-path-comment': 'off',
       '@checkdigit/no-uuid': 'error',
       '@checkdigit/require-strict-assert': 'error',
