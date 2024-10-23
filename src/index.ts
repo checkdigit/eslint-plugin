@@ -21,6 +21,7 @@ import requireResolveFullResponse, {
 import requireTypeOutOfTypeOnlyImports, {
   ruleId as requireTypeOutOfTypeOnlyImportsRuleId,
 } from './require-type-out-of-type-only-imports';
+import noServeRuntime, { ruleId as noServeRuntimeRuleId } from './agent/no-serve-runtime';
 import filePathComment from './file-path-comment';
 import noCardNumbers from './no-card-numbers';
 import noTestImport from './no-test-import';
@@ -48,6 +49,7 @@ const rules: Record<string, TSESLint.LooseRuleDefinition> = {
   [requireTypeOutOfTypeOnlyImportsRuleId]: requireTypeOutOfTypeOnlyImports,
   [noDuplicatedImportsRuleId]: noDuplicatedImports,
   [requireFixedServicesImportRuleId]: requireFixedServicesImport,
+  [noServeRuntimeRuleId]: noServeRuntime,
 };
 
 const plugin: TSESLint.FlatConfig.Plugin = {
@@ -76,6 +78,7 @@ const configs: Record<string, TSESLint.FlatConfig.Config> = {
       [`@checkdigit/${requireTypeOutOfTypeOnlyImportsRuleId}`]: 'error',
       [`@checkdigit/${noDuplicatedImportsRuleId}`]: 'error',
       [`@checkdigit/${requireFixedServicesImportRuleId}`]: 'error',
+      [`@checkdigit/${noServeRuntimeRuleId}`]: 'error',
     },
   },
   recommended: {
