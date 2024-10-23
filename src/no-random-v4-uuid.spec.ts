@@ -1,18 +1,9 @@
 // no-random-v4-uuid.spec.ts
 
-import { RuleTester } from '@typescript-eslint/rule-tester';
 import rule, { ruleId } from './no-random-v4-uuid';
+import createTester from './ts-tester.test';
 
-const ruleTester = new RuleTester({
-  languageOptions: {
-    parserOptions: {
-      project: '../tsconfig.json',
-      tsconfigRootDir: `${process.cwd()}/ts-init`,
-    },
-  },
-});
-
-ruleTester.run(ruleId, rule, {
+createTester().run(ruleId, rule, {
   valid: [
     {
       name: 'Valid case with different uuid method',
