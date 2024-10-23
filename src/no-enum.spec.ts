@@ -1,20 +1,18 @@
 // no-enum.spec.ts
 
-import { RuleTester } from '@typescript-eslint/rule-tester';
-import { describe } from '@jest/globals';
 import rule, { ruleId } from './no-enum';
 
-describe(ruleId, () => {
-  const ruleTester = new RuleTester();
-  ruleTester.run(ruleId, rule, {
-    valid: [
-      {
-        name: 'Valid case with status object and type alias',
-        code: `const status = { SUCCESS: 'success', FAILURE: 'failure' }; type Status = 'success' | 'failure';`,
-      },
-      {
-        name: 'Valid case with enum property with in JSON schema definition',
-        code: `export const test = {
+import createTester from './ts-tester.test';
+
+createTester().run(ruleId, rule, {
+  valid: [
+    {
+      name: 'Valid case with status object and type alias',
+      code: `const status = { SUCCESS: 'success', FAILURE: 'failure' }; type Status = 'success' | 'failure';`,
+    },
+    {
+      name: 'Valid case with enum property with in JSON schema definition',
+      code: `export const test = {
                 properties: {
                   testString1: {
                     type: 'string'
@@ -33,21 +31,21 @@ describe(ruleId, () => {
                 required: ['testString1', 'testType', 'testString2', 'testString3'],
                 type: 'object',
               };`,
-      },
-    ],
-    invalid: [
-      {
-        name: 'Invalid case with enum declaration',
-        code: `enum Days { MONDAY = 'Monday', TUESDAY = 'Tuesday', WEDNESDAY = 'Wednesday' };`,
-        errors: [
-          {
-            messageId: 'NO_ENUM',
-          },
-        ],
-      },
-      {
-        name: 'Invalid case with export enum declaration',
-        code: `export enum TEST_NAMES {
+    },
+  ],
+  invalid: [
+    {
+      name: 'Invalid case with enum declaration',
+      code: `enum Days { MONDAY = 'Monday', TUESDAY = 'Tuesday', WEDNESDAY = 'Wednesday' };`,
+      errors: [
+        {
+          messageId: 'NO_ENUM',
+        },
+      ],
+    },
+    {
+      name: 'Invalid case with export enum declaration',
+      code: `export enum TEST_NAMES {
                 testString1 = 'testString1',
                 testString2 = 'testString2',
                 testString3 = 'testString3',
@@ -58,12 +56,11 @@ describe(ruleId, () => {
                 testString8 = 'testString8',
                 testString9 = 'testString9',
               }`,
-        filename: 'test-names.enum.ts',
-        errors: [{ messageId: 'NO_ENUM' }],
-      },
-      {
-        name: 'Invalid case with nested enum properties',
-        code: `
+      errors: [{ messageId: 'NO_ENUM' }],
+    },
+    {
+      name: 'Invalid case with nested enum properties',
+      code: `
             const complexStructure = {
               nested: {
                 enum: ['VALUE1', 'VALUE2'],
@@ -73,18 +70,18 @@ describe(ruleId, () => {
               },
             };
           `,
-        errors: [
-          {
-            messageId: 'NO_ENUM',
-          },
-          {
-            messageId: 'NO_ENUM',
-          },
-        ],
-      },
-      {
-        name: 'Invalid case with deeply nested enum properties',
-        code: `
+      errors: [
+        {
+          messageId: 'NO_ENUM',
+        },
+        {
+          messageId: 'NO_ENUM',
+        },
+      ],
+    },
+    {
+      name: 'Invalid case with deeply nested enum properties',
+      code: `
           const complexStructure = {
             level1: {
               level2: {
@@ -105,16 +102,11 @@ describe(ruleId, () => {
             },
           };
         `,
-        errors: [
-          { messageId: 'NO_ENUM' },
-          { messageId: 'NO_ENUM' },
-          { messageId: 'NO_ENUM' },
-          { messageId: 'NO_ENUM' },
-        ],
-      },
-      {
-        name: 'Invalid case with enum properties in array',
-        code: `
+      errors: [{ messageId: 'NO_ENUM' }, { messageId: 'NO_ENUM' }, { messageId: 'NO_ENUM' }, { messageId: 'NO_ENUM' }],
+    },
+    {
+      name: 'Invalid case with enum properties in array',
+      code: `
           const complexStructure = {
             level1: [
               {
@@ -134,8 +126,7 @@ describe(ruleId, () => {
             ],
           };
         `,
-        errors: [{ messageId: 'NO_ENUM' }, { messageId: 'NO_ENUM' }],
-      },
-    ],
-  });
+      errors: [{ messageId: 'NO_ENUM' }, { messageId: 'NO_ENUM' }],
+    },
+  ],
 });
