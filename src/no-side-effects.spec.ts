@@ -6,10 +6,9 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import rule, { ruleId } from './no-side-effects';
-
 import { RuleTester } from '@typescript-eslint/rule-tester';
 import { describe } from '@jest/globals';
+import rule, { ruleId } from './no-side-effects';
 
 describe(ruleId, () => {
   const ruleTester = new RuleTester();
@@ -53,6 +52,7 @@ describe(ruleId, () => {
               }`,
         filename: 'src/no-side-effects.ts',
         options: [{ excludedIdentifiers: ['assert', 'debug', 'log'] }],
+        name: 'Valid case with no side effects',
       },
     ],
     invalid: [
@@ -91,6 +91,7 @@ describe(ruleId, () => {
         errors: [{ messageId: 'NO_SIDE_EFFECTS' }],
         filename: 'src/side-effects.ts',
         options: [{ excludedIdentifiers: ['assert', 'debug', 'log'] }],
+        name: 'Invalid case with side effects in assertions and schema validation',
       },
       {
         code: `import { strict as assert } from 'node:assert';
@@ -117,6 +118,7 @@ describe(ruleId, () => {
         ],
         filename: 'local.ts',
         options: [{ excludedIdentifiers: ['assert', 'debug', 'log'] }],
+        name: 'Invalid case with multiple side effects including server creation and async operations',
       },
     ],
   });

@@ -208,7 +208,11 @@ const TEST = "this isn't secret"; // testing with ? here and there ??.
 `;
 
 describe('no-wallaby-comment', () => {
-  const ruleTester = new RuleTester({ parserOptions: { ecmaVersion: 2020 } });
+  const ruleTester = new RuleTester({
+    languageOptions: {
+      parserOptions: { ecmaVersion: 2020 },
+    },
+  });
 
   ruleTester.run('no-wallaby-comment', rule, {
     valid: [

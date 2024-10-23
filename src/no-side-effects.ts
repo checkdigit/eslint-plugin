@@ -58,9 +58,9 @@ function isVariableDeclarationCallExpression(node: TSESTree.Node, excludedIdenti
   );
 }
 
-const createRule = ESLintUtils.RuleCreator((name) => name);
+const createRule: ReturnType<typeof ESLintUtils.RuleCreator> = ESLintUtils.RuleCreator((name) => name);
 
-const rule = createRule({
+const rule: ReturnType<typeof createRule> = createRule({
   name: ruleId,
   meta: {
     type: 'problem',
@@ -85,7 +85,7 @@ const rule = createRule({
   },
   defaultOptions: [{ excludedIdentifiers: [''] }],
   create(context) {
-    const options: RuleOptions = (context.options[0] ?? {}) as RuleOptions;
+    const options: RuleOptions = context.options[0] as RuleOptions;
     const excludedIdentifiers = options.excludedIdentifiers.length > 0 ? options.excludedIdentifiers : [];
 
     return {
