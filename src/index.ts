@@ -23,6 +23,7 @@ import requireTypeOutOfTypeOnlyImports, {
 } from './require-type-out-of-type-only-imports';
 import filePathComment from './file-path-comment';
 import noCardNumbers from './no-card-numbers';
+import noSideEffects from './no-side-effects';
 import noTestImport from './no-test-import';
 import noUuid from './no-uuid';
 import noWallabyComment from './no-wallaby-comment';
@@ -38,6 +39,7 @@ const rules: Record<string, TSESLint.LooseRuleDefinition> = {
   'require-strict-assert': requireStrictAssert,
   'no-test-import': noTestImport,
   'no-wallaby-comment': noWallabyComment,
+  'no-side-effects': noSideEffects,
   'regular-expression-comment': regexComment,
   'require-assert-predicate-rejects-throws': requireAssertPredicateRejectsThrows,
   'object-literal-response': objectLiteralResponse,
@@ -65,6 +67,7 @@ const configs: Record<string, TSESLint.FlatConfig.Config> = {
       '@checkdigit/no-uuid': 'error',
       '@checkdigit/require-strict-assert': 'error',
       '@checkdigit/no-wallaby-comment': 'error',
+      '@checkdigit/no-side-effects': ['error', { excludedIdentifiers: ['assert', 'debug', 'log', 'promisify'] }],
       '@checkdigit/regular-expression-comment': 'error',
       '@checkdigit/require-assert-predicate-rejects-throws': 'error',
       '@checkdigit/object-literal-response': 'error',
@@ -88,6 +91,7 @@ const configs: Record<string, TSESLint.FlatConfig.Config> = {
       '@checkdigit/no-uuid': 'error',
       '@checkdigit/require-strict-assert': 'error',
       '@checkdigit/no-wallaby-comment': 'off',
+      '@checkdigit/no-side-effects': 'error',
       '@checkdigit/regular-expression-comment': 'error',
       '@checkdigit/require-assert-predicate-rejects-throws': 'error',
       '@checkdigit/object-literal-response': 'error',
