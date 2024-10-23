@@ -6,16 +6,13 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import { RuleTester } from '@typescript-eslint/rule-tester';
-import { describe } from '@jest/globals';
 import rule, { ruleId } from './no-side-effects';
+import createTester from './ts-tester.test';
 
-describe(ruleId, () => {
-  const ruleTester = new RuleTester();
-  ruleTester.run(ruleId, rule, {
-    valid: [
-      {
-        code: `import { strict as assert } from 'node:assert';
+createTester().run(ruleId, rule, {
+  valid: [
+    {
+      code: `import { strict as assert } from 'node:assert';
                import debug from 'debug';
                import Koa from 'koa';
                import { v4 as uuid } from 'uuid';
@@ -50,14 +47,13 @@ describe(ruleId, () => {
                 const prefix = formatUtc(createdAt, 'yyyy/MM/dd/HH');
                 return prefix;
               }`,
-        filename: 'src/no-side-effects.ts',
-        options: [{ excludedIdentifiers: ['assert', 'debug', 'log'] }],
-        name: 'Valid case with no side effects',
-      },
-    ],
-    invalid: [
-      {
-        code: `import { strict as assert } from 'node:assert';
+      options: [{ excludedIdentifiers: ['assert', 'debug', 'log'] }],
+      name: 'Valid case with no side effects',
+    },
+  ],
+  invalid: [
+    {
+      code: `import { strict as assert } from 'node:assert';
                import debug from 'debug';
                import Koa from 'koa';
                import { v4 as uuid } from 'uuid';
@@ -88,13 +84,12 @@ describe(ruleId, () => {
               }
               assert(\`I'm a number, \${numberValue}\`);
               const jsonSchemaValidator = new Ajv({ allErrors: true }).compile(schema);`,
-        errors: [{ messageId: 'NO_SIDE_EFFECTS' }],
-        filename: 'src/side-effects.ts',
-        options: [{ excludedIdentifiers: ['assert', 'debug', 'log'] }],
-        name: 'Invalid case with side effects in assertions and schema validation',
-      },
-      {
-        code: `import { strict as assert } from 'node:assert';
+      errors: [{ messageId: 'NO_SIDE_EFFECTS' }],
+      options: [{ excludedIdentifiers: ['assert', 'debug', 'log'] }],
+      name: 'Invalid case with side effects in assertions and schema validation',
+    },
+    {
+      code: `import { strict as assert } from 'node:assert';
                 import http from 'node:http';
                 import debug from 'debug';
                 
@@ -109,17 +104,15 @@ describe(ruleId, () => {
                 await new Promise((resolve) => {
                   server.on('listening', resolve);
                 });`,
-        errors: [
-          { messageId: 'NO_SIDE_EFFECTS' },
-          { messageId: 'NO_SIDE_EFFECTS' },
-          { messageId: 'NO_SIDE_EFFECTS' },
-          { messageId: 'NO_SIDE_EFFECTS' },
-          { messageId: 'NO_SIDE_EFFECTS' },
-        ],
-        filename: 'local.ts',
-        options: [{ excludedIdentifiers: ['assert', 'debug', 'log'] }],
-        name: 'Invalid case with multiple side effects including server creation and async operations',
-      },
-    ],
-  });
+      errors: [
+        { messageId: 'NO_SIDE_EFFECTS' },
+        { messageId: 'NO_SIDE_EFFECTS' },
+        { messageId: 'NO_SIDE_EFFECTS' },
+        { messageId: 'NO_SIDE_EFFECTS' },
+        { messageId: 'NO_SIDE_EFFECTS' },
+      ],
+      options: [{ excludedIdentifiers: ['assert', 'debug', 'log'] }],
+      name: 'Invalid case with multiple side effects including server creation and async operations',
+    },
+  ],
 });
