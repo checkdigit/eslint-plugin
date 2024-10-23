@@ -6,19 +6,10 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import { RuleTester } from '@typescript-eslint/rule-tester';
 import rule, { ruleId } from './require-type-out-of-type-only-imports';
+import createTester from './ts-tester.test';
 
-const ruleTester = new RuleTester({
-  languageOptions: {
-    parserOptions: {
-      project: '../tsconfig.json',
-      tsconfigRootDir: `${process.cwd()}/ts-init`,
-    },
-  },
-});
-
-ruleTester.run(ruleId, rule, {
+createTester().run(ruleId, rule, {
   valid: [
     {
       name: 'correct import with one type specifier',

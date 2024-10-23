@@ -6,13 +6,15 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import fs from 'node:fs';
-
 import type { TSESLint } from '@typescript-eslint/utils';
 
 import invalidJsonStringify, { ruleId as invalidJsonStringifyRuleId } from './invalid-json-stringify';
+import noDuplicatedImports, { ruleId as noDuplicatedImportsRuleId } from './no-duplicated-imports';
 import noFullResponse, { ruleId as noFullResponseRuleId } from './agent/no-full-response';
 import noPromiseInstanceMethod, { ruleId as noPromiseInstanceMethodRuleId } from './no-promise-instance-method';
+import requireFixedServicesImport, {
+  ruleId as requireFixedServicesImportRuleId,
+} from './require-fixed-services-import';
 import requireResolveFullResponse, {
   ruleId as requireResolveFullResponseRuleId,
 } from './require-resolve-full-response';
@@ -46,14 +48,11 @@ const rules: Record<string, TSESLint.LooseRuleDefinition> = {
   [noFullResponseRuleId]: noFullResponse,
   [requireResolveFullResponseRuleId]: requireResolveFullResponse,
   [requireTypeOutOfTypeOnlyImportsRuleId]: requireTypeOutOfTypeOnlyImports,
+  [noDuplicatedImportsRuleId]: noDuplicatedImports,
+  [requireFixedServicesImportRuleId]: requireFixedServicesImport,
 };
 
-const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf-8')) as { name: string; version: string };
 const plugin: TSESLint.FlatConfig.Plugin = {
-  meta: {
-    name: packageJson.name,
-    version: packageJson.version,
-  },
   rules,
 };
 
@@ -78,6 +77,8 @@ const configs: Record<string, TSESLint.FlatConfig.Config> = {
       [`@checkdigit/${noFullResponseRuleId}`]: 'error',
       [`@checkdigit/${requireResolveFullResponseRuleId}`]: 'error',
       [`@checkdigit/${requireTypeOutOfTypeOnlyImportsRuleId}`]: 'error',
+      [`@checkdigit/${noDuplicatedImportsRuleId}`]: 'error',
+      [`@checkdigit/${requireFixedServicesImportRuleId}`]: 'error',
     },
   },
   recommended: {
