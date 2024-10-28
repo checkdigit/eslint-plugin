@@ -7,13 +7,14 @@
  */
 
 import { AST_NODE_TYPES, ESLintUtils, TSESTree } from '@typescript-eslint/utils';
+
 import getDocumentationUrl from '../get-documentation-url';
 
 export const ruleId = 'fetch-response-body-json';
 
 const createRule = ESLintUtils.RuleCreator((name) => getDocumentationUrl(name));
 
-const rule = createRule({
+const rule: ESLintUtils.RuleModule<'unknownError' | 'replaceBodyWithJson'> = createRule({
   name: ruleId,
   meta: {
     type: 'suggestion',

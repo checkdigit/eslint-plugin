@@ -6,19 +6,21 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import { AST_NODE_TYPES, ESLintUtils, TSESTree } from '@typescript-eslint/utils';
-import { DefinitionType, type Scope } from '@typescript-eslint/scope-manager';
-import { PLAIN_URL_REGEXP, TOKENIZED_URL_REGEXP, replaceEndpointUrlPrefixWithDomain } from './url';
 import { strict as assert } from 'node:assert';
+
+import { DefinitionType, type Scope } from '@typescript-eslint/scope-manager';
+import { AST_NODE_TYPES, ESLintUtils, TSESTree } from '@typescript-eslint/utils';
+
 import getDocumentationUrl from '../get-documentation-url';
 import { getEnclosingScopeNode } from '../library/ts-tree';
 import { getIndentation } from '../library/format';
+import { PLAIN_URL_REGEXP, replaceEndpointUrlPrefixWithDomain, TOKENIZED_URL_REGEXP } from './url';
 
 export const ruleId = 'no-service-wrapper';
 
 const createRule = ESLintUtils.RuleCreator((name) => getDocumentationUrl(name));
 
-const rule = createRule({
+const rule: ESLintUtils.RuleModule<'unknownError' | 'preferNativeFetch' | 'invalidOptions'> = createRule({
   name: ruleId,
   meta: {
     type: 'suggestion',
@@ -57,7 +59,6 @@ const rule = createRule({
           const variableDefinition = foundVariable.defs.find((def) => def.type === DefinitionType.Variable);
           assert.ok(variableDefinition, `Variable "${urlArgument.name}" not defined in scope`);
           const variableDefinitionNode = variableDefinition.node;
-          assert.ok(variableDefinitionNode.type === AST_NODE_TYPES.VariableDeclarator);
           assert.ok(variableDefinitionNode.init, 'Variable definition node has no init property');
           return isUrlArgumentValid(variableDefinitionNode.init, scope);
         }

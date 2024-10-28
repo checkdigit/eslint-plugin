@@ -6,6 +6,8 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
+import { strict as assert } from 'node:assert';
+
 import type {
   AwaitExpression,
   CallExpression,
@@ -17,6 +19,7 @@ import type {
   VariableDeclaration,
 } from 'estree';
 import { type Rule, type Scope, SourceCode } from 'eslint';
+
 import {
   getEnclosingFunction,
   getEnclosingScopeNode,
@@ -24,12 +27,11 @@ import {
   getParent,
   isUsedInArrayOrAsArgument,
 } from '../library/tree';
-import { getResponseBodyRetrievalText, hasAssertions } from './fetch';
-import { analyzeResponseReferences } from './response-reference';
-import { strict as assert } from 'node:assert';
 import getDocumentationUrl from '../get-documentation-url';
 import { getIndentation } from '../library/format';
 import { isValidPropertyName } from '../library/variable';
+import { analyzeResponseReferences } from './response-reference';
+import { getResponseBodyRetrievalText, hasAssertions } from './fetch';
 import { replaceEndpointUrlPrefixWithBasePath } from './url';
 
 export const ruleId = 'no-fixture';
@@ -362,7 +364,7 @@ const rule: Rule.RuleModule = {
           context.report({
             node: fixtureCall,
             messageId: 'preferNativeFetch',
-            // eslint-disable-next-line sonarjs/cognitive-complexity
+
             *fix(fixer) {
               if (fixtureCallInformation.inlineStatementNode) {
                 const preInlineDeclaration = [
@@ -400,9 +402,9 @@ const rule: Rule.RuleModule = {
                 let headerName;
                 if (parent.type === 'MemberExpression') {
                   const headerNameNode = parent.property;
-                  headerName =
-                    // eslint-disable-next-line no-nested-ternary, @typescript-eslint/restrict-template-expressions
-                    parent.computed ? sourceCode.getText(headerNameNode) : `'${sourceCode.getText(headerNameNode)}'`;
+                  headerName = parent.computed
+                    ? sourceCode.getText(headerNameNode)
+                    : `'${sourceCode.getText(headerNameNode)}'`;
                 } else if (parent.type === 'CallExpression') {
                   const headerNameNode = parent.arguments[0];
                   headerName = sourceCode.getText(headerNameNode);

@@ -6,10 +6,24 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
+// import createTester from '../ts-tester.test';
+import { RuleTester } from '@typescript-eslint/rule-tester';
+import tsParser from '@typescript-eslint/parser';
 import rule, { ruleId } from './add-url-domain';
-import createTester from '../ts-tester.test';
 
-const ruleTester = createTester();
+// createTester()
+
+const ruleTester = new RuleTester({
+  languageOptions: {
+    parser: tsParser,
+    ecmaVersion: 'latest',
+    sourceType: 'module',
+    parserOptions: {
+      project: '../tsconfig.json',
+      tsconfigRootDir: `${process.cwd()}/ts-init`,
+    },
+  },
+});
 
 ruleTester.run(ruleId, rule, {
   valid: [

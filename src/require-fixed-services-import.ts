@@ -7,6 +7,7 @@
  */
 
 import { ESLintUtils } from '@typescript-eslint/utils';
+
 import getDocumentationUrl from './get-documentation-url';
 
 export const ruleId = 'require-fixed-services-import';

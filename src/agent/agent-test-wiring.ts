@@ -99,7 +99,7 @@ const rule: ESLintUtils.RuleModule<'updateTestWiring' | 'unknownError'> = create
             assert.ok(arrowFunctionBody.type === TSESTree.AST_NODE_TYPES.BlockStatement);
 
             const targetStatement = arrowFunctionBody.body.find(
-              (statement) => sourceCode.getText(statement) /*?*/ === 'await fixture.reset();',
+              (statement) => sourceCode.getText(statement) === 'await fixture.reset();',
             );
             if (targetStatement !== undefined) {
               const beforeAllBodyText = sourceCode.getText(arrowFunctionBody);

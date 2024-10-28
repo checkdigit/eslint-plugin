@@ -6,9 +6,10 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
+import { strict as assert } from 'node:assert';
 import type { MemberExpression, VariableDeclaration } from 'estree';
 import { type Scope } from 'eslint';
-import { strict as assert } from 'node:assert';
+
 import { getParent } from '../library/tree';
 
 /**
@@ -19,7 +20,15 @@ import { getParent } from '../library/tree';
 export function analyzeResponseReferences(
   variableDeclaration: VariableDeclaration | undefined,
   scopeManager: Scope.ScopeManager,
-) {
+): {
+  variable?: Scope.Variable;
+  bodyReferences: MemberExpression[];
+  headersReferences: MemberExpression[];
+  statusReferences: MemberExpression[];
+  destructuringBodyVariable?: Scope.Variable;
+  destructuringHeadersVariable?: Scope.Variable;
+  destructuringHeadersReferences?: MemberExpression[] | undefined;
+} {
   const results: {
     variable?: Scope.Variable;
     bodyReferences: MemberExpression[];

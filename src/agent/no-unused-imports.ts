@@ -8,13 +8,14 @@
 
 import { ESLintUtils, TSESTree } from '@typescript-eslint/utils';
 import type { Scope } from '@typescript-eslint/utils/ts-eslint';
+
 import getDocumentationUrl from '../get-documentation-url';
 
 export const ruleId = 'no-unused-imports';
 
 const createRule = ESLintUtils.RuleCreator((name) => getDocumentationUrl(name));
 
-const rule = createRule({
+const rule: ESLintUtils.RuleModule<'unknownError' | 'removeUnusedImports'> = createRule({
   name: ruleId,
   meta: {
     type: 'suggestion',

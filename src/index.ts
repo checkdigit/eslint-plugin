@@ -40,6 +40,7 @@ import requireResolveFullResponse, {
 import requireTypeOutOfTypeOnlyImports, {
   ruleId as requireTypeOutOfTypeOnlyImportsRuleId,
 } from './require-type-out-of-type-only-imports';
+import noServeRuntime, { ruleId as noServeRuntimeRuleId } from './agent/no-serve-runtime';
 import filePathComment from './file-path-comment';
 import noCardNumbers from './no-card-numbers';
 import noTestImport from './no-test-import';
@@ -50,7 +51,7 @@ import regexComment from './regular-expression-comment';
 import requireAssertPredicateRejectsThrows from './require-assert-predicate-rejects-throws';
 import requireStrictAssert from './require-strict-assert';
 
-const rules = {
+const rules: Record<string, TSESLint.LooseRuleDefinition> = {
   'file-path-comment': filePathComment,
   'no-card-numbers': noCardNumbers,
   'no-uuid': noUuid,
@@ -73,6 +74,7 @@ const rules = {
   [noMappedResponseRuleId]: noMappedResponse,
   [requireResolveFullResponseRuleId]: requireResolveFullResponse,
   [noDuplicatedImportsRuleId]: noDuplicatedImports,
+  [noServeRuntimeRuleId]: noServeRuntime,
   [requireFixedServicesImportRuleId]: requireFixedServicesImport,
   [requireTypeOutOfTypeOnlyImportsRuleId]: requireTypeOutOfTypeOnlyImports,
   [noUnusedFunctionArgumentsRuleId]: noUnusedFunctionArguments,
@@ -108,6 +110,7 @@ const configs: Record<string, TSESLint.FlatConfig.Config | TSESLint.FlatConfig.C
       [`@checkdigit/${noDuplicatedImportsRuleId}`]: 'error',
       [`@checkdigit/${requireFixedServicesImportRuleId}`]: 'error',
       [`@checkdigit/${requireTypeOutOfTypeOnlyImportsRuleId}`]: 'error',
+      [`@checkdigit/${noServeRuntimeRuleId}`]: 'error',
       // --- agent rules BEGIN ---
       [`@checkdigit/${noMappedResponseRuleId}`]: 'off',
       [`@checkdigit/${addUrlDomainRuleId}`]: 'off',

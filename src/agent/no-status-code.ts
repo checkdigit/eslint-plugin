@@ -7,13 +7,14 @@
  */
 
 import { ESLintUtils, TSESTree } from '@typescript-eslint/utils';
+
 import getDocumentationUrl from '../get-documentation-url';
 
 export const ruleId = 'no-status-code';
 
 const createRule = ESLintUtils.RuleCreator((name) => getDocumentationUrl(name));
 
-const rule = createRule({
+const rule: ESLintUtils.RuleModule<'unknownError' | 'replaceStatusCode'> = createRule({
   name: ruleId,
   meta: {
     type: 'suggestion',

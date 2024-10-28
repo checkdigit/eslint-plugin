@@ -6,14 +6,16 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
+import { strict as assert } from 'node:assert';
+
 import type { CallExpression, Expression, MemberExpression, SimpleCallExpression } from 'estree';
 import { type Rule, type Scope, SourceCode } from 'eslint';
+
 import { getEnclosingFunction, getEnclosingStatement, getParent, isUsedInArrayOrAsArgument } from '../library/tree';
-import { hasAssertions, isInvalidResponseHeadersAccess } from './fetch';
-import { strict as assert } from 'node:assert';
 import getDocumentationUrl from '../get-documentation-url';
 import { getIndentation } from '../library/format';
 import { isValidPropertyName } from '../library/variable';
+import { hasAssertions, isInvalidResponseHeadersAccess } from './fetch';
 import { replaceEndpointUrlPrefixWithBasePath } from './url';
 
 export const ruleId = 'fetch-then';
@@ -198,13 +200,12 @@ const rule: Rule.RuleModule = {
     fixable: 'code',
     schema: [],
   },
-  // eslint-disable-next-line max-lines-per-function
+
   create(context) {
     const sourceCode = context.sourceCode;
     const scopeManager = sourceCode.scopeManager;
 
     return {
-      // eslint-disable-next-line max-lines-per-function
       'CallExpression[callee.object.object.name="fixture"][callee.object.property.name="api"]': (
         fixtureCall: CallExpression,
         // eslint-disable-next-line sonarjs/cognitive-complexity

@@ -109,18 +109,18 @@ createTester().run(ruleId, rule, {
     },
     {
       name: 'url declared as a variable',
-      code: `
+      code: `function doSomething() {
         const url = \`\${PING_BASE_PATH}/key/\${keyId}\`;
         await pingService.get(url, {
           resolveWithFullResponse: true,
         });
-      `,
-      output: `
+      }`,
+      output: `function doSomething() {
         const url = \`\${PING_BASE_PATH}/key/\${keyId}\`;
         await fetch(url, {
           method: 'GET',
         });
-      `,
+      }`,
       errors: [{ messageId: 'preferNativeFetch' }],
     },
     {

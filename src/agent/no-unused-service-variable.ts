@@ -6,9 +6,11 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
+import { strict as assert } from 'node:assert';
+
 import { ESLintUtils, TSESTree } from '@typescript-eslint/utils';
 import type { Scope } from '@typescript-eslint/utils/ts-eslint';
-import { strict as assert } from 'node:assert';
+
 import getDocumentationUrl from '../get-documentation-url';
 import { getEnclosingScopeNode } from '../library/ts-tree';
 
@@ -16,7 +18,7 @@ export const ruleId = 'no-unused-service-variable';
 
 const createRule = ESLintUtils.RuleCreator((name) => getDocumentationUrl(name));
 
-const rule = createRule({
+const rule: ESLintUtils.RuleModule<'unknownError' | 'removeUnusedServiceVariables'> = createRule({
   name: ruleId,
   meta: {
     type: 'suggestion',
@@ -54,7 +56,6 @@ const rule = createRule({
           assert.ok(enclosingScopeNode, 'enclosingScopeNode is undefined');
 
           const declarator = variableDeclaration.declarations[0];
-          assert.ok(declarator, 'variable declaration is undefined');
           if (declarator.id.type !== TSESTree.AST_NODE_TYPES.Identifier) {
             return;
           }

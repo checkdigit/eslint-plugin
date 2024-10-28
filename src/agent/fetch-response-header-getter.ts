@@ -7,6 +7,7 @@
  */
 
 import { AST_NODE_TYPES, ESLintUtils, TSESTree } from '@typescript-eslint/utils';
+
 import getDocumentationUrl from '../get-documentation-url';
 
 export const ruleId = 'fetch-response-header-getter-ts';
@@ -14,7 +15,7 @@ const HEADER_BUILTIN_FUNCTIONS = Object.keys(Headers.prototype);
 
 const createRule = ESLintUtils.RuleCreator((name) => getDocumentationUrl(name));
 
-const rule = createRule({
+const rule: ESLintUtils.RuleModule<'unknownError' | 'useGetter'> = createRule({
   name: ruleId,
   meta: {
     type: 'suggestion',
@@ -49,7 +50,6 @@ const rule = createRule({
           let responseHeadersType = typeChecker.getTypeAtLocation(responseHeadersTsNode);
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           responseHeadersType = responseHeadersType.isUnion() ? responseHeadersType.types[0]! : responseHeadersType;
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
           const responseHeadersTypeName = // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             (responseHeadersType.symbol ?? responseHeadersType.aliasSymbol)?.escapedName;
           // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison

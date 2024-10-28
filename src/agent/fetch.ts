@@ -1,13 +1,14 @@
 // agent/fetch.ts
 
-import { getParent, isBlockStatement } from '../library/tree';
 import type { Node } from 'estree';
+
+import { getParent, isBlockStatement } from '../library/tree';
 
 export function getResponseBodyRetrievalText(responseVariableName: string) {
   return `await ${responseVariableName}.json()`;
 }
 
-export function isInvalidResponseHeadersAccess(responseHeadersAccess: Node) {
+export function isInvalidResponseHeadersAccess(responseHeadersAccess: Node): boolean {
   const responseHeaderAccessParent = getParent(responseHeadersAccess);
   if (responseHeaderAccessParent?.type === 'VariableDeclarator') {
     return false;
@@ -29,7 +30,7 @@ export function isInvalidResponseHeadersAccess(responseHeadersAccess: Node) {
   );
 }
 
-export function hasAssertions(fixtureCall: Node) {
+export function hasAssertions(fixtureCall: Node): boolean {
   if (isBlockStatement(fixtureCall)) {
     return false;
   }

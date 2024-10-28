@@ -13,7 +13,7 @@ export const ruleId = 'no-mapped-response';
 
 const createRule = ESLintUtils.RuleCreator((name) => getDocumentationUrl(name));
 
-const rule = createRule({
+const rule: ESLintUtils.RuleModule<'unknownError' | 'replaceFullResponseWithFetchResponse'> = createRule({
   name: ruleId,
   meta: {
     type: 'suggestion',

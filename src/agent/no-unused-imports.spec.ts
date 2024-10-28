@@ -6,8 +6,8 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import rule, { ruleId } from './no-unused-imports';
 import createTester from '../ts-tester.test';
+import rule, { ruleId } from './no-unused-imports';
 
 createTester().run(ruleId, rule, {
   valid: [

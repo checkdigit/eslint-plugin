@@ -6,9 +6,10 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import rule, { ruleId } from './fetch-then';
-import createTester from '../tester.test';
 import { describe } from '@jest/globals';
+
+import createTester from '../tester.test';
+import rule, { ruleId } from './fetch-then';
 
 describe(ruleId, () => {
   createTester().run(ruleId, rule, {

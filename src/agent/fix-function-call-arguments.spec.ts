@@ -6,8 +6,8 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import rule, { type FixFunctionCallArgumentsRuleOptions, ruleId } from './fix-function-call-arguments';
 import createTester from '../ts-tester.test';
+import rule, { type FixFunctionCallArgumentsRuleOptions, ruleId } from './fix-function-call-arguments';
 
 const testOptions: FixFunctionCallArgumentsRuleOptions = { typesToCheck: ['string', 'number', 'object'] };
 createTester().run(ruleId, rule, {

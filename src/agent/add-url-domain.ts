@@ -7,14 +7,15 @@
  */
 
 import { AST_NODE_TYPES, ESLintUtils, TSESTree } from '@typescript-eslint/utils';
-import { addBasePathUrlDomain } from './url';
+
 import getDocumentationUrl from '../get-documentation-url';
+import { addBasePathUrlDomain } from './url';
 
 export const ruleId = 'add-url-domain';
 
 const createRule = ESLintUtils.RuleCreator((name) => getDocumentationUrl(name));
 
-const rule = createRule({
+const rule: ESLintUtils.RuleModule<'addDomain' | 'unknownError'> = createRule({
   name: ruleId,
   meta: {
     type: 'suggestion',
