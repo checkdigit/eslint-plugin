@@ -61,7 +61,8 @@ const rule: ESLintUtils.RuleModule<
   },
   defaultOptions: [DEFAULT_OPTIONS],
   create(context) {
-    const { typesToCheck } = context.options[0];
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    const { typesToCheck } = context.options[0] ?? DEFAULT_OPTIONS;
     const parserServices = ESLintUtils.getParserServices(context);
     const typeChecker = parserServices.program.getTypeChecker();
     const sourceCode = context.sourceCode;
