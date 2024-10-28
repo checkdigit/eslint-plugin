@@ -89,66 +89,72 @@ const plugin: TSESLint.FlatConfig.Plugin = {
 };
 
 const configs: Record<string, TSESLint.FlatConfig.Config | TSESLint.FlatConfig.Config[]> = {
-  all: {
-    plugins: {
-      '@checkdigit': plugin,
+  all: [
+    {
+      files: ['**/*.ts'],
+      plugins: {
+        '@checkdigit': plugin,
+      },
+      rules: {
+        '@checkdigit/no-card-numbers': 'error',
+        '@checkdigit/file-path-comment': 'error',
+        '@checkdigit/no-uuid': 'error',
+        '@checkdigit/require-strict-assert': 'error',
+        '@checkdigit/no-wallaby-comment': 'error',
+        '@checkdigit/regular-expression-comment': 'error',
+        '@checkdigit/require-assert-predicate-rejects-throws': 'error',
+        '@checkdigit/object-literal-response': 'error',
+        '@checkdigit/no-test-import': 'error',
+        [`@checkdigit/${invalidJsonStringifyRuleId}`]: 'error',
+        [`@checkdigit/${noPromiseInstanceMethodRuleId}`]: 'error',
+        [`@checkdigit/${noFullResponseRuleId}`]: 'error',
+        [`@checkdigit/${requireResolveFullResponseRuleId}`]: 'error',
+        [`@checkdigit/${noDuplicatedImportsRuleId}`]: 'error',
+        [`@checkdigit/${requireFixedServicesImportRuleId}`]: 'error',
+        [`@checkdigit/${requireTypeOutOfTypeOnlyImportsRuleId}`]: 'error',
+        [`@checkdigit/${noServeRuntimeRuleId}`]: 'error',
+        // --- agent rules BEGIN ---
+        [`@checkdigit/${noMappedResponseRuleId}`]: 'off',
+        [`@checkdigit/${addUrlDomainRuleId}`]: 'off',
+        [`@checkdigit/${noFixtureRuleId}`]: 'off',
+        [`@checkdigit/${noServiceWrapperRuleId}`]: 'off',
+        [`@checkdigit/${noStatusCodeRuleId}`]: 'off',
+        [`@checkdigit/${fetchResponseBodyJsonRuleId}`]: 'off',
+        [`@checkdigit/${fetchResponseHeaderGetterRuleId}`]: 'off',
+        [`@checkdigit/${fetchThenRuleId}`]: 'off',
+        [`@checkdigit/${noUnusedFunctionArgumentsRuleId}`]: 'off',
+        [`@checkdigit/${noUnusedServiceVariablesRuleId}`]: 'off',
+        [`@checkdigit/${noUnusedImportsRuleId}`]: 'off',
+        [`@checkdigit/${fixFunctionCallArgumentsRuleId}`]: 'off',
+        [`@checkdigit/${agentTestWiringRuleId}`]: 'off',
+        // --- agent rules END ---
+      },
     },
-    rules: {
-      '@checkdigit/no-card-numbers': 'error',
-      '@checkdigit/file-path-comment': 'error',
-      '@checkdigit/no-uuid': 'error',
-      '@checkdigit/require-strict-assert': 'error',
-      '@checkdigit/no-wallaby-comment': 'error',
-      '@checkdigit/regular-expression-comment': 'error',
-      '@checkdigit/require-assert-predicate-rejects-throws': 'error',
-      '@checkdigit/object-literal-response': 'error',
-      '@checkdigit/no-test-import': 'error',
-      [`@checkdigit/${invalidJsonStringifyRuleId}`]: 'error',
-      [`@checkdigit/${noPromiseInstanceMethodRuleId}`]: 'error',
-      [`@checkdigit/${noFullResponseRuleId}`]: 'error',
-      [`@checkdigit/${requireResolveFullResponseRuleId}`]: 'error',
-      [`@checkdigit/${noDuplicatedImportsRuleId}`]: 'error',
-      [`@checkdigit/${requireFixedServicesImportRuleId}`]: 'error',
-      [`@checkdigit/${requireTypeOutOfTypeOnlyImportsRuleId}`]: 'error',
-      [`@checkdigit/${noServeRuntimeRuleId}`]: 'error',
-      // --- agent rules BEGIN ---
-      [`@checkdigit/${noMappedResponseRuleId}`]: 'off',
-      [`@checkdigit/${addUrlDomainRuleId}`]: 'off',
-      [`@checkdigit/${noFixtureRuleId}`]: 'off',
-      [`@checkdigit/${noServiceWrapperRuleId}`]: 'off',
-      [`@checkdigit/${noStatusCodeRuleId}`]: 'off',
-      [`@checkdigit/${fetchResponseBodyJsonRuleId}`]: 'off',
-      [`@checkdigit/${fetchResponseHeaderGetterRuleId}`]: 'off',
-      [`@checkdigit/${fetchThenRuleId}`]: 'off',
-      [`@checkdigit/${noUnusedFunctionArgumentsRuleId}`]: 'off',
-      [`@checkdigit/${noUnusedServiceVariablesRuleId}`]: 'off',
-      [`@checkdigit/${noUnusedImportsRuleId}`]: 'off',
-      [`@checkdigit/${fixFunctionCallArgumentsRuleId}`]: 'off',
-      [`@checkdigit/${agentTestWiringRuleId}`]: 'off',
-      // --- agent rules END ---
+  ],
+  recommended: [
+    {
+      files: ['**/*.ts'],
+      plugins: {
+        '@checkdigit': plugin,
+      },
+      rules: {
+        '@checkdigit/no-card-numbers': 'error',
+        '@checkdigit/file-path-comment': 'off',
+        '@checkdigit/no-uuid': 'error',
+        '@checkdigit/require-strict-assert': 'error',
+        '@checkdigit/no-wallaby-comment': 'off',
+        '@checkdigit/regular-expression-comment': 'error',
+        '@checkdigit/require-assert-predicate-rejects-throws': 'error',
+        '@checkdigit/object-literal-response': 'error',
+        '@checkdigit/no-test-import': 'error',
+        [`@checkdigit/${invalidJsonStringifyRuleId}`]: 'error',
+        [`@checkdigit/${noPromiseInstanceMethodRuleId}`]: 'error',
+      },
     },
-  },
-  recommended: {
-    plugins: {
-      '@checkdigit': plugin,
-    },
-    rules: {
-      '@checkdigit/no-card-numbers': 'error',
-      '@checkdigit/file-path-comment': 'off',
-      '@checkdigit/no-uuid': 'error',
-      '@checkdigit/require-strict-assert': 'error',
-      '@checkdigit/no-wallaby-comment': 'off',
-      '@checkdigit/regular-expression-comment': 'error',
-      '@checkdigit/require-assert-predicate-rejects-throws': 'error',
-      '@checkdigit/object-literal-response': 'error',
-      '@checkdigit/no-test-import': 'error',
-      [`@checkdigit/${invalidJsonStringifyRuleId}`]: 'error',
-      [`@checkdigit/${noPromiseInstanceMethodRuleId}`]: 'error',
-    },
-  },
+  ],
   'agent-phase-1-test': [
     {
-      files: ['*.spec.ts', '*.test.ts', 'src/api/v*/index.ts'],
+      files: ['**/*.spec.ts', '**/*.test.ts', 'src/api/v*/index.ts'],
       plugins: {
         '@checkdigit': plugin,
       },
@@ -168,7 +174,7 @@ const configs: Record<string, TSESLint.FlatConfig.Config | TSESLint.FlatConfig.C
       },
     },
     {
-      files: ['*.spec.ts'],
+      files: ['**/*.spec.ts'],
       plugins: {
         '@checkdigit': plugin,
       },
@@ -177,25 +183,28 @@ const configs: Record<string, TSESLint.FlatConfig.Config | TSESLint.FlatConfig.C
       },
     },
   ],
-  'agent-phase-2-production': {
-    plugins: {
-      '@checkdigit': plugin,
+  'agent-phase-2-production': [
+    {
+      files: ['**/*.ts'],
+      plugins: {
+        '@checkdigit': plugin,
+      },
+      rules: {
+        [`@checkdigit/${noMappedResponseRuleId}`]: 'error',
+        [`@checkdigit/${addUrlDomainRuleId}`]: 'error',
+        [`@checkdigit/${noFixtureRuleId}`]: 'off',
+        [`@checkdigit/${noServiceWrapperRuleId}`]: 'error',
+        [`@checkdigit/${noStatusCodeRuleId}`]: 'error',
+        [`@checkdigit/${fetchResponseBodyJsonRuleId}`]: 'error',
+        [`@checkdigit/${fetchResponseHeaderGetterRuleId}`]: 'error',
+        [`@checkdigit/${fetchThenRuleId}`]: 'error',
+        [`@checkdigit/${noUnusedFunctionArgumentsRuleId}`]: 'error',
+        [`@checkdigit/${noUnusedServiceVariablesRuleId}`]: 'error',
+        [`@checkdigit/${noUnusedImportsRuleId}`]: 'error',
+        [`@checkdigit/${fixFunctionCallArgumentsRuleId}`]: 'error',
+      },
     },
-    rules: {
-      [`@checkdigit/${noMappedResponseRuleId}`]: 'error',
-      [`@checkdigit/${addUrlDomainRuleId}`]: 'error',
-      [`@checkdigit/${noFixtureRuleId}`]: 'off',
-      [`@checkdigit/${noServiceWrapperRuleId}`]: 'error',
-      [`@checkdigit/${noStatusCodeRuleId}`]: 'error',
-      [`@checkdigit/${fetchResponseBodyJsonRuleId}`]: 'error',
-      [`@checkdigit/${fetchResponseHeaderGetterRuleId}`]: 'error',
-      [`@checkdigit/${fetchThenRuleId}`]: 'error',
-      [`@checkdigit/${noUnusedFunctionArgumentsRuleId}`]: 'error',
-      [`@checkdigit/${noUnusedServiceVariablesRuleId}`]: 'error',
-      [`@checkdigit/${noUnusedImportsRuleId}`]: 'error',
-      [`@checkdigit/${fixFunctionCallArgumentsRuleId}`]: 'error',
-    },
-  },
+  ],
 };
 
 const defaultToExport: Exclude<TSESLint.FlatConfig.Plugin, 'config'> & {
