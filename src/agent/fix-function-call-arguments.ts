@@ -6,8 +6,8 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import { ESLintUtils, TSESTree } from '@typescript-eslint/utils';
 import { strict as assert } from 'node:assert';
+import { ESLintUtils, TSESTree } from '@typescript-eslint/utils';
 import debug from 'debug';
 import getDocumentationUrl from '../get-documentation-url';
 
@@ -28,7 +28,10 @@ const DEFAULT_OPTIONS = {
 const createRule = ESLintUtils.RuleCreator((name) => getDocumentationUrl(name));
 const log = debug('eslint-plugin:fix-function-call-arguments');
 
-const rule = createRule({
+const rule: ESLintUtils.RuleModule<
+  'removeIncompatibleFunctionArguments' | 'unknownError',
+  [FixFunctionCallArgumentsRuleOptions]
+> = createRule({
   name: ruleId,
   meta: {
     type: 'suggestion',
@@ -58,7 +61,7 @@ const rule = createRule({
   },
   defaultOptions: [DEFAULT_OPTIONS],
   create(context) {
-    const { typesToCheck } = context.options[0] ?? DEFAULT_OPTIONS;
+    const { typesToCheck } = context.options[0];
     const parserServices = ESLintUtils.getParserServices(context);
     const typeChecker = parserServices.program.getTypeChecker();
     const sourceCode = context.sourceCode;
@@ -108,7 +111,6 @@ const rule = createRule({
           const parametersToKeep: TSESTree.CallExpressionArgument[] = [];
           let expectedParameterIndex = 0;
           for (const [actualParameterIndex, actualParameter] of actualParameters.entries()) {
-            // eslint-disable-next-line max-depth
             if (expectedParameterIndex >= expectedParametersCount) {
               break;
             }
@@ -131,11 +133,7 @@ const rule = createRule({
               // skip the parameter type checking if it's not in the candidate types
               parametersToKeep.push(actualParameter);
               log('skipped');
-            } else if (
-              // @ts-expect-error: this is typescript's internal API
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-              typeChecker.isTypeAssignableTo(actualType, expectedType) === true
-            ) {
+            } else if (typeChecker.isTypeAssignableTo(actualType, expectedType)) {
               parametersToKeep.push(actualParameter);
               log('matched');
               expectedParameterIndex++;

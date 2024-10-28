@@ -6,18 +6,10 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
+import createTester from '../ts-tester.test';
 import rule, { ruleId } from './fetch-response-body-json';
-import { RuleTester } from '@typescript-eslint/rule-tester';
 
-const ruleTester = new RuleTester({
-  parser: '@typescript-eslint/parser',
-  parserOptions: {
-    project: '../tsconfig.json',
-    tsconfigRootDir: `${process.cwd()}/ts-init`,
-  },
-});
-
-ruleTester.run(ruleId, rule, {
+createTester().run(ruleId, rule, {
   valid: [
     {
       name: 'no change if no "json" property is found in the response type',

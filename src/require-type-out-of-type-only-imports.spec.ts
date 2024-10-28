@@ -7,17 +7,9 @@
  */
 
 import rule, { ruleId } from './require-type-out-of-type-only-imports';
-import { RuleTester } from '@typescript-eslint/rule-tester';
+import createTester from './ts-tester.test';
 
-const ruleTester = new RuleTester({
-  parser: '@typescript-eslint/parser',
-  parserOptions: {
-    project: '../tsconfig.json',
-    tsconfigRootDir: `${process.cwd()}/ts-init`,
-  },
-});
-
-ruleTester.run(ruleId, rule, {
+createTester().run(ruleId, rule, {
   valid: [
     {
       name: 'correct import with one type specifier',

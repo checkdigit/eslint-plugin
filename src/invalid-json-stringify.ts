@@ -10,7 +10,7 @@ import getDocumentationUrl from './get-documentation-url';
  */
 
 export const ruleId = 'invalid-json-stringify';
-const INVALID_JSON_STRINGIFY = 'INVALID_JSON_STRINGIFY';
+export const INVALID_JSON_STRINGIFY = 'INVALID_JSON_STRINGIFY';
 const DEFAULT_OPTIONS = ['error|.*Error'];
 
 export default {

@@ -6,16 +6,16 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
+import { strict as assert } from 'node:assert';
 import { AST_TOKEN_TYPES, ESLintUtils, TSESTree } from '@typescript-eslint/utils';
 import type { RuleFix, RuleFixer } from '@typescript-eslint/utils/ts-eslint';
-import { strict as assert } from 'node:assert';
 import getDocumentationUrl from '../get-documentation-url';
 
 export const ruleId = 'agent-test-wiring';
 
 const createRule = ESLintUtils.RuleCreator((name) => getDocumentationUrl(name));
 
-const rule = createRule({
+const rule: ESLintUtils.RuleModule<'updateTestWiring' | 'unknownError'> = createRule({
   name: ruleId,
   meta: {
     type: 'suggestion',
@@ -64,7 +64,9 @@ const rule = createRule({
             jestImportDeclaration &&
             !jestImportDeclaration.specifiers.some(
               (specifier) =>
-                specifier.type === TSESTree.AST_NODE_TYPES.ImportSpecifier && specifier.imported.name === 'afterAll',
+                specifier.type === TSESTree.AST_NODE_TYPES.ImportSpecifier &&
+                specifier.imported.type === TSESTree.AST_NODE_TYPES.Identifier &&
+                specifier.imported.name === 'afterAll',
             )
           ) {
             const firstImportSpecifier = jestImportDeclaration.specifiers[0];

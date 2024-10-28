@@ -14,7 +14,7 @@ export const ruleId = 'require-fixed-services-import';
 const createRule = ESLintUtils.RuleCreator((name) => getDocumentationUrl(name));
 const SERVICE_TYPINGS_IMPORT_PATH_PREFIX = /(?<path>\.\.\/)+services\/.*/u;
 
-const rule = createRule({
+const rule: ESLintUtils.RuleModule<'updateServicesImportFrom'> = createRule({
   name: ruleId,
   meta: {
     type: 'suggestion',
