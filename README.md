@@ -18,6 +18,7 @@ Copyright (c) 2021-2024 [Check Digit, LLC](https://checkdigit.com)
 - `@checkdigit/no-full-response`
 - `@checkdigit/require-resolve-full-response`
 - `@checkdigit/require-type-out-of-type-only-imports`
+- `@checkdigit/no-enum`
 
 ## Configurations
 
