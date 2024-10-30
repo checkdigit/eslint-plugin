@@ -17,6 +17,11 @@ const ignores = [
 
 export default [
   { ignores },
+  {
+    linterOptions: {
+      reportUnusedDisableDirectives: 'error',
+    },
+  },
   js.configs.all,
   ...ts.configs.strictTypeChecked,
   ...ts.configs.stylisticTypeChecked,

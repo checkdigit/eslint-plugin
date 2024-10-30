@@ -7,13 +7,23 @@
  */
 
 import { strict as assert } from 'node:assert';
+
 import { AST_TOKEN_TYPES, ESLintUtils, TSESTree } from '@typescript-eslint/utils';
 import type { RuleFix, RuleFixer } from '@typescript-eslint/utils/ts-eslint';
+
 import getDocumentationUrl from '../get-documentation-url';
 
 export const ruleId = 'agent-test-wiring';
 
 const createRule = ESLintUtils.RuleCreator((name) => getDocumentationUrl(name));
+
+const STATEMENT_FIXTURE_RESET = 'fixture.reset()';
+const STATEMENT_FIXTURE_RESET_AWAITED = `await ${STATEMENT_FIXTURE_RESET};`;
+const STATEMENT_AGENT_DECLARATION = 'let agent: Agent;';
+const STATEMENT_AGENT_CREATION = 'agent = await createAgent();';
+const STATEMENT_AGENT_REGISTER = 'agent.register(await fixturePlugin(fixture));';
+const STATEMENT_AGENT_ENABLE = 'agent.enable();';
+const STATEMENT_AGENT_DISPOSE = 'await agent[Symbol.asyncDispose]();';
 
 const rule: ESLintUtils.RuleModule<'updateTestWiring' | 'unknownError'> = createRule({
   name: ruleId,
@@ -33,21 +43,37 @@ const rule: ESLintUtils.RuleModule<'updateTestWiring' | 'unknownError'> = create
   create(context) {
     const sourceCode = context.sourceCode;
     const importDeclarations = new Map<string, TSESTree.ImportDeclaration>();
-    let beforeAllCallExpression: TSESTree.CallExpression | undefined;
-    let afterAllCallExpression: TSESTree.CallExpression | undefined;
+    let isFixtureUsed = false;
+    let beforeAll: TSESTree.CallExpression | undefined;
+    let afterAll: TSESTree.CallExpression | undefined;
 
     return {
       ImportDeclaration(importDeclaration) {
         const moduleName = importDeclaration.source.value;
         importDeclarations.set(moduleName, importDeclaration);
+        if (
+          moduleName === '@checkdigit/fixture' &&
+          importDeclaration.specifiers.some(
+            (specifier) =>
+              specifier.type === TSESTree.AST_NODE_TYPES.ImportSpecifier &&
+              specifier.imported.type === TSESTree.AST_NODE_TYPES.Identifier &&
+              specifier.imported.name === 'createFixture',
+          )
+        ) {
+          isFixtureUsed = true;
+        }
       },
       'CallExpression[callee.name="beforeAll"]': (callExpression: TSESTree.CallExpression) => {
-        beforeAllCallExpression = callExpression;
+        beforeAll = callExpression;
       },
       'CallExpression[callee.name="afterAll"]': (callExpression: TSESTree.CallExpression) => {
-        afterAllCallExpression = callExpression;
+        afterAll = callExpression;
       },
       'Program:exit'(program) {
+        if (!isFixtureUsed) {
+          return;
+        }
+
         try {
           let jestImportFixer: ((fixer: RuleFixer) => RuleFix) | undefined;
           let agentImportFixer: ((fixer: RuleFixer) => RuleFix) | undefined;
@@ -89,40 +115,50 @@ const rule: ESLintUtils.RuleModule<'updateTestWiring' | 'unknownError'> = create
               fixer.insertTextAfter(lastImportDeclaration, `\nimport fixturePlugin from '../../plugin/fixture.test';`);
           }
 
-          if (beforeAllCallExpression !== undefined) {
-            const beforeAllArrowFunctionExpression = beforeAllCallExpression.arguments[0];
-            assert.ok(
-              beforeAllArrowFunctionExpression !== undefined &&
-                beforeAllArrowFunctionExpression.type === TSESTree.AST_NODE_TYPES.ArrowFunctionExpression,
-            );
-            const arrowFunctionBody = beforeAllArrowFunctionExpression.body;
-            assert.ok(arrowFunctionBody.type === TSESTree.AST_NODE_TYPES.BlockStatement);
-
-            const targetStatement = arrowFunctionBody.body.find(
-              (statement) => sourceCode.getText(statement) === 'await fixture.reset();',
-            );
-            if (targetStatement !== undefined) {
-              const beforeAllBodyText = sourceCode.getText(arrowFunctionBody);
-              if (!beforeAllBodyText.includes('agent = await createAgent();')) {
+          if (beforeAll !== undefined) {
+            const beforeAllArgument = beforeAll.arguments[0];
+            assert.ok(beforeAllArgument !== undefined);
+            if (!sourceCode.getText(beforeAllArgument).includes(STATEMENT_AGENT_CREATION)) {
+              if (
+                beforeAllArgument.type === TSESTree.AST_NODE_TYPES.ArrowFunctionExpression &&
+                beforeAllArgument.body.type === TSESTree.AST_NODE_TYPES.BlockStatement
+              ) {
+                const fixtureResetStatement = beforeAllArgument.body.body.find(
+                  (statement) => sourceCode.getText(statement) === STATEMENT_FIXTURE_RESET_AWAITED,
+                );
+                assert.ok(fixtureResetStatement !== undefined);
                 beforeAllFixer = (fixer: RuleFixer) =>
                   fixer.replaceText(
-                    targetStatement,
+                    fixtureResetStatement,
                     [
-                      'agent = await createAgent();',
-                      'agent.register(await fixturePlugin(fixture));',
-                      'agent.enable();',
-                      'await fixture.reset();',
+                      STATEMENT_AGENT_CREATION,
+                      STATEMENT_AGENT_REGISTER,
+                      STATEMENT_AGENT_ENABLE,
+                      STATEMENT_FIXTURE_RESET_AWAITED,
                     ].join('\n'),
                   );
-                agentDeclarationFixer = (fixer: RuleFixer) =>
-                  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                  fixer.insertTextBefore(beforeAllCallExpression!, 'let agent: Agent;\n');
+              } else {
+                beforeAllFixer = (fixer: RuleFixer) =>
+                  fixer.replaceText(
+                    beforeAllArgument,
+                    [
+                      `async () => {`,
+                      STATEMENT_AGENT_CREATION,
+                      STATEMENT_AGENT_REGISTER,
+                      STATEMENT_AGENT_ENABLE,
+                      STATEMENT_FIXTURE_RESET_AWAITED,
+                      `}`,
+                    ].join('\n'),
+                  );
               }
+              agentDeclarationFixer = (fixer: RuleFixer) =>
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                fixer.insertTextBefore(beforeAll!, `${STATEMENT_AGENT_DECLARATION}\n`);
             }
           }
 
-          if (afterAllCallExpression !== undefined) {
-            const afterAllArrowFunctionExpression = afterAllCallExpression.arguments[0];
+          if (afterAll !== undefined) {
+            const afterAllArrowFunctionExpression = afterAll.arguments[0];
             assert.ok(
               afterAllArrowFunctionExpression !== undefined &&
                 afterAllArrowFunctionExpression.type === TSESTree.AST_NODE_TYPES.ArrowFunctionExpression,
@@ -131,23 +167,20 @@ const rule: ESLintUtils.RuleModule<'updateTestWiring' | 'unknownError'> = create
             assert.ok(arrowFunctionBody.type === TSESTree.AST_NODE_TYPES.BlockStatement);
 
             const afterAllBodyText = sourceCode.getText(arrowFunctionBody);
-            if (!afterAllBodyText.includes('await agent[Symbol.asyncDispose]();')) {
+            if (!afterAllBodyText.includes(STATEMENT_AGENT_DISPOSE)) {
               const lastStatement = arrowFunctionBody.body.at(-1);
               assert.ok(lastStatement);
-              afterAllFixer = (fixer: RuleFixer) =>
-                fixer.insertTextAfter(lastStatement, 'await agent[Symbol.asyncDispose]();');
+              afterAllFixer = (fixer: RuleFixer) => fixer.insertTextAfter(lastStatement, STATEMENT_AGENT_DISPOSE);
             }
-          } else if (beforeAllCallExpression !== undefined) {
-            const nextToken = sourceCode.getTokenAfter(beforeAllCallExpression);
+          } else if (beforeAll !== undefined) {
+            const nextToken = sourceCode.getTokenAfter(beforeAll);
             afterAllFixer = (fixer: RuleFixer) =>
               fixer.insertTextAfter(
                 nextToken !== null && nextToken.type === AST_TOKEN_TYPES.Punctuator
                   ? nextToken
                   : // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                    beforeAllCallExpression!,
-                `\nafterAll(async () => {
-  await agent[Symbol.asyncDispose]();
-});`,
+                    beforeAll!,
+                ['', `afterAll(async () => {`, STATEMENT_AGENT_DISPOSE, `});`].join('\n'),
               );
           }
 

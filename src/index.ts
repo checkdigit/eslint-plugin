@@ -155,6 +155,8 @@ const configs: Record<string, TSESLint.FlatConfig.Config | TSESLint.FlatConfig.C
   'agent-phase-1-test': [
     {
       files: ['**/*.spec.ts', '**/*.test.ts', 'src/api/v*/index.ts'],
+      // eslint-disable-next-line sonarjs/no-duplicate-string
+      ignores: ['src/plugin/**'],
       plugins: {
         '@checkdigit': plugin,
       },
@@ -175,6 +177,7 @@ const configs: Record<string, TSESLint.FlatConfig.Config | TSESLint.FlatConfig.C
     },
     {
       files: ['**/*.spec.ts'],
+      ignores: ['src/plugin/**'],
       plugins: {
         '@checkdigit': plugin,
       },
@@ -186,6 +189,7 @@ const configs: Record<string, TSESLint.FlatConfig.Config | TSESLint.FlatConfig.C
   'agent-phase-2-production': [
     {
       files: ['**/*.ts'],
+      ignores: ['src/plugin/**'],
       plugins: {
         '@checkdigit': plugin,
       },
