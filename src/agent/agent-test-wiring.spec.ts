@@ -29,45 +29,26 @@ describe('/ping', () => {
   invalid: [
     {
       name: 'update test wiring - async arrow function with body block',
+      filename: `src/api/v1/ping.spec.ts`,
       code: `
 import { beforeAll, describe, it } from '@jest/globals';
-import { StatusCodes } from 'http-status-codes';
-
 import { amazonSetup } from '@checkdigit/amazon';
-import awsNock from '@checkdigit/aws-nock';
 import { createFixture } from '@checkdigit/fixture';
-
-import { BASE_PATH } from './index';
-
 describe('/ping', () => {
-  awsNock();
   const fixture = createFixture(amazonSetup);
-
   beforeAll(async () => {
     await fixture.reset();
   }, 15_000);
-
-  it('returns current server time', async () => {
-    //
-  });
 });
       `,
       output: `
 import { afterAll, beforeAll, describe, it } from '@jest/globals';
-import { StatusCodes } from 'http-status-codes';
-
 import { amazonSetup } from '@checkdigit/amazon';
-import awsNock from '@checkdigit/aws-nock';
 import { createFixture } from '@checkdigit/fixture';
-
-import { BASE_PATH } from './index';
 import createAgent, { type Agent } from '@checkdigit/agent';
 import fixturePlugin from '../../plugin/fixture.test';
-
 describe('/ping', () => {
-  awsNock();
   const fixture = createFixture(amazonSetup);
-
   let agent: Agent;
 beforeAll(async () => {
     agent = await createAgent();
@@ -78,53 +59,30 @@ await fixture.reset();
 afterAll(async () => {
 await agent[Symbol.asyncDispose]();
 });
-
-  it('returns current server time', async () => {
-    //
-  });
 });
       `,
       errors: [{ messageId: 'updateTestWiring' }],
     },
     {
       name: 'update test wiring - function reference instead of arrow function',
+      filename: `src/api/v1/ping.spec.ts`,
       code: `
 import { beforeAll, describe, it } from '@jest/globals';
-import { StatusCodes } from 'http-status-codes';
-
 import { amazonSetup } from '@checkdigit/amazon';
-import awsNock from '@checkdigit/aws-nock';
 import { createFixture } from '@checkdigit/fixture';
-
-import { BASE_PATH } from './index';
-
 describe('/ping', () => {
-  awsNock();
   const fixture = createFixture(amazonSetup);
-
   beforeAll(fixture.reset);
-
-  it('returns current server time', async () => {
-    //
-  });
 });
       `,
       output: `
 import { afterAll, beforeAll, describe, it } from '@jest/globals';
-import { StatusCodes } from 'http-status-codes';
-
 import { amazonSetup } from '@checkdigit/amazon';
-import awsNock from '@checkdigit/aws-nock';
 import { createFixture } from '@checkdigit/fixture';
-
-import { BASE_PATH } from './index';
 import createAgent, { type Agent } from '@checkdigit/agent';
 import fixturePlugin from '../../plugin/fixture.test';
-
 describe('/ping', () => {
-  awsNock();
   const fixture = createFixture(amazonSetup);
-
   let agent: Agent;
 beforeAll(async () => {
 agent = await createAgent();
@@ -135,53 +93,30 @@ await fixture.reset();
 afterAll(async () => {
 await agent[Symbol.asyncDispose]();
 });
-
-  it('returns current server time', async () => {
-    //
-  });
 });
       `,
       errors: [{ messageId: 'updateTestWiring' }],
     },
     {
       name: 'update test wiring - function call instead of block - async',
+      filename: `src/api/v1/ping.spec.ts`,
       code: `
 import { beforeAll, describe, it } from '@jest/globals';
-import { StatusCodes } from 'http-status-codes';
-
 import { amazonSetup } from '@checkdigit/amazon';
-import awsNock from '@checkdigit/aws-nock';
 import { createFixture } from '@checkdigit/fixture';
-
-import { BASE_PATH } from './index';
-
 describe('/ping', () => {
-  awsNock();
   const fixture = createFixture(amazonSetup);
-
   beforeAll(async () => fixture.reset());
-
-  it('returns current server time', async () => {
-    //
-  });
 });
       `,
       output: `
 import { afterAll, beforeAll, describe, it } from '@jest/globals';
-import { StatusCodes } from 'http-status-codes';
-
 import { amazonSetup } from '@checkdigit/amazon';
-import awsNock from '@checkdigit/aws-nock';
 import { createFixture } from '@checkdigit/fixture';
-
-import { BASE_PATH } from './index';
 import createAgent, { type Agent } from '@checkdigit/agent';
 import fixturePlugin from '../../plugin/fixture.test';
-
 describe('/ping', () => {
-  awsNock();
   const fixture = createFixture(amazonSetup);
-
   let agent: Agent;
 beforeAll(async () => {
 agent = await createAgent();
@@ -192,53 +127,30 @@ await fixture.reset();
 afterAll(async () => {
 await agent[Symbol.asyncDispose]();
 });
-
-  it('returns current server time', async () => {
-    //
-  });
 });
       `,
       errors: [{ messageId: 'updateTestWiring' }],
     },
     {
       name: 'update test wiring - function call instead of block - not async',
+      filename: `src/api/v1/ping.spec.ts`,
       code: `
 import { beforeAll, describe, it } from '@jest/globals';
-import { StatusCodes } from 'http-status-codes';
-
 import { amazonSetup } from '@checkdigit/amazon';
-import awsNock from '@checkdigit/aws-nock';
 import { createFixture } from '@checkdigit/fixture';
-
-import { BASE_PATH } from './index';
-
 describe('/ping', () => {
-  awsNock();
   const fixture = createFixture(amazonSetup);
-
   beforeAll(() => fixture.reset());
-
-  it('returns current server time', async () => {
-    //
-  });
 });
       `,
       output: `
 import { afterAll, beforeAll, describe, it } from '@jest/globals';
-import { StatusCodes } from 'http-status-codes';
-
 import { amazonSetup } from '@checkdigit/amazon';
-import awsNock from '@checkdigit/aws-nock';
 import { createFixture } from '@checkdigit/fixture';
-
-import { BASE_PATH } from './index';
 import createAgent, { type Agent } from '@checkdigit/agent';
 import fixturePlugin from '../../plugin/fixture.test';
-
 describe('/ping', () => {
-  awsNock();
   const fixture = createFixture(amazonSetup);
-
   let agent: Agent;
 beforeAll(async () => {
 agent = await createAgent();
@@ -249,10 +161,74 @@ await fixture.reset();
 afterAll(async () => {
 await agent[Symbol.asyncDispose]();
 });
-
-  it('returns current server time', async () => {
-    //
-  });
+});
+      `,
+      errors: [{ messageId: 'updateTestWiring' }],
+    },
+    {
+      name: 'update test wiring - deeper folder structure',
+      filename: `src/api/v1/test/util.spec.ts`,
+      code: `
+import { beforeAll, describe, it } from '@jest/globals';
+import { amazonSetup } from '@checkdigit/amazon';
+import { createFixture } from '@checkdigit/fixture';
+describe('/ping', () => {
+  const fixture = createFixture(amazonSetup);
+  beforeAll(() => fixture.reset());
+});
+      `,
+      output: `
+import { afterAll, beforeAll, describe, it } from '@jest/globals';
+import { amazonSetup } from '@checkdigit/amazon';
+import { createFixture } from '@checkdigit/fixture';
+import createAgent, { type Agent } from '@checkdigit/agent';
+import fixturePlugin from '../../../plugin/fixture.test';
+describe('/ping', () => {
+  const fixture = createFixture(amazonSetup);
+  let agent: Agent;
+beforeAll(async () => {
+agent = await createAgent();
+agent.register(await fixturePlugin(fixture));
+agent.enable();
+await fixture.reset();
+});
+afterAll(async () => {
+await agent[Symbol.asyncDispose]();
+});
+});
+      `,
+      errors: [{ messageId: 'updateTestWiring' }],
+    },
+    {
+      name: 'update test wiring - shallower folder structure',
+      filename: `src/service/pgp.spec.ts`,
+      code: `
+import { beforeAll, describe, it } from '@jest/globals';
+import { amazonSetup } from '@checkdigit/amazon';
+import { createFixture } from '@checkdigit/fixture';
+describe('/ping', () => {
+  const fixture = createFixture(amazonSetup);
+  beforeAll(() => fixture.reset());
+});
+      `,
+      output: `
+import { afterAll, beforeAll, describe, it } from '@jest/globals';
+import { amazonSetup } from '@checkdigit/amazon';
+import { createFixture } from '@checkdigit/fixture';
+import createAgent, { type Agent } from '@checkdigit/agent';
+import fixturePlugin from '../plugin/fixture.test';
+describe('/ping', () => {
+  const fixture = createFixture(amazonSetup);
+  let agent: Agent;
+beforeAll(async () => {
+agent = await createAgent();
+agent.register(await fixturePlugin(fixture));
+agent.enable();
+await fixture.reset();
+});
+afterAll(async () => {
+await agent[Symbol.asyncDispose]();
+});
 });
       `,
       errors: [{ messageId: 'updateTestWiring' }],

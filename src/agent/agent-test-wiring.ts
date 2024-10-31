@@ -10,12 +10,13 @@ import { strict as assert } from 'node:assert';
 
 import { AST_TOKEN_TYPES, ESLintUtils, TSESTree } from '@typescript-eslint/utils';
 import type { RuleFix, RuleFixer } from '@typescript-eslint/utils/ts-eslint';
+import debug from 'debug';
 
 import getDocumentationUrl from '../get-documentation-url';
 
 export const ruleId = 'agent-test-wiring';
-
 const createRule = ESLintUtils.RuleCreator((name) => getDocumentationUrl(name));
+const log = debug('eslint-plugin:agent:agent-test-wiring');
 
 const STATEMENT_FIXTURE_RESET = 'fixture.reset()';
 const STATEMENT_FIXTURE_RESET_AWAITED = `await ${STATEMENT_FIXTURE_RESET};`;
@@ -41,6 +42,7 @@ const rule: ESLintUtils.RuleModule<'updateTestWiring' | 'unknownError'> = create
   },
   defaultOptions: [],
   create(context) {
+    log('Processing file:', context.filename);
     const sourceCode = context.sourceCode;
     const importDeclarations = new Map<string, TSESTree.ImportDeclaration>();
     let isFixtureUsed = false;
@@ -85,7 +87,7 @@ const rule: ESLintUtils.RuleModule<'updateTestWiring' | 'unknownError'> = create
           const lastImportDeclaration = [...importDeclarations.values()].at(-1);
           assert.ok(lastImportDeclaration);
 
-          // check if afterAll is already imported from jest
+          // make sure that afterAll is imported from jest
           const jestImportDeclaration = importDeclarations.get('@jest/globals');
           if (
             jestImportDeclaration &&
@@ -101,7 +103,7 @@ const rule: ESLintUtils.RuleModule<'updateTestWiring' | 'unknownError'> = create
             jestImportFixer = (fixer: RuleFixer) => fixer.insertTextBefore(firstImportSpecifier, 'afterAll, ');
           }
 
-          // check if agent is already imported
+          // make sure that agent is imported
           const agentImportDeclaration = importDeclarations.get('@checkdigit/agent');
           if (!agentImportDeclaration) {
             agentImportFixer = (fixer: RuleFixer) =>
@@ -111,11 +113,15 @@ const rule: ESLintUtils.RuleModule<'updateTestWiring' | 'unknownError'> = create
               );
           }
 
-          // check if fixture plugin is already imported
-          const fixturePluginImportDeclaration = importDeclarations.get('../../plugin/fixture.test');
-          if (!fixturePluginImportDeclaration) {
+          // make sure that fixture plugin is imported
+          const pathLets = context.filename.split('/');
+          const currentFileIndex = pathLets.length - 1;
+          const pluginFolderIndex = pathLets.lastIndexOf('src') + 1;
+          // it should be safe to assume that the test code is always at least one level deeper than the plugin folder
+          const fixturePluginImportPath = `${'../'.repeat(currentFileIndex - pluginFolderIndex)}plugin/fixture.test`;
+          if (!importDeclarations.get(fixturePluginImportPath)) {
             fixturePluginImportFixer = (fixer: RuleFixer) =>
-              fixer.insertTextAfter(lastImportDeclaration, `\nimport fixturePlugin from '../../plugin/fixture.test';`);
+              fixer.insertTextAfter(lastImportDeclaration, `\nimport fixturePlugin from '${fixturePluginImportPath}';`);
           }
 
           // inject agent declaration and initialization to `beforeAll` block
