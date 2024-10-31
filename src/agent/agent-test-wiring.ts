@@ -70,7 +70,7 @@ const rule: ESLintUtils.RuleModule<'updateTestWiring' | 'unknownError'> = create
         afterAll = callExpression;
       },
       'Program:exit'(program) {
-        if (!isFixtureUsed) {
+        if (!isFixtureUsed || beforeAll === undefined) {
           return;
         }
 
@@ -85,6 +85,7 @@ const rule: ESLintUtils.RuleModule<'updateTestWiring' | 'unknownError'> = create
           const lastImportDeclaration = [...importDeclarations.values()].at(-1);
           assert.ok(lastImportDeclaration);
 
+          // check if afterAll is already imported from jest
           const jestImportDeclaration = importDeclarations.get('@jest/globals');
           if (
             jestImportDeclaration &&
@@ -100,6 +101,7 @@ const rule: ESLintUtils.RuleModule<'updateTestWiring' | 'unknownError'> = create
             jestImportFixer = (fixer: RuleFixer) => fixer.insertTextBefore(firstImportSpecifier, 'afterAll, ');
           }
 
+          // check if agent is already imported
           const agentImportDeclaration = importDeclarations.get('@checkdigit/agent');
           if (!agentImportDeclaration) {
             agentImportFixer = (fixer: RuleFixer) =>
@@ -109,54 +111,55 @@ const rule: ESLintUtils.RuleModule<'updateTestWiring' | 'unknownError'> = create
               );
           }
 
+          // check if fixture plugin is already imported
           const fixturePluginImportDeclaration = importDeclarations.get('../../plugin/fixture.test');
           if (!fixturePluginImportDeclaration) {
             fixturePluginImportFixer = (fixer: RuleFixer) =>
               fixer.insertTextAfter(lastImportDeclaration, `\nimport fixturePlugin from '../../plugin/fixture.test';`);
           }
 
-          if (beforeAll !== undefined) {
-            const beforeAllArgument = beforeAll.arguments[0];
-            assert.ok(beforeAllArgument !== undefined);
-            if (!sourceCode.getText(beforeAllArgument).includes(STATEMENT_AGENT_CREATION)) {
-              if (
-                beforeAllArgument.type === TSESTree.AST_NODE_TYPES.ArrowFunctionExpression &&
-                beforeAllArgument.body.type === TSESTree.AST_NODE_TYPES.BlockStatement
-              ) {
-                const fixtureResetStatement = beforeAllArgument.body.body.find(
-                  (statement) => sourceCode.getText(statement) === STATEMENT_FIXTURE_RESET_AWAITED,
+          // inject agent declaration and initialization to `beforeAll` block
+          const beforeAllArgument = beforeAll.arguments[0];
+          assert.ok(beforeAllArgument !== undefined);
+          if (!sourceCode.getText(beforeAllArgument).includes(STATEMENT_AGENT_CREATION)) {
+            if (
+              beforeAllArgument.type === TSESTree.AST_NODE_TYPES.ArrowFunctionExpression &&
+              beforeAllArgument.body.type === TSESTree.AST_NODE_TYPES.BlockStatement
+            ) {
+              const fixtureResetStatement = beforeAllArgument.body.body.find(
+                (statement) => sourceCode.getText(statement) === STATEMENT_FIXTURE_RESET_AWAITED,
+              );
+              assert.ok(fixtureResetStatement !== undefined);
+              beforeAllFixer = (fixer: RuleFixer) =>
+                fixer.replaceText(
+                  fixtureResetStatement,
+                  [
+                    STATEMENT_AGENT_CREATION,
+                    STATEMENT_AGENT_REGISTER,
+                    STATEMENT_AGENT_ENABLE,
+                    STATEMENT_FIXTURE_RESET_AWAITED,
+                  ].join('\n'),
                 );
-                assert.ok(fixtureResetStatement !== undefined);
-                beforeAllFixer = (fixer: RuleFixer) =>
-                  fixer.replaceText(
-                    fixtureResetStatement,
-                    [
-                      STATEMENT_AGENT_CREATION,
-                      STATEMENT_AGENT_REGISTER,
-                      STATEMENT_AGENT_ENABLE,
-                      STATEMENT_FIXTURE_RESET_AWAITED,
-                    ].join('\n'),
-                  );
-              } else {
-                beforeAllFixer = (fixer: RuleFixer) =>
-                  fixer.replaceText(
-                    beforeAllArgument,
-                    [
-                      `async () => {`,
-                      STATEMENT_AGENT_CREATION,
-                      STATEMENT_AGENT_REGISTER,
-                      STATEMENT_AGENT_ENABLE,
-                      STATEMENT_FIXTURE_RESET_AWAITED,
-                      `}`,
-                    ].join('\n'),
-                  );
-              }
-              agentDeclarationFixer = (fixer: RuleFixer) =>
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                fixer.insertTextBefore(beforeAll!, `${STATEMENT_AGENT_DECLARATION}\n`);
+            } else {
+              beforeAllFixer = (fixer: RuleFixer) =>
+                fixer.replaceText(
+                  beforeAllArgument,
+                  [
+                    `async () => {`,
+                    STATEMENT_AGENT_CREATION,
+                    STATEMENT_AGENT_REGISTER,
+                    STATEMENT_AGENT_ENABLE,
+                    STATEMENT_FIXTURE_RESET_AWAITED,
+                    `}`,
+                  ].join('\n'),
+                );
             }
+            agentDeclarationFixer = (fixer: RuleFixer) =>
+              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+              fixer.insertTextBefore(beforeAll!, `${STATEMENT_AGENT_DECLARATION}\n`);
           }
 
+          // inject agent disposal to `afterAll` block
           if (afterAll !== undefined) {
             const afterAllArrowFunctionExpression = afterAll.arguments[0];
             assert.ok(
@@ -172,7 +175,7 @@ const rule: ESLintUtils.RuleModule<'updateTestWiring' | 'unknownError'> = create
               assert.ok(lastStatement);
               afterAllFixer = (fixer: RuleFixer) => fixer.insertTextAfter(lastStatement, STATEMENT_AGENT_DISPOSE);
             }
-          } else if (beforeAll !== undefined) {
+          } else {
             const nextToken = sourceCode.getTokenAfter(beforeAll);
             afterAllFixer = (fixer: RuleFixer) =>
               fixer.insertTextAfter(
@@ -194,7 +197,7 @@ const rule: ESLintUtils.RuleModule<'updateTestWiring' | 'unknownError'> = create
           ) {
             context.report({
               messageId: 'updateTestWiring',
-              node: program,
+              node: beforeAll,
               *fix(fixer) {
                 if (jestImportFixer !== undefined) {
                   yield jestImportFixer(fixer);

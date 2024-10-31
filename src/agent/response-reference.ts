@@ -7,10 +7,13 @@
  */
 
 import { strict as assert } from 'node:assert';
-import type { MemberExpression, VariableDeclaration } from 'estree';
+import type { MemberExpression, ObjectPattern, VariableDeclaration } from 'estree';
 import { type Scope } from 'eslint';
+import debug from 'debug';
 
 import { getParent } from '../library/tree';
+
+const log = debug('eslint-plugin:response-reference');
 
 /**
  * analyze response related variables and their references
@@ -25,7 +28,7 @@ export function analyzeResponseReferences(
   bodyReferences: MemberExpression[];
   headersReferences: MemberExpression[];
   statusReferences: MemberExpression[];
-  destructuringBodyVariable?: Scope.Variable;
+  destructuringBodyVariable?: Scope.Variable | ObjectPattern;
   destructuringHeadersVariable?: Scope.Variable;
   destructuringHeadersReferences?: MemberExpression[] | undefined;
 } {
@@ -34,7 +37,7 @@ export function analyzeResponseReferences(
     bodyReferences: MemberExpression[];
     headersReferences: MemberExpression[];
     statusReferences: MemberExpression[];
-    destructuringBodyVariable?: Scope.Variable;
+    destructuringBodyVariable?: Scope.Variable | ObjectPattern;
     destructuringHeadersVariable?: Scope.Variable;
     destructuringHeadersReferences?: MemberExpression[] | undefined;
   } = {
@@ -101,7 +104,17 @@ export function analyzeResponseReferences(
             parent.property.name !== 'get' &&
             getParent(parent)?.type !== 'CallExpression',
         );
+    } else if (identifierParent.type === 'Property') {
+      // body reference through nested destruction, e.g. "const { body: {bodyPropertyName: renamedBodyPropertyName}, headers: {headerPropertyName: renamedHeaderPropertyName} } = ..."
+      const parent = getParent(identifierParent);
+      if (parent?.type === 'ObjectPattern') {
+        const parent2 = getParent(parent);
+        if (parent2?.type === 'Property' && parent2.key.type === 'Identifier' && parent2.key.name === 'body') {
+          results.destructuringBodyVariable = parent;
+        }
+      }
     } else {
+      log('+++++++ can not handle identifierParent', identifierParent);
       throw new Error(`Unknown response variable reference: ${responseVariable.name}`);
     }
   }

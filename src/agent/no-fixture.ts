@@ -14,6 +14,7 @@ import type {
   Expression,
   MemberExpression,
   Node,
+  ObjectPattern,
   ReturnStatement,
   SimpleCallExpression,
   VariableDeclaration,
@@ -245,6 +246,7 @@ const rule: Rule.RuleModule = {
       // eslint-disable-next-line max-lines-per-function
       'CallExpression[callee.object.object.name="fixture"][callee.object.property.name="api"]': (
         fixtureCall: CallExpression,
+        // eslint-disable-next-line sonarjs/cognitive-complexity
       ) => {
         try {
           if (
@@ -325,7 +327,8 @@ const rule: Rule.RuleModule = {
                 // eslint-disable-next-line no-nested-ternary
                 ...(destructuringResponseBodyVariable
                   ? [
-                      `const ${destructuringResponseBodyVariable.name} = ${getResponseBodyRetrievalText(responseVariableNameToUse)}`,
+                      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+                      `const ${(destructuringResponseBodyVariable as ObjectPattern).type === 'ObjectPattern' ? sourceCode.getText(destructuringResponseBodyVariable as ObjectPattern) : (destructuringResponseBodyVariable as Scope.Variable).name} = ${getResponseBodyRetrievalText(responseVariableNameToUse)}`,
                     ]
                   : isResponseBodyVariableRedefinitionNeeded
                     ? [

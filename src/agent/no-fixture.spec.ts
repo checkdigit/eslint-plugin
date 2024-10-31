@@ -369,6 +369,22 @@ describe(ruleId, () => {
         errors: 1,
       },
       {
+        name: 'handle destructuring variable declaration for body - with nested destructuring',
+        code: `
+          const { body: { pgpPublicKey: firstPgpPublicKey } } = await fixture.api.get(\`$\{BASE_PATH}/ping\`).expect(StatusCodes.OK);
+          assert.ok(firstPgpPublicKey.startsWith('-----BEGIN PGP PUBLIC KEY BLOCK-----'));
+        `,
+        output: `
+          const response = await fetch(\`$\{BASE_PATH}/ping\`, {
+            method: 'GET',
+          });
+          assert.equal(response.status, StatusCodes.OK);
+          const { pgpPublicKey: firstPgpPublicKey } = await response.json();
+          assert.ok(firstPgpPublicKey.startsWith('-----BEGIN PGP PUBLIC KEY BLOCK-----'));
+        `,
+        errors: 1,
+      },
+      {
         name: 'handle destructuring variable declaration for headers when body is presented as well',
         code: `
           const { body, headers: headers2 } = await fixture.api.get(\`$\{BASE_PATH}/ping\`).expect(StatusCodes.OK);
