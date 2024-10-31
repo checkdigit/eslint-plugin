@@ -105,7 +105,7 @@ const rule: ESLintUtils.RuleModule<
           const expectedParametersCount = expectedParameters.length;
           const actualParameters = callExpression.arguments;
           const actualParametersCount = actualParameters.length;
-          if (actualParametersCount === 0 || actualParametersCount === expectedParametersCount) {
+          if (actualParametersCount === 0) {
             return;
           }
 
