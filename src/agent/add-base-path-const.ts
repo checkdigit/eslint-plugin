@@ -11,13 +11,7 @@ import { strict as assert } from 'node:assert';
 import { AST_NODE_TYPES, ESLintUtils, TSESTree } from '@typescript-eslint/utils';
 
 import getDocumentationUrl from '../get-documentation-url';
-import {
-  getProjectRootFolder,
-  getSwaggerPathByIndexFile,
-  isApiIndexFile,
-  loadPackageJson,
-  loadSwagger,
-} from './file';
+import { getProjectRootFolder, getSwaggerPathByIndexFile, isApiIndexFile, loadPackageJson, loadSwagger } from './file';
 
 export const ruleId = 'add-base-path-const';
 
