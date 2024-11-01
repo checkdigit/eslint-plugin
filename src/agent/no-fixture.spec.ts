@@ -6,33 +6,31 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import { describe } from '@jest/globals';
 import createTester from '../tester.test';
 import rule, { ruleId } from './no-fixture';
 
-describe(ruleId, () => {
-  createTester().run(ruleId, rule, {
-    valid: [
-      {
-        name: 'skip concurrent fixture calls which will be handled in concurrent-promises rule',
-        code: `
+createTester().run(ruleId, rule, {
+  valid: [
+    {
+      name: 'skip concurrent fixture calls which will be handled in concurrent-promises rule',
+      code: `
           const responses = await Promise.all([
             fixture.api.put(\`\${BASE_PATH}/key\`).send(keyData).expect(StatusCodes.NO_CONTENT),
             fixture.api.put(\`\${BASE_PATH}/key\`).send(keyData).expect(StatusCodes.NO_CONTENT),
           ]);
         `,
-      },
-    ],
-    invalid: [
-      {
-        name: 'without assertions',
-        code: `
+    },
+  ],
+  invalid: [
+    {
+      name: 'without assertions',
+      code: `
           const responses = await Promise.all([
             fixture.api.put(\`\${BASE_PATH}/key\`).send(keyData),
             fixture.api.put(\`\${BASE_PATH}/key\`).send(keyData),
           ]);
         `,
-        output: `
+      output: `
           const responses = await Promise.all([
             fetch(\`\${BASE_PATH}/key\`, {
               method: 'PUT',
@@ -44,17 +42,19 @@ describe(ruleId, () => {
             }),
           ]);
         `,
-        errors: 2,
-      },
-      {
-        name: 'assertion with variable declaration',
-        code: `
+      errors: 2,
+    },
+    {
+      name: 'assertion with variable declaration',
+      code: `
+          import { BASE_PATH } from './index';
           const pingResponse = await fixture.api.get(\`/sample-service/v1/ping\`).expect(StatusCodes.OK);
           const body = pingResponse.body;
           const timeDifference = Date.now() - new Date(body.serverTime).getTime();
           assert.ok(timeDifference >= 0 && timeDifference < 200);
         `,
-        output: `
+      output: `
+          import { BASE_PATH } from './index';
           const pingResponse = await fetch(\`\${BASE_PATH}/ping\`, {
             method: 'GET',
           });
@@ -63,51 +63,58 @@ describe(ruleId, () => {
           const timeDifference = Date.now() - new Date(body.serverTime).getTime();
           assert.ok(timeDifference >= 0 && timeDifference < 200);
         `,
-        errors: 1,
-      },
-      {
-        name: 'assertion without variable declaration',
-        code: `
+      errors: 1,
+    },
+    {
+      name: 'assertion without variable declaration',
+      code: `
+          import { BASE_PATH } from './index';
           await fixture.api.get(\`/sample-service/v1/ping\`).expect(StatusCodes.OK);
         `,
-        output: `
+      output: `
+          import { BASE_PATH } from './index';
           const response = await fetch(\`\${BASE_PATH}/ping\`, {
             method: 'GET',
           });
           assert.equal(response.status, StatusCodes.OK);
         `,
-        errors: 1,
-      },
-      {
-        name: 'assertion without variable declaration',
-        code: `
+      errors: 1,
+    },
+    {
+      name: 'assertion without variable declaration',
+      code: `
+          import { BASE_PATH } from './index';
           await fixture.api.get(\`/sample-service/v1/ping\`).expect(options.expectedStatusCode ?? StatusCodes.CREATED);
         `,
-        output: `
+      output: `
+          import { BASE_PATH } from './index';
           const response = await fetch(\`\${BASE_PATH}/ping\`, {
             method: 'GET',
           });
           assert.equal(response.status, options.expectedStatusCode ?? StatusCodes.CREATED);
         `,
-        errors: 1,
-      },
-      {
-        name: 'PUT with request body',
-        code: `
+      errors: 1,
+    },
+    {
+      name: 'PUT with request body',
+      code: `
+          import { BASE_PATH } from './index';
           await fixture.api.put(\`/sample-service/v2/card/\${uuid()}\`).send(cardCreationData).expect(StatusCodes.BAD_REQUEST);
         `,
-        output: `
+      output: `
+          import { BASE_PATH } from './index';
           const response = await fetch(\`\${BASE_PATH}/card/\${uuid()}\`, {
             method: 'PUT',
             body: JSON.stringify(cardCreationData),
           });
           assert.equal(response.status, StatusCodes.BAD_REQUEST);
         `,
-        errors: 1,
-      },
-      {
-        name: 'PUT with request header',
-        code: `
+      errors: 1,
+    },
+    {
+      name: 'PUT with request header',
+      code: `
+          import { BASE_PATH } from './index';
           const noFraudResponse = await fixture.api
             .post(\`/sample-service/v2/card/\${originalCard.card.cardId}/block/\${encodeURIComponent('BLOCKED NO FRAUD')}\`)
             .set(IF_MATCH_HEADER, originalCard.version)
@@ -115,7 +122,8 @@ describe(ruleId, () => {
             .set('x-y-z', '123')
             .expect(StatusCodes.NO_CONTENT);
         `,
-        output: `
+      output: `
+          import { BASE_PATH } from './index';
           const noFraudResponse = await fetch(\`\${BASE_PATH}/card/\${originalCard.card.cardId}/block/\${encodeURIComponent('BLOCKED NO FRAUD')}\`, {
             method: 'POST',
             headers: {
@@ -126,41 +134,46 @@ describe(ruleId, () => {
           });
           assert.equal(noFraudResponse.status, StatusCodes.NO_CONTENT);
         `,
-        errors: 1,
-      },
-      {
-        name: 'POST without request header/body',
-        code: `
+      errors: 1,
+    },
+    {
+      name: 'POST without request header/body',
+      code: `
+          import { BASE_PATH } from './index';
           await fixture.api
             .post(\`/sample-service/v2/card/\${originalCard.card.cardId}/block/\${encodeURIComponent('BLOCKED NO FRAUD')}\`)
             .expect(StatusCodes.NO_CONTENT);
         `,
-        output: `
+      output: `
+          import { BASE_PATH } from './index';
           const response = await fetch(\`\${BASE_PATH}/card/\${originalCard.card.cardId}/block/\${encodeURIComponent('BLOCKED NO FRAUD')}\`, {
             method: 'POST',
           });
           assert.equal(response.status, StatusCodes.NO_CONTENT);
         `,
-        errors: 1,
-      },
-      {
-        name: 'replace del with DELETE',
-        code: `
+      errors: 1,
+    },
+    {
+      name: 'replace del with DELETE',
+      code: `
+          import { BASE_PATH } from './index';
           await fixture.api
             .del(\`/sample-service/v2/card/\${originalCard.card.cardId}/block/\${encodeURIComponent('BLOCKED NO FRAUD')}\`)
             .expect(StatusCodes.NO_CONTENT);
         `,
-        output: `
+      output: `
+          import { BASE_PATH } from './index';
           const response = await fetch(\`\${BASE_PATH}/card/\${originalCard.card.cardId}/block/\${encodeURIComponent('BLOCKED NO FRAUD')}\`, {
             method: 'DELETE',
           });
           assert.equal(response.status, StatusCodes.NO_CONTENT);
         `,
-        errors: 1,
-      },
-      {
-        name: 'response headers assertion should be externalized with new variable declared if necessary',
-        code: `
+      errors: 1,
+    },
+    {
+      name: 'response headers assertion should be externalized with new variable declared if necessary',
+      code: `
+          import { BASE_PATH } from './index';
           await fixture.api.get(\`/sample-service/v2/ping\`)
             .expect(StatusCodes.OK)
             .expect('etag', '123')
@@ -168,7 +181,8 @@ describe(ruleId, () => {
             .expect(ETAG, correctVersion)
             .expect(ETAG, /1.*/u);
         `,
-        output: `
+      output: `
+          import { BASE_PATH } from './index';
           const response = await fetch(\`\${BASE_PATH}/ping\`, {
             method: 'GET',
           });
@@ -178,46 +192,52 @@ describe(ruleId, () => {
           assert.equal(response.headers.get(ETAG), correctVersion);
           assert.ok(response.headers.get(ETAG).match(/1.*/u));
         `,
-        errors: 1,
-      },
-      {
-        name: 'response body assertion',
-        code: `
+      errors: 1,
+    },
+    {
+      name: 'response body assertion',
+      code: `
+          import { BASE_PATH } from './index';
           await fixture.api.get(\`/sample-service/v2/ping\`).expect({message:'pong'});
         `,
-        output: `
+      output: `
+          import { BASE_PATH } from './index';
           const response = await fetch(\`\${BASE_PATH}/ping\`, {
             method: 'GET',
           });
           assert.deepEqual(await response.json(), {message:'pong'});
         `,
-        errors: 1,
-      },
-      {
-        name: 'response callback assertion',
-        code: `
+      errors: 1,
+    },
+    {
+      name: 'response callback assertion',
+      code: `
+          import { BASE_PATH } from './index';
           await fixture.api.get(\`/sample-service/v2/ping\`)
           .expect(validate)
           .expect((response)=>console.log(response));
         `,
-        output: `
+      output: `
+          import { BASE_PATH } from './index';
           const response = await fetch(\`\${BASE_PATH}/ping\`, {
             method: 'GET',
           });
           assert.ok(validate(response));
           assert.ok(console.log(response));
         `,
-        errors: 1,
-      },
-      {
-        name: 'multiple fixture calls in the same test',
-        code: `
+      errors: 1,
+    },
+    {
+      name: 'multiple fixture calls in the same test',
+      code: `
+          import { BASE_PATH } from './index';
           await fixture.api.get(\`/sample-service/v1/ping\`).expect(StatusCodes.OK);
           const pingResponse = await fixture.api.get(\`/sample-service/v1/ping\`).expect(StatusCodes.OK);
           await fixture.api.get(\`/sample-service/v1/ping?param=xxx\`).expect(StatusCodes.OK).expect({message:'pong'});
           await fixture.api.get(\`/sample-service/v1/ping\`).expect(StatusCodes.OK);
         `,
-        output: `
+      output: `
+          import { BASE_PATH } from './index';
           const response = await fetch(\`\${BASE_PATH}/ping\`, {
             method: 'GET',
           });
@@ -236,42 +256,54 @@ describe(ruleId, () => {
           });
           assert.equal(response3.status, StatusCodes.OK);
         `,
-        errors: 4,
-      },
-      {
-        name: 'directly return (no await) fixture call',
-        code: `() => {
+      errors: 4,
+    },
+    {
+      name: 'directly return (no await) fixture call',
+      code: `
+        import { BASE_PATH } from './index';
+        () => {
           return fixture.api.get(\`/sample-service/v1/ping\`);
         }`,
-        output: `() => {
+      output: `
+        import { BASE_PATH } from './index';
+        () => {
           return fetch(\`\${BASE_PATH}/ping\`, {
             method: 'GET',
           });
         }`,
-        errors: 1,
-      },
-      {
-        name: 'directly return (no await) fixture call with assertion',
-        code: `async () => {
+      errors: 1,
+    },
+    {
+      name: 'directly return (no await) fixture call with assertion',
+      code: `
+        import { BASE_PATH } from './index';
+        async () => {
           return fixture.api.get(\`/sample-service/v1/ping\`).expect(StatusCodes.OK);
         }`,
-        output: `async () => {
+      output: `
+        import { BASE_PATH } from './index';
+        async () => {
           const response = await fetch(\`\${BASE_PATH}/ping\`, {
             method: 'GET',
           });
           assert.equal(response.status, StatusCodes.OK);
           return response;
         }`,
-        errors: 1,
-      },
-      {
-        name: 'directly return (no await) fixture call with body/headers',
-        code: `() => {
+      errors: 1,
+    },
+    {
+      name: 'directly return (no await) fixture call with body/headers',
+      code: `
+        import { BASE_PATH } from './index';
+        () => {
           return fixture.api.put(\`/sample-service/v2/card/\${uuid()}\`)
             .set(IF_MATCH_HEADER, originalCard.version)
             .send({});
         }`,
-        output: `() => {
+      output: `
+        import { BASE_PATH } from './index';
+        () => {
           return fetch(\`\${BASE_PATH}/card/\${uuid()}\`, {
             method: 'PUT',
             body: JSON.stringify({}),
@@ -280,18 +312,20 @@ describe(ruleId, () => {
             },
           });
         }`,
-        errors: 1,
-      },
-      {
-        name: 'replace statusCode with status',
-        code: `
+      errors: 1,
+    },
+    {
+      name: 'replace statusCode with status',
+      code: `
+          import { BASE_PATH } from './index';
           const response = await fixture.api.get(\`/sample-service/v2/ping\`);
           assert.equal(response.statusCode, StatusCodes.OK);
           console.log('status:', response.statusCode);
           const response2 = await fixture.api.get(\`/sample-service/v2/ping\`);
           assert.equal(response2.status, StatusCodes.OK);
         `,
-        output: `
+      output: `
+          import { BASE_PATH } from './index';
           const response = await fetch(\`\${BASE_PATH}/ping\`, {
             method: 'GET',
           });
@@ -302,16 +336,18 @@ describe(ruleId, () => {
           });
           assert.equal(response2.status, StatusCodes.OK);
         `,
-        errors: 2,
-      },
-      {
-        name: 'replace header access through response.get() with response.headers.get()',
-        code: `
+      errors: 2,
+    },
+    {
+      name: 'replace header access through response.get() with response.headers.get()',
+      code: `
+          import { BASE_PATH } from './index';
           const response = await fixture.api.get(\`/sample-service/v2/ping\`).expect(StatusCodes.OK);
           assert.equal(response.get(ETAG), correctVersion);
           assert.equal(response.get('etag'), correctVersion);
         `,
-        output: `
+      output: `
+          import { BASE_PATH } from './index';
           const response = await fetch(\`\${BASE_PATH}/ping\`, {
             method: 'GET',
           });
@@ -319,28 +355,32 @@ describe(ruleId, () => {
           assert.equal(response.headers.get(ETAG), correctVersion);
           assert.equal(response.headers.get('etag'), correctVersion);
         `,
-        errors: 1,
-      },
-      {
-        name: 'work with response status literal (e.g. 200 instead of StatusCoodes.OK) as well',
-        code: `
+      errors: 1,
+    },
+    {
+      name: 'work with response status literal (e.g. 200 instead of StatusCoodes.OK) as well',
+      code: `
+          import { BASE_PATH } from './index';
           await fixture.api.get(\`/sample-service/v2/ping\`).expect(200);
         `,
-        output: `
+      output: `
+          import { BASE_PATH } from './index';
           const response = await fetch(\`\${BASE_PATH}/ping\`, {
             method: 'GET',
           });
           assert.equal(response.status, 200);
         `,
-        errors: 1,
-      },
-      {
-        name: 'assert response body against function call\'s return value ".expect(validateBody(response))"',
-        code: `
+      errors: 1,
+    },
+    {
+      name: 'assert response body against function call\'s return value ".expect(validateBody(response))"',
+      code: `
+          import { BASE_PATH } from './index';
           const createdOn = Date.now().toUTCString();
           await fixture.api.get(\`/sample-service/v2/ping\`).expect(200).expect(validateBody(createdOn));
         `,
-        output: `
+      output: `
+          import { BASE_PATH } from './index';
           const createdOn = Date.now().toUTCString();
           const response = await fetch(\`\${BASE_PATH}/ping\`, {
             method: 'GET',
@@ -348,16 +388,16 @@ describe(ruleId, () => {
           assert.equal(response.status, 200);
           assert.deepEqual(await response.json(), validateBody(createdOn));
         `,
-        errors: 1,
-      },
-      {
-        name: 'handle destructuring variable declaration for body',
-        code: `
+      errors: 1,
+    },
+    {
+      name: 'handle destructuring variable declaration for body',
+      code: `
           const { body: responseBody } = await fixture.api.get(\`$\{BASE_PATH}/ping\`).expect(StatusCodes.OK);
           const timeDifference = Date.now() - new Date(responseBody.serverTime).getTime();
           assert.ok(timeDifference >= 0 && timeDifference < 200);
         `,
-        output: `
+      output: `
           const response = await fetch(\`$\{BASE_PATH}/ping\`, {
             method: 'GET',
           });
@@ -366,15 +406,15 @@ describe(ruleId, () => {
           const timeDifference = Date.now() - new Date(responseBody.serverTime).getTime();
           assert.ok(timeDifference >= 0 && timeDifference < 200);
         `,
-        errors: 1,
-      },
-      {
-        name: 'handle destructuring variable declaration for body - with nested destructuring',
-        code: `
+      errors: 1,
+    },
+    {
+      name: 'handle destructuring variable declaration for body - with nested destructuring',
+      code: `
           const { body: { pgpPublicKey: firstPgpPublicKey } } = await fixture.api.get(\`$\{BASE_PATH}/ping\`).expect(StatusCodes.OK);
           assert.ok(firstPgpPublicKey.startsWith('-----BEGIN PGP PUBLIC KEY BLOCK-----'));
         `,
-        output: `
+      output: `
           const response = await fetch(\`$\{BASE_PATH}/ping\`, {
             method: 'GET',
           });
@@ -382,16 +422,16 @@ describe(ruleId, () => {
           const { pgpPublicKey: firstPgpPublicKey } = await response.json();
           assert.ok(firstPgpPublicKey.startsWith('-----BEGIN PGP PUBLIC KEY BLOCK-----'));
         `,
-        errors: 1,
-      },
-      {
-        name: 'handle destructuring variable declaration for headers when body is presented as well',
-        code: `
+      errors: 1,
+    },
+    {
+      name: 'handle destructuring variable declaration for headers when body is presented as well',
+      code: `
           const { body, headers: headers2 } = await fixture.api.get(\`$\{BASE_PATH}/ping\`).expect(StatusCodes.OK);
           assert(body);
           assert.ok(headers2.get(ETAG));
         `,
-        output: `
+      output: `
           const response = await fetch(\`$\{BASE_PATH}/ping\`, {
             method: 'GET',
           });
@@ -401,15 +441,15 @@ describe(ruleId, () => {
           assert(body);
           assert.ok(headers2.get(ETAG));
         `,
-        errors: 1,
-      },
-      {
-        name: 'handle destructuring variable declaration for headers without body presented but with assertions used',
-        code: `
+      errors: 1,
+    },
+    {
+      name: 'handle destructuring variable declaration for headers without body presented but with assertions used',
+      code: `
           const { headers } = await fixture.api.get(\`$\{BASE_PATH}/ping\`).expect(StatusCodes.OK);
           assert.ok(headers.get(ETAG));
         `,
-        output: `
+      output: `
           const response = await fetch(\`$\{BASE_PATH}/ping\`, {
             method: 'GET',
           });
@@ -417,25 +457,25 @@ describe(ruleId, () => {
           const headers = response.headers;
           assert.ok(headers.get(ETAG));
         `,
-        errors: 1,
-      },
-      {
-        name: 'handle destructuring variable declaration for headers without body/assertion presented does not need to change',
-        code: `
+      errors: 1,
+    },
+    {
+      name: 'handle destructuring variable declaration for headers without body/assertion presented does not need to change',
+      code: `
           const { headers } = await fixture.api.get(\`$\{BASE_PATH}/ping\`);
           assert.ok(headers.get(ETAG));
         `,
-        output: `
+      output: `
           const { headers } = await fetch(\`$\{BASE_PATH}/ping\`, {
             method: 'GET',
           });
           assert.ok(headers.get(ETAG));
         `,
-        errors: 1,
-      },
-      {
-        name: 'avoid response variable name conflict with existing variables in the same scope',
-        code: `
+      errors: 1,
+    },
+    {
+      name: 'avoid response variable name conflict with existing variables in the same scope',
+      code: `
           async () => {
             const response = 'foo';
             const response1 = 'bar';
@@ -443,7 +483,7 @@ describe(ruleId, () => {
             await fixture.api.get(\`$\{BASE_PATH}/ping\`).expect(StatusCodes.OK);
           }
         `,
-        output: `
+      output: `
           async () => {
             const response = 'foo';
             const response1 = 'bar';
@@ -457,11 +497,11 @@ describe(ruleId, () => {
             assert.equal(response3.status, StatusCodes.OK);
           }
         `,
-        errors: 2,
-      },
-      {
-        name: 'response variable names in different scope do not conflict with each other',
-        code: `
+      errors: 2,
+    },
+    {
+      name: 'response variable names in different scope do not conflict with each other',
+      code: `
           it('#1', async () => {
             const response = 'foo';
           });
@@ -474,7 +514,7 @@ describe(ruleId, () => {
             await fixture.api.get(\`$\{BASE_PATH}/ping\`).expect(StatusCodes.OK);
           });
         `,
-        output: `
+      output: `
           it('#1', async () => {
             const response = 'foo';
           });
@@ -493,18 +533,18 @@ describe(ruleId, () => {
             assert.equal(response.status, StatusCodes.OK);
           });
         `,
-        errors: 2,
-      },
-      {
-        name: 'inline access to response body should be extracted to a variable',
-        code: `
+      errors: 2,
+    },
+    {
+      name: 'inline access to response body should be extracted to a variable',
+      code: `
         export async function validatePin(
           fixture,
         ) {
           const paymentSecurityServicePublicKey = (await fixture.api.get(\`\${BASE_PATH}/public-key\`).expect(StatusCodes.OK)).body.publicKey;
         }
         `,
-        output: `
+      output: `
         export async function validatePin(
           fixture,
         ) {
@@ -516,11 +556,11 @@ describe(ruleId, () => {
           const paymentSecurityServicePublicKey = responseBody.publicKey;
         }
         `,
-        errors: 1,
-      },
-      {
-        name: 'callback assertion using arrow function that accesses to response might conflict with the new/redefined response variable',
-        code: `
+      errors: 1,
+    },
+    {
+      name: 'callback assertion using arrow function that accesses to response might conflict with the new/redefined response variable',
+      code: `
           const createdOn = new Date().toISOString();
           const zoneKeyId = uuid();
 
@@ -537,7 +577,7 @@ describe(ruleId, () => {
             .expect(ETAG_HEADER, '1')
             .expect((res) => verifyTemporalHeaders(res, createdOn));
         `,
-        output: `
+      output: `
           const createdOn = new Date().toISOString();
           const zoneKeyId = uuid();
 
@@ -557,18 +597,18 @@ describe(ruleId, () => {
           assert.equal(response.headers.get(ETAG_HEADER), '1');
           assert.ok(verifyTemporalHeaders(response, createdOn));
         `,
-        errors: 1,
-      },
-      {
-        name: 'in arrow function without concurrent promises',
-        code: `
+      errors: 1,
+    },
+    {
+      name: 'in arrow function without concurrent promises',
+      code: `
           const delayedCardCreationPromise = new Promise((delayedExecution) => {
             setTimeout(() => {
               delayedExecution(fixture.api.put(\`\${BASE_PATH}/card/\${cardId}\`).send(otherTestCard));
             }, 600);
           });
         `,
-        output: `
+      output: `
           const delayedCardCreationPromise = new Promise((delayedExecution) => {
             setTimeout(() => {
               delayedExecution(fetch(\`\${BASE_PATH}/card/\${cardId}\`, {
@@ -578,8 +618,25 @@ describe(ruleId, () => {
             }, 600);
           });
         `,
-        errors: 1,
-      },
-    ],
-  });
+      errors: 1,
+    },
+    {
+      name: 'add missing import of BASE_PATH',
+      filename: 'src/api/v1/ping.spec.ts',
+      code: `
+          import { strict as assert } from 'node:assert';
+          await fixture.api.get(\`/sample-service/v1/ping\`).expect(StatusCodes.OK);
+        `,
+      output: `
+          import { strict as assert } from 'node:assert';
+import { BASE_PATH } from './index';
+
+          const response = await fetch(\`\${BASE_PATH}/ping\`, {
+            method: 'GET',
+          });
+          assert.equal(response.status, StatusCodes.OK);
+        `,
+      errors: [{ messageId: 'addBasePathImport' }, { messageId: 'preferNativeFetch' }],
+    },
+  ],
 });

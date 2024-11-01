@@ -41,6 +41,7 @@ import requireTypeOutOfTypeOnlyImports, {
   ruleId as requireTypeOutOfTypeOnlyImportsRuleId,
 } from './require-type-out-of-type-only-imports';
 import noServeRuntime, { ruleId as noServeRuntimeRuleId } from './agent/no-serve-runtime';
+import addBasePathConst, { ruleId as addBasePathConstRuleId } from './agent/add-base-path-const';
 import filePathComment from './file-path-comment';
 import noCardNumbers from './no-card-numbers';
 import noTestImport from './no-test-import';
@@ -75,6 +76,7 @@ const rules: Record<string, TSESLint.LooseRuleDefinition> = {
   [requireResolveFullResponseRuleId]: requireResolveFullResponse,
   [noDuplicatedImportsRuleId]: noDuplicatedImports,
   [noServeRuntimeRuleId]: noServeRuntime,
+  [addBasePathConstRuleId]: addBasePathConst,
   [requireFixedServicesImportRuleId]: requireFixedServicesImport,
   [requireTypeOutOfTypeOnlyImportsRuleId]: requireTypeOutOfTypeOnlyImports,
   [noUnusedFunctionArgumentsRuleId]: noUnusedFunctionArguments,
@@ -127,6 +129,7 @@ const configs: Record<string, TSESLint.FlatConfig.Config | TSESLint.FlatConfig.C
         [`@checkdigit/${noUnusedImportsRuleId}`]: 'off',
         [`@checkdigit/${fixFunctionCallArgumentsRuleId}`]: 'off',
         [`@checkdigit/${agentTestWiringRuleId}`]: 'off',
+        [`@checkdigit/${addBasePathConstRuleId}`]: 'off',
         // --- agent rules END ---
       },
     },
@@ -173,6 +176,7 @@ const configs: Record<string, TSESLint.FlatConfig.Config | TSESLint.FlatConfig.C
         [`@checkdigit/${noUnusedServiceVariablesRuleId}`]: 'error',
         [`@checkdigit/${noUnusedImportsRuleId}`]: 'error',
         [`@checkdigit/${fixFunctionCallArgumentsRuleId}`]: 'error',
+        [`@checkdigit/${addBasePathConstRuleId}`]: 'error',
       },
     },
     {
@@ -206,6 +210,7 @@ const configs: Record<string, TSESLint.FlatConfig.Config | TSESLint.FlatConfig.C
         [`@checkdigit/${noUnusedServiceVariablesRuleId}`]: 'error',
         [`@checkdigit/${noUnusedImportsRuleId}`]: 'error',
         [`@checkdigit/${fixFunctionCallArgumentsRuleId}`]: 'error',
+        [`@checkdigit/${addBasePathConstRuleId}`]: 'error',
       },
     },
   ],
