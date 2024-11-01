@@ -466,18 +466,20 @@ const rule: Rule.RuleModule = {
             return;
           }
 
-          const lastImportStatement = program.body.findLast((statement) => statement.type === 'ImportDeclaration');
-          assert(lastImportStatement);
-
           const apiIndexPath = getApiIndexPathByFilename(context.filename);
-          const basePathImportStatement = `\nimport { BASE_PATH } from '${apiIndexPath}';\n`;
-          context.report({
-            node: program,
-            messageId: 'addBasePathImport',
-            fix(fixer) {
-              return fixer.insertTextAfter(lastImportStatement, basePathImportStatement);
-            },
-          });
+          if (apiIndexPath !== undefined) {
+            const lastImportStatement = program.body.findLast((statement) => statement.type === 'ImportDeclaration');
+            assert(lastImportStatement);
+
+            const basePathImportStatement = `\nimport { BASE_PATH } from '${apiIndexPath}';\n`;
+            context.report({
+              node: program,
+              messageId: 'addBasePathImport',
+              fix(fixer) {
+                return fixer.insertTextAfter(lastImportStatement, basePathImportStatement);
+              },
+            });
+          }
         }
       },
     };

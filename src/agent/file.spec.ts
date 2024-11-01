@@ -40,6 +40,8 @@ describe('file utility functions', () => {
     assert.equal(getApiFolder('/Users/xxx/workspace/src/api/v1/index.ts'), '/Users/xxx/workspace/src/api/v1');
     assert.equal(getApiFolder('/Users/xxx/workspace/src/api/v1/ping.ts'), '/Users/xxx/workspace/src/api/v1');
     assert.equal(getApiFolder('/Users/xxx/workspace/src/api/v1/service/abc.ts'), '/Users/xxx/workspace/src/api/v1');
+
+    assert.equal(getApiFolder('/Users/xxx/workspace/src/abc.ts'), undefined);
   });
 
   it('getApiIndexPathByFilename', () => {

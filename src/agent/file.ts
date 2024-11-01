@@ -1,6 +1,5 @@
 // agent/file.ts
 
-import { strict as assert } from 'node:assert';
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -32,9 +31,12 @@ export function getApiFolder(folder: string): string | undefined {
   return upperFolder.trim() === '' ? undefined : getApiFolder(upperFolder);
 }
 
-export function getApiIndexPathByFilename(filename: string): string {
+export function getApiIndexPathByFilename(filename: string): string | undefined {
   const apiFolder = getApiFolder(filename);
-  assert(apiFolder !== undefined, `Cannot find api folder for ${filename}`);
+  if (apiFolder === undefined) {
+    return undefined;
+  }
+
   const relativePath = path.relative(path.dirname(filename), `${apiFolder}/index`);
   return relativePath.startsWith('../') ? relativePath : `./${relativePath}`;
 }

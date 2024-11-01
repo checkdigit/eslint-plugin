@@ -638,5 +638,19 @@ import { BASE_PATH } from './index';
         `,
       errors: [{ messageId: 'addBasePathImport' }, { messageId: 'preferNativeFetch' }],
     },
+    {
+      name: 'do not add missing import of BASE_PATH if api folder can not be determined',
+      filename: 'src/abc.spec.ts',
+      code: `
+          await fixture.api.get(\`/sample-service/v1/ping\`).expect(StatusCodes.OK);
+        `,
+      output: `
+          const response = await fetch(\`\${BASE_PATH}/ping\`, {
+            method: 'GET',
+          });
+          assert.equal(response.status, StatusCodes.OK);
+        `,
+      errors: 1,
+    },
   ],
 });
