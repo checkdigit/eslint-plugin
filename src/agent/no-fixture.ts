@@ -34,7 +34,6 @@ import { isValidPropertyName } from '../library/variable';
 import { analyzeResponseReferences } from './response-reference';
 import { getResponseBodyRetrievalText, hasAssertions } from './fetch';
 import { replaceEndpointUrlPrefixWithBasePath } from './url';
-import { getApiIndexPathByFilename } from './file';
 
 export const ruleId = 'no-fixture';
 
@@ -232,7 +231,6 @@ const rule: Rule.RuleModule = {
     },
     messages: {
       preferNativeFetch: 'Prefer native fetch API over customized fixture API.',
-      addBasePathImport: 'Add BASE_PATH import statement to the file.',
       unknownError: 'Unknown error occurred in file "{{fileName}}": {{ error }}.',
     },
     fixable: 'code',
@@ -243,7 +241,6 @@ const rule: Rule.RuleModule = {
     const sourceCode = context.sourceCode;
     const scopeManager = sourceCode.scopeManager;
     const scopeVariablesMap = new Map<Scope.Scope, string[]>();
-    let isUrlReplacementNeeded = false;
 
     return {
       // eslint-disable-next-line max-lines-per-function
@@ -283,9 +280,6 @@ const rule: Rule.RuleModule = {
           // convert url from `/sample-service/v1/ping` to `${BASE_PATH}/ping`
           const originalUrlArgumentText = sourceCode.getText(urlArgumentNode);
           const fetchUrlArgumentText = replaceEndpointUrlPrefixWithBasePath(originalUrlArgumentText);
-          if (fetchUrlArgumentText !== originalUrlArgumentText) {
-            isUrlReplacementNeeded = true;
-          }
 
           // fetch request argument
           const methodNode = fixtureFunction.property; // get/put/etc.
@@ -455,31 +449,6 @@ const rule: Rule.RuleModule = {
               error: error instanceof Error ? error.toString() : JSON.stringify(error),
             },
           });
-        }
-      },
-
-      'Program:exit': (program) => {
-        if (isUrlReplacementNeeded) {
-          const topScope = sourceCode.getScope(program).childScopes[0];
-          assert(topScope);
-          if (topScope.variables.some((variable) => variable.name === 'BASE_PATH')) {
-            return;
-          }
-
-          const apiIndexPath = getApiIndexPathByFilename(context.filename);
-          if (apiIndexPath !== undefined) {
-            const lastImportStatement = program.body.findLast((statement) => statement.type === 'ImportDeclaration');
-            assert(lastImportStatement);
-
-            const basePathImportStatement = `\nimport { BASE_PATH } from '${apiIndexPath}';\n`;
-            context.report({
-              node: program,
-              messageId: 'addBasePathImport',
-              fix(fixer) {
-                return fixer.insertTextAfter(lastImportStatement, basePathImportStatement);
-              },
-            });
-          }
         }
       },
     };

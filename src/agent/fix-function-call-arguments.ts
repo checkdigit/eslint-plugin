@@ -71,9 +71,9 @@ const rule: ESLintUtils.RuleModule<
       CallExpression(callExpression) {
         // ignore calls like `foo.bar()` which are likely to be 3rd party module calls
         // we only focus on calls against local functions or functions imported from the same module
-        if (callExpression.callee.type === TSESTree.AST_NODE_TYPES.MemberExpression) {
-          return;
-        }
+        // if (callExpression.callee.type === TSESTree.AST_NODE_TYPES.MemberExpression) {
+        //   return;
+        // }
 
         log('===== file name:', context.filename);
         log('callExpression:', sourceCode.getText(callExpression));
@@ -133,11 +133,12 @@ const rule: ESLintUtils.RuleModule<
             if (!typesToCheck.includes(actualTypeString) && !actualTypeString.endsWith('RequestType')) {
               // skip the parameter type checking if it's not in the candidate types
               parametersToKeep.push(actualParameter);
+              expectedParameterIndex++;
               log('skipped');
             } else if (typeChecker.isTypeAssignableTo(actualType, expectedType)) {
               parametersToKeep.push(actualParameter);
-              log('matched');
               expectedParameterIndex++;
+              log('matched');
             } else {
               log('not matched');
             }

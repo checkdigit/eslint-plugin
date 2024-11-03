@@ -22,10 +22,10 @@ const rule: ESLintUtils.RuleModule<'addBasePathConst'> = createRule({
   meta: {
     type: 'suggestion',
     docs: {
-      description: 'Add HTTP domain to the BASE_PATH like url constant variable.',
+      description: 'Add BASE_PATH const variable.',
     },
     messages: {
-      addBasePathConst: 'Add HTTP domain to the BASE_PATH like url constant variable.',
+      addBasePathConst: 'Add BASE_PATH const variable.',
     },
     fixable: 'code',
     schema: [],
