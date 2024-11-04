@@ -54,10 +54,12 @@ const rule: ESLintUtils.RuleModule<'invalidOptions' | 'unknownError'> = createRu
         const foundVariable = scope.variables.find((variable) => variable.name === urlArgument.name);
         if (foundVariable) {
           const variableDefinition = foundVariable.defs.find((def) => def.type === DefinitionType.Variable);
-          assert.ok(variableDefinition, `Variable "${urlArgument.name}" not defined in scope`);
-          const variableDefinitionNode = variableDefinition.node;
-          assert.ok(variableDefinitionNode.init, 'Variable definition node has no init property');
-          return isUrlArgumentValid(variableDefinitionNode.init, scope);
+          if (variableDefinition) {
+            const variableDefinitionNode = variableDefinition.node;
+            assert.ok(variableDefinitionNode.init, 'Variable definition node has no init property');
+            return isUrlArgumentValid(variableDefinitionNode.init, scope);
+          }
+          return true;
         }
       }
 
@@ -139,7 +141,7 @@ const rule: ESLintUtils.RuleModule<'invalidOptions' | 'unknownError'> = createRu
 
           const enclosingScopeNode = getEnclosingScopeNode(serviceCall);
           assert.ok(enclosingScopeNode, 'enclosingScopeNode is undefined');
-          const scope = scopeManager?.acquire(enclosingScopeNode);
+          const scope = scopeManager?.acquire(enclosingScopeNode); /*?*/
           assert.ok(scope, 'scope is undefined');
           const urlArgument = serviceCall.arguments[0];
           if (!isUrlArgumentValid(urlArgument, scope)) {

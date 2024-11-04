@@ -186,5 +186,23 @@ createTester().run(ruleId, rule, {
       `,
       errors: [{ messageId: 'invalidOptions' }],
     },
+    {
+      name: 'handle url provided as a function argument',
+      code: `
+          async function getKey(
+            fixture: Fixture,
+            keyRequest: ping.KeyRequest,
+            url: string,
+          ) {
+            const pingService = fixture.config.service.ping(EMPTY_CONTEXT);
+            const response = await pingService.post(url, keyRequest, {
+              headers: {
+                etag: '123',
+              },
+            });
+          }
+        `,
+      errors: [{ messageId: 'invalidOptions' }],
+    },
   ],
 });
