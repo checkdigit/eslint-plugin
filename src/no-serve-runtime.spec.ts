@@ -1,4 +1,4 @@
-// agent/no-full-response.spec.ts
+// no-full-response.spec.ts
 
 /*
  * Copyright (c) 2021-2024 Check Digit, LLC
@@ -6,7 +6,7 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import createTester from '../ts-tester.test';
+import createTester from './ts-tester.test';
 import rule, { ruleId } from './no-serve-runtime';
 
 createTester().run(ruleId, rule, {

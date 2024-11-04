@@ -21,7 +21,7 @@ import fixFunctionCallArguments, {
 import invalidJsonStringify, { ruleId as invalidJsonStringifyRuleId } from './invalid-json-stringify';
 import noDuplicatedImports, { ruleId as noDuplicatedImportsRuleId } from './no-duplicated-imports';
 import noFixture, { ruleId as noFixtureRuleId } from './agent/no-fixture';
-import noFullResponse, { ruleId as noFullResponseRuleId } from './agent/no-full-response';
+import noLegacyServiceTyping, { ruleId as noLegacyServiceTypingRuleId } from './no-legacy-service-typing';
 import noMappedResponse, { ruleId as noMappedResponseRuleId } from './agent/no-mapped-response';
 import noPromiseInstanceMethod, { ruleId as noPromiseInstanceMethodRuleId } from './no-promise-instance-method';
 import noServiceWrapper, { ruleId as noServiceWrapperRuleId } from './agent/no-service-wrapper';
@@ -40,7 +40,7 @@ import requireResolveFullResponse, {
 import requireTypeOutOfTypeOnlyImports, {
   ruleId as requireTypeOutOfTypeOnlyImportsRuleId,
 } from './require-type-out-of-type-only-imports';
-import noServeRuntime, { ruleId as noServeRuntimeRuleId } from './agent/no-serve-runtime';
+import noServeRuntime, { ruleId as noServeRuntimeRuleId } from './no-serve-runtime';
 import addBasePathConst, { ruleId as addBasePathConstRuleId } from './agent/add-base-path-const';
 import addBasePathImport, { ruleId as addBasePathImportRuleId } from './agent/add-base-path-import';
 import addAssertImport, { ruleId as addAssertImportRuleId } from './agent/add-assert-import';
@@ -73,7 +73,7 @@ const rules: Record<string, TSESLint.LooseRuleDefinition> = {
   [fetchResponseBodyJsonRuleId]: fetchResponseBodyJson,
   [fetchResponseHeaderGetterRuleId]: fetchResponseHeaderGetter,
   [addUrlDomainRuleId]: addUrlDomain,
-  [noFullResponseRuleId]: noFullResponse,
+  [noLegacyServiceTypingRuleId]: noLegacyServiceTyping,
   [noMappedResponseRuleId]: noMappedResponse,
   [requireResolveFullResponseRuleId]: requireResolveFullResponse,
   [noDuplicatedImportsRuleId]: noDuplicatedImports,
@@ -113,7 +113,7 @@ const configs: Record<string, TSESLint.FlatConfig.Config | TSESLint.FlatConfig.C
         '@checkdigit/no-test-import': 'error',
         [`@checkdigit/${invalidJsonStringifyRuleId}`]: 'error',
         [`@checkdigit/${noPromiseInstanceMethodRuleId}`]: 'error',
-        [`@checkdigit/${noFullResponseRuleId}`]: 'error',
+        [`@checkdigit/${noLegacyServiceTypingRuleId}`]: 'error',
         [`@checkdigit/${requireResolveFullResponseRuleId}`]: 'error',
         [`@checkdigit/${noDuplicatedImportsRuleId}`]: 'error',
         [`@checkdigit/${requireFixedServicesImportRuleId}`]: 'error',
