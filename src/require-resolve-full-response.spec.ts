@@ -25,6 +25,24 @@ createTester().run(ruleId, rule, {
           }
         `,
     },
+    {
+      name: 'no error if options is an identifier with type of FullResponseOptions',
+      code: `
+          async function getKey(pingService: Endpoint) {
+            const options: FullResponseOptions = { resolveWithFullResponse: true };
+            await pingService.get(\`\${PING_BASE_PATH}/key/\${keyId}\`, options);
+          }
+        `,
+    },
+    {
+      name: 'no error if options is an identifier with FullResponseOptions-ish type',
+      code: `
+          async function getKey(pingService: Endpoint) {
+            const options = { resolveWithFullResponse: true };
+            await pingService.get(\`\${PING_BASE_PATH}/key/\${keyId}\`, options);
+          }
+        `,
+    },
   ],
   invalid: [
     {

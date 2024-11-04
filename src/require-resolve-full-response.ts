@@ -158,7 +158,7 @@ const rule: ESLintUtils.RuleModule<'invalidOptions' | 'unknownError'> = createRu
           const optionsArgument = ['get', 'head', 'del'].includes(method)
             ? serviceCall.arguments[1]
             : serviceCall.arguments[2];
-          if (optionsArgument === undefined || optionsArgument.type !== AST_NODE_TYPES.ObjectExpression) {
+          if (optionsArgument === undefined) {
             context.report({
               node: serviceCall,
               messageId: 'invalidOptions',
@@ -166,23 +166,38 @@ const rule: ESLintUtils.RuleModule<'invalidOptions' | 'unknownError'> = createRu
             return;
           }
 
-          const resolveWithFullResponseProperty = optionsArgument.properties.find(
-            (property) =>
-              property.type === AST_NODE_TYPES.Property &&
-              property.key.type === AST_NODE_TYPES.Identifier &&
-              property.key.name === 'resolveWithFullResponse',
-          );
-          if (
-            resolveWithFullResponseProperty?.type !== AST_NODE_TYPES.Property ||
-            resolveWithFullResponseProperty.value.type !== AST_NODE_TYPES.Literal ||
-            resolveWithFullResponseProperty.value.value !== true
-          ) {
-            context.report({
-              node: optionsArgument,
-              messageId: 'invalidOptions',
-            });
-            return;
+          if (optionsArgument.type === AST_NODE_TYPES.Identifier) {
+            const optionsTypeString = getType(optionsArgument);
+            if (optionsTypeString === 'FullResponseOptions') {
+              return;
+            }
+
+            const variable = parserService.esTreeNodeToTSNodeMap.get(optionsArgument);
+            const optionType = typeChecker.getTypeAtLocation(variable);
+            const resolveWithFullResponseProperty = optionType.getProperty('resolveWithFullResponse');
+            if (resolveWithFullResponseProperty?.declarations?.[0]?.getText() === 'resolveWithFullResponse: true') {
+              return;
+            }
+          } else if (optionsArgument.type === AST_NODE_TYPES.ObjectExpression) {
+            const resolveWithFullResponseProperty = optionsArgument.properties.find(
+              (property) =>
+                property.type === AST_NODE_TYPES.Property &&
+                property.key.type === AST_NODE_TYPES.Identifier &&
+                property.key.name === 'resolveWithFullResponse',
+            );
+            if (
+              resolveWithFullResponseProperty?.type === AST_NODE_TYPES.Property &&
+              resolveWithFullResponseProperty.value.type === AST_NODE_TYPES.Literal &&
+              resolveWithFullResponseProperty.value.value === true
+            ) {
+              return;
+            }
           }
+
+          context.report({
+            node: optionsArgument,
+            messageId: 'invalidOptions',
+          });
         } catch (error) {
           // eslint-disable-next-line no-console
           console.error(`Failed to apply ${ruleId} rule for file "${context.filename}":`, error);
