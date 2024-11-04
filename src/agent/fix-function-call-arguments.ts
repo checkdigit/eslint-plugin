@@ -88,8 +88,10 @@ const rule: ESLintUtils.RuleModule<
           }
 
           const signature = signatures[0];
-          assert.ok(signature, 'Signature not found.');
-          if (signature.typeParameters !== undefined && signature.typeParameters.length > 0) {
+          if (
+            signature === undefined ||
+            (signature.typeParameters !== undefined && signature.typeParameters.length > 0)
+          ) {
             // ignore complex signatures with type parameters
             return;
           }

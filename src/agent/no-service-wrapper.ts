@@ -14,7 +14,7 @@ import { AST_NODE_TYPES, ESLintUtils, TSESTree } from '@typescript-eslint/utils'
 import getDocumentationUrl from '../get-documentation-url';
 import { getEnclosingScopeNode } from '../library/ts-tree';
 import { getIndentation } from '../library/format';
-import { PLAIN_URL_REGEXP, replaceEndpointUrlPrefixWithDomain, TOKENIZED_URL_REGEXP } from './url';
+import { isServiceApiCallUrl, replaceEndpointUrlPrefixWithDomain } from './url';
 
 export const ruleId = 'no-service-wrapper';
 
@@ -50,7 +50,7 @@ const rule: ESLintUtils.RuleModule<'unknownError' | 'preferNativeFetch' | 'inval
         urlArgument?.type === AST_NODE_TYPES.TemplateLiteral
       ) {
         const urlText = sourceCode.getText(urlArgument);
-        return PLAIN_URL_REGEXP.test(urlText) || TOKENIZED_URL_REGEXP.test(urlText);
+        return isServiceApiCallUrl(urlText);
       }
 
       if (urlArgument?.type === AST_NODE_TYPES.Identifier) {

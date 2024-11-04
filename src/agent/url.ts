@@ -1,13 +1,20 @@
 // agent/url.ts
 
 // eslint-disable-next-line @typescript-eslint/no-inferrable-types
-export const PLAIN_URL_REGEXP: RegExp = /^[`']\/\w+(?<serviceNamePart>-\w+)*\/v\d+\/(?<any>.|\r|\n)+[`']$/u;
+const PLAIN_URL_REGEXP: RegExp = /^[`']\/\w+(?<serviceNamePart>-\w+)*\/v\d+\/(?<any>.|\r|\n)+[`']$/u;
 // eslint-disable-next-line @typescript-eslint/no-inferrable-types
-export const TOKENIZED_URL_REGEXP: RegExp = /^`\$\{(?<serviceNamePart>[A-Z]+_)*BASE_PATH\}\/(?<any>.|\r|\n)+`$/u;
+const TOKENIZED_URL_REGEXP: RegExp = /^`\$\{(?<serviceNamePart>[A-Z]+_)*BASE_PATH\}\/(?<any>.|\r|\n)+`$/u;
+
+export function isServiceApiCallUrl(url: string): boolean {
+  return PLAIN_URL_REGEXP.test(url) || TOKENIZED_URL_REGEXP.test(url);
+}
 
 export function replaceEndpointUrlPrefixWithBasePath(url: string): string {
-  // eslint-disable-next-line no-template-curly-in-string
-  return url.replace(/^`\/\w+(?<parts>-\w+)*\/v\d+\//u, '`${BASE_PATH}/');
+  return url.replace(
+    /^(?<quotStart>[`'])\/(?<servicename>\w+(?<parts>-\w+)*)(?<path>\/v\d+\/)(?<endpoint>(?<any>.|\r|\n)+)(?<quotEnd>[`'])$/u,
+    // eslint-disable-next-line no-template-curly-in-string
+    '`${BASE_PATH}/$5`',
+  );
 }
 
 export function replaceEndpointUrlPrefixWithDomain(url: string): string {
