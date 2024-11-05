@@ -50,7 +50,9 @@ const rule: ESLintUtils.RuleModule<'addBasePathConst'> = createRule({
 
         const swaggerPath = getSwaggerPathByIndexFile(context.filename);
         const swaggerFileContents = loadSwagger(swaggerPath);
-        const baseUrlLine = swaggerFileContents.split('\n').find((line) => /^\s*-\s*url:\s*\/.*$/u.test(line));
+        const baseUrlLine = swaggerFileContents
+          .split('\n')
+          .find((line) => /^\s*-\s*url:\s*\/.*$/u.test(line) || /^basePath:.*/u.test(line));
         const baseUrl = baseUrlLine?.split(':')[1]?.trim();
         assert(baseUrl !== undefined);
 

@@ -28,5 +28,14 @@ export const BASE_PATH = 'https://ping.checkdigit/ping/v1';
 `,
       errors: [{ messageId: 'addBasePathConst' }],
     },
+    {
+      name: 'add BASE_PATH const for swagger 2.0',
+      filename: 'src/api/v2/index.ts',
+      code: `import ping from './ping';`,
+      output: `import ping from './ping';
+export const BASE_PATH = 'https://ping.checkdigit/ping/v2';
+`,
+      errors: [{ messageId: 'addBasePathConst' }],
+    },
   ],
 });

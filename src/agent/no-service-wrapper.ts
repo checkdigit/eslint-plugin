@@ -57,10 +57,12 @@ const rule: ESLintUtils.RuleModule<'unknownError' | 'preferNativeFetch' | 'inval
         const foundVariable = scope.variables.find((variable) => variable.name === urlArgument.name);
         if (foundVariable) {
           const variableDefinition = foundVariable.defs.find((def) => def.type === DefinitionType.Variable);
-          assert.ok(variableDefinition, `Variable "${urlArgument.name}" not defined in scope`);
-          const variableDefinitionNode = variableDefinition.node;
-          assert.ok(variableDefinitionNode.init, 'Variable definition node has no init property');
-          return isUrlArgumentValid(variableDefinitionNode.init, scope);
+          if (variableDefinition !== undefined) {
+            const variableDefinitionNode = variableDefinition.node;
+            assert.ok(variableDefinitionNode.init, 'Variable definition node has no init property');
+            return isUrlArgumentValid(variableDefinitionNode.init, scope);
+          }
+          return true;
         }
       }
 

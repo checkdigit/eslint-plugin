@@ -59,7 +59,11 @@ function analyzeFixtureCall(call: SimpleCallExpression, results: FixtureCallInfo
     // direct return, no variable declaration or await
     results.fixtureNode = call;
     results.rootNode = parent;
-  } else if (parent.type === 'ArrayExpression' || parent.type === 'CallExpression') {
+  } else if (
+    parent.type === 'ArrayExpression' ||
+    parent.type === 'CallExpression' ||
+    parent.type === 'ArrowFunctionExpression'
+  ) {
     // direct return, no variable declaration or await
     results.fixtureNode = call;
     results.rootNode = call;
