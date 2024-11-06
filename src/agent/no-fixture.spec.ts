@@ -620,5 +620,23 @@ createTester().run(ruleId, rule, {
         `,
       errors: 1,
     },
+    {
+      name: 'assignment statement instead of variable declaration used for subsequent fixture calls',
+      code: `
+          let response = await fixture.api.get(\`\${BASE_PATH}/ping\`).expect(StatusCodes.OK);
+          response = await fixture.api.get(\`\${BASE_PATH}/ping2\`).expect(StatusCodes.OK);
+        `,
+      output: `
+          let response = await fetch(\`\${BASE_PATH}/ping\`, {
+            method: 'GET',
+          });
+          assert.equal(response.status, StatusCodes.OK);
+          response = await fetch(\`\${BASE_PATH}/ping2\`, {
+            method: 'GET',
+          });
+          assert.equal(response.status, StatusCodes.OK);
+        `,
+      errors: 2,
+    },
   ],
 });

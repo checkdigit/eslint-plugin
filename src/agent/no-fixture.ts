@@ -12,6 +12,7 @@ import type {
   AwaitExpression,
   CallExpression,
   Expression,
+  ExpressionStatement,
   MemberExpression,
   Node,
   ObjectPattern,
@@ -38,9 +39,10 @@ import { replaceEndpointUrlPrefixWithBasePath } from './url';
 export const ruleId = 'no-fixture';
 
 interface FixtureCallInformation {
-  rootNode: AwaitExpression | ReturnStatement | VariableDeclaration | SimpleCallExpression;
+  rootNode: AwaitExpression | ReturnStatement | VariableDeclaration | SimpleCallExpression | ExpressionStatement;
   fixtureNode: AwaitExpression | SimpleCallExpression;
   variableDeclaration?: VariableDeclaration;
+  variableAssignment?: ExpressionStatement;
   requestBody?: Expression;
   requestHeaders?: { name: Expression; value: Expression }[];
   assertions?: Expression[][];
@@ -80,6 +82,12 @@ function analyzeFixtureCall(call: SimpleCallExpression, results: FixtureCallInfo
       }
     } else if (enclosingStatement.type === 'VariableDeclaration') {
       results.variableDeclaration = enclosingStatement;
+      results.rootNode = enclosingStatement;
+    } else if (
+      enclosingStatement.type === 'ExpressionStatement' &&
+      enclosingStatement.expression.type === 'AssignmentExpression'
+    ) {
+      results.variableAssignment = enclosingStatement;
       results.rootNode = enclosingStatement;
     } else {
       results.rootNode = parent;
@@ -190,6 +198,14 @@ function getResponseVariableNameToUse(
   fixtureCallInformation: FixtureCallInformation,
   scopeVariablesMap: Map<Scope.Scope, string[]>,
 ) {
+  if (fixtureCallInformation.variableAssignment) {
+    assert.ok(
+      fixtureCallInformation.variableAssignment.expression.type === 'AssignmentExpression' &&
+        fixtureCallInformation.variableAssignment.expression.left.type === 'Identifier',
+    );
+    return fixtureCallInformation.variableAssignment.expression.left.name;
+  }
+
   if (fixtureCallInformation.variableDeclaration) {
     const firstDeclaration = fixtureCallInformation.variableDeclaration.declarations[0];
     if (firstDeclaration && firstDeclaration.id.type === 'Identifier') {
@@ -323,7 +339,9 @@ const rule: Rule.RuleModule = {
           const redefineResponseBodyVariableName = `${responseVariableNameToUse}Body`;
 
           const isResponseVariableRedefinitionNeeded =
-            (responseVariable === undefined && fixtureCallInformation.assertions !== undefined) ||
+            (fixtureCallInformation.variableAssignment === undefined &&
+              responseVariable === undefined &&
+              fixtureCallInformation.assertions !== undefined) ||
             isResponseBodyVariableRedefinitionNeeded;
 
           const responseBodyHeadersVariableRedefineLines = isResponseVariableRedefinitionNeeded
