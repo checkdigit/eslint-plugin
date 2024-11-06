@@ -1,4 +1,4 @@
-// no-full-response.spec.ts
+// no-serve-runtime.spec.ts
 
 /*
  * Copyright (c) 2021-2024 Check Digit, LLC

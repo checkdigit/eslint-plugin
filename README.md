@@ -15,7 +15,7 @@ Copyright (c) 2021-2024 [Check Digit, LLC](https://checkdigit.com)
 - `@checkdigit/no-test-import`
 - `@checkdigit/no-promise-instance-method`
 - `@checkdigit/invalid-json-stringify`
-- `@checkdigit/no-full-response`
+- `@checkdigit/no-legacy-service-typing`
 - `@checkdigit/require-resolve-full-response`
 - `@checkdigit/require-type-out-of-type-only-imports`
 

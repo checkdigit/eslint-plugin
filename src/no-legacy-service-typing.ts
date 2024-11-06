@@ -1,4 +1,4 @@
-// no-full-response.ts
+// no-legacy-service-typing.ts
 
 /*
  * Copyright (c) 2021-2024 Check Digit, LLC
