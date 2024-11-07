@@ -28,7 +28,7 @@ interface Change {
   // replacementText: string;
 }
 
-const rule: ESLintUtils.RuleModule<'unknownError' | 'replaceBodyWithJson'> = createRule({
+const rule: ESLintUtils.RuleModule<'unknownError' | 'replaceBodyWithJson' | 'refactorNeeded'> = createRule({
   name: ruleId,
   meta: {
     type: 'suggestion',
@@ -36,6 +36,8 @@ const rule: ESLintUtils.RuleModule<'unknownError' | 'replaceBodyWithJson'> = cre
       description: 'Replace "response.body" with "await response.json()".',
     },
     messages: {
+      refactorNeeded:
+        'Please extract the fetch call and check its reponse status code before accessing its response body.',
       replaceBodyWithJson: 'Replace "response.body" with "await response.json()".',
       unknownError: 'Unknown error occurred in file "{{fileName}}": {{ error }}.',
     },
@@ -59,6 +61,14 @@ const rule: ESLintUtils.RuleModule<'unknownError' | 'replaceBodyWithJson'> = cre
             responseType.getProperties().some((symbol) => symbol.name === 'json');
 
           if (shouldReplace) {
+            if (responseBodyNode.object.type !== AST_NODE_TYPES.Identifier) {
+              context.report({
+                node: responseBodyNode,
+                messageId: 'refactorNeeded',
+              });
+              return;
+            }
+
             const enclosingFunction = getAncestor(
               responseBodyNode,
               (node: TSESTree.Node) =>
@@ -77,14 +87,23 @@ const rule: ESLintUtils.RuleModule<'unknownError' | 'replaceBodyWithJson'> = cre
             const enclosingStatementIndex = (enclosingFunction.body as TSESTree.BlockStatement).body.indexOf(
               enclosingStatement,
             );
-            const responseVariableName = (responseBodyNode.object as TSESTree.Identifier).name;
+            const responseVariableName = responseBodyNode.object.name;
             const isResponseBodyVariableDeclared =
               enclosingStatement.type === AST_NODE_TYPES.VariableDeclaration &&
-              enclosingStatement.declarations.some((declaration) => declaration.init === responseBodyNode);
+              enclosingStatement.declarations.some(
+                (declaration) =>
+                  declaration.init === responseBodyNode ||
+                  (declaration.init?.type === AST_NODE_TYPES.TSAsExpression &&
+                    declaration.init.expression === responseBodyNode),
+              );
             const responseBodyVariableName = isResponseBodyVariableDeclared
-              ? (enclosingStatement.declarations.find((declaration) => declaration.init === responseBodyNode)
-                  ?.id as unknown as string)
-              : `${(responseBodyNode.object as TSESTree.Identifier).name}Body`;
+              ? (enclosingStatement.declarations.find(
+                  (declaration) =>
+                    declaration.init === responseBodyNode ||
+                    (declaration.init?.type === AST_NODE_TYPES.TSAsExpression &&
+                      declaration.init.expression === responseBodyNode),
+                )?.id as unknown as string)
+              : `${responseBodyNode.object.name}Body`;
 
             const change: Change = {
               enclosingFunction,
@@ -121,7 +140,7 @@ const rule: ESLintUtils.RuleModule<'unknownError' | 'replaceBodyWithJson'> = cre
           return;
         }
 
-        const fixes: { node: TSESTree.Node; text: string; insert: boolean }[] = [];
+        const fixes: { node: TSESTree.Node | TSESTree.Token; text: string; insert: boolean }[] = [];
         for (const changesByFunction of allChanges.values()) {
           for (const changesByResponse of changesByFunction.values()) {
             const orderedChanges = changesByResponse.sort(
@@ -141,8 +160,8 @@ const rule: ESLintUtils.RuleModule<'unknownError' | 'replaceBodyWithJson'> = cre
             let remainingChanges;
             if (!isResponseBodyVariableDeclared) {
               fixes.push({
-                node: enclosingStatement,
-                text: `const ${responseBodyVariableName} = await ${responseVariableName}.json();\n`,
+                node: context.sourceCode.getTokenBefore(enclosingStatement) as TSESTree.Token,
+                text: `\nconst ${responseBodyVariableName} = await ${responseVariableName}.json();`,
                 insert: true,
               });
               remainingChanges = orderedChanges;
@@ -161,12 +180,12 @@ const rule: ESLintUtils.RuleModule<'unknownError' | 'replaceBodyWithJson'> = cre
           }
         }
 
-        for (const fix of fixes) {
+        for (const fix of fixes.reverse()) {
           context.report({
             node: fix.node,
             messageId: 'replaceBodyWithJson',
             fix(fixer) {
-              return fix.insert ? fixer.insertTextBefore(fix.node, fix.text) : fixer.replaceText(fix.node, fix.text);
+              return fix.insert ? fixer.insertTextAfter(fix.node, fix.text) : fixer.replaceText(fix.node, fix.text);
             },
           });
         }

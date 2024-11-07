@@ -350,7 +350,7 @@ const rule: Rule.RuleModule = {
                 ...(destructuringResponseBodyVariable
                   ? [
                       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-                      `const ${(destructuringResponseBodyVariable as ObjectPattern).type === 'ObjectPattern' ? sourceCode.getText(destructuringResponseBodyVariable as ObjectPattern) : (destructuringResponseBodyVariable as Scope.Variable).name} = ${getResponseBodyRetrievalText(responseVariableNameToUse)}`,
+                      `${fixtureCallInformation.variableDeclaration?.kind ?? 'const'} ${(destructuringResponseBodyVariable as ObjectPattern).type === 'ObjectPattern' ? sourceCode.getText(destructuringResponseBodyVariable as ObjectPattern) : (destructuringResponseBodyVariable as Scope.Variable).name} = ${getResponseBodyRetrievalText(responseVariableNameToUse)}`,
                     ]
                   : isResponseBodyVariableRedefinitionNeeded
                     ? [
@@ -374,7 +374,7 @@ const rule: Rule.RuleModule = {
           const fetchCallText = `fetch(${fetchUrlArgumentText}, ${fetchRequestArgumentLines})`;
           const fetchStatementText = !isResponseVariableRedefinitionNeeded
             ? fetchCallText
-            : `const ${responseVariableNameToUse} = await ${fetchCallText}`;
+            : `${fixtureCallInformation.variableDeclaration?.kind ?? 'const'} ${responseVariableNameToUse} = await ${fetchCallText}`;
 
           const nodeToReplace = isResponseVariableRedefinitionNeeded
             ? fixtureCallInformation.rootNode

@@ -40,8 +40,8 @@ createTester().run(ruleId, rule, {
       }`,
       output: `() => {
         const response = await fetch(url);
-        const responseBody = await response.json();
-const data = responseBody.data;
+const responseBody = await response.json();
+        const data = responseBody.data;
       }`,
       errors: [{ messageId: 'replaceBodyWithJson' }, { messageId: 'replaceBodyWithJson' }],
     },
@@ -53,8 +53,8 @@ const data = responseBody.data;
       }`,
       output: `() => {
         const response = await fetch(url);
-        const responseBody = await response.json();
-assert(responseBody);
+const responseBody = await response.json();
+        assert(responseBody);
       }`,
       errors: [{ messageId: 'replaceBodyWithJson' }, { messageId: 'replaceBodyWithJson' }],
     },
@@ -66,8 +66,8 @@ assert(responseBody);
       }`,
       output: `() => {
         const response = await fetch(url);
-        const responseBody = await response.json();
-assert(responseBody.data);
+const responseBody = await response.json();
+        assert(responseBody.data);
       }`,
       errors: [{ messageId: 'replaceBodyWithJson' }, { messageId: 'replaceBodyWithJson' }],
     },
@@ -82,8 +82,8 @@ assert(responseBody.data);
       output: `
         async function foo() {
           const response = await fetch(url);
-          const responseBody = await response.json();
-return responseBody;
+const responseBody = await response.json();
+          return responseBody;
         }
       `,
       errors: [{ messageId: 'replaceBodyWithJson' }, { messageId: 'replaceBodyWithJson' }],
@@ -96,8 +96,8 @@ return responseBody;
       }`,
       output: `() => {
         const response = await fetch(url);
-        const responseBody = await response.json();
-return responseBody.data;
+const responseBody = await response.json();
+        return responseBody.data;
       }`,
       errors: [{ messageId: 'replaceBodyWithJson' }, { messageId: 'replaceBodyWithJson' }],
     },
@@ -110,8 +110,8 @@ return responseBody.data;
       }`,
       output: `() => {
         const response = await fetch(url);
-        const responseBody = await response.json();
-assert(responseBody);
+const responseBody = await response.json();
+        assert(responseBody);
         assert(responseBody.data);
       }`,
       errors: [
@@ -130,11 +130,11 @@ assert(responseBody);
       }`,
       output: `() => {
         const response = await fetch(url);
-        const responseBody = await response.json();
-assert(responseBody);
+const responseBody = await response.json();
+        assert(responseBody);
         const response2 = await fetch(url2);
-        const response2Body = await response2.json();
-assert(response2Body);
+const response2Body = await response2.json();
+        assert(response2Body);
       }`,
       errors: [
         { messageId: 'replaceBodyWithJson' },
@@ -155,12 +155,12 @@ assert(response2Body);
       }`,
       output: `() => {
         const response = await fetch(url);
-        const responseBody = await response.json();
-assert(responseBody);
+const responseBody = await response.json();
+        assert(responseBody);
         assert(responseBody.data);
         const response2 = await fetch(url2);
-        const response2Body = await response2.json();
-assert(response2Body);
+const response2Body = await response2.json();
+        assert(response2Body);
         assert(response2Body.data);
       }`,
       errors: [
@@ -185,11 +185,11 @@ assert(response2Body);
       output: `() => {
         const response = await fetch(url);
         const response2 = await fetch(url2);
-        const response2Body = await response2.json();
-assert(response2Body.data);
+const response2Body = await response2.json();
+        assert(response2Body.data);
         assert(response2Body);
-        const responseBody = await response.json();
-assert(responseBody);
+const responseBody = await response.json();
+        assert(responseBody);
         assert(responseBody.data);
       }`,
       errors: [
@@ -218,17 +218,17 @@ assert(responseBody);
       output: `() => {
         const response = await fetch(url);
         const response2 = await fetch(url2);
-        const response2Body = await response2.json();
-assert(response2Body.data);
+const response2Body = await response2.json();
+        assert(response2Body.data);
         assert(response2Body);
-        const responseBody = await response.json();
-assert(responseBody);
+const responseBody = await response.json();
+        assert(responseBody);
         assert(responseBody.data);
       }
       () => {
         const response = await fetch(url3);
-        const responseBody = await response.json();
-return responseBody;
+const responseBody = await response.json();
+        return responseBody;
       }`,
       errors: [
         { messageId: 'replaceBodyWithJson' },
@@ -240,6 +240,26 @@ return responseBody;
         { messageId: 'replaceBodyWithJson' },
         { messageId: 'replaceBodyWithJson' },
       ],
+    },
+    {
+      name: 'work with expression like body.forEach',
+      code: `() => {
+        const response = await fetch(url);
+        response.body.forEach(() => {});
+      }`,
+      output: `() => {
+        const response = await fetch(url);
+const responseBody = await response.json();
+        responseBody.forEach(() => {});
+      }`,
+      errors: [{ messageId: 'replaceBodyWithJson' }, { messageId: 'replaceBodyWithJson' }],
+    },
+    {
+      name: 'report error for inline fetch call',
+      code: `() => {
+        (await fetch(url)).body;
+      }`,
+      errors: [{ messageId: 'refactorNeeded' }],
     },
   ],
 });

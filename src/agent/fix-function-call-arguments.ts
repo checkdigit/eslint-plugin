@@ -22,6 +22,7 @@ const DEFAULT_OPTIONS = {
     'Fixture<ResolvedServices>',
     'InboundContext',
     '{ get: () => string; }',
+    'Api',
   ],
 };
 
@@ -77,7 +78,21 @@ const rule: ESLintUtils.RuleModule<
 
         log('===== file name:', context.filename);
         log('callExpression:', sourceCode.getText(callExpression));
+
         try {
+          const actualParameters = callExpression.arguments;
+          if (
+            !actualParameters.some((actualParameter) => {
+              const actualType = typeChecker.getTypeAtLocation(
+                parserServices.esTreeNodeToTSNodeMap.get(actualParameter),
+              );
+              const actualTypeString = typeChecker.typeToString(actualType);
+              return typesToCheck.includes(actualTypeString) || actualTypeString.endsWith('RequestType');
+            })
+          ) {
+            return;
+          }
+
           const calleeTsNode = parserServices.esTreeNodeToTSNodeMap.get(callExpression.callee);
           const calleeType = typeChecker.getTypeAtLocation(calleeTsNode);
 
@@ -88,13 +103,14 @@ const rule: ESLintUtils.RuleModule<
           }
 
           const signature = signatures[0];
-          if (
-            signature === undefined ||
-            (signature.typeParameters !== undefined && signature.typeParameters.length > 0)
-          ) {
-            // ignore complex signatures with type parameters
-            return;
-          }
+          assert(signature);
+          // if (
+          //   signature === undefined ||
+          //   (signature.typeParameters !== undefined && signature.typeParameters.length > 0)
+          // ) {
+          //   // ignore complex signatures with type parameters
+          //   return;
+          // }
 
           log('signature:', signature.getDeclaration().getText());
           const expectedParameters = signature.getParameters();
@@ -105,7 +121,6 @@ const rule: ESLintUtils.RuleModule<
             ),
           );
           const expectedParametersCount = expectedParameters.length;
-          const actualParameters = callExpression.arguments;
           const actualParametersCount = actualParameters.length;
           if (actualParametersCount === 0) {
             return;
@@ -132,18 +147,15 @@ const rule: ESLintUtils.RuleModule<
             );
             log('actual type: #', actualParameterIndex, sourceCode.getText(actualParameter), actualTypeString);
 
-            if (!typesToCheck.includes(actualTypeString) && !actualTypeString.endsWith('RequestType')) {
-              // skip the parameter type checking if it's not in the candidate types
-              parametersToKeep.push(actualParameter);
-              expectedParameterIndex++;
-              log('skipped');
-            } else if (typeChecker.isTypeAssignableTo(actualType, expectedType)) {
-              parametersToKeep.push(actualParameter);
-              expectedParameterIndex++;
-              log('matched');
-            } else {
-              log('not matched');
+            if (
+              (typesToCheck.includes(actualTypeString) || actualTypeString.endsWith('RequestType')) &&
+              !typeChecker.isTypeAssignableTo(actualType, expectedType)
+            ) {
+              log('removing un-matched parameter', sourceCode.getText(actualParameter));
+              continue;
             }
+            parametersToKeep.push(actualParameter);
+            expectedParameterIndex++;
           }
 
           if (parametersToKeep.length === actualParametersCount) {
