@@ -376,10 +376,17 @@ const rule: Rule.RuleModule = {
                     : []),
                 // eslint-disable-next-line no-nested-ternary
                 ...(destructuringResponseHeadersVariable
-                  ? [
-                      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-                      `${fixtureCallInformation.variableDeclaration?.kind ?? 'const'} ${(destructuringResponseHeadersVariable as ObjectPattern).type === 'ObjectPattern' ? sourceCode.getText(destructuringResponseHeadersVariable as ObjectPattern) : (destructuringResponseHeadersVariable as Scope.Variable).name} = ${getResponseHeadersRetrievalText(responseVariableNameToUse)}`,
-                    ]
+                  ? // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+                    (destructuringResponseHeadersVariable as ObjectPattern).type === 'ObjectPattern'
+                    ? (destructuringResponseHeadersVariable as ObjectPattern).properties.map((property) => {
+                        assert.ok(property.type === 'Property');
+                        assert.equal(property.value.type, 'Identifier');
+                        // eslint-disable-next-line sonarjs/no-nested-template-literals
+                        return `${fixtureCallInformation.variableDeclaration?.kind ?? 'const'} ${property.value.name} = ${getResponseHeadersRetrievalText(responseVariableNameToUse)}.get(${property.key.type === 'Literal' ? sourceCode.getText(property.key) : `'${sourceCode.getText(property.key)}'`})`;
+                      })
+                    : [
+                        `${fixtureCallInformation.variableDeclaration?.kind ?? 'const'} ${(destructuringResponseHeadersVariable as Scope.Variable).name} = ${getResponseHeadersRetrievalText(responseVariableNameToUse)}`,
+                      ]
                   : isResponseHeadersVariableRedefinitionNeeded
                     ? [
                         `const ${redefineResponseHeadersVariableName} = ${getResponseHeadersRetrievalText(responseVariableNameToUse)}`,

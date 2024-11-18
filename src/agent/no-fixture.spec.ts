@@ -648,7 +648,22 @@ createTester().run(ruleId, rule, {
           method: 'GET',
         });
         assert.equal(response.status, StatusCodes.OK);
-        const { etag } = response.headers;
+        const etag = response.headers.get('etag');
+      `,
+      errors: 1,
+    },
+    {
+      name: 'nested header destructuring - string literal key with renaming',
+      code: `
+        const { headers: { 'created-on': createdOn, 'updated-on': updatedOn } } = await fixture.api.get(\`\${BASE_PATH}/ping\`).expect(StatusCodes.OK);
+      `,
+      output: `
+        const response = await fetch(\`\${BASE_PATH}/ping\`, {
+          method: 'GET',
+        });
+        assert.equal(response.status, StatusCodes.OK);
+        const createdOn = response.headers.get('created-on');
+        const updatedOn = response.headers.get('updated-on');
       `,
       errors: 1,
     },
