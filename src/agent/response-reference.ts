@@ -29,7 +29,7 @@ export function analyzeResponseReferences(
   headersReferences: MemberExpression[];
   statusReferences: MemberExpression[];
   destructuringBodyVariable?: Scope.Variable | ObjectPattern;
-  destructuringHeadersVariable?: Scope.Variable;
+  destructuringHeadersVariable?: Scope.Variable | ObjectPattern;
   destructuringHeadersReferences?: MemberExpression[] | undefined;
 } {
   const results: {
@@ -38,7 +38,7 @@ export function analyzeResponseReferences(
     headersReferences: MemberExpression[];
     statusReferences: MemberExpression[];
     destructuringBodyVariable?: Scope.Variable | ObjectPattern;
-    destructuringHeadersVariable?: Scope.Variable;
+    destructuringHeadersVariable?: Scope.Variable | ObjectPattern;
     destructuringHeadersReferences?: MemberExpression[] | undefined;
   } = {
     bodyReferences: [],
@@ -105,12 +105,19 @@ export function analyzeResponseReferences(
             getParent(parent)?.type !== 'CallExpression',
         );
     } else if (identifierParent.type === 'Property') {
-      // body reference through nested destruction, e.g. "const { body: {bodyPropertyName: renamedBodyPropertyName}, headers: {headerPropertyName: renamedHeaderPropertyName} } = ..."
       const parent = getParent(identifierParent);
       if (parent?.type === 'ObjectPattern') {
+        // body reference through nested destruction, e.g. "const { body: {bodyPropertyName: renamedBodyPropertyName}, headers: {headerPropertyName: renamedHeaderPropertyName} } = ..."
         const parent2 = getParent(parent);
         if (parent2?.type === 'Property' && parent2.key.type === 'Identifier' && parent2.key.name === 'body') {
           results.destructuringBodyVariable = parent;
+        }
+        if (
+          parent2?.type === 'Property' &&
+          parent2.key.type === 'Identifier' &&
+          (parent2.key.name === 'header' || parent2.key.name === 'headers')
+        ) {
+          results.destructuringHeadersVariable = parent;
         }
       }
     } else {

@@ -8,6 +8,10 @@ export function getResponseBodyRetrievalText(responseVariableName: string) {
   return `await ${responseVariableName}.json()`;
 }
 
+export function getResponseHeadersRetrievalText(responseVariableName: string) {
+  return `${responseVariableName}.headers`;
+}
+
 export function isInvalidResponseHeadersAccess(responseHeadersAccess: Node): boolean {
   const responseHeaderAccessParent = getParent(responseHeadersAccess);
   if (responseHeaderAccessParent?.type === 'VariableDeclarator') {

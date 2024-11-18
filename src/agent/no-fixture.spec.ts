@@ -222,8 +222,8 @@ createTester().run(ruleId, rule, {
           const response = await fetch(\`\${BASE_PATH}/ping\`, {
             method: 'GET',
           });
-          assert.ok(validate(response));
-          assert.ok(console.log(response));
+          assert.doesNotThrow(()=>validate(response));
+          assert.doesNotThrow(()=>console.log(response));
         `,
       errors: 1,
     },
@@ -595,7 +595,7 @@ createTester().run(ruleId, rule, {
           });
           assert.equal(response.status, StatusCodes.NO_CONTENT);
           assert.equal(response.headers.get(ETAG_HEADER), '1');
-          assert.ok(verifyTemporalHeaders(response, createdOn));
+          assert.doesNotThrow(()=>verifyTemporalHeaders(response, createdOn));
         `,
       errors: 1,
     },
@@ -637,6 +637,20 @@ createTester().run(ruleId, rule, {
           assert.equal(response.status, StatusCodes.OK);
         `,
       errors: 2,
+    },
+    {
+      name: 'nested header destructuring',
+      code: `
+        const { headers: { etag } } = await fixture.api.get(\`\${BASE_PATH}/ping\`).expect(StatusCodes.OK);
+      `,
+      output: `
+        const response = await fetch(\`\${BASE_PATH}/ping\`, {
+          method: 'GET',
+        });
+        assert.equal(response.status, StatusCodes.OK);
+        const { etag } = response.headers;
+      `,
+      errors: 1,
     },
   ],
 });

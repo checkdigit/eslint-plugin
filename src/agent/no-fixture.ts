@@ -33,7 +33,7 @@ import getDocumentationUrl from '../get-documentation-url';
 import { getIndentation } from '../library/format';
 import { isValidPropertyName } from '../library/variable';
 import { analyzeResponseReferences } from './response-reference';
-import { getResponseBodyRetrievalText, hasAssertions } from './fetch';
+import { getResponseBodyRetrievalText, getResponseHeadersRetrievalText, hasAssertions } from './fetch';
 import { replaceEndpointUrlPrefixWithBasePath } from './url';
 
 export const ruleId = 'no-fixture';
@@ -48,6 +48,7 @@ interface FixtureCallInformation {
   assertions?: Expression[][];
   inlineStatementNode?: Node;
   inlineBodyReference?: MemberExpression;
+  inlineHeadersReference?: MemberExpression;
 }
 
 // recursively analyze the fixture/supertest call chain to collect information of request/response
@@ -79,6 +80,12 @@ function analyzeFixtureCall(call: SimpleCallExpression, results: FixtureCallInfo
       results.inlineStatementNode = enclosingStatement;
       if (awaitParent.property.type === 'Identifier' && awaitParent.property.name === 'body') {
         results.inlineBodyReference = awaitParent;
+      }
+      if (
+        awaitParent.property.type === 'Identifier' &&
+        (awaitParent.property.name === 'header' || awaitParent.property.name === 'headers')
+      ) {
+        results.inlineHeadersReference = awaitParent;
       }
     } else if (enclosingStatement.type === 'VariableDeclaration') {
       results.variableDeclaration = enclosingStatement;
@@ -156,10 +163,12 @@ function createResponseAssertions(
             responseVariableName,
           );
         }
-        nonStatusAssertions.push(`assert.ok(${functionBody})`);
+        nonStatusAssertions.push(`assert.doesNotThrow(()=>${functionBody})`);
       } else if (assertionArgument.type === 'Identifier') {
         // callback assertion using function reference
-        nonStatusAssertions.push(`assert.ok(${sourceCode.getText(assertionArgument)}(${responseVariableName}))`);
+        nonStatusAssertions.push(
+          `assert.doesNotThrow(()=>${sourceCode.getText(assertionArgument)}(${responseVariableName}))`,
+        );
       } else if (assertionArgument.type === 'ObjectExpression' || assertionArgument.type === 'CallExpression') {
         // body deep equal assertion
         nonStatusAssertions.push(
@@ -338,11 +347,19 @@ const rule: Rule.RuleModule = {
             (responseBodyReferences.length > 0 && !responseBodyReferences.some(isResponseBodyRedefinition));
           const redefineResponseBodyVariableName = `${responseVariableNameToUse}Body`;
 
+          const isResponseHeadersVariableRedefinitionNeeded =
+            (destructuringResponseHeadersVariable !== undefined &&
+              // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+              (destructuringResponseHeadersVariable as ObjectPattern).type === 'ObjectPattern') ||
+            fixtureCallInformation.inlineHeadersReference !== undefined;
+          const redefineResponseHeadersVariableName = `${responseVariableNameToUse}Headers`;
+
           const isResponseVariableRedefinitionNeeded =
             (fixtureCallInformation.variableAssignment === undefined &&
               responseVariable === undefined &&
               fixtureCallInformation.assertions !== undefined) ||
-            isResponseBodyVariableRedefinitionNeeded;
+            isResponseBodyVariableRedefinitionNeeded ||
+            isResponseHeadersVariableRedefinitionNeeded;
 
           const responseBodyHeadersVariableRedefineLines = isResponseVariableRedefinitionNeeded
             ? [
@@ -357,9 +374,17 @@ const rule: Rule.RuleModule = {
                         `const ${redefineResponseBodyVariableName} = ${getResponseBodyRetrievalText(responseVariableNameToUse)}`,
                       ]
                     : []),
+                // eslint-disable-next-line no-nested-ternary
                 ...(destructuringResponseHeadersVariable
-                  ? [`const ${destructuringResponseHeadersVariable.name} = ${responseVariableNameToUse}.headers`]
-                  : []),
+                  ? [
+                      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+                      `${fixtureCallInformation.variableDeclaration?.kind ?? 'const'} ${(destructuringResponseHeadersVariable as ObjectPattern).type === 'ObjectPattern' ? sourceCode.getText(destructuringResponseHeadersVariable as ObjectPattern) : (destructuringResponseHeadersVariable as Scope.Variable).name} = ${getResponseHeadersRetrievalText(responseVariableNameToUse)}`,
+                    ]
+                  : isResponseHeadersVariableRedefinitionNeeded
+                    ? [
+                        `const ${redefineResponseHeadersVariableName} = ${getResponseHeadersRetrievalText(responseVariableNameToUse)}`,
+                      ]
+                    : []),
               ]
             : [];
 
@@ -367,7 +392,7 @@ const rule: Rule.RuleModule = {
             fixtureCallInformation,
             sourceCode,
             responseVariableNameToUse,
-            destructuringResponseHeadersVariable,
+            destructuringResponseHeadersVariable as Scope.Variable | undefined,
           );
 
           // add variable declaration if needed

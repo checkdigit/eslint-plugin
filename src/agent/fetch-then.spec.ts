@@ -6,34 +6,31 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import { describe } from '@jest/globals';
-
 import createTester from '../tester.test';
 import rule, { ruleId } from './fetch-then';
 
-describe(ruleId, () => {
-  createTester().run(ruleId, rule, {
-    valid: [
-      {
-        name: 'skip regular fixture calls which will be handled in "no-fixture" rule',
-        code: `
+createTester().run(ruleId, rule, {
+  valid: [
+    {
+      name: 'skip regular fixture calls which will be handled in "no-fixture" rule',
+      code: `
           const pingResponse = await fixture.api.get(\`/sample-service/v1/ping\`).expect(StatusCodes.OK);
           const body = pingResponse.body;
           const timeDifference = Date.now() - new Date(body.serverTime).getTime();
           assert.ok(timeDifference >= 0 && timeDifference < 200);
         `,
-      },
-    ],
-    invalid: [
-      {
-        name: 'with assertions',
-        code: `
+    },
+  ],
+  invalid: [
+    {
+      name: 'with assertions',
+      code: `
           const responses = await Promise.all([
             fixture.api.put(\`\${BASE_PATH}/key\`).send(keyData).expect(StatusCodes.NO_CONTENT),
             fixture.api.put(\`\${BASE_PATH}/key\`).send(keyData).expect(StatusCodes.NO_CONTENT),
           ]);
         `,
-        output: `
+      output: `
           const responses = await Promise.all([
             // eslint-disable-next-line @checkdigit/no-promise-instance-method
             fetch(\`\${BASE_PATH}/key\`, {
@@ -53,11 +50,11 @@ describe(ruleId, () => {
             }),
           ]);
         `,
-        errors: 2,
-      },
-      {
-        name: 'adjust header access correctly',
-        code: `
+      errors: 2,
+    },
+    {
+      name: 'adjust header access correctly',
+      code: `
           const responses = await Promise.all([
             fixture.api.put(\`\${BASE_PATH}/key\`).send(keyData).expect(StatusCodes.NO_CONTENT),
             fixture.api.put(\`\${BASE_PATH}/key\`).send(keyData).expect(StatusCodes.NO_CONTENT),
@@ -67,7 +64,7 @@ describe(ruleId, () => {
           assert.equal(responses[0].get(CREATED_ON_HEADER), responses[1].get(CREATED_ON_HEADER));
           assert.equal(responses[0].headers.get(UPDATED_ON_HEADER), responses[1].headers.get(UPDATED_ON_HEADER));
         `,
-        output: `
+      output: `
           const responses = await Promise.all([
             // eslint-disable-next-line @checkdigit/no-promise-instance-method
             fetch(\`\${BASE_PATH}/key\`, {
@@ -91,11 +88,11 @@ describe(ruleId, () => {
           assert.equal(responses[0].headers.get(CREATED_ON_HEADER), responses[1].headers.get(CREATED_ON_HEADER));
           assert.equal(responses[0].headers.get(UPDATED_ON_HEADER), responses[1].headers.get(UPDATED_ON_HEADER));
         `,
-        errors: 12,
-      },
-      {
-        name: 'in non-async arrow function with concurrent promises',
-        code: `
+      errors: 12,
+    },
+    {
+      name: 'in non-async arrow function with concurrent promises',
+      code: `
           await Promise.all(
             Object.keys(zoneKeyPartImportRequest).map((propertyName) => {
               const requestWithPropertyMissing = omit(
@@ -111,7 +108,7 @@ describe(ruleId, () => {
             }),
           );
         `,
-        output: `
+      output: `
           await Promise.all(
             Object.keys(zoneKeyPartImportRequest).map((propertyName) => {
               const requestWithPropertyMissing = omit(
@@ -131,8 +128,7 @@ describe(ruleId, () => {
             }),
           );
         `,
-        errors: 1,
-      },
-    ],
-  });
+      errors: 1,
+    },
+  ],
 });

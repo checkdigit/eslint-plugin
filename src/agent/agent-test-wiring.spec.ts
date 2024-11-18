@@ -233,5 +233,39 @@ await agent[Symbol.asyncDispose]();
       `,
       errors: [{ messageId: 'updateTestWiring' }],
     },
+    {
+      name: 'only beforeEach is presented',
+      filename: `src/api/v1/ping.spec.ts`,
+      code: `
+import { beforeEach, describe, it } from '@jest/globals';
+import { amazonSetup } from '@checkdigit/amazon';
+import { createFixture } from '@checkdigit/fixture';
+describe('/ping', () => {
+  const fixture = createFixture(amazonSetup);
+  beforeEach(() => fixture.reset());
+});
+      `,
+      output: `
+import { afterAll, beforeAll, beforeEach, describe, it } from '@jest/globals';
+import { amazonSetup } from '@checkdigit/amazon';
+import { createFixture } from '@checkdigit/fixture';
+import createAgent, { type Agent } from '@checkdigit/agent';
+import fixturePlugin from '../../plugin/fixture.test';
+describe('/ping', () => {
+  const fixture = createFixture(amazonSetup);
+  let agent: Agent;
+beforeAll(async () => {
+agent = await createAgent();
+agent.register(await fixturePlugin(fixture));
+agent.enable();
+});
+beforeEach(() => fixture.reset());
+afterAll(async () => {
+await agent[Symbol.asyncDispose]();
+});
+});
+      `,
+      errors: [{ messageId: 'updateTestWiring' }],
+    },
   ],
 });

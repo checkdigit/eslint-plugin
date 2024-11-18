@@ -103,10 +103,12 @@ function createResponseAssertions(
             responseVariableName,
           );
         }
-        nonStatusAssertions.push(`assert.ok(${functionBody})`);
+        nonStatusAssertions.push(`assert.doesNotThrow(()=>${functionBody})`);
       } else if (assertionArgument.type === 'Identifier') {
         // callback assertion using function reference
-        nonStatusAssertions.push(`assert.ok(${sourceCode.getText(assertionArgument)}(${responseVariableName}))`);
+        nonStatusAssertions.push(
+          `assert.doesNotThrow(()=>${sourceCode.getText(assertionArgument)}(${responseVariableName}))`,
+        );
       } else if (assertionArgument.type === 'ObjectExpression' || assertionArgument.type === 'CallExpression') {
         // body deep equal assertion
         nonStatusAssertions.push(

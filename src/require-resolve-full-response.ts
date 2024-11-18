@@ -141,7 +141,7 @@ const rule: ESLintUtils.RuleModule<'invalidOptions' | 'unknownError'> = createRu
 
           const enclosingScopeNode = getEnclosingScopeNode(serviceCall);
           assert.ok(enclosingScopeNode, 'enclosingScopeNode is undefined');
-          const scope = scopeManager?.acquire(enclosingScopeNode); /*?*/
+          const scope = scopeManager?.acquire(enclosingScopeNode);
           assert.ok(scope, 'scope is undefined');
           const urlArgument = serviceCall.arguments[0];
           if (!isUrlArgumentValid(urlArgument, scope)) {
