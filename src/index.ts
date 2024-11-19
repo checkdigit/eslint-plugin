@@ -24,6 +24,8 @@ import requireTypeOutOfTypeOnlyImports, {
 import noServeRuntime, { ruleId as noServeRuntimeRuleId } from './no-serve-runtime';
 import filePathComment from './file-path-comment';
 import noCardNumbers from './no-card-numbers';
+import noSideEffects from './no-side-effects';
+import noRandomV4UUID from './no-random-v4-uuid';
 import noTestImport from './no-test-import';
 import noUuid from './no-uuid';
 import noWallabyComment from './no-wallaby-comment';
@@ -35,10 +37,12 @@ import requireStrictAssert from './require-strict-assert';
 const rules: Record<string, TSESLint.LooseRuleDefinition> = {
   'file-path-comment': filePathComment,
   'no-card-numbers': noCardNumbers,
+  'no-random-v4-uuid': noRandomV4UUID,
   'no-uuid': noUuid,
   'require-strict-assert': requireStrictAssert,
   'no-test-import': noTestImport,
   'no-wallaby-comment': noWallabyComment,
+  'no-side-effects': noSideEffects,
   'regular-expression-comment': regexComment,
   'require-assert-predicate-rejects-throws': requireAssertPredicateRejectsThrows,
   'object-literal-response': objectLiteralResponse,
@@ -56,7 +60,7 @@ const plugin: TSESLint.FlatConfig.Plugin = {
   rules,
 };
 
-const configs: Record<string, TSESLint.FlatConfig.Config | TSESLint.FlatConfig.Config[]> = {
+const configs: Record<string, TSESLint.FlatConfig.Config[]> = {
   all: [
     {
       files: ['**/*.ts'],
@@ -66,9 +70,11 @@ const configs: Record<string, TSESLint.FlatConfig.Config | TSESLint.FlatConfig.C
       rules: {
         '@checkdigit/no-card-numbers': 'error',
         '@checkdigit/file-path-comment': 'error',
+        '@checkdigit/no-random-v4-uuid': 'error',
         '@checkdigit/no-uuid': 'error',
         '@checkdigit/require-strict-assert': 'error',
         '@checkdigit/no-wallaby-comment': 'error',
+        '@checkdigit/no-side-effects': ['error', { excludedIdentifiers: ['assert', 'debug', 'log', 'promisify'] }],
         '@checkdigit/regular-expression-comment': 'error',
         '@checkdigit/require-assert-predicate-rejects-throws': 'error',
         '@checkdigit/object-literal-response': 'error',
@@ -93,22 +99,30 @@ const configs: Record<string, TSESLint.FlatConfig.Config | TSESLint.FlatConfig.C
       rules: {
         '@checkdigit/no-card-numbers': 'error',
         '@checkdigit/file-path-comment': 'off',
+        '@checkdigit/no-random-v4-uuid': 'error',
         '@checkdigit/no-uuid': 'error',
         '@checkdigit/require-strict-assert': 'error',
         '@checkdigit/no-wallaby-comment': 'off',
+        '@checkdigit/no-side-effects': 'error',
         '@checkdigit/regular-expression-comment': 'error',
         '@checkdigit/require-assert-predicate-rejects-throws': 'error',
         '@checkdigit/object-literal-response': 'error',
         '@checkdigit/no-test-import': 'error',
         [`@checkdigit/${invalidJsonStringifyRuleId}`]: 'error',
-        [`@checkdigit/${noPromiseInstanceMethodRuleId}`]: 'error',
+        [`@checkdigit/${noPromiseInstanceMethodRuleId}`]: 'off',
+        [`@checkdigit/${noLegacyServiceTypingRuleId}`]: 'off',
+        [`@checkdigit/${requireResolveFullResponseRuleId}`]: 'off',
+        [`@checkdigit/${noDuplicatedImportsRuleId}`]: 'error',
+        [`@checkdigit/${requireFixedServicesImportRuleId}`]: 'off',
+        [`@checkdigit/${requireTypeOutOfTypeOnlyImportsRuleId}`]: 'error',
+        [`@checkdigit/${noServeRuntimeRuleId}`]: 'off',
       },
     },
   ],
 };
 
 const defaultToExport: Exclude<TSESLint.FlatConfig.Plugin, 'config'> & {
-  configs: Record<string, TSESLint.FlatConfig.Config | TSESLint.FlatConfig.Config[]>;
+  configs: Record<string, TSESLint.FlatConfig.Config[]>;
 } = {
   ...plugin,
   configs,
