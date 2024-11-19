@@ -15,6 +15,14 @@ createTester().run(ruleId, rule, {
       name: 'correctly import service typing',
       code: `import type { Ping } from '../../services';`,
     },
+    {
+      name: 'correctly import service typing',
+      code: `import type { Ping } from '../../services/index';`,
+    },
+    {
+      name: 'correctly import service typing',
+      code: `import type { Ping } from '../../services/index.ts';`,
+    },
   ],
   invalid: [
     {
