@@ -14,9 +14,7 @@ import fetchResponseBodyJson, { ruleId as fetchResponseBodyJsonRuleId } from './
 import fetchResponseHeaderGetter, {
   ruleId as fetchResponseHeaderGetterRuleId,
 } from './agent/fetch-response-header-getter';
-import fetchResponseStatus, {
-  ruleId as fetchResponseStatusRuleId,
-} from './agent/fetch-response-status';
+import fetchResponseStatus, { ruleId as fetchResponseStatusRuleId } from './agent/fetch-response-status';
 import fetchThen, { ruleId as fetchThenRuleId } from './agent/fetch-then';
 import fixFunctionCallArguments, {
   ruleId as fixFunctionCallArgumentsRuleId,
@@ -49,6 +47,8 @@ import addBasePathImport, { ruleId as addBasePathImportRuleId } from './agent/ad
 import addAssertImport, { ruleId as addAssertImportRuleId } from './agent/add-assert-import';
 import filePathComment from './file-path-comment';
 import noCardNumbers from './no-card-numbers';
+import noSideEffects from './no-side-effects';
+import noRandomV4UUID from './no-random-v4-uuid';
 import noTestImport from './no-test-import';
 import noUuid from './no-uuid';
 import noWallabyComment from './no-wallaby-comment';
@@ -60,10 +60,12 @@ import requireStrictAssert from './require-strict-assert';
 const rules: Record<string, TSESLint.LooseRuleDefinition> = {
   'file-path-comment': filePathComment,
   'no-card-numbers': noCardNumbers,
+  'no-random-v4-uuid': noRandomV4UUID,
   'no-uuid': noUuid,
   'require-strict-assert': requireStrictAssert,
   'no-test-import': noTestImport,
   'no-wallaby-comment': noWallabyComment,
+  'no-side-effects': noSideEffects,
   'regular-expression-comment': regexComment,
   'require-assert-predicate-rejects-throws': requireAssertPredicateRejectsThrows,
   'object-literal-response': objectLiteralResponse,
@@ -108,9 +110,11 @@ const configs: Record<string, TSESLint.FlatConfig.Config | TSESLint.FlatConfig.C
       rules: {
         '@checkdigit/no-card-numbers': 'error',
         '@checkdigit/file-path-comment': 'error',
+        '@checkdigit/no-random-v4-uuid': 'error',
         '@checkdigit/no-uuid': 'error',
         '@checkdigit/require-strict-assert': 'error',
         '@checkdigit/no-wallaby-comment': 'error',
+        '@checkdigit/no-side-effects': ['error', { excludedIdentifiers: ['assert', 'debug', 'log', 'promisify'] }],
         '@checkdigit/regular-expression-comment': 'error',
         '@checkdigit/require-assert-predicate-rejects-throws': 'error',
         '@checkdigit/object-literal-response': 'error',
@@ -154,15 +158,42 @@ const configs: Record<string, TSESLint.FlatConfig.Config | TSESLint.FlatConfig.C
       rules: {
         '@checkdigit/no-card-numbers': 'error',
         '@checkdigit/file-path-comment': 'off',
+        '@checkdigit/no-random-v4-uuid': 'error',
         '@checkdigit/no-uuid': 'error',
         '@checkdigit/require-strict-assert': 'error',
         '@checkdigit/no-wallaby-comment': 'off',
+        '@checkdigit/no-side-effects': 'error',
         '@checkdigit/regular-expression-comment': 'error',
         '@checkdigit/require-assert-predicate-rejects-throws': 'error',
         '@checkdigit/object-literal-response': 'error',
         '@checkdigit/no-test-import': 'error',
         [`@checkdigit/${invalidJsonStringifyRuleId}`]: 'error',
-        [`@checkdigit/${noPromiseInstanceMethodRuleId}`]: 'error',
+        [`@checkdigit/${noPromiseInstanceMethodRuleId}`]: 'off',
+        [`@checkdigit/${noLegacyServiceTypingRuleId}`]: 'off',
+        [`@checkdigit/${requireResolveFullResponseRuleId}`]: 'off',
+        [`@checkdigit/${noDuplicatedImportsRuleId}`]: 'error',
+        [`@checkdigit/${requireFixedServicesImportRuleId}`]: 'off',
+        [`@checkdigit/${requireTypeOutOfTypeOnlyImportsRuleId}`]: 'error',
+        [`@checkdigit/${noServeRuntimeRuleId}`]: 'off',
+        // --- agent rules BEGIN ---
+        [`@checkdigit/${noMappedResponseRuleId}`]: 'off',
+        [`@checkdigit/${addUrlDomainRuleId}`]: 'off',
+        [`@checkdigit/${noFixtureRuleId}`]: 'off',
+        [`@checkdigit/${noServiceWrapperRuleId}`]: 'off',
+        [`@checkdigit/${noStatusCodeRuleId}`]: 'off',
+        [`@checkdigit/${fetchResponseBodyJsonRuleId}`]: 'off',
+        [`@checkdigit/${fetchResponseHeaderGetterRuleId}`]: 'off',
+        [`@checkdigit/${fetchResponseStatusRuleId}`]: 'off',
+        [`@checkdigit/${fetchThenRuleId}`]: 'off',
+        [`@checkdigit/${noUnusedFunctionArgumentsRuleId}`]: 'off',
+        [`@checkdigit/${noUnusedServiceVariablesRuleId}`]: 'off',
+        [`@checkdigit/${noUnusedImportsRuleId}`]: 'off',
+        [`@checkdigit/${fixFunctionCallArgumentsRuleId}`]: 'off',
+        [`@checkdigit/${agentTestWiringRuleId}`]: 'off',
+        [`@checkdigit/${addBasePathConstRuleId}`]: 'off',
+        [`@checkdigit/${addBasePathImportRuleId}`]: 'off',
+        [`@checkdigit/${addAssertImportRuleId}`]: 'off',
+        // --- agent rules END ---
       },
     },
   ],
@@ -177,7 +208,6 @@ const configs: Record<string, TSESLint.FlatConfig.Config | TSESLint.FlatConfig.C
       rules: {
         [`@checkdigit/${noMappedResponseRuleId}`]: 'error',
         [`@checkdigit/${addUrlDomainRuleId}`]: 'error',
-        [`@checkdigit/${noFixtureRuleId}`]: 'error',
         [`@checkdigit/${noServiceWrapperRuleId}`]: 'error',
         [`@checkdigit/${noStatusCodeRuleId}`]: 'error',
         [`@checkdigit/${fetchResponseBodyJsonRuleId}`]: 'error',
@@ -201,6 +231,7 @@ const configs: Record<string, TSESLint.FlatConfig.Config | TSESLint.FlatConfig.C
       },
       rules: {
         [`@checkdigit/${agentTestWiringRuleId}`]: 'error',
+        [`@checkdigit/${noFixtureRuleId}`]: 'error',
       },
     },
   ],
@@ -214,7 +245,6 @@ const configs: Record<string, TSESLint.FlatConfig.Config | TSESLint.FlatConfig.C
       rules: {
         [`@checkdigit/${noMappedResponseRuleId}`]: 'error',
         [`@checkdigit/${addUrlDomainRuleId}`]: 'error',
-        [`@checkdigit/${noFixtureRuleId}`]: 'off',
         [`@checkdigit/${noServiceWrapperRuleId}`]: 'error',
         [`@checkdigit/${noStatusCodeRuleId}`]: 'error',
         [`@checkdigit/${fetchResponseBodyJsonRuleId}`]: 'error',
