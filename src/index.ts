@@ -14,6 +14,9 @@ import fetchResponseBodyJson, { ruleId as fetchResponseBodyJsonRuleId } from './
 import fetchResponseHeaderGetter, {
   ruleId as fetchResponseHeaderGetterRuleId,
 } from './agent/fetch-response-header-getter';
+import fetchResponseStatus, {
+  ruleId as fetchResponseStatusRuleId,
+} from './agent/fetch-response-status';
 import fetchThen, { ruleId as fetchThenRuleId } from './agent/fetch-then';
 import fixFunctionCallArguments, {
   ruleId as fixFunctionCallArgumentsRuleId,
@@ -72,6 +75,7 @@ const rules: Record<string, TSESLint.LooseRuleDefinition> = {
   [noStatusCodeRuleId]: noStatusCode,
   [fetchResponseBodyJsonRuleId]: fetchResponseBodyJson,
   [fetchResponseHeaderGetterRuleId]: fetchResponseHeaderGetter,
+  [fetchResponseStatusRuleId]: fetchResponseStatus,
   [addUrlDomainRuleId]: addUrlDomain,
   [noLegacyServiceTypingRuleId]: noLegacyServiceTyping,
   [noMappedResponseRuleId]: noMappedResponse,
@@ -127,6 +131,7 @@ const configs: Record<string, TSESLint.FlatConfig.Config | TSESLint.FlatConfig.C
         [`@checkdigit/${noStatusCodeRuleId}`]: 'off',
         [`@checkdigit/${fetchResponseBodyJsonRuleId}`]: 'off',
         [`@checkdigit/${fetchResponseHeaderGetterRuleId}`]: 'off',
+        [`@checkdigit/${fetchResponseStatusRuleId}`]: 'off',
         [`@checkdigit/${fetchThenRuleId}`]: 'off',
         [`@checkdigit/${noUnusedFunctionArgumentsRuleId}`]: 'off',
         [`@checkdigit/${noUnusedServiceVariablesRuleId}`]: 'off',
@@ -177,6 +182,7 @@ const configs: Record<string, TSESLint.FlatConfig.Config | TSESLint.FlatConfig.C
         [`@checkdigit/${noStatusCodeRuleId}`]: 'error',
         [`@checkdigit/${fetchResponseBodyJsonRuleId}`]: 'error',
         [`@checkdigit/${fetchResponseHeaderGetterRuleId}`]: 'error',
+        [`@checkdigit/${fetchResponseStatusRuleId}`]: 'error',
         [`@checkdigit/${fetchThenRuleId}`]: 'error',
         [`@checkdigit/${noUnusedFunctionArgumentsRuleId}`]: 'error',
         [`@checkdigit/${noUnusedServiceVariablesRuleId}`]: 'error',
@@ -213,6 +219,7 @@ const configs: Record<string, TSESLint.FlatConfig.Config | TSESLint.FlatConfig.C
         [`@checkdigit/${noStatusCodeRuleId}`]: 'error',
         [`@checkdigit/${fetchResponseBodyJsonRuleId}`]: 'error',
         [`@checkdigit/${fetchResponseHeaderGetterRuleId}`]: 'error',
+        [`@checkdigit/${fetchResponseStatusRuleId}`]: 'error',
         [`@checkdigit/${fetchThenRuleId}`]: 'error',
         [`@checkdigit/${noUnusedFunctionArgumentsRuleId}`]: 'error',
         [`@checkdigit/${noUnusedServiceVariablesRuleId}`]: 'error',
