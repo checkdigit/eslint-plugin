@@ -667,5 +667,24 @@ createTester().run(ruleId, rule, {
       `,
       errors: 1,
     },
+    {
+      name: 'support setting headers using object literal',
+      code: `function doSomething() {
+        return fixture.api
+          .get(\`\${BASE_PATH}/ping\`)
+          .set({
+            ...(options?.createdOn ? { [CREATED_ON_HEADER]: options.createdOn } : {}),
+          });
+      }`,
+      output: `function doSomething() {
+        return fetch(\`\${BASE_PATH}/ping\`, {
+          method: 'GET',
+          headers: {
+            ...(options?.createdOn ? { [CREATED_ON_HEADER]: options.createdOn } : {}),
+          },
+        });
+      }`,
+      errors: 1,
+    },
   ],
 });

@@ -15,6 +15,7 @@ import type {
   ExpressionStatement,
   MemberExpression,
   Node,
+  ObjectExpression,
   ObjectPattern,
   ReturnStatement,
   SimpleCallExpression,
@@ -45,6 +46,7 @@ interface FixtureCallInformation {
   variableAssignment?: ExpressionStatement;
   requestBody?: Expression;
   requestHeaders?: { name: Expression; value: Expression }[];
+  requestHeadersObjectLiteral?: ObjectExpression;
   assertions?: Expression[][];
   inlineStatementNode?: Node;
   inlineBodyReference?: MemberExpression;
@@ -116,8 +118,12 @@ function analyzeFixtureCall(call: SimpleCallExpression, results: FixtureCallInfo
       // request headers
       const setRequestHeaderCall = getParent(parent);
       assert.ok(setRequestHeaderCall && setRequestHeaderCall.type === 'CallExpression');
-      const [name, value] = setRequestHeaderCall.arguments as [Expression, Expression];
-      results.requestHeaders = [...(results.requestHeaders ?? []), { name, value }];
+      const [arg1, arg2] = setRequestHeaderCall.arguments as [Expression, Expression];
+      if (arg1.type === 'ObjectExpression') {
+        results.requestHeadersObjectLiteral = arg1;
+      } else {
+        results.requestHeaders = [...(results.requestHeaders ?? []), { name: arg1, value: arg2 }];
+      }
       nextCall = setRequestHeaderCall;
     }
   } else {
@@ -321,17 +327,20 @@ const rule: Rule.RuleModule = {
             ...(fixtureCallInformation.requestBody
               ? [`  body: JSON.stringify(${sourceCode.getText(fixtureCallInformation.requestBody)}),`]
               : []),
-            ...(fixtureCallInformation.requestHeaders
-              ? [
-                  `  headers: {`,
-                  ...fixtureCallInformation.requestHeaders.map(
-                    ({ name, value }) =>
-                      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions, no-nested-ternary, sonarjs/no-nested-template-literals
-                      `    ${name.type === 'Literal' ? (isValidPropertyName(name.value) ? name.value : `'${name.value}'`) : `[${sourceCode.getText(name)}]`}: ${sourceCode.getText(value)},`,
-                  ),
-                  `  },`,
-                ]
-              : []),
+            // eslint-disable-next-line no-nested-ternary
+            ...(fixtureCallInformation.requestHeadersObjectLiteral
+              ? [`  headers: ${sourceCode.getText(fixtureCallInformation.requestHeadersObjectLiteral)},`]
+              : fixtureCallInformation.requestHeaders
+                ? [
+                    `  headers: {`,
+                    ...fixtureCallInformation.requestHeaders.map(
+                      ({ name, value }) =>
+                        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions, no-nested-ternary, sonarjs/no-nested-template-literals
+                        `    ${name.type === 'Literal' ? (isValidPropertyName(name.value) ? name.value : `'${name.value}'`) : `[${sourceCode.getText(name)}]`}: ${sourceCode.getText(value)},`,
+                    ),
+                    `  },`,
+                  ]
+                : []),
             '}',
           ].join(`\n${indentation}`);
 
