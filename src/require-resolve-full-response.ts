@@ -171,7 +171,6 @@ const rule: ESLintUtils.RuleModule<'invalidOptions' | 'unknownError'> = createRu
             if (optionsTypeString === 'FullResponseOptions') {
               return;
             }
-
             const variable = parserService.esTreeNodeToTSNodeMap.get(optionsArgument);
             const optionType = typeChecker.getTypeAtLocation(variable);
             const resolveWithFullResponseProperty = optionType.getProperty('resolveWithFullResponse');
@@ -193,7 +192,6 @@ const rule: ESLintUtils.RuleModule<'invalidOptions' | 'unknownError'> = createRu
               return;
             }
           }
-
           context.report({
             node: optionsArgument,
             messageId: 'invalidOptions',
