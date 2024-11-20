@@ -264,7 +264,7 @@ const configs: Record<string, TSESLint.FlatConfig.Config[]> = {
 };
 
 const defaultToExport: Exclude<TSESLint.FlatConfig.Plugin, 'config'> & {
-  configs: Record<string, TSESLint.FlatConfig.Config | TSESLint.FlatConfig.Config[]>;
+  configs: Record<string, TSESLint.FlatConfig.Config[]>;
 } = {
   ...plugin,
   configs,
