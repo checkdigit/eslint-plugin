@@ -24,7 +24,7 @@ export function loadPackageJson(projectRoot: string): string {
 }
 
 export function getApiFolder(folder: string): string | undefined {
-  if (/^(?<absolutePath>(?:[^\/]+\/)*)src\/api\/v\d+$/u.test(folder)) {
+  if (/^\/?(?<absolutePath>(?:[^/]+\/)*)src\/api\/v\d+$/u.test(folder)) {
     return folder;
   }
   const upperFolder = folder.substring(0, folder.lastIndexOf('/'));
