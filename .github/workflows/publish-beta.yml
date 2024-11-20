@@ -18,6 +18,7 @@ jobs:
         uses: actions/dependency-review-action@v4
         with:
           allow-licenses: ${{ vars.ALLOW_LICENSES }}
+          allow-dependencies-licenses: pkg:npm/flatted
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
