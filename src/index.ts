@@ -10,7 +10,7 @@ import type { TSESLint } from '@typescript-eslint/utils';
 
 import invalidJsonStringify, { ruleId as invalidJsonStringifyRuleId } from './invalid-json-stringify';
 import noDuplicatedImports, { ruleId as noDuplicatedImportsRuleId } from './no-duplicated-imports';
-import noFullResponse, { ruleId as noFullResponseRuleId } from './agent/no-full-response';
+import noLegacyServiceTyping, { ruleId as noLegacyServiceTypingRuleId } from './no-legacy-service-typing';
 import noPromiseInstanceMethod, { ruleId as noPromiseInstanceMethodRuleId } from './no-promise-instance-method';
 import requireFixedServicesImport, {
   ruleId as requireFixedServicesImportRuleId,
@@ -21,7 +21,7 @@ import requireResolveFullResponse, {
 import requireTypeOutOfTypeOnlyImports, {
   ruleId as requireTypeOutOfTypeOnlyImportsRuleId,
 } from './require-type-out-of-type-only-imports';
-import noServeRuntime, { ruleId as noServeRuntimeRuleId } from './agent/no-serve-runtime';
+import noServeRuntime, { ruleId as noServeRuntimeRuleId } from './no-serve-runtime';
 import filePathComment from './file-path-comment';
 import noCardNumbers from './no-card-numbers';
 import noSideEffects from './no-side-effects';
@@ -48,69 +48,83 @@ const rules: Record<string, TSESLint.LooseRuleDefinition> = {
   'object-literal-response': objectLiteralResponse,
   [invalidJsonStringifyRuleId]: invalidJsonStringify,
   [noPromiseInstanceMethodRuleId]: noPromiseInstanceMethod,
-  [noFullResponseRuleId]: noFullResponse,
+  [noLegacyServiceTypingRuleId]: noLegacyServiceTyping,
   [requireResolveFullResponseRuleId]: requireResolveFullResponse,
-  [requireTypeOutOfTypeOnlyImportsRuleId]: requireTypeOutOfTypeOnlyImports,
   [noDuplicatedImportsRuleId]: noDuplicatedImports,
-  [requireFixedServicesImportRuleId]: requireFixedServicesImport,
   [noServeRuntimeRuleId]: noServeRuntime,
+  [requireFixedServicesImportRuleId]: requireFixedServicesImport,
+  [requireTypeOutOfTypeOnlyImportsRuleId]: requireTypeOutOfTypeOnlyImports,
 };
 
 const plugin: TSESLint.FlatConfig.Plugin = {
   rules,
 };
 
-const configs: Record<string, TSESLint.FlatConfig.Config> = {
-  all: {
-    plugins: {
-      '@checkdigit': plugin,
+const configs: Record<string, TSESLint.FlatConfig.Config[]> = {
+  all: [
+    {
+      files: ['**/*.ts'],
+      plugins: {
+        '@checkdigit': plugin,
+      },
+      rules: {
+        '@checkdigit/no-card-numbers': 'error',
+        '@checkdigit/file-path-comment': 'error',
+        '@checkdigit/no-random-v4-uuid': 'error',
+        '@checkdigit/no-uuid': 'error',
+        '@checkdigit/require-strict-assert': 'error',
+        '@checkdigit/no-wallaby-comment': 'error',
+        '@checkdigit/no-side-effects': ['error', { excludedIdentifiers: ['assert', 'debug', 'log', 'promisify'] }],
+        '@checkdigit/regular-expression-comment': 'error',
+        '@checkdigit/require-assert-predicate-rejects-throws': 'error',
+        '@checkdigit/object-literal-response': 'error',
+        '@checkdigit/no-test-import': 'error',
+        [`@checkdigit/${invalidJsonStringifyRuleId}`]: 'error',
+        [`@checkdigit/${noPromiseInstanceMethodRuleId}`]: 'error',
+        [`@checkdigit/${noLegacyServiceTypingRuleId}`]: 'error',
+        [`@checkdigit/${requireResolveFullResponseRuleId}`]: 'error',
+        [`@checkdigit/${noDuplicatedImportsRuleId}`]: 'error',
+        [`@checkdigit/${requireFixedServicesImportRuleId}`]: 'error',
+        [`@checkdigit/${requireTypeOutOfTypeOnlyImportsRuleId}`]: 'error',
+        [`@checkdigit/${noServeRuntimeRuleId}`]: 'error',
+      },
     },
-    rules: {
-      '@checkdigit/no-card-numbers': 'error',
-      '@checkdigit/file-path-comment': 'error',
-      '@checkdigit/no-random-v4-uuid': 'error',
-      '@checkdigit/no-uuid': 'error',
-      '@checkdigit/require-strict-assert': 'error',
-      '@checkdigit/no-wallaby-comment': 'error',
-      '@checkdigit/no-side-effects': ['error', { excludedIdentifiers: ['assert', 'debug', 'log', 'promisify'] }],
-      '@checkdigit/regular-expression-comment': 'error',
-      '@checkdigit/require-assert-predicate-rejects-throws': 'error',
-      '@checkdigit/object-literal-response': 'error',
-      '@checkdigit/no-test-import': 'error',
-      [`@checkdigit/${invalidJsonStringifyRuleId}`]: 'error',
-      [`@checkdigit/${noPromiseInstanceMethodRuleId}`]: 'error',
-      [`@checkdigit/${noFullResponseRuleId}`]: 'error',
-      [`@checkdigit/${requireResolveFullResponseRuleId}`]: 'error',
-      [`@checkdigit/${requireTypeOutOfTypeOnlyImportsRuleId}`]: 'error',
-      [`@checkdigit/${noDuplicatedImportsRuleId}`]: 'error',
-      [`@checkdigit/${requireFixedServicesImportRuleId}`]: 'error',
-      [`@checkdigit/${noServeRuntimeRuleId}`]: 'error',
+  ],
+  recommended: [
+    {
+      files: ['**/*.ts'],
+      plugins: {
+        '@checkdigit': plugin,
+      },
+      rules: {
+        '@checkdigit/no-card-numbers': 'error',
+        '@checkdigit/file-path-comment': 'off',
+        '@checkdigit/no-random-v4-uuid': 'error',
+        '@checkdigit/no-uuid': 'error',
+        '@checkdigit/require-strict-assert': 'error',
+        '@checkdigit/no-wallaby-comment': 'off',
+        '@checkdigit/no-side-effects': 'error',
+        '@checkdigit/regular-expression-comment': 'error',
+        '@checkdigit/require-assert-predicate-rejects-throws': 'error',
+        '@checkdigit/object-literal-response': 'error',
+        '@checkdigit/no-test-import': 'error',
+        [`@checkdigit/${invalidJsonStringifyRuleId}`]: 'error',
+        [`@checkdigit/${noPromiseInstanceMethodRuleId}`]: 'off',
+        [`@checkdigit/${noLegacyServiceTypingRuleId}`]: 'off',
+        [`@checkdigit/${requireResolveFullResponseRuleId}`]: 'off',
+        [`@checkdigit/${noDuplicatedImportsRuleId}`]: 'error',
+        [`@checkdigit/${requireFixedServicesImportRuleId}`]: 'off',
+        [`@checkdigit/${requireTypeOutOfTypeOnlyImportsRuleId}`]: 'error',
+        [`@checkdigit/${noServeRuntimeRuleId}`]: 'off',
+      },
     },
-  },
-  recommended: {
-    plugins: {
-      '@checkdigit': plugin,
-    },
-    rules: {
-      '@checkdigit/no-card-numbers': 'error',
-      '@checkdigit/file-path-comment': 'off',
-      '@checkdigit/no-random-v4-uuid': 'error',
-      '@checkdigit/no-uuid': 'error',
-      '@checkdigit/require-strict-assert': 'error',
-      '@checkdigit/no-wallaby-comment': 'off',
-      '@checkdigit/no-side-effects': 'error',
-      '@checkdigit/regular-expression-comment': 'error',
-      '@checkdigit/require-assert-predicate-rejects-throws': 'error',
-      '@checkdigit/object-literal-response': 'error',
-      '@checkdigit/no-test-import': 'error',
-      [`@checkdigit/${invalidJsonStringifyRuleId}`]: 'error',
-      [`@checkdigit/${noPromiseInstanceMethodRuleId}`]: 'error',
-    },
-  },
+  ],
 };
 
-const pluginToExport: TSESLint.FlatConfig.Plugin = {
+const defaultToExport: Exclude<TSESLint.FlatConfig.Plugin, 'config'> & {
+  configs: Record<string, TSESLint.FlatConfig.Config[]>;
+} = {
   ...plugin,
   configs,
 };
-export default pluginToExport;
+export default defaultToExport;

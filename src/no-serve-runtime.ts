@@ -1,4 +1,4 @@
-// agent/no-serve-runtime.ts
+// no-serve-runtime.ts
 
 /*
  * Copyright (c) 2021-2024 Check Digit, LLC
@@ -7,7 +7,7 @@
  */
 
 import { ESLintUtils, TSESTree } from '@typescript-eslint/utils';
-import getDocumentationUrl from '../get-documentation-url';
+import getDocumentationUrl from './get-documentation-url';
 
 export const ruleId = 'no-serve-runtime';
 
