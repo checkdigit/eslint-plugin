@@ -221,6 +221,7 @@ const configs: Record<string, TSESLint.FlatConfig.Config[]> = {
         [`@checkdigit/${addBasePathConstRuleId}`]: 'error',
         [`@checkdigit/${addBasePathImportRuleId}`]: 'error',
         [`@checkdigit/${addAssertImportRuleId}`]: 'error',
+        [`@checkdigit/${noFixtureRuleId}`]: 'error',
       },
     },
     {
@@ -231,7 +232,6 @@ const configs: Record<string, TSESLint.FlatConfig.Config[]> = {
       },
       rules: {
         [`@checkdigit/${agentTestWiringRuleId}`]: 'error',
-        [`@checkdigit/${noFixtureRuleId}`]: 'error',
       },
     },
   ],
