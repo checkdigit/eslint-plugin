@@ -61,8 +61,8 @@
     "preset": "@checkdigit/jest-config"
   },
   "dependencies": {
-    "@typescript-eslint/type-utils": "8.15.0",
-    "@typescript-eslint/utils": "8.15.0",
+    "@typescript-eslint/type-utils": "^8.15.0",
+    "@typescript-eslint/utils": "^8.15.0",
     "debug": "^4.3.7",
     "ts-api-utils": "^1.4.0"
   },
@@ -76,7 +76,7 @@
     "@types/eslint-config-prettier": "^6.11.3",
     "@typescript-eslint/parser": "^8.15.0",
     "@typescript-eslint/rule-tester": "^8.15.0",
-    "eslint": "9.15.0",
+    "eslint": "^9.15.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-import-resolver-typescript": "^3.6.3",
     "eslint-plugin-eslint-plugin": "^6.3.2",

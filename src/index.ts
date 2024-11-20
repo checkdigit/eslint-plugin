@@ -100,7 +100,7 @@ const plugin: TSESLint.FlatConfig.Plugin = {
   rules,
 };
 
-const configs: Record<string, TSESLint.FlatConfig.Config | TSESLint.FlatConfig.Config[]> = {
+const configs: Record<string, TSESLint.FlatConfig.Config[]> = {
   all: [
     {
       files: ['**/*.ts'],
