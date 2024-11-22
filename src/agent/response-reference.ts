@@ -7,11 +7,12 @@
  */
 
 import { strict as assert } from 'node:assert';
-import type { MemberExpression, ObjectPattern, VariableDeclaration } from 'estree';
-import { type Scope } from 'eslint';
+
 import debug from 'debug';
 
-import { getParent } from '../library/tree';
+import { AST_NODE_TYPES, TSESTree } from '@typescript-eslint/utils';
+import type { ScopeManager, Variable } from '@typescript-eslint/scope-manager';
+import { getParent } from '../library/ts-tree';
 
 const log = debug('eslint-plugin:response-reference');
 
@@ -21,25 +22,25 @@ const log = debug('eslint-plugin:response-reference');
  * @param variableDeclaration - variable declaration node
  */
 export function analyzeResponseReferences(
-  variableDeclaration: VariableDeclaration | undefined,
-  scopeManager: Scope.ScopeManager,
+  variableDeclaration: TSESTree.VariableDeclaration | undefined,
+  scopeManager: ScopeManager,
 ): {
-  variable?: Scope.Variable;
-  bodyReferences: MemberExpression[];
-  headersReferences: MemberExpression[];
-  statusReferences: MemberExpression[];
-  destructuringBodyVariable?: Scope.Variable | ObjectPattern;
-  destructuringHeadersVariable?: Scope.Variable | ObjectPattern;
-  destructuringHeadersReferences?: MemberExpression[] | undefined;
+  variable?: Variable;
+  bodyReferences: TSESTree.MemberExpression[];
+  headersReferences: TSESTree.MemberExpression[];
+  statusReferences: TSESTree.MemberExpression[];
+  destructuringBodyVariable?: Variable | TSESTree.ObjectPattern;
+  destructuringHeadersVariable?: Variable | TSESTree.ObjectPattern;
+  destructuringHeadersReferences?: TSESTree.MemberExpression[] | undefined;
 } {
   const results: {
-    variable?: Scope.Variable;
-    bodyReferences: MemberExpression[];
-    headersReferences: MemberExpression[];
-    statusReferences: MemberExpression[];
-    destructuringBodyVariable?: Scope.Variable | ObjectPattern;
-    destructuringHeadersVariable?: Scope.Variable | ObjectPattern;
-    destructuringHeadersReferences?: MemberExpression[] | undefined;
+    variable?: Variable;
+    bodyReferences: TSESTree.MemberExpression[];
+    headersReferences: TSESTree.MemberExpression[];
+    statusReferences: TSESTree.MemberExpression[];
+    destructuringBodyVariable?: Variable | TSESTree.ObjectPattern;
+    destructuringHeadersVariable?: Variable | TSESTree.ObjectPattern;
+    destructuringHeadersReferences?: TSESTree.MemberExpression[] | undefined;
   } = {
     bodyReferences: [],
     headersReferences: [],
@@ -55,7 +56,7 @@ export function analyzeResponseReferences(
     assert.ok(identifier);
     const identifierParent = getParent(identifier);
     assert.ok(identifierParent);
-    if (identifierParent.type === 'VariableDeclarator') {
+    if (identifierParent.type === AST_NODE_TYPES.VariableDeclarator) {
       // e.g. const response = ...
       results.variable = responseVariable;
       const responseReferences = responseVariable.references.map((responseReference) =>
@@ -63,34 +64,36 @@ export function analyzeResponseReferences(
       );
       // e.g. response.body
       results.bodyReferences = responseReferences.filter(
-        (node): node is MemberExpression =>
-          node?.type === 'MemberExpression' && node.property.type === 'Identifier' && node.property.name === 'body',
+        (node): node is TSESTree.MemberExpression =>
+          node?.type === AST_NODE_TYPES.MemberExpression &&
+          node.property.type === AST_NODE_TYPES.Identifier &&
+          node.property.name === 'body',
       );
       // e.g. response.headers / response.header / response.get()
       results.headersReferences = responseReferences.filter(
-        (node): node is MemberExpression =>
-          node?.type === 'MemberExpression' &&
-          node.property.type === 'Identifier' &&
+        (node): node is TSESTree.MemberExpression =>
+          node?.type === AST_NODE_TYPES.MemberExpression &&
+          node.property.type === AST_NODE_TYPES.Identifier &&
           (node.property.name === 'header' || node.property.name === 'headers' || node.property.name === 'get'),
       );
       // e.g. response.status / response.statusCode
       results.statusReferences = responseReferences.filter(
-        (node): node is MemberExpression =>
-          node?.type === 'MemberExpression' &&
-          node.property.type === 'Identifier' &&
+        (node): node is TSESTree.MemberExpression =>
+          node?.type === AST_NODE_TYPES.MemberExpression &&
+          node.property.type === AST_NODE_TYPES.Identifier &&
           (node.property.name === 'status' || node.property.name === 'statusCode'),
       );
     } else if (
       // body reference through destruction/renaming, e.g. "const { body } = ..."
-      identifierParent.type === 'Property' &&
-      identifierParent.key.type === 'Identifier' &&
+      identifierParent.type === AST_NODE_TYPES.Property &&
+      identifierParent.key.type === AST_NODE_TYPES.Identifier &&
       identifierParent.key.name === 'body'
     ) {
       results.destructuringBodyVariable = responseVariable;
     } else if (
       // header reference through destruction/renaming, e.g. "const { headers } = ..."
-      identifierParent.type === 'Property' &&
-      identifierParent.key.type === 'Identifier' &&
+      identifierParent.type === AST_NODE_TYPES.Property &&
+      identifierParent.key.type === AST_NODE_TYPES.Identifier &&
       identifierParent.key.name === 'headers'
     ) {
       results.destructuringHeadersVariable = responseVariable;
@@ -98,23 +101,27 @@ export function analyzeResponseReferences(
         .map((reference) => reference.identifier)
         .map(getParent)
         .filter(
-          (parent): parent is MemberExpression =>
-            parent?.type === 'MemberExpression' &&
-            parent.property.type === 'Identifier' &&
+          (parent): parent is TSESTree.MemberExpression =>
+            parent?.type === AST_NODE_TYPES.MemberExpression &&
+            parent.property.type === AST_NODE_TYPES.Identifier &&
             parent.property.name !== 'get' &&
-            getParent(parent)?.type !== 'CallExpression',
+            getParent(parent)?.type !== AST_NODE_TYPES.CallExpression,
         );
-    } else if (identifierParent.type === 'Property') {
+    } else if (identifierParent.type === AST_NODE_TYPES.Property) {
       const parent = getParent(identifierParent);
-      if (parent?.type === 'ObjectPattern') {
+      if (parent?.type === AST_NODE_TYPES.ObjectPattern) {
         // body reference through nested destruction, e.g. "const { body: {bodyPropertyName: renamedBodyPropertyName}, headers: {headerPropertyName: renamedHeaderPropertyName} } = ..."
         const parent2 = getParent(parent);
-        if (parent2?.type === 'Property' && parent2.key.type === 'Identifier' && parent2.key.name === 'body') {
+        if (
+          parent2?.type === AST_NODE_TYPES.Property &&
+          parent2.key.type === AST_NODE_TYPES.Identifier &&
+          parent2.key.name === 'body'
+        ) {
           results.destructuringBodyVariable = parent;
         }
         if (
-          parent2?.type === 'Property' &&
-          parent2.key.type === 'Identifier' &&
+          parent2?.type === AST_NODE_TYPES.Property &&
+          parent2.key.type === AST_NODE_TYPES.Identifier &&
           (parent2.key.name === 'header' || parent2.key.name === 'headers')
         ) {
           results.destructuringHeadersVariable = parent;

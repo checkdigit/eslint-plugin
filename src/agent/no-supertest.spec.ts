@@ -6,7 +6,7 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import createTester from '../tester.test';
+import createTester from '../ts-tester.test';
 import rule, { ruleId } from './no-supertest';
 
 createTester().run(ruleId, rule, {
@@ -38,7 +38,7 @@ createTester().run(ruleId, rule, {
         const response = await ping();
         assert.equal(response.status, StatusCodes.OK);
       }`,
-      errors: 1,
+      errors: [{ messageId: 'preferNativeFetch' }],
     },
     {
       name: 'assertion with variable declaration',
@@ -52,7 +52,7 @@ createTester().run(ruleId, rule, {
         const pingResponseBody = await pingResponse.json();
         assert(pingResponseBody);
       }`,
-      errors: 1,
+      errors: [{ messageId: 'preferNativeFetch' }],
     },
     {
       name: 'response headers assertion should be externalized with new variable declared if necessary',
@@ -72,7 +72,7 @@ createTester().run(ruleId, rule, {
         assert.equal(response.headers.get(ETAG), correctVersion);
         assert.ok(response.headers.get(ETAG).match(/1.*/u));
       }`,
-      errors: 1,
+      errors: [{ messageId: 'preferNativeFetch' }],
     },
     {
       name: 'response body assertion',
@@ -83,7 +83,7 @@ createTester().run(ruleId, rule, {
         const response = await ping();
         assert.deepEqual(await response.json(), {message:'pong'});
       }`,
-      errors: 1,
+      errors: [{ messageId: 'preferNativeFetch' }],
     },
     {
       name: 'response callback assertion',
@@ -97,7 +97,7 @@ createTester().run(ruleId, rule, {
         assert.doesNotThrow(()=>validate(response));
         assert.doesNotThrow(()=>console.log(response));
       }`,
-      errors: 1,
+      errors: [{ messageId: 'preferNativeFetch' }],
     },
     {
       name: 'multiple fixture calls in the same test',
@@ -118,7 +118,12 @@ createTester().run(ruleId, rule, {
         const response3 = await ping();
         assert.equal(response3.status, StatusCodes.OK);
       }`,
-      errors: 4,
+      errors: [
+        { messageId: 'preferNativeFetch' },
+        { messageId: 'preferNativeFetch' },
+        { messageId: 'preferNativeFetch' },
+        { messageId: 'preferNativeFetch' },
+      ],
     },
     {
       name: 'directly return (no await) fixture call with assertion',
@@ -130,7 +135,7 @@ createTester().run(ruleId, rule, {
         assert.equal(response.status, StatusCodes.OK);
         return response;
       }`,
-      errors: 1,
+      errors: [{ messageId: 'preferNativeFetch' }],
     },
     {
       name: 'replace header access through response.get() with response.headers.get()',
@@ -145,7 +150,7 @@ createTester().run(ruleId, rule, {
         assert.equal(response.headers.get(ETAG), correctVersion);
         assert.equal(response.headers.get('etag'), correctVersion);
       }`,
-      errors: 1,
+      errors: [{ messageId: 'preferNativeFetch' }],
     },
     {
       name: 'work with response status literal (e.g. 200 instead of StatusCoodes.OK) as well',
@@ -156,7 +161,7 @@ createTester().run(ruleId, rule, {
         const response = await ping();
         assert.equal(response.status, 200);
       }`,
-      errors: 1,
+      errors: [{ messageId: 'preferNativeFetch' }],
     },
     {
       name: 'assert response body against function call\'s return value ".expect(validateBody(response))"',
@@ -170,7 +175,7 @@ createTester().run(ruleId, rule, {
         assert.equal(response.status, 200);
         assert.deepEqual(await response.json(), validateBody(createdOn));
       }`,
-      errors: 1,
+      errors: [{ messageId: 'preferNativeFetch' }],
     },
     {
       name: 'handle destructuring variable declaration for body',
@@ -186,7 +191,7 @@ createTester().run(ruleId, rule, {
         const timeDifference = Date.now() - new Date(responseBody.serverTime).getTime();
         assert.ok(timeDifference >= 0 && timeDifference < 200);
       }`,
-      errors: 1,
+      errors: [{ messageId: 'preferNativeFetch' }],
     },
     {
       name: 'handle destructuring variable declaration for body - with nested destructuring',
@@ -200,7 +205,7 @@ createTester().run(ruleId, rule, {
         const { pgpPublicKey: firstPgpPublicKey } = await response.json();
         assert.ok(firstPgpPublicKey.startsWith('-----BEGIN PGP PUBLIC KEY BLOCK-----'));
       }`,
-      errors: 1,
+      errors: [{ messageId: 'preferNativeFetch' }],
     },
     {
       name: 'handle destructuring variable declaration for headers when body is presented as well',
@@ -217,7 +222,7 @@ createTester().run(ruleId, rule, {
         assert(body);
         assert.ok(headers2.get(ETAG));
       }`,
-      errors: 1,
+      errors: [{ messageId: 'preferNativeFetch' }],
     },
     {
       name: 'handle destructuring variable declaration for headers without body presented but with assertions used',
@@ -231,7 +236,7 @@ createTester().run(ruleId, rule, {
         const headers = response.headers;
         assert.ok(headers.get(ETAG));
       }`,
-      errors: 1,
+      errors: [{ messageId: 'preferNativeFetch' }],
     },
     {
       name: 'avoid response variable name conflict with existing variables in the same scope',
@@ -249,7 +254,7 @@ createTester().run(ruleId, rule, {
         const response3 = await ping();
         assert.equal(response3.status, StatusCodes.OK);
       }`,
-      errors: 2,
+      errors: [{ messageId: 'preferNativeFetch' }, { messageId: 'preferNativeFetch' }],
     },
     {
       name: 'response variable names in different scope do not conflict with each other',
@@ -281,7 +286,7 @@ createTester().run(ruleId, rule, {
           assert.equal(response.status, StatusCodes.OK);
         });
       `,
-      errors: 2,
+      errors: [{ messageId: 'preferNativeFetch' }, { messageId: 'preferNativeFetch' }],
     },
     {
       name: 'inline access to response body should be extracted to a variable',
@@ -298,7 +303,7 @@ createTester().run(ruleId, rule, {
         const responseBody = await response.json();
         const paymentSecurityServicePublicKey = responseBody.publicKey;
       }`,
-      errors: 1,
+      errors: [{ messageId: 'preferNativeFetch' }],
     },
     {
       name: 'callback assertion using arrow function that accesses to response might conflict with the new/redefined response variable',
@@ -324,7 +329,7 @@ createTester().run(ruleId, rule, {
         assert.equal(response.headers.get(ETAG_HEADER), '1');
         assert.doesNotThrow(()=>verifyTemporalHeaders(response, createdOn));
       }`,
-      errors: 1,
+      errors: [{ messageId: 'preferNativeFetch' }],
     },
     {
       name: 'assignment statement instead of variable declaration used for subsequent fixture calls',
@@ -338,7 +343,7 @@ createTester().run(ruleId, rule, {
         response = await ping();
         assert.equal(response.status, StatusCodes.OK);
       }`,
-      errors: 2,
+      errors: [{ messageId: 'preferNativeFetch' }, { messageId: 'preferNativeFetch' }],
     },
     {
       name: 'nested header destructuring',
@@ -350,7 +355,7 @@ createTester().run(ruleId, rule, {
         assert.equal(response.status, StatusCodes.OK);
         const etag = response.headers.get('etag');
       }`,
-      errors: 1,
+      errors: [{ messageId: 'preferNativeFetch' }],
     },
     {
       name: 'nested header destructuring - string literal key with renaming',
@@ -363,7 +368,7 @@ createTester().run(ruleId, rule, {
         const createdOn = response.headers.get('created-on');
         const updatedOn = response.headers.get('updated-on');
       }`,
-      errors: 1,
+      errors: [{ messageId: 'preferNativeFetch' }],
     },
   ],
 });

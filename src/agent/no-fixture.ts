@@ -8,20 +8,9 @@
 
 import { strict as assert } from 'node:assert';
 
-import type {
-  AwaitExpression,
-  CallExpression,
-  Expression,
-  ExpressionStatement,
-  MemberExpression,
-  Node,
-  ObjectExpression,
-  ObjectPattern,
-  ReturnStatement,
-  SimpleCallExpression,
-  VariableDeclaration,
-} from 'estree';
-import { type Rule, type Scope, SourceCode } from 'eslint';
+import { AST_NODE_TYPES, ESLintUtils, TSESTree } from '@typescript-eslint/utils';
+import type { Scope, ScopeManager, Variable } from '@typescript-eslint/scope-manager';
+import type { SourceCode } from '@typescript-eslint/utils/ts-eslint';
 
 import {
   getEnclosingFunction,
@@ -29,7 +18,7 @@ import {
   getEnclosingStatement,
   getParent,
   isUsedInArrayOrAsArgument,
-} from '../library/tree';
+} from '../library/ts-tree';
 import getDocumentationUrl from '../get-documentation-url';
 import { getIndentation } from '../library/format';
 import { isValidPropertyName } from '../library/variable';
@@ -40,86 +29,91 @@ import { replaceEndpointUrlPrefixWithBasePath } from './url';
 export const ruleId = 'no-fixture';
 
 interface FixtureCallInformation {
-  rootNode: AwaitExpression | ReturnStatement | VariableDeclaration | SimpleCallExpression | ExpressionStatement;
-  fixtureNode: AwaitExpression | SimpleCallExpression;
-  variableDeclaration?: VariableDeclaration;
-  variableAssignment?: ExpressionStatement;
-  requestBody?: Expression;
-  requestHeaders?: { name: Expression; value: Expression }[];
-  requestHeadersObjectLiteral?: ObjectExpression;
-  assertions?: Expression[][];
-  inlineStatementNode?: Node;
-  inlineBodyReference?: MemberExpression;
-  inlineHeadersReference?: MemberExpression;
+  rootNode:
+    | TSESTree.AwaitExpression
+    | TSESTree.ReturnStatement
+    | TSESTree.VariableDeclaration
+    | TSESTree.CallExpression
+    | TSESTree.ExpressionStatement;
+  fixtureNode: TSESTree.AwaitExpression | TSESTree.CallExpression;
+  variableDeclaration?: TSESTree.VariableDeclaration;
+  variableAssignment?: TSESTree.ExpressionStatement;
+  requestBody?: TSESTree.Expression;
+  requestHeaders?: { name: TSESTree.Expression; value: TSESTree.Expression }[];
+  requestHeadersObjectLiteral?: TSESTree.ObjectExpression;
+  assertions?: TSESTree.Expression[][];
+  inlineStatementNode?: TSESTree.Node;
+  inlineBodyReference?: TSESTree.MemberExpression;
+  inlineHeadersReference?: TSESTree.MemberExpression;
 }
 
 // recursively analyze the fixture/supertest call chain to collect information of request/response
 // eslint-disable-next-line sonarjs/cognitive-complexity
-function analyzeFixtureCall(call: SimpleCallExpression, results: FixtureCallInformation, sourceCode: SourceCode) {
+function analyzeFixtureCall(call: TSESTree.CallExpression, results: FixtureCallInformation, sourceCode: SourceCode) {
   const parent = getParent(call);
   assert.ok(parent, 'parent should exist for fixture/supertest call node');
 
   let nextCall;
-  if (parent.type === 'ReturnStatement') {
+  if (parent.type === AST_NODE_TYPES.ReturnStatement) {
     // direct return, no variable declaration or await
     results.fixtureNode = call;
     results.rootNode = parent;
   } else if (
-    parent.type === 'ArrayExpression' ||
-    parent.type === 'CallExpression' ||
-    parent.type === 'ArrowFunctionExpression'
+    parent.type === AST_NODE_TYPES.ArrayExpression ||
+    parent.type === AST_NODE_TYPES.CallExpression ||
+    parent.type === AST_NODE_TYPES.ArrowFunctionExpression
   ) {
     // direct return, no variable declaration or await
     results.fixtureNode = call;
     results.rootNode = call;
-  } else if (parent.type === 'AwaitExpression') {
+  } else if (parent.type === AST_NODE_TYPES.AwaitExpression) {
     results.fixtureNode = call;
     const enclosingStatement = getEnclosingStatement(parent);
     assert.ok(enclosingStatement);
     const awaitParent = getParent(parent);
-    if (awaitParent?.type === 'MemberExpression') {
+    if (awaitParent?.type === AST_NODE_TYPES.MemberExpression) {
       results.rootNode = parent;
       results.inlineStatementNode = enclosingStatement;
-      if (awaitParent.property.type === 'Identifier' && awaitParent.property.name === 'body') {
+      if (awaitParent.property.type === AST_NODE_TYPES.Identifier && awaitParent.property.name === 'body') {
         results.inlineBodyReference = awaitParent;
       }
       if (
-        awaitParent.property.type === 'Identifier' &&
+        awaitParent.property.type === AST_NODE_TYPES.Identifier &&
         (awaitParent.property.name === 'header' || awaitParent.property.name === 'headers')
       ) {
         results.inlineHeadersReference = awaitParent;
       }
-    } else if (enclosingStatement.type === 'VariableDeclaration') {
+    } else if (enclosingStatement.type === AST_NODE_TYPES.VariableDeclaration) {
       results.variableDeclaration = enclosingStatement;
       results.rootNode = enclosingStatement;
     } else if (
-      enclosingStatement.type === 'ExpressionStatement' &&
-      enclosingStatement.expression.type === 'AssignmentExpression'
+      enclosingStatement.type === AST_NODE_TYPES.ExpressionStatement &&
+      enclosingStatement.expression.type === AST_NODE_TYPES.AssignmentExpression
     ) {
       results.variableAssignment = enclosingStatement;
       results.rootNode = enclosingStatement;
     } else {
       results.rootNode = parent;
     }
-  } else if (parent.type === 'MemberExpression' && parent.property.type === 'Identifier') {
+  } else if (parent.type === AST_NODE_TYPES.MemberExpression && parent.property.type === AST_NODE_TYPES.Identifier) {
     if (parent.property.name === 'expect') {
       // supertest assertions
       const assertionCall = getParent(parent);
-      assert.ok(assertionCall && assertionCall.type === 'CallExpression');
-      results.assertions = [...(results.assertions ?? []), assertionCall.arguments as Expression[]];
+      assert.ok(assertionCall && assertionCall.type === AST_NODE_TYPES.CallExpression);
+      results.assertions = [...(results.assertions ?? []), assertionCall.arguments as TSESTree.Expression[]];
       nextCall = assertionCall;
     } else if (parent.property.name === 'send') {
       // request body
       const sendRequestBodyCall = getParent(parent);
-      assert.ok(sendRequestBodyCall && sendRequestBodyCall.type === 'CallExpression');
-      results.requestBody = sendRequestBodyCall.arguments[0] as Expression;
+      assert.ok(sendRequestBodyCall && sendRequestBodyCall.type === AST_NODE_TYPES.CallExpression);
+      results.requestBody = sendRequestBodyCall.arguments[0] as TSESTree.Expression;
       nextCall = sendRequestBodyCall;
     } else if (parent.property.name === 'set') {
       // request headers
       const setRequestHeaderCall = getParent(parent);
-      assert.ok(setRequestHeaderCall && setRequestHeaderCall.type === 'CallExpression');
-      const [arg1, arg2] = setRequestHeaderCall.arguments as [Expression, Expression];
-      if (arg1.type === 'ObjectExpression') {
+      assert.ok(setRequestHeaderCall && setRequestHeaderCall.type === AST_NODE_TYPES.CallExpression);
+      const [arg1, arg2] = setRequestHeaderCall.arguments as [TSESTree.Expression, TSESTree.Expression];
+      if (arg1.type === AST_NODE_TYPES.ObjectExpression) {
         results.requestHeadersObjectLiteral = arg1;
       } else {
         results.requestHeaders = [...(results.requestHeaders ?? []), { name: arg1, value: arg2 }];
@@ -139,7 +133,7 @@ function createResponseAssertions(
   fixtureCallInformation: FixtureCallInformation,
   sourceCode: SourceCode,
   responseVariableName: string,
-  destructuringResponseHeadersVariable: Scope.Variable | undefined,
+  destructuringResponseHeadersVariable: Variable | undefined,
 ) {
   let statusAssertion: string | undefined;
   const nonStatusAssertions: string[] = [];
@@ -148,20 +142,20 @@ function createResponseAssertions(
       const [assertionArgument] = expectArguments;
       assert.ok(assertionArgument);
       if (
-        (assertionArgument.type === 'MemberExpression' &&
-          assertionArgument.object.type === 'Identifier' &&
+        (assertionArgument.type === AST_NODE_TYPES.MemberExpression &&
+          assertionArgument.object.type === AST_NODE_TYPES.Identifier &&
           assertionArgument.object.name === 'StatusCodes') ||
-        assertionArgument.type === 'Literal' ||
-        sourceCode.getText(assertionArgument).includes('StatusCodes.')
+        assertionArgument.type === AST_NODE_TYPES.Literal ||
+        sourceCode.getText(assertionArgument as TSESTree.Node).includes('StatusCodes.')
       ) {
         // status code assertion
         statusAssertion = `assert.equal(${responseVariableName}.status, ${sourceCode.getText(assertionArgument)})`;
-      } else if (assertionArgument.type === 'ArrowFunctionExpression') {
+      } else if (assertionArgument.type === AST_NODE_TYPES.ArrowFunctionExpression) {
         // callback assertion using arrow function
         let functionBody = sourceCode.getText(assertionArgument.body);
 
         const [originalResponseArgument] = assertionArgument.params;
-        assert.ok(originalResponseArgument?.type === 'Identifier');
+        assert.ok(originalResponseArgument?.type === AST_NODE_TYPES.Identifier);
         const originalResponseArgumentName = originalResponseArgument.name;
         if (originalResponseArgumentName !== responseVariableName) {
           functionBody = functionBody.replace(
@@ -170,12 +164,15 @@ function createResponseAssertions(
           );
         }
         nonStatusAssertions.push(`assert.doesNotThrow(()=>${functionBody})`);
-      } else if (assertionArgument.type === 'Identifier') {
+      } else if (assertionArgument.type === AST_NODE_TYPES.Identifier) {
         // callback assertion using function reference
         nonStatusAssertions.push(
           `assert.doesNotThrow(()=>${sourceCode.getText(assertionArgument)}(${responseVariableName}))`,
         );
-      } else if (assertionArgument.type === 'ObjectExpression' || assertionArgument.type === 'CallExpression') {
+      } else if (
+        assertionArgument.type === AST_NODE_TYPES.ObjectExpression ||
+        assertionArgument.type === AST_NODE_TYPES.CallExpression
+      ) {
         // body deep equal assertion
         nonStatusAssertions.push(
           `assert.deepEqual(await ${responseVariableName}.json(), ${sourceCode.getText(assertionArgument)})`,
@@ -191,7 +188,7 @@ function createResponseAssertions(
         destructuringResponseHeadersVariable !== undefined
           ? destructuringResponseHeadersVariable.name
           : `${responseVariableName}.headers`;
-      if (headerValue.type === 'Literal' && headerValue.value instanceof RegExp) {
+      if (headerValue.type === AST_NODE_TYPES.Literal && headerValue.value instanceof RegExp) {
         nonStatusAssertions.push(
           `assert.ok(${headersReference}.get(${sourceCode.getText(headerName)}).match(${sourceCode.getText(headerValue)}))`,
         );
@@ -209,21 +206,22 @@ function createResponseAssertions(
 }
 
 function getResponseVariableNameToUse(
-  scopeManager: Scope.ScopeManager,
+  scopeManager: ScopeManager,
   fixtureCallInformation: FixtureCallInformation,
-  scopeVariablesMap: Map<Scope.Scope, string[]>,
+  scopeVariablesMap: Map<Scope, string[]>,
 ) {
   if (fixtureCallInformation.variableAssignment) {
     assert.ok(
-      fixtureCallInformation.variableAssignment.expression.type === 'AssignmentExpression' &&
-        fixtureCallInformation.variableAssignment.expression.left.type === 'Identifier',
+      fixtureCallInformation.variableAssignment.expression.type === AST_NODE_TYPES.AssignmentExpression &&
+        fixtureCallInformation.variableAssignment.expression.left.type === AST_NODE_TYPES.Identifier,
     );
     return fixtureCallInformation.variableAssignment.expression.left.name;
   }
 
   if (fixtureCallInformation.variableDeclaration) {
     const firstDeclaration = fixtureCallInformation.variableDeclaration.declarations[0];
-    if (firstDeclaration && firstDeclaration.id.type === 'Identifier') {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (firstDeclaration !== undefined && firstDeclaration.id.type === AST_NODE_TYPES.Identifier) {
       return firstDeclaration.id.name;
     }
   }
@@ -252,12 +250,15 @@ function getResponseVariableNameToUse(
   return responseVariableNameToUse;
 }
 
-function isResponseBodyRedefinition(responseBodyReference: MemberExpression): boolean {
+function isResponseBodyRedefinition(responseBodyReference: TSESTree.MemberExpression): boolean {
   const parent = getParent(responseBodyReference);
-  return parent?.type === 'VariableDeclarator' && parent.id.type === 'Identifier';
+  return parent?.type === AST_NODE_TYPES.VariableDeclarator && parent.id.type === AST_NODE_TYPES.Identifier;
 }
 
-const rule: Rule.RuleModule = {
+const createRule = ESLintUtils.RuleCreator((name) => getDocumentationUrl(name));
+
+const rule: ESLintUtils.RuleModule<'unknownError' | 'preferNativeFetch'> = createRule({
+  name: ruleId,
   meta: {
     type: 'suggestion',
     docs: {
@@ -271,16 +272,18 @@ const rule: Rule.RuleModule = {
     fixable: 'code',
     schema: [],
   },
+  defaultOptions: [],
   // eslint-disable-next-line max-lines-per-function
   create(context) {
     const sourceCode = context.sourceCode;
     const scopeManager = sourceCode.scopeManager;
-    const scopeVariablesMap = new Map<Scope.Scope, string[]>();
+    assert.ok(scopeManager !== null);
+    const scopeVariablesMap = new Map<Scope, string[]>();
 
     return {
       // eslint-disable-next-line max-lines-per-function
       'CallExpression[callee.object.object.name="fixture"][callee.object.property.name="api"]': (
-        fixtureCall: CallExpression,
+        fixtureCall: TSESTree.CallExpression,
         // eslint-disable-next-line sonarjs/cognitive-complexity
       ) => {
         try {
@@ -292,9 +295,8 @@ const rule: Rule.RuleModule = {
             return;
           }
 
-          assert.ok(fixtureCall.type === 'CallExpression');
           const fixtureFunction = fixtureCall.callee; // e.g. fixture.api.get
-          assert.ok(fixtureFunction.type === 'MemberExpression');
+          assert.ok(fixtureFunction.type === AST_NODE_TYPES.MemberExpression);
           const indentation = getIndentation(fixtureCall, sourceCode);
 
           const [urlArgumentNode] = fixtureCall.arguments; // e.g. `/sample-service/v1/ping`
@@ -318,7 +320,7 @@ const rule: Rule.RuleModule = {
 
           // fetch request argument
           const methodNode = fixtureFunction.property; // get/put/etc.
-          assert.ok(methodNode.type === 'Identifier');
+          assert.ok(methodNode.type === AST_NODE_TYPES.Identifier);
           const methodName = methodNode.name.toUpperCase();
 
           const fetchRequestArgumentLines = [
@@ -336,7 +338,7 @@ const rule: Rule.RuleModule = {
                     ...fixtureCallInformation.requestHeaders.map(
                       ({ name, value }) =>
                         // eslint-disable-next-line @typescript-eslint/restrict-template-expressions, no-nested-ternary, sonarjs/no-nested-template-literals
-                        `    ${name.type === 'Literal' ? (isValidPropertyName(name.value) ? name.value : `'${name.value}'`) : `[${sourceCode.getText(name)}]`}: ${sourceCode.getText(value)},`,
+                        `    ${name.type === AST_NODE_TYPES.Literal ? (isValidPropertyName(name.value) ? name.value : `'${name.value}'`) : `[${sourceCode.getText(name)}]`}: ${sourceCode.getText(value)},`,
                     ),
                     `  },`,
                   ]
@@ -359,7 +361,7 @@ const rule: Rule.RuleModule = {
           const isResponseHeadersVariableRedefinitionNeeded =
             (destructuringResponseHeadersVariable !== undefined &&
               // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-              (destructuringResponseHeadersVariable as ObjectPattern).type === 'ObjectPattern') ||
+              (destructuringResponseHeadersVariable as TSESTree.ObjectPattern).type === AST_NODE_TYPES.ObjectPattern) ||
             fixtureCallInformation.inlineHeadersReference !== undefined;
           const redefineResponseHeadersVariableName = `${responseVariableNameToUse}Headers`;
 
@@ -376,7 +378,7 @@ const rule: Rule.RuleModule = {
                 ...(destructuringResponseBodyVariable
                   ? [
                       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-                      `${fixtureCallInformation.variableDeclaration?.kind ?? 'const'} ${(destructuringResponseBodyVariable as ObjectPattern).type === 'ObjectPattern' ? sourceCode.getText(destructuringResponseBodyVariable as ObjectPattern) : (destructuringResponseBodyVariable as Scope.Variable).name} = ${getResponseBodyRetrievalText(responseVariableNameToUse)}`,
+                      `${fixtureCallInformation.variableDeclaration?.kind ?? 'const'} ${(destructuringResponseBodyVariable as TSESTree.ObjectPattern).type === AST_NODE_TYPES.ObjectPattern ? sourceCode.getText(destructuringResponseBodyVariable as TSESTree.ObjectPattern) : (destructuringResponseBodyVariable as Variable).name} = ${getResponseBodyRetrievalText(responseVariableNameToUse)}`,
                     ]
                   : isResponseBodyVariableRedefinitionNeeded
                     ? [
@@ -386,15 +388,16 @@ const rule: Rule.RuleModule = {
                 // eslint-disable-next-line no-nested-ternary
                 ...(destructuringResponseHeadersVariable
                   ? // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-                    (destructuringResponseHeadersVariable as ObjectPattern).type === 'ObjectPattern'
-                    ? (destructuringResponseHeadersVariable as ObjectPattern).properties.map((property) => {
-                        assert.ok(property.type === 'Property');
-                        assert.equal(property.value.type, 'Identifier');
+                    (destructuringResponseHeadersVariable as TSESTree.ObjectPattern).type ===
+                    AST_NODE_TYPES.ObjectPattern
+                    ? (destructuringResponseHeadersVariable as TSESTree.ObjectPattern).properties.map((property) => {
+                        assert.ok(property.type === AST_NODE_TYPES.Property);
+                        assert.equal(property.value.type, AST_NODE_TYPES.Identifier);
                         // eslint-disable-next-line sonarjs/no-nested-template-literals
-                        return `${fixtureCallInformation.variableDeclaration?.kind ?? 'const'} ${property.value.name} = ${getResponseHeadersRetrievalText(responseVariableNameToUse)}.get(${property.key.type === 'Literal' ? sourceCode.getText(property.key) : `'${sourceCode.getText(property.key)}'`})`;
+                        return `${fixtureCallInformation.variableDeclaration?.kind ?? 'const'} ${property.value.name} = ${getResponseHeadersRetrievalText(responseVariableNameToUse)}.get(${property.key.type === AST_NODE_TYPES.Literal ? sourceCode.getText(property.key) : `'${sourceCode.getText(property.key)}'`})`;
                       })
                     : [
-                        `${fixtureCallInformation.variableDeclaration?.kind ?? 'const'} ${(destructuringResponseHeadersVariable as Scope.Variable).name} = ${getResponseHeadersRetrievalText(responseVariableNameToUse)}`,
+                        `${fixtureCallInformation.variableDeclaration?.kind ?? 'const'} ${(destructuringResponseHeadersVariable as Variable).name} = ${getResponseHeadersRetrievalText(responseVariableNameToUse)}`,
                       ]
                   : isResponseHeadersVariableRedefinitionNeeded
                     ? [
@@ -408,7 +411,7 @@ const rule: Rule.RuleModule = {
             fixtureCallInformation,
             sourceCode,
             responseVariableNameToUse,
-            destructuringResponseHeadersVariable as Scope.Variable | undefined,
+            destructuringResponseHeadersVariable as Variable | undefined,
           );
 
           // add variable declaration if needed
@@ -466,12 +469,12 @@ const rule: Rule.RuleModule = {
                 const parent = getParent(responseHeadersReference);
                 assert.ok(parent);
                 let headerName;
-                if (parent.type === 'MemberExpression') {
+                if (parent.type === AST_NODE_TYPES.MemberExpression) {
                   const headerNameNode = parent.property;
                   headerName = parent.computed
                     ? sourceCode.getText(headerNameNode)
                     : `'${sourceCode.getText(headerNameNode)}'`;
-                } else if (parent.type === 'CallExpression') {
+                } else if (parent.type === AST_NODE_TYPES.CallExpression) {
                   const headerNameNode = parent.arguments[0];
                   headerName = sourceCode.getText(headerNameNode);
                 }
@@ -482,7 +485,7 @@ const rule: Rule.RuleModule = {
               // convert response.statusCode to response.status
               for (const responseStatusReference of responseStatusReferences) {
                 if (
-                  responseStatusReference.property.type === 'Identifier' &&
+                  responseStatusReference.property.type === AST_NODE_TYPES.Identifier &&
                   responseStatusReference.property.name === 'statusCode'
                 ) {
                   yield fixer.replaceText(responseStatusReference.property, `status`);
@@ -491,7 +494,7 @@ const rule: Rule.RuleModule = {
 
               // handle direct return statement without await, e.g. "return fixture.api.get(...);"
               if (
-                fixtureCallInformation.rootNode.type === 'ReturnStatement' &&
+                fixtureCallInformation.rootNode.type === AST_NODE_TYPES.ReturnStatement &&
                 fixtureCallInformation.assertions !== undefined
               ) {
                 yield fixer.insertTextAfter(
@@ -516,6 +519,6 @@ const rule: Rule.RuleModule = {
       },
     };
   },
-};
+});
 
 export default rule;

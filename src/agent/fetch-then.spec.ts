@@ -6,7 +6,7 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import createTester from '../tester.test';
+import createTester from '../ts-tester.test';
 import rule, { ruleId } from './fetch-then';
 
 createTester().run(ruleId, rule, {
@@ -50,7 +50,7 @@ createTester().run(ruleId, rule, {
             }),
           ]);
         `,
-      errors: 2,
+      errors: [{ messageId: 'preferNativeFetch' }, { messageId: 'preferNativeFetch' }],
     },
     {
       name: 'adjust header access correctly',
@@ -88,7 +88,20 @@ createTester().run(ruleId, rule, {
           assert.equal(responses[0].headers.get(CREATED_ON_HEADER), responses[1].headers.get(CREATED_ON_HEADER));
           assert.equal(responses[0].headers.get(UPDATED_ON_HEADER), responses[1].headers.get(UPDATED_ON_HEADER));
         `,
-      errors: 12,
+      errors: [
+        { messageId: 'preferNativeFetch' },
+        { messageId: 'preferNativeFetch' },
+        { messageId: 'shouldUseHeaderGetter' },
+        { messageId: 'shouldUseHeaderGetter' },
+        { messageId: 'shouldUseHeaderGetter' },
+        { messageId: 'shouldUseHeaderGetter' },
+        { messageId: 'shouldUseHeaderGetter' },
+        { messageId: 'shouldUseHeaderGetter' },
+        { messageId: 'shouldUseHeaderGetter' },
+        { messageId: 'shouldUseHeaderGetter' },
+        { messageId: 'shouldUseHeaderGetter' },
+        { messageId: 'shouldUseHeaderGetter' },
+      ],
     },
     {
       name: 'in non-async arrow function with concurrent promises',
@@ -128,7 +141,7 @@ createTester().run(ruleId, rule, {
             }),
           );
         `,
-      errors: 1,
+      errors: [{ messageId: 'preferNativeFetch' }],
     },
   ],
 });
