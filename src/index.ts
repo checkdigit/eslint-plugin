@@ -23,6 +23,7 @@ import invalidJsonStringify, { ruleId as invalidJsonStringifyRuleId } from './in
 import noDuplicatedImports, { ruleId as noDuplicatedImportsRuleId } from './no-duplicated-imports';
 import noFixture, { ruleId as noFixtureRuleId } from './agent/no-fixture';
 import noSupertest, { ruleId as noSupertestRuleId } from './agent/no-supertest';
+import supertestThen, { ruleId as supertestThenRuleId } from './agent/supertest-then';
 import noLegacyServiceTyping, { ruleId as noLegacyServiceTypingRuleId } from './no-legacy-service-typing';
 import noMappedResponse, { ruleId as noMappedResponseRuleId } from './agent/no-mapped-response';
 import noPromiseInstanceMethod, { ruleId as noPromiseInstanceMethodRuleId } from './no-promise-instance-method';
@@ -74,6 +75,7 @@ const rules: Record<string, TSESLint.LooseRuleDefinition> = {
   [noPromiseInstanceMethodRuleId]: noPromiseInstanceMethod,
   [noFixtureRuleId]: noFixture,
   [noSupertestRuleId]: noSupertest,
+  [supertestThenRuleId]: supertestThen,
   [fetchThenRuleId]: fetchThen,
   [noServiceWrapperRuleId]: noServiceWrapper,
   [noStatusCodeRuleId]: noStatusCode,
@@ -134,6 +136,7 @@ const configs: Record<string, TSESLint.FlatConfig.Config[]> = {
         [`@checkdigit/${addUrlDomainRuleId}`]: 'off',
         [`@checkdigit/${noFixtureRuleId}`]: 'off',
         [`@checkdigit/${noSupertestRuleId}`]: 'off',
+        [`@checkdigit/${supertestThenRuleId}`]: 'off',
         [`@checkdigit/${noServiceWrapperRuleId}`]: 'off',
         [`@checkdigit/${noStatusCodeRuleId}`]: 'off',
         [`@checkdigit/${fetchResponseBodyJsonRuleId}`]: 'off',
@@ -183,6 +186,7 @@ const configs: Record<string, TSESLint.FlatConfig.Config[]> = {
         [`@checkdigit/${addUrlDomainRuleId}`]: 'off',
         [`@checkdigit/${noFixtureRuleId}`]: 'off',
         [`@checkdigit/${noSupertestRuleId}`]: 'off',
+        [`@checkdigit/${supertestThenRuleId}`]: 'off',
         [`@checkdigit/${noServiceWrapperRuleId}`]: 'off',
         [`@checkdigit/${noStatusCodeRuleId}`]: 'off',
         [`@checkdigit/${fetchResponseBodyJsonRuleId}`]: 'off',
@@ -227,6 +231,7 @@ const configs: Record<string, TSESLint.FlatConfig.Config[]> = {
         [`@checkdigit/${addAssertImportRuleId}`]: 'error',
         [`@checkdigit/${noFixtureRuleId}`]: 'error',
         [`@checkdigit/${noSupertestRuleId}`]: 'error',
+        [`@checkdigit/${supertestThenRuleId}`]: 'error',
       },
     },
     {

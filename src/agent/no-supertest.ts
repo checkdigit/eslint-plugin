@@ -284,33 +284,28 @@ const rule: ESLintUtils.RuleModule<'unknownError' | 'preferNativeFetch'> = creat
         supertestCall: TSESTree.CallExpression,
         // eslint-disable-next-line sonarjs/cognitive-complexity
       ) => {
-        assert.ok(supertestCall.callee.type === AST_NODE_TYPES.MemberExpression);
-        if (
-          supertestCall.callee.object.type === AST_NODE_TYPES.CallExpression &&
-          supertestCall.callee.object.callee.type === AST_NODE_TYPES.MemberExpression &&
-          supertestCall.callee.object.callee.property.type === AST_NODE_TYPES.Identifier &&
-          supertestCall.callee.object.callee.property.name === 'expect'
-        ) {
-          // skip nested expect calls, only focus on the top level
-          return;
-        }
         try {
-          if (isUsedInArrayOrAsArgument(supertestCall) || getEnclosingFunction(supertestCall)?.async === false) {
-            // skip and leave it to "fetch-then" rule to handle it because no "await" can be used here
+          assert.ok(supertestCall.callee.type === AST_NODE_TYPES.MemberExpression);
+          if (
+            supertestCall.callee.object.type !== AST_NODE_TYPES.CallExpression ||
+            (supertestCall.callee.object.callee.type === AST_NODE_TYPES.MemberExpression &&
+              supertestCall.callee.object.callee.property.type === AST_NODE_TYPES.Identifier &&
+              supertestCall.callee.object.callee.property.name === 'expect')
+          ) {
+            // skip nested expect calls, only focus on the top level
             return;
           }
 
-          const fixtureFunction = supertestCall.callee.object;
-          if (fixtureFunction.type !== AST_NODE_TYPES.CallExpression) {
+          if (isUsedInArrayOrAsArgument(supertestCall) || getEnclosingFunction(supertestCall)?.async === false) {
+            // skip and leave it to "fetch-then" rule to handle it because no "await" can be used here
             return;
           }
 
           const indentation = getIndentation(supertestCall, sourceCode);
 
           const fixtureCallInformation = {} as FixtureCallInformation;
+          const fixtureFunction = supertestCall.callee.object;
           analyzeFixtureCall(fixtureFunction, fixtureCallInformation, sourceCode);
-          sourceCode.getText(fixtureCallInformation.fixtureNode);
-          sourceCode.getText(fixtureCallInformation.rootNode);
           fixtureCallInformation.assertions?.flat().map((ass) => sourceCode.getText(ass));
 
           const {
