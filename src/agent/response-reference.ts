@@ -21,6 +21,7 @@ const log = debug('eslint-plugin:response-reference');
  * the implementation is for fixture API, but it can be used for fetch API as well since the tree structure is similar
  * @param variableDeclaration - variable declaration node
  */
+// eslint-disable-next-line sonarjs/cognitive-complexity
 export function analyzeResponseReferences(
   variableDeclaration: TSESTree.VariableDeclaration | undefined,
   scopeManager: ScopeManager,
@@ -31,6 +32,7 @@ export function analyzeResponseReferences(
   statusReferences: TSESTree.MemberExpression[];
   destructuringBodyVariable?: Variable | TSESTree.ObjectPattern;
   destructuringHeadersVariable?: Variable | TSESTree.ObjectPattern;
+  destructuringStatusVariable?: Variable | TSESTree.ObjectPattern;
   destructuringHeadersReferences?: TSESTree.MemberExpression[] | undefined;
 } {
   const results: {
@@ -40,6 +42,7 @@ export function analyzeResponseReferences(
     statusReferences: TSESTree.MemberExpression[];
     destructuringBodyVariable?: Variable | TSESTree.ObjectPattern;
     destructuringHeadersVariable?: Variable | TSESTree.ObjectPattern;
+    destructuringStatusVariable?: Variable | TSESTree.ObjectPattern;
     destructuringHeadersReferences?: TSESTree.MemberExpression[] | undefined;
   } = {
     bodyReferences: [],
@@ -91,6 +94,13 @@ export function analyzeResponseReferences(
     ) {
       results.destructuringBodyVariable = responseVariable;
     } else if (
+      // body reference through destruction/renaming, e.g. "const { body } = ..."
+      identifierParent.type === AST_NODE_TYPES.Property &&
+      identifierParent.key.type === AST_NODE_TYPES.Identifier &&
+      (identifierParent.key.name === 'status' || identifierParent.key.name === 'statusCode')
+    ) {
+      results.destructuringStatusVariable = responseVariable;
+    } else if (
       // header reference through destruction/renaming, e.g. "const { headers } = ..."
       identifierParent.type === AST_NODE_TYPES.Property &&
       identifierParent.key.type === AST_NODE_TYPES.Identifier &&
@@ -118,6 +128,13 @@ export function analyzeResponseReferences(
           parent2.key.name === 'body'
         ) {
           results.destructuringBodyVariable = parent;
+        }
+        if (
+          parent2?.type === AST_NODE_TYPES.Property &&
+          parent2.key.type === AST_NODE_TYPES.Identifier &&
+          (parent2.key.name === 'status' || parent2.key.name === 'statusCode')
+        ) {
+          results.destructuringStatusVariable = parent;
         }
         if (
           parent2?.type === AST_NODE_TYPES.Property &&

@@ -714,5 +714,33 @@ createTester().run(ruleId, rule, {
       }`,
       errors: [{ messageId: 'preferNativeFetch' }],
     },
+    {
+      name: 'statusCode destructuring should be renamed',
+      code: `async function test() {
+        const { statusCode } = await fixture.api.get(\`\${BASE_PATH}/ping\`).expect(StatusCodes.OK);
+      }`,
+      output: `async function test() {
+        const response = await fetch(\`\${BASE_PATH}/ping\`, {
+          method: 'GET',
+        });
+        assert.equal(response.status, StatusCodes.OK);
+        const statusCode = response.status;
+      }`,
+      errors: [{ messageId: 'preferNativeFetch' }],
+    },
+    {
+      name: 'statusCode destructuring should be renamed',
+      code: `async function test() {
+        const { statusCode: pingStatusCode } = await fixture.api.get(\`\${BASE_PATH}/ping\`).expect(StatusCodes.OK);
+      }`,
+      output: `async function test() {
+        const response = await fetch(\`\${BASE_PATH}/ping\`, {
+          method: 'GET',
+        });
+        assert.equal(response.status, StatusCodes.OK);
+        const pingStatusCode = response.status;
+      }`,
+      errors: [{ messageId: 'preferNativeFetch' }],
+    },
   ],
 });

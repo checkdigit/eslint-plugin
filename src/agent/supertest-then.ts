@@ -8,14 +8,12 @@
 
 import { strict as assert } from 'node:assert';
 
-// import { ScopeManager, Variable } from '@typescript-eslint/scope-manager';
 import { AST_NODE_TYPES, ESLintUtils, TSESTree } from '@typescript-eslint/utils';
 import type { SourceCode } from '@typescript-eslint/utils/ts-eslint';
 
 import { getEnclosingFunction, getParent, isUsedInArrayOrAsArgument } from '../library/ts-tree';
 import getDocumentationUrl from '../get-documentation-url';
 import { getIndentation } from '../library/format';
-// import { isInvalidResponseHeadersAccess } from './fetch';
 
 export const ruleId = 'supertest-then';
 
@@ -128,50 +126,6 @@ function createResponseAssertions(
   };
 }
 
-// function getResponseHeadersAccesses(responseVariables: Variable[], scopeManager: ScopeManager, sourceCode: SourceCode) {
-//   const responseHeadersAccesses: TSESTree.MemberExpression[] = [];
-//   for (const responseVariable of responseVariables) {
-//     for (const responseReference of responseVariable.references) {
-//       const responseAccess = getParent(responseReference.identifier);
-//       if (!responseAccess || responseAccess.type !== AST_NODE_TYPES.MemberExpression) {
-//         continue;
-//       }
-
-//       const responseAccessParent = getParent(responseAccess);
-//       if (!responseAccessParent) {
-//         continue;
-//       }
-
-//       if (
-//         responseAccessParent.type === AST_NODE_TYPES.CallExpression &&
-//         responseAccessParent.arguments[0]?.type === AST_NODE_TYPES.ArrowFunctionExpression
-//       ) {
-//         // map-like operation against responses, e.g. responses.map((response) => response.headers.etag)
-//         responseHeadersAccesses.push(
-//           ...getResponseHeadersAccesses(
-//             scopeManager.getDeclaredVariables(responseAccessParent.arguments[0]),
-//             scopeManager,
-//             sourceCode,
-//           ),
-//         );
-//         continue;
-//       }
-
-//       if (
-//         responseAccess.computed &&
-//         responseAccess.property.type === AST_NODE_TYPES.Literal &&
-//         responseAccessParent.type === AST_NODE_TYPES.MemberExpression
-//       ) {
-//         // header access through indexed responses array, e.g. responses[0].headers, responses[1].get(...), etc.
-//         responseHeadersAccesses.push(responseAccessParent);
-//       } else {
-//         responseHeadersAccesses.push(responseAccess);
-//       }
-//     }
-//   }
-//   return responseHeadersAccesses;
-// }
-
 const createRule = ESLintUtils.RuleCreator((name) => getDocumentationUrl(name));
 const rule: ESLintUtils.RuleModule<
   'unknownError' | 'preferNativeFetch'
@@ -256,52 +210,6 @@ const rule: ESLintUtils.RuleModule<
               return fixer.replaceText(fixtureCallInformation.fixtureNode, replacementText);
             },
           });
-
-          // const responsesVariable = getEnclosingStatement(fixtureCallInformation.fixtureNode);
-          // if (!responsesVariable) {
-          //   return;
-          // }
-
-          // const responseVariableReferences = scopeManager.getDeclaredVariables(responsesVariable);
-          // const responseHeadersAccesses = getResponseHeadersAccesses(
-          //   responseVariableReferences,
-          //   scopeManager,
-          //   sourceCode,
-          // );
-          // for (const responseHeadersAccess of responseHeadersAccesses) {
-          //   if (isInvalidResponseHeadersAccess(responseHeadersAccess)) {
-          //     const headerAccess = getParent(responseHeadersAccess);
-          //     if (headerAccess?.type === AST_NODE_TYPES.MemberExpression) {
-          //       const headerNameNode = headerAccess.property;
-          //       const headerName = headerAccess.computed
-          //         ? sourceCode.getText(headerNameNode)
-          //         : `'${sourceCode.getText(headerNameNode)}'`;
-          //       const headerAccessReplacementText = `${sourceCode.getText(headerAccess.object)}.get(${headerName})`;
-
-          //       context.report({
-          //         node: headerAccess,
-          //         messageId: 'shouldUseHeaderGetter',
-          //         fix(fixer) {
-          //           return fixer.replaceText(headerAccess, headerAccessReplacementText);
-          //         },
-          //       });
-          //     } else if (
-          //       headerAccess?.type === AST_NODE_TYPES.CallExpression &&
-          //       responseHeadersAccess.property.type === AST_NODE_TYPES.Identifier &&
-          //       responseHeadersAccess.property.name === 'get'
-          //     ) {
-          //       const headerAccessReplacementText = `${sourceCode.getText(responseHeadersAccess.object)}.headers.get(${sourceCode.getText(headerAccess.arguments[0])})`;
-
-          //       context.report({
-          //         node: headerAccess,
-          //         messageId: 'shouldUseHeaderGetter',
-          //         fix(fixer) {
-          //           return fixer.replaceText(headerAccess, headerAccessReplacementText);
-          //         },
-          //       });
-          //     }
-          //   }
-          // }
         } catch (error) {
           // eslint-disable-next-line no-console
           console.error(`Failed to apply ${ruleId} rule for file "${context.filename}":`, error);

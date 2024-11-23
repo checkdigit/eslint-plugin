@@ -8,6 +8,10 @@ export function getResponseBodyRetrievalText(responseVariableName: string) {
   return `await ${responseVariableName}.json()`;
 }
 
+export function getResponseStatusRetrievalText(responseVariableName: string) {
+  return `${responseVariableName}.status`;
+}
+
 export function getResponseHeadersRetrievalText(responseVariableName: string) {
   return `${responseVariableName}.headers`;
 }

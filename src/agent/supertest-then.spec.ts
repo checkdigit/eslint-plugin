@@ -46,51 +46,6 @@ createTester().run(ruleId, rule, {
         `,
       errors: [{ messageId: 'preferNativeFetch' }, { messageId: 'preferNativeFetch' }],
     },
-    // {
-    //   name: 'adjust header access correctly',
-    //   code: `
-    //       const responses = await Promise.all([
-    //         ping().expect(StatusCodes.NO_CONTENT),
-    //         ping().expect(StatusCodes.NO_CONTENT),
-    //       ]);
-    //       assert.deepEqual(responses.map((response) => response.headers.etag).sort(), ['1', '1']);
-    //       assert.equal(responses[0].headers[LAST_MODIFIED_HEADER], responses[1].headers[LAST_MODIFIED_HEADER]);
-    //       assert.equal(responses[0].get(CREATED_ON_HEADER), responses[1].get(CREATED_ON_HEADER));
-    //       assert.equal(responses[0].headers.get(UPDATED_ON_HEADER), responses[1].headers.get(UPDATED_ON_HEADER));
-    //     `,
-    //   output: `
-    //       const responses = await Promise.all([
-    //         // eslint-disable-next-line @checkdigit/no-promise-instance-method
-    //         ping().then((res) => {
-    //           assert.equal(res.status, StatusCodes.NO_CONTENT);
-    //           return res;
-    //         }),
-    //         // eslint-disable-next-line @checkdigit/no-promise-instance-method
-    //         ping().then((res) => {
-    //           assert.equal(res.status, StatusCodes.NO_CONTENT);
-    //           return res;
-    //         }),
-    //       ]);
-    //       assert.deepEqual(responses.map((response) => response.headers.get('etag')).sort(), ['1', '1']);
-    //       assert.equal(responses[0].headers.get(LAST_MODIFIED_HEADER), responses[1].headers.get(LAST_MODIFIED_HEADER));
-    //       assert.equal(responses[0].headers.get(CREATED_ON_HEADER), responses[1].headers.get(CREATED_ON_HEADER));
-    //       assert.equal(responses[0].headers.get(UPDATED_ON_HEADER), responses[1].headers.get(UPDATED_ON_HEADER));
-    //     `,
-    //   errors: [
-    //     { messageId: 'preferNativeFetch' },
-    //     { messageId: 'preferNativeFetch' },
-    //     { messageId: 'shouldUseHeaderGetter' },
-    //     { messageId: 'shouldUseHeaderGetter' },
-    //     { messageId: 'shouldUseHeaderGetter' },
-    //     { messageId: 'shouldUseHeaderGetter' },
-    //     { messageId: 'shouldUseHeaderGetter' },
-    //     { messageId: 'shouldUseHeaderGetter' },
-    //     { messageId: 'shouldUseHeaderGetter' },
-    //     { messageId: 'shouldUseHeaderGetter' },
-    //     { messageId: 'shouldUseHeaderGetter' },
-    //     { messageId: 'shouldUseHeaderGetter' },
-    //   ],
-    // },
     {
       name: 'in non-async arrow function with concurrent promises',
       code: `

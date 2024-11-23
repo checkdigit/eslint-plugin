@@ -22,7 +22,7 @@ import {
 import getDocumentationUrl from '../get-documentation-url';
 import { getIndentation } from '../library/format';
 import { analyzeResponseReferences } from './response-reference';
-import { getResponseBodyRetrievalText, getResponseHeadersRetrievalText } from './fetch';
+import { getResponseBodyRetrievalText, getResponseHeadersRetrievalText, getResponseStatusRetrievalText } from './fetch';
 
 export const ruleId = 'no-supertest';
 
@@ -42,6 +42,7 @@ interface FixtureCallInformation {
   assertions?: TSESTree.Expression[][];
   inlineStatementNode?: TSESTree.Node;
   inlineBodyReference?: TSESTree.MemberExpression;
+  inlineStatusReference?: TSESTree.MemberExpression;
   inlineHeadersReference?: TSESTree.MemberExpression;
 }
 
@@ -74,6 +75,12 @@ function analyzeFixtureCall(call: TSESTree.CallExpression, results: FixtureCallI
       results.inlineStatementNode = enclosingStatement;
       if (awaitParent.property.type === AST_NODE_TYPES.Identifier && awaitParent.property.name === 'body') {
         results.inlineBodyReference = awaitParent;
+      }
+      if (
+        awaitParent.property.type === AST_NODE_TYPES.Identifier &&
+        (awaitParent.property.name === 'status' || awaitParent.property.name === 'statusCode')
+      ) {
+        results.inlineStatusReference = awaitParent;
       }
       if (
         awaitParent.property.type === AST_NODE_TYPES.Identifier &&
@@ -315,6 +322,7 @@ const rule: ESLintUtils.RuleModule<'unknownError' | 'preferNativeFetch'> = creat
             statusReferences: responseStatusReferences,
             destructuringBodyVariable: destructuringResponseBodyVariable,
             destructuringHeadersVariable: destructuringResponseHeadersVariable,
+            destructuringStatusVariable: destructuringResponseStatusVariable,
           } = analyzeResponseReferences(fixtureCallInformation.variableDeclaration, scopeManager);
 
           const responseVariableNameToUse = getResponseVariableNameToUse(
@@ -329,6 +337,11 @@ const rule: ESLintUtils.RuleModule<'unknownError' | 'preferNativeFetch'> = creat
             (responseBodyReferences.length > 0 && !responseBodyReferences.some(isResponseBodyRedefinition));
           const redefineResponseBodyVariableName = `${responseVariableNameToUse}Body`;
 
+          const isResponseStatusVariableRedefinitionNeeded =
+            destructuringResponseStatusVariable !== undefined ||
+            fixtureCallInformation.inlineStatusReference !== undefined;
+          const redefineResponseStatusVariableName = `${responseVariableNameToUse}Status`;
+
           const isResponseHeadersVariableRedefinitionNeeded =
             (destructuringResponseHeadersVariable !== undefined &&
               // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
@@ -341,6 +354,7 @@ const rule: ESLintUtils.RuleModule<'unknownError' | 'preferNativeFetch'> = creat
               responseVariable === undefined &&
               fixtureCallInformation.assertions !== undefined) ||
             isResponseBodyVariableRedefinitionNeeded ||
+            isResponseStatusVariableRedefinitionNeeded ||
             isResponseHeadersVariableRedefinitionNeeded;
 
           const responseBodyHeadersVariableRedefineLines = isResponseVariableRedefinitionNeeded
@@ -354,6 +368,17 @@ const rule: ESLintUtils.RuleModule<'unknownError' | 'preferNativeFetch'> = creat
                   : isResponseBodyVariableRedefinitionNeeded
                     ? [
                         `const ${redefineResponseBodyVariableName} = ${getResponseBodyRetrievalText(responseVariableNameToUse)}`,
+                      ]
+                    : []),
+                // eslint-disable-next-line no-nested-ternary
+                ...(destructuringResponseStatusVariable
+                  ? [
+                      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+                      `${fixtureCallInformation.variableDeclaration?.kind ?? 'const'} ${(destructuringResponseStatusVariable as TSESTree.ObjectPattern).type === AST_NODE_TYPES.ObjectPattern ? sourceCode.getText(destructuringResponseStatusVariable as TSESTree.ObjectPattern) : (destructuringResponseStatusVariable as Variable).name} = ${getResponseStatusRetrievalText(responseVariableNameToUse)}`,
+                    ]
+                  : isResponseStatusVariableRedefinitionNeeded
+                    ? [
+                        `const ${redefineResponseStatusVariableName} = ${getResponseStatusRetrievalText(responseVariableNameToUse)}`,
                       ]
                     : []),
                 // eslint-disable-next-line no-nested-ternary

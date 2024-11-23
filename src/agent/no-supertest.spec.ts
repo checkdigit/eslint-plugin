@@ -18,15 +18,15 @@ createTester().run(ruleId, rule, {
         assert.ok(headers.get(ETAG));
       }`,
     },
-    // {
-    //   name: 'skip concurrent fixture calls which will be handled in concurrent-promises rule',
-    //   code: `async function test() {
-    //     const responses = await Promise.all([
-    //       ping().expect(StatusCodes.OK),
-    //       ping().expect(StatusCodes.OK),
-    //     ]);
-    //   }`,
-    // },
+    {
+      name: 'skip concurrent supertest calls which will be handled in "supertest-then" rule',
+      code: `async function test() {
+        const responses = await Promise.all([
+          ping().expect(StatusCodes.OK),
+          ping().expect(StatusCodes.OK),
+        ]);
+      }`,
+    },
   ],
   invalid: [
     {
@@ -367,6 +367,30 @@ createTester().run(ruleId, rule, {
         assert.equal(response.status, StatusCodes.OK);
         const createdOn = response.headers.get('created-on');
         const updatedOn = response.headers.get('updated-on');
+      }`,
+      errors: [{ messageId: 'preferNativeFetch' }],
+    },
+    {
+      name: 'statusCode destructuring should be renamed',
+      code: `async function test() {
+        const { statusCode } = await ping().expect(StatusCodes.OK);
+      }`,
+      output: `async function test() {
+        const response = await ping();
+        assert.equal(response.status, StatusCodes.OK);
+        const statusCode = response.status;
+      }`,
+      errors: [{ messageId: 'preferNativeFetch' }],
+    },
+    {
+      name: 'statusCode destructuring should be renamed',
+      code: `async function test() {
+        const { statusCode: pingStatusCode } = await ping().expect(StatusCodes.OK);
+      }`,
+      output: `async function test() {
+        const response = await ping();
+        assert.equal(response.status, StatusCodes.OK);
+        const pingStatusCode = response.status;
       }`,
       errors: [{ messageId: 'preferNativeFetch' }],
     },
