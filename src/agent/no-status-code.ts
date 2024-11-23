@@ -9,6 +9,7 @@
 import { ESLintUtils, TSESTree } from '@typescript-eslint/utils';
 
 import getDocumentationUrl from '../get-documentation-url';
+import { isFetchResponse } from './fetch';
 
 export const ruleId = 'no-status-code';
 
@@ -39,11 +40,7 @@ const rule: ESLintUtils.RuleModule<'unknownError' | 'replaceStatusCode'> = creat
           const responseNode = parserServices.esTreeNodeToTSNodeMap.get(responseStatusCode.object);
           const responseType = typeChecker.getTypeAtLocation(responseNode);
 
-          const shouldReplace =
-            responseType.getProperties().some((symbol) => symbol.name === 'status') &&
-            !responseType.getProperties().some((symbol) => symbol.name === 'statusCode');
-
-          if (shouldReplace) {
+          if (isFetchResponse(responseType)) {
             context.report({
               messageId: 'replaceStatusCode',
               node: responseStatusCode.property,

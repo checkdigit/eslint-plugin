@@ -1,6 +1,7 @@
 // agent/fetch.ts
 
 import { AST_NODE_TYPES, TSESTree } from '@typescript-eslint/utils';
+import ts from 'typescript';
 
 import { getParent, isBlockStatement } from '../library/ts-tree';
 
@@ -58,4 +59,11 @@ export function hasAssertions(fixtureCall: TSESTree.Node): boolean {
   }
 
   return hasAssertions(parent);
+}
+
+export function isFetchResponse(type: ts.Type): boolean {
+  return (
+    type.getProperties().some((symbol) => symbol.name === 'body') &&
+    type.getProperties().some((symbol) => symbol.name === 'json')
+  );
 }

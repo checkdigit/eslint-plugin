@@ -12,6 +12,7 @@ import { AST_NODE_TYPES, ESLintUtils, TSESTree } from '@typescript-eslint/utils'
 
 import getDocumentationUrl from '../get-documentation-url';
 import { getAncestor } from '../library/ts-tree';
+import { isFetchResponse } from './fetch';
 
 export const ruleId = 'fetch-response-body-json';
 
@@ -56,11 +57,7 @@ const rule: ESLintUtils.RuleModule<'unknownError' | 'replaceBodyWithJson' | 'ref
           const responseNode = parserServices.esTreeNodeToTSNodeMap.get(responseBodyNode.object);
           const responseType = typeChecker.getTypeAtLocation(responseNode);
 
-          const shouldReplace =
-            responseType.getProperties().some((symbol) => symbol.name === 'body') &&
-            responseType.getProperties().some((symbol) => symbol.name === 'json');
-
-          if (shouldReplace) {
+          if (isFetchResponse(responseType)) {
             if (responseBodyNode.object.type !== AST_NODE_TYPES.Identifier) {
               context.report({
                 node: responseBodyNode,

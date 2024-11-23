@@ -51,5 +51,23 @@ createTester().run(ruleId, rule, {
       }`,
       errors: [{ messageId: 'renameStatusCodeProperty' }],
     },
+    {
+      name: 'not directly destructuring fetch',
+      code: `function ping() {
+        return fetch(url);
+      }
+      async function foo() {
+        const { statusCode } = await ping();
+        assert.equal(statusCode, StatusCode.Ok);
+      }`,
+      output: `function ping() {
+        return fetch(url);
+      }
+      async function foo() {
+        const { status: statusCode } = await ping();
+        assert.equal(statusCode, StatusCode.Ok);
+      }`,
+      errors: [{ messageId: 'renameStatusCodeProperty' }],
+    },
   ],
 });

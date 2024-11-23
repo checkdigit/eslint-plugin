@@ -9,6 +9,7 @@
 import { AST_NODE_TYPES, ESLintUtils, TSESTree } from '@typescript-eslint/utils';
 
 import getDocumentationUrl from '../get-documentation-url';
+import { isFetchResponse } from './fetch';
 
 export const ruleId = 'fetch-response-status';
 
@@ -30,15 +31,16 @@ const rule: ESLintUtils.RuleModule<'unknownError' | 'renameStatusCodeProperty'> 
   },
   defaultOptions: [],
   create(context) {
+    const parserServices = ESLintUtils.getParserServices(context);
+    const typeChecker = parserServices.program.getTypeChecker();
+
     return {
       VariableDeclaration: (variableDeclaration: TSESTree.VariableDeclaration) => {
         const variableInit = variableDeclaration.declarations[0]?.init;
         if (
           !variableInit ||
           variableInit.type !== AST_NODE_TYPES.AwaitExpression ||
-          variableInit.argument.type !== AST_NODE_TYPES.CallExpression ||
-          variableInit.argument.callee.type !== AST_NODE_TYPES.Identifier ||
-          variableInit.argument.callee.name !== 'fetch'
+          variableInit.argument.type !== AST_NODE_TYPES.CallExpression
         ) {
           return;
         }
@@ -55,6 +57,17 @@ const rule: ESLintUtils.RuleModule<'unknownError' | 'renameStatusCodeProperty'> 
         );
         if (!statusCodeProperty) {
           return;
+        }
+
+        if (
+          variableInit.argument.callee.type !== AST_NODE_TYPES.Identifier ||
+          variableInit.argument.callee.name !== 'fetch'
+        ) {
+          const variableNode = parserServices.esTreeNodeToTSNodeMap.get(variableId);
+          const variableType = typeChecker.getTypeAtLocation(variableNode);
+          if (!isFetchResponse(variableType)) {
+            return;
+          }
         }
 
         try {
