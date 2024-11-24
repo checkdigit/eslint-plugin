@@ -218,6 +218,9 @@ function createResponseAssertions(
 }
 
 function getResponseVariableNameToUse(
+  methodName: string,
+  urlArgumentNode: TSESTree.CallExpressionArgument,
+  originalUrlArgumentText: string,
   scopeManager: ScopeManager,
   fixtureCallInformation: FixtureCallInformation,
   scopeVariablesMap: Map<Scope, string[]>,
@@ -249,14 +252,34 @@ function getResponseVariableNameToUse(
     scopeVariablesMap.set(scope, scopeVariables);
   }
 
+  let responseVariableNameBase = 'response';
+  if (urlArgumentNode.type === AST_NODE_TYPES.Literal || urlArgumentNode.type === AST_NODE_TYPES.TemplateLiteral) {
+    const urlWithoutQuotes = originalUrlArgumentText.replace(/['"`]/gu, '');
+    const urlWithoutQuery = urlWithoutQuotes.includes('?')
+      ? urlWithoutQuotes.slice(0, urlWithoutQuotes.indexOf('?'))
+      : urlWithoutQuotes;
+    const parts = urlWithoutQuery.startsWith('${')
+      ? urlWithoutQuery.split('/').slice(1)
+      : // eslint-disable-next-line no-magic-numbers
+        urlWithoutQuery.split('/').slice(3);
+
+    responseVariableNameBase = [...parts, methodName.toLocaleLowerCase()]
+      .map((part) => part.split(/[-=]/u))
+      .flat()
+      .filter((part) => part.trim() !== '' && !/\$\{.*\}/u.test(part)) // keep only non-empty parts that are not path parameters
+      .map((part) => `${part[0]?.toUpperCase() ?? ''}${part.slice(1)}`)
+      .join('');
+    responseVariableNameBase = `${responseVariableNameBase[0]?.toLowerCase() ?? ''}${responseVariableNameBase.slice(1)}Response`;
+  }
+
   let responseVariableCounter = 0;
   let responseVariableNameToUse;
   while (responseVariableNameToUse === undefined) {
-    responseVariableCounter++;
-    responseVariableNameToUse = `response${responseVariableCounter === 1 ? '' : responseVariableCounter.toString()}`;
+    responseVariableNameToUse = `${responseVariableNameBase}${responseVariableCounter === 0 ? '' : responseVariableCounter.toString()}`;
     if (scopeVariables.includes(responseVariableNameToUse)) {
       responseVariableNameToUse = undefined;
     }
+    responseVariableCounter++;
   }
   scopeVariables.push(responseVariableNameToUse);
   return responseVariableNameToUse;
@@ -335,10 +358,11 @@ const rule: ESLintUtils.RuleModule<'unknownError' | 'preferNativeFetch'> = creat
           const methodNode = fixtureFunction.property; // get/put/etc.
           assert.ok(methodNode.type === AST_NODE_TYPES.Identifier);
           const methodName = methodNode.name.toUpperCase();
+          const methodNameToUse = methodName === 'DEL' ? 'DELETE' : methodName;
 
           const fetchRequestArgumentLines = [
             '{',
-            `  method: '${methodName === 'DEL' ? 'DELETE' : methodName}',`,
+            `  method: '${methodNameToUse}',`,
             ...(fixtureCallInformation.requestBody
               ? [`  body: JSON.stringify(${sourceCode.getText(fixtureCallInformation.requestBody)}),`]
               : []),
@@ -360,6 +384,9 @@ const rule: ESLintUtils.RuleModule<'unknownError' | 'preferNativeFetch'> = creat
           ].join(`\n${indentation}`);
 
           const responseVariableNameToUse = getResponseVariableNameToUse(
+            methodNameToUse,
+            urlArgumentNode,
+            originalUrlArgumentText,
             scopeManager,
             fixtureCallInformation,
             scopeVariablesMap,

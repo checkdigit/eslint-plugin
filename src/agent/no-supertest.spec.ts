@@ -27,6 +27,12 @@ createTester().run(ruleId, rule, {
         ]);
       }`,
     },
+    {
+      name: 'leave fixture.api.xxx() calls as is, which will be handled by no-fixture rule',
+      code: `async function test() {
+        await fixture.api.get(url).expect(StatusCodes.OK);
+      }`,
+    },
   ],
   invalid: [
     {
@@ -35,8 +41,8 @@ createTester().run(ruleId, rule, {
         await ping().expect(StatusCodes.OK);
       }`,
       output: `async function test() {
-        const response = await ping();
-        assert.equal(response.status, StatusCodes.OK);
+        const pingResponse = await ping();
+        assert.equal(pingResponse.status, StatusCodes.OK);
       }`,
       errors: [{ messageId: 'preferNativeFetch' }],
     },
@@ -65,12 +71,12 @@ createTester().run(ruleId, rule, {
           .expect(ETAG, /1.*/u);
       }`,
       output: `async function test() {
-        const response = await ping();
-        assert.equal(response.status, StatusCodes.OK);
-        assert.equal(response.headers.get('etag'), '123');
-        assert.equal(response.headers.get('content-type'), 'application/json');
-        assert.equal(response.headers.get(ETAG), correctVersion);
-        assert.ok(response.headers.get(ETAG).match(/1.*/u));
+        const pingResponse = await ping();
+        assert.equal(pingResponse.status, StatusCodes.OK);
+        assert.equal(pingResponse.headers.get('etag'), '123');
+        assert.equal(pingResponse.headers.get('content-type'), 'application/json');
+        assert.equal(pingResponse.headers.get(ETAG), correctVersion);
+        assert.ok(pingResponse.headers.get(ETAG).match(/1.*/u));
       }`,
       errors: [{ messageId: 'preferNativeFetch' }],
     },
@@ -80,8 +86,8 @@ createTester().run(ruleId, rule, {
         await ping().expect({message:'pong'});
       }`,
       output: `async function test() {
-        const response = await ping();
-        assert.deepEqual(await response.json(), {message:'pong'});
+        const pingResponse = await ping();
+        assert.deepEqual(await pingResponse.json(), {message:'pong'});
       }`,
       errors: [{ messageId: 'preferNativeFetch' }],
     },
@@ -93,9 +99,9 @@ createTester().run(ruleId, rule, {
           .expect((response)=>console.log(response));
       }`,
       output: `async function test() {
-        const response = await ping();
-        assert.doesNotThrow(()=>validate(response));
-        assert.doesNotThrow(()=>console.log(response));
+        const pingResponse = await ping();
+        assert.doesNotThrow(()=>validate(pingResponse));
+        assert.doesNotThrow(()=>console.log(pingResponse));
       }`,
       errors: [{ messageId: 'preferNativeFetch' }],
     },
@@ -108,15 +114,15 @@ createTester().run(ruleId, rule, {
         await ping().expect(StatusCodes.OK);
       }`,
       output: `async function test() {
-        const response = await ping();
-        assert.equal(response.status, StatusCodes.OK);
+        const pingResponse1 = await ping();
+        assert.equal(pingResponse1.status, StatusCodes.OK);
         const pingResponse = await ping();
         assert.equal(pingResponse.status, StatusCodes.OK);
-        const response2 = await ping();
-        assert.equal(response2.status, StatusCodes.OK);
-        assert.deepEqual(await response2.json(), {message:'pong'});
-        const response3 = await ping();
-        assert.equal(response3.status, StatusCodes.OK);
+        const pingResponse2 = await ping();
+        assert.equal(pingResponse2.status, StatusCodes.OK);
+        assert.deepEqual(await pingResponse2.json(), {message:'pong'});
+        const pingResponse3 = await ping();
+        assert.equal(pingResponse3.status, StatusCodes.OK);
       }`,
       errors: [
         { messageId: 'preferNativeFetch' },
@@ -131,9 +137,9 @@ createTester().run(ruleId, rule, {
         return ping().expect(StatusCodes.OK);
       }`,
       output: `async function test() {
-        const response = await ping();
-        assert.equal(response.status, StatusCodes.OK);
-        return response;
+        const pingResponse = await ping();
+        assert.equal(pingResponse.status, StatusCodes.OK);
+        return pingResponse;
       }`,
       errors: [{ messageId: 'preferNativeFetch' }],
     },
@@ -155,11 +161,11 @@ createTester().run(ruleId, rule, {
     {
       name: 'work with response status literal (e.g. 200 instead of StatusCoodes.OK) as well',
       code: `async function test() {
-        await ping().expect(200);
+        await util.ping().expect(200);
       }`,
       output: `async function test() {
-        const response = await ping();
-        assert.equal(response.status, 200);
+        const pingResponse = await util.ping();
+        assert.equal(pingResponse.status, 200);
       }`,
       errors: [{ messageId: 'preferNativeFetch' }],
     },
@@ -171,9 +177,9 @@ createTester().run(ruleId, rule, {
       }`,
       output: `async function test() {
         const createdOn = Date.now().toUTCString();
-        const response = await ping();
-        assert.equal(response.status, 200);
-        assert.deepEqual(await response.json(), validateBody(createdOn));
+        const pingResponse = await ping();
+        assert.equal(pingResponse.status, 200);
+        assert.deepEqual(await pingResponse.json(), validateBody(createdOn));
       }`,
       errors: [{ messageId: 'preferNativeFetch' }],
     },
@@ -185,9 +191,9 @@ createTester().run(ruleId, rule, {
         assert.ok(timeDifference >= 0 && timeDifference < 200);
       }`,
       output: `async function test() {
-        const response = await ping();
-        assert.equal(response.status, StatusCodes.OK);
-        const responseBody = await response.json();
+        const pingResponse = await ping();
+        assert.equal(pingResponse.status, StatusCodes.OK);
+        const responseBody = await pingResponse.json();
         const timeDifference = Date.now() - new Date(responseBody.serverTime).getTime();
         assert.ok(timeDifference >= 0 && timeDifference < 200);
       }`,
@@ -200,9 +206,9 @@ createTester().run(ruleId, rule, {
         assert.ok(firstPgpPublicKey.startsWith('-----BEGIN PGP PUBLIC KEY BLOCK-----'));
       }`,
       output: `async function test() {
-        const response = await ping();
-        assert.equal(response.status, StatusCodes.OK);
-        const { pgpPublicKey: firstPgpPublicKey } = await response.json();
+        const pingResponse = await ping();
+        assert.equal(pingResponse.status, StatusCodes.OK);
+        const { pgpPublicKey: firstPgpPublicKey } = await pingResponse.json();
         assert.ok(firstPgpPublicKey.startsWith('-----BEGIN PGP PUBLIC KEY BLOCK-----'));
       }`,
       errors: [{ messageId: 'preferNativeFetch' }],
@@ -215,10 +221,10 @@ createTester().run(ruleId, rule, {
         assert.ok(headers2.get(ETAG));
       }`,
       output: `async function test() {
-        const response = await ping();
-        assert.equal(response.status, StatusCodes.OK);
-        const body = await response.json();
-        const headers2 = response.headers;
+        const pingResponse = await ping();
+        assert.equal(pingResponse.status, StatusCodes.OK);
+        const body = await pingResponse.json();
+        const headers2 = pingResponse.headers;
         assert(body);
         assert.ok(headers2.get(ETAG));
       }`,
@@ -231,9 +237,9 @@ createTester().run(ruleId, rule, {
         assert.ok(headers.get(ETAG));
       }`,
       output: `async function test() {
-        const response = await ping();
-        assert.equal(response.status, StatusCodes.OK);
-        const headers = response.headers;
+        const pingResponse = await ping();
+        assert.equal(pingResponse.status, StatusCodes.OK);
+        const headers = pingResponse.headers;
         assert.ok(headers.get(ETAG));
       }`,
       errors: [{ messageId: 'preferNativeFetch' }],
@@ -241,18 +247,18 @@ createTester().run(ruleId, rule, {
     {
       name: 'avoid response variable name conflict with existing variables in the same scope',
       code: `async () => {
-        const response = 'foo';
-        const response1 = 'bar';
+        const pingResponse = 'foo';
+        const pingResponse1 = 'bar';
         await ping().expect(StatusCodes.OK);
         await ping().expect(StatusCodes.OK);
       }`,
       output: `async () => {
-        const response = 'foo';
-        const response1 = 'bar';
-        const response2 = await ping();
-        assert.equal(response2.status, StatusCodes.OK);
-        const response3 = await ping();
-        assert.equal(response3.status, StatusCodes.OK);
+        const pingResponse = 'foo';
+        const pingResponse1 = 'bar';
+        const pingResponse2 = await ping();
+        assert.equal(pingResponse2.status, StatusCodes.OK);
+        const pingResponse3 = await ping();
+        assert.equal(pingResponse3.status, StatusCodes.OK);
       }`,
       errors: [{ messageId: 'preferNativeFetch' }, { messageId: 'preferNativeFetch' }],
     },
@@ -260,30 +266,30 @@ createTester().run(ruleId, rule, {
       name: 'response variable names in different scope do not conflict with each other',
       code: `
         it('#1', async () => {
-          const response = 'foo';
+          const pingResponse = 'foo';
         });
         it('#2', async () => {
-          const response = 'foo';
+          const pingResponse = 'foo';
           await ping().expect(StatusCodes.OK);
         });
         it('#3', async () => {
-          const response3 = 'foo';
+          const pingResponse3 = 'foo';
           await ping().expect(StatusCodes.OK);
         });
       `,
       output: `
         it('#1', async () => {
-          const response = 'foo';
+          const pingResponse = 'foo';
         });
         it('#2', async () => {
-          const response = 'foo';
-          const response2 = await ping();
-          assert.equal(response2.status, StatusCodes.OK);
+          const pingResponse = 'foo';
+          const pingResponse1 = await ping();
+          assert.equal(pingResponse1.status, StatusCodes.OK);
         });
         it('#3', async () => {
-          const response3 = 'foo';
-          const response = await ping();
-          assert.equal(response.status, StatusCodes.OK);
+          const pingResponse3 = 'foo';
+          const pingResponse = await ping();
+          assert.equal(pingResponse.status, StatusCodes.OK);
         });
       `,
       errors: [{ messageId: 'preferNativeFetch' }, { messageId: 'preferNativeFetch' }],
@@ -298,10 +304,10 @@ createTester().run(ruleId, rule, {
       output: `export async function validatePin(
         fixture,
       ) {
-        const response = await ping();
-        assert.equal(response.status, StatusCodes.OK);
-        const responseBody = await response.json();
-        const paymentSecurityServicePublicKey = responseBody.publicKey;
+        const pingResponse = await ping();
+        assert.equal(pingResponse.status, StatusCodes.OK);
+        const pingResponseBody = await pingResponse.json();
+        const paymentSecurityServicePublicKey = pingResponseBody.publicKey;
       }`,
       errors: [{ messageId: 'preferNativeFetch' }],
     },
@@ -324,10 +330,10 @@ createTester().run(ruleId, rule, {
 
         // Import Key
         const keyId = uuid();
-        const response = await ping();
-        assert.equal(response.status, StatusCodes.NO_CONTENT);
-        assert.equal(response.headers.get(ETAG_HEADER), '1');
-        assert.doesNotThrow(()=>verifyTemporalHeaders(response, createdOn));
+        const pingResponse = await ping();
+        assert.equal(pingResponse.status, StatusCodes.NO_CONTENT);
+        assert.equal(pingResponse.headers.get(ETAG_HEADER), '1');
+        assert.doesNotThrow(()=>verifyTemporalHeaders(pingResponse, createdOn));
       }`,
       errors: [{ messageId: 'preferNativeFetch' }],
     },
@@ -351,9 +357,9 @@ createTester().run(ruleId, rule, {
         const { headers: { etag } } = await ping().expect(StatusCodes.OK);
       }`,
       output: `async function test() {
-        const response = await ping();
-        assert.equal(response.status, StatusCodes.OK);
-        const etag = response.headers.get('etag');
+        const pingResponse = await ping();
+        assert.equal(pingResponse.status, StatusCodes.OK);
+        const etag = pingResponse.headers.get('etag');
       }`,
       errors: [{ messageId: 'preferNativeFetch' }],
     },
@@ -363,10 +369,10 @@ createTester().run(ruleId, rule, {
         const { headers: { 'created-on': createdOn, 'updated-on': updatedOn } } = await ping().expect(StatusCodes.OK);
       }`,
       output: `async function test() {
-        const response = await ping();
-        assert.equal(response.status, StatusCodes.OK);
-        const createdOn = response.headers.get('created-on');
-        const updatedOn = response.headers.get('updated-on');
+        const pingResponse = await ping();
+        assert.equal(pingResponse.status, StatusCodes.OK);
+        const createdOn = pingResponse.headers.get('created-on');
+        const updatedOn = pingResponse.headers.get('updated-on');
       }`,
       errors: [{ messageId: 'preferNativeFetch' }],
     },
@@ -376,9 +382,9 @@ createTester().run(ruleId, rule, {
         const { statusCode } = await ping().expect(StatusCodes.OK);
       }`,
       output: `async function test() {
-        const response = await ping();
-        assert.equal(response.status, StatusCodes.OK);
-        const statusCode = response.status;
+        const pingResponse = await ping();
+        assert.equal(pingResponse.status, StatusCodes.OK);
+        const statusCode = pingResponse.status;
       }`,
       errors: [{ messageId: 'preferNativeFetch' }],
     },
@@ -388,9 +394,9 @@ createTester().run(ruleId, rule, {
         const { statusCode: pingStatusCode } = await ping().expect(StatusCodes.OK);
       }`,
       output: `async function test() {
-        const response = await ping();
-        assert.equal(response.status, StatusCodes.OK);
-        const pingStatusCode = response.status;
+        const pingResponse = await ping();
+        assert.equal(pingResponse.status, StatusCodes.OK);
+        const pingStatusCode = pingResponse.status;
       }`,
       errors: [{ messageId: 'preferNativeFetch' }],
     },

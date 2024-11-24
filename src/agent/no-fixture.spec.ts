@@ -73,25 +73,25 @@ createTester().run(ruleId, rule, {
         `,
       output: `
           import { BASE_PATH } from './index';
-          const response = await fetch(\`\${BASE_PATH}/ping\`, {
+          const pingGetResponse = await fetch(\`\${BASE_PATH}/ping\`, {
             method: 'GET',
           });
-          assert.equal(response.status, StatusCodes.OK);
+          assert.equal(pingGetResponse.status, StatusCodes.OK);
         `,
       errors: [{ messageId: 'preferNativeFetch' }],
     },
     {
-      name: 'assertion without variable declaration',
+      name: 'assertion without variable declaration - complex status assertion argument',
       code: `
           import { BASE_PATH } from './index';
           await fixture.api.get(\`/sample-service/v1/ping\`).expect(options.expectedStatusCode ?? StatusCodes.CREATED);
         `,
       output: `
           import { BASE_PATH } from './index';
-          const response = await fetch(\`\${BASE_PATH}/ping\`, {
+          const pingGetResponse = await fetch(\`\${BASE_PATH}/ping\`, {
             method: 'GET',
           });
-          assert.equal(response.status, options.expectedStatusCode ?? StatusCodes.CREATED);
+          assert.equal(pingGetResponse.status, options.expectedStatusCode ?? StatusCodes.CREATED);
         `,
       errors: [{ messageId: 'preferNativeFetch' }],
     },
@@ -103,11 +103,11 @@ createTester().run(ruleId, rule, {
         `,
       output: `
           import { BASE_PATH } from './index';
-          const response = await fetch(\`\${BASE_PATH}/card/\${uuid()}\`, {
+          const cardPutResponse = await fetch(\`\${BASE_PATH}/card/\${uuid()}\`, {
             method: 'PUT',
             body: JSON.stringify(cardCreationData),
           });
-          assert.equal(response.status, StatusCodes.BAD_REQUEST);
+          assert.equal(cardPutResponse.status, StatusCodes.BAD_REQUEST);
         `,
       errors: [{ messageId: 'preferNativeFetch' }],
     },
@@ -169,10 +169,10 @@ createTester().run(ruleId, rule, {
         `,
       output: `
           import { BASE_PATH } from './index';
-          const response = await fetch(\`\${BASE_PATH}/card/\${originalCard.card.cardId}/block/\${encodeURIComponent('BLOCKED NO FRAUD')}\`, {
+          const cardBlockPostResponse = await fetch(\`\${BASE_PATH}/card/\${originalCard.card.cardId}/block/\${encodeURIComponent('BLOCKED NO FRAUD')}\`, {
             method: 'POST',
           });
-          assert.equal(response.status, StatusCodes.NO_CONTENT);
+          assert.equal(cardBlockPostResponse.status, StatusCodes.NO_CONTENT);
         `,
       errors: [{ messageId: 'preferNativeFetch' }],
     },
@@ -186,10 +186,10 @@ createTester().run(ruleId, rule, {
         `,
       output: `
           import { BASE_PATH } from './index';
-          const response = await fetch(\`\${BASE_PATH}/card/\${originalCard.card.cardId}/block/\${encodeURIComponent('BLOCKED NO FRAUD')}\`, {
+          const cardBlockDeleteResponse = await fetch(\`\${BASE_PATH}/card/\${originalCard.card.cardId}/block/\${encodeURIComponent('BLOCKED NO FRAUD')}\`, {
             method: 'DELETE',
           });
-          assert.equal(response.status, StatusCodes.NO_CONTENT);
+          assert.equal(cardBlockDeleteResponse.status, StatusCodes.NO_CONTENT);
         `,
       errors: [{ messageId: 'preferNativeFetch' }],
     },
@@ -206,14 +206,14 @@ createTester().run(ruleId, rule, {
         `,
       output: `
           import { BASE_PATH } from './index';
-          const response = await fetch(\`\${BASE_PATH}/ping\`, {
+          const pingGetResponse = await fetch(\`\${BASE_PATH}/ping\`, {
             method: 'GET',
           });
-          assert.equal(response.status, StatusCodes.OK);
-          assert.equal(response.headers.get('etag'), '123');
-          assert.equal(response.headers.get('content-type'), 'application/json');
-          assert.equal(response.headers.get(ETAG), correctVersion);
-          assert.ok(response.headers.get(ETAG).match(/1.*/u));
+          assert.equal(pingGetResponse.status, StatusCodes.OK);
+          assert.equal(pingGetResponse.headers.get('etag'), '123');
+          assert.equal(pingGetResponse.headers.get('content-type'), 'application/json');
+          assert.equal(pingGetResponse.headers.get(ETAG), correctVersion);
+          assert.ok(pingGetResponse.headers.get(ETAG).match(/1.*/u));
         `,
       errors: [{ messageId: 'preferNativeFetch' }],
     },
@@ -225,10 +225,10 @@ createTester().run(ruleId, rule, {
         `,
       output: `
           import { BASE_PATH } from './index';
-          const response = await fetch(\`\${BASE_PATH}/ping\`, {
+          const pingGetResponse = await fetch(\`\${BASE_PATH}/ping\`, {
             method: 'GET',
           });
-          assert.deepEqual(await response.json(), {message:'pong'});
+          assert.deepEqual(await pingGetResponse.json(), {message:'pong'});
         `,
       errors: [{ messageId: 'preferNativeFetch' }],
     },
@@ -242,11 +242,11 @@ createTester().run(ruleId, rule, {
         `,
       output: `
           import { BASE_PATH } from './index';
-          const response = await fetch(\`\${BASE_PATH}/ping\`, {
+          const pingGetResponse = await fetch(\`\${BASE_PATH}/ping\`, {
             method: 'GET',
           });
-          assert.doesNotThrow(()=>validate(response));
-          assert.doesNotThrow(()=>console.log(response));
+          assert.doesNotThrow(()=>validate(pingGetResponse));
+          assert.doesNotThrow(()=>console.log(pingGetResponse));
         `,
       errors: [{ messageId: 'preferNativeFetch' }],
     },
@@ -254,30 +254,34 @@ createTester().run(ruleId, rule, {
       name: 'multiple fixture calls in the same test',
       code: `
           import { BASE_PATH } from './index';
-          await fixture.api.get(\`/sample-service/v1/ping\`).expect(StatusCodes.OK);
-          const pingResponse = await fixture.api.get(\`/sample-service/v1/ping\`).expect(StatusCodes.OK);
-          await fixture.api.get(\`/sample-service/v1/ping?param=xxx\`).expect(StatusCodes.OK).expect({message:'pong'});
-          await fixture.api.get(\`/sample-service/v1/ping\`).expect(StatusCodes.OK);
+          async function test() {
+            await fixture.api.get(\`/sample-service/v1/ping\`).expect(StatusCodes.OK);
+            const pingGetResponse = await fixture.api.get(\`/sample-service/v1/ping\`).expect(StatusCodes.OK);
+            await fixture.api.get(\`/sample-service/v1/ping?param=xxx\`).expect(StatusCodes.OK).expect({message:'pong'});
+            await fixture.api.get(\`/sample-service/v1/ping\`).expect(StatusCodes.OK);
+          }
         `,
       output: `
           import { BASE_PATH } from './index';
-          const response = await fetch(\`\${BASE_PATH}/ping\`, {
-            method: 'GET',
-          });
-          assert.equal(response.status, StatusCodes.OK);
-          const pingResponse = await fetch(\`\${BASE_PATH}/ping\`, {
-            method: 'GET',
-          });
-          assert.equal(pingResponse.status, StatusCodes.OK);
-          const response2 = await fetch(\`\${BASE_PATH}/ping?param=xxx\`, {
-            method: 'GET',
-          });
-          assert.equal(response2.status, StatusCodes.OK);
-          assert.deepEqual(await response2.json(), {message:'pong'});
-          const response3 = await fetch(\`\${BASE_PATH}/ping\`, {
-            method: 'GET',
-          });
-          assert.equal(response3.status, StatusCodes.OK);
+          async function test() {
+            const pingGetResponse1 = await fetch(\`\${BASE_PATH}/ping\`, {
+              method: 'GET',
+            });
+            assert.equal(pingGetResponse1.status, StatusCodes.OK);
+            const pingGetResponse = await fetch(\`\${BASE_PATH}/ping\`, {
+              method: 'GET',
+            });
+            assert.equal(pingGetResponse.status, StatusCodes.OK);
+            const pingGetResponse2 = await fetch(\`\${BASE_PATH}/ping?param=xxx\`, {
+              method: 'GET',
+            });
+            assert.equal(pingGetResponse2.status, StatusCodes.OK);
+            assert.deepEqual(await pingGetResponse2.json(), {message:'pong'});
+            const pingGetResponse3 = await fetch(\`\${BASE_PATH}/ping\`, {
+              method: 'GET',
+            });
+            assert.equal(pingGetResponse3.status, StatusCodes.OK);
+          }
         `,
       errors: [
         { messageId: 'preferNativeFetch' },
@@ -312,11 +316,11 @@ createTester().run(ruleId, rule, {
       output: `
         import { BASE_PATH } from './index';
         async () => {
-          const response = await fetch(\`\${BASE_PATH}/ping\`, {
+          const pingGetResponse = await fetch(\`\${BASE_PATH}/ping\`, {
             method: 'GET',
           });
-          assert.equal(response.status, StatusCodes.OK);
-          return response;
+          assert.equal(pingGetResponse.status, StatusCodes.OK);
+          return pingGetResponse;
         }`,
       errors: [{ messageId: 'preferNativeFetch' }],
     },
@@ -393,10 +397,10 @@ createTester().run(ruleId, rule, {
         `,
       output: `
           import { BASE_PATH } from './index';
-          const response = await fetch(\`\${BASE_PATH}/ping\`, {
+          const pingGetResponse = await fetch(\`\${BASE_PATH}/ping\`, {
             method: 'GET',
           });
-          assert.equal(response.status, 200);
+          assert.equal(pingGetResponse.status, 200);
         `,
       errors: [{ messageId: 'preferNativeFetch' }],
     },
@@ -410,11 +414,11 @@ createTester().run(ruleId, rule, {
       output: `
           import { BASE_PATH } from './index';
           const createdOn = Date.now().toUTCString();
-          const response = await fetch(\`\${BASE_PATH}/ping\`, {
+          const pingGetResponse = await fetch(\`\${BASE_PATH}/ping\`, {
             method: 'GET',
           });
-          assert.equal(response.status, 200);
-          assert.deepEqual(await response.json(), validateBody(createdOn));
+          assert.equal(pingGetResponse.status, 200);
+          assert.deepEqual(await pingGetResponse.json(), validateBody(createdOn));
         `,
       errors: [{ messageId: 'preferNativeFetch' }],
     },
@@ -426,11 +430,11 @@ createTester().run(ruleId, rule, {
           assert.ok(timeDifference >= 0 && timeDifference < 200);
         `,
       output: `
-          const response = await fetch(\`$\{BASE_PATH}/ping\`, {
+          const pingGetResponse = await fetch(\`$\{BASE_PATH}/ping\`, {
             method: 'GET',
           });
-          assert.equal(response.status, StatusCodes.OK);
-          const responseBody = await response.json();
+          assert.equal(pingGetResponse.status, StatusCodes.OK);
+          const responseBody = await pingGetResponse.json();
           const timeDifference = Date.now() - new Date(responseBody.serverTime).getTime();
           assert.ok(timeDifference >= 0 && timeDifference < 200);
         `,
@@ -443,11 +447,11 @@ createTester().run(ruleId, rule, {
           assert.ok(firstPgpPublicKey.startsWith('-----BEGIN PGP PUBLIC KEY BLOCK-----'));
         `,
       output: `
-          const response = await fetch(\`$\{BASE_PATH}/ping\`, {
+          const pingGetResponse = await fetch(\`$\{BASE_PATH}/ping\`, {
             method: 'GET',
           });
-          assert.equal(response.status, StatusCodes.OK);
-          const { pgpPublicKey: firstPgpPublicKey } = await response.json();
+          assert.equal(pingGetResponse.status, StatusCodes.OK);
+          const { pgpPublicKey: firstPgpPublicKey } = await pingGetResponse.json();
           assert.ok(firstPgpPublicKey.startsWith('-----BEGIN PGP PUBLIC KEY BLOCK-----'));
         `,
       errors: [{ messageId: 'preferNativeFetch' }],
@@ -460,12 +464,12 @@ createTester().run(ruleId, rule, {
           assert.ok(headers2.get(ETAG));
         `,
       output: `
-          const response = await fetch(\`$\{BASE_PATH}/ping\`, {
+          const pingGetResponse = await fetch(\`$\{BASE_PATH}/ping\`, {
             method: 'GET',
           });
-          assert.equal(response.status, StatusCodes.OK);
-          const body = await response.json();
-          const headers2 = response.headers;
+          assert.equal(pingGetResponse.status, StatusCodes.OK);
+          const body = await pingGetResponse.json();
+          const headers2 = pingGetResponse.headers;
           assert(body);
           assert.ok(headers2.get(ETAG));
         `,
@@ -478,11 +482,11 @@ createTester().run(ruleId, rule, {
           assert.ok(headers.get(ETAG));
         `,
       output: `
-          const response = await fetch(\`$\{BASE_PATH}/ping\`, {
+          const pingGetResponse = await fetch(\`$\{BASE_PATH}/ping\`, {
             method: 'GET',
           });
-          assert.equal(response.status, StatusCodes.OK);
-          const headers = response.headers;
+          assert.equal(pingGetResponse.status, StatusCodes.OK);
+          const headers = pingGetResponse.headers;
           assert.ok(headers.get(ETAG));
         `,
       errors: [{ messageId: 'preferNativeFetch' }],
@@ -505,24 +509,24 @@ createTester().run(ruleId, rule, {
       name: 'avoid response variable name conflict with existing variables in the same scope',
       code: `
           async () => {
-            const response = 'foo';
-            const response1 = 'bar';
+            const pingGetResponse = 'foo';
+            const pingGetResponse1 = 'bar';
             await fixture.api.get(\`$\{BASE_PATH}/ping\`).expect(StatusCodes.OK);
             await fixture.api.get(\`$\{BASE_PATH}/ping\`).expect(StatusCodes.OK);
           }
         `,
       output: `
           async () => {
-            const response = 'foo';
-            const response1 = 'bar';
-            const response2 = await fetch(\`$\{BASE_PATH}/ping\`, {
+            const pingGetResponse = 'foo';
+            const pingGetResponse1 = 'bar';
+            const pingGetResponse2 = await fetch(\`$\{BASE_PATH}/ping\`, {
               method: 'GET',
             });
-            assert.equal(response2.status, StatusCodes.OK);
-            const response3 = await fetch(\`$\{BASE_PATH}/ping\`, {
+            assert.equal(pingGetResponse2.status, StatusCodes.OK);
+            const pingGetResponse3 = await fetch(\`$\{BASE_PATH}/ping\`, {
               method: 'GET',
             });
-            assert.equal(response3.status, StatusCodes.OK);
+            assert.equal(pingGetResponse3.status, StatusCodes.OK);
           }
         `,
       errors: [{ messageId: 'preferNativeFetch' }, { messageId: 'preferNativeFetch' }],
@@ -531,34 +535,34 @@ createTester().run(ruleId, rule, {
       name: 'response variable names in different scope do not conflict with each other',
       code: `
           it('#1', async () => {
-            const response = 'foo';
+            const pingGetResponse = 'foo';
           });
           it('#2', async () => {
-            const response = 'foo';
+            const pingGetResponse = 'foo';
             await fixture.api.get(\`$\{BASE_PATH}/ping\`).expect(StatusCodes.OK);
           });
           it('#3', async () => {
-            const response3 = 'foo';
+            const pingGetResponse3 = 'foo';
             await fixture.api.get(\`$\{BASE_PATH}/ping\`).expect(StatusCodes.OK);
           });
         `,
       output: `
           it('#1', async () => {
-            const response = 'foo';
+            const pingGetResponse = 'foo';
           });
           it('#2', async () => {
-            const response = 'foo';
-            const response2 = await fetch(\`$\{BASE_PATH}/ping\`, {
+            const pingGetResponse = 'foo';
+            const pingGetResponse1 = await fetch(\`$\{BASE_PATH}/ping\`, {
               method: 'GET',
             });
-            assert.equal(response2.status, StatusCodes.OK);
+            assert.equal(pingGetResponse1.status, StatusCodes.OK);
           });
           it('#3', async () => {
-            const response3 = 'foo';
-            const response = await fetch(\`$\{BASE_PATH}/ping\`, {
+            const pingGetResponse3 = 'foo';
+            const pingGetResponse = await fetch(\`$\{BASE_PATH}/ping\`, {
               method: 'GET',
             });
-            assert.equal(response.status, StatusCodes.OK);
+            assert.equal(pingGetResponse.status, StatusCodes.OK);
           });
         `,
       errors: [{ messageId: 'preferNativeFetch' }, { messageId: 'preferNativeFetch' }],
@@ -576,12 +580,12 @@ createTester().run(ruleId, rule, {
         export async function validatePin(
           fixture,
         ) {
-          const response = await fetch(\`\${BASE_PATH}/public-key\`, {
+          const publicKeyGetResponse = await fetch(\`\${BASE_PATH}/public-key\`, {
             method: 'GET',
           });
-          assert.equal(response.status, StatusCodes.OK);
-          const responseBody = await response.json();
-          const paymentSecurityServicePublicKey = responseBody.publicKey;
+          assert.equal(publicKeyGetResponse.status, StatusCodes.OK);
+          const publicKeyGetResponseBody = await publicKeyGetResponse.json();
+          const paymentSecurityServicePublicKey = publicKeyGetResponseBody.publicKey;
         }
         `,
       errors: [{ messageId: 'preferNativeFetch' }],
@@ -611,7 +615,7 @@ createTester().run(ruleId, rule, {
 
           // Import Key
           const keyId = uuid();
-          const response = await fetch(\`\${BASE_PATH}/key/\${keyId}?zoneKeyId=\${zoneKeyId}\`, {
+          const keyPutResponse = await fetch(\`\${BASE_PATH}/key/\${keyId}?zoneKeyId=\${zoneKeyId}\`, {
             method: 'PUT',
             body: JSON.stringify({
               key: '71CA52F757D7C0B45A16C6C04EAFD704',
@@ -621,9 +625,9 @@ createTester().run(ruleId, rule, {
               [CREATED_ON_HEADER]: createdOn,
             },
           });
-          assert.equal(response.status, StatusCodes.NO_CONTENT);
-          assert.equal(response.headers.get(ETAG_HEADER), '1');
-          assert.doesNotThrow(()=>verifyTemporalHeaders(response, createdOn));
+          assert.equal(keyPutResponse.status, StatusCodes.NO_CONTENT);
+          assert.equal(keyPutResponse.headers.get(ETAG_HEADER), '1');
+          assert.doesNotThrow(()=>verifyTemporalHeaders(keyPutResponse, createdOn));
         `,
       errors: [{ messageId: 'preferNativeFetch' }],
     },
@@ -672,11 +676,11 @@ createTester().run(ruleId, rule, {
         const { headers: { etag } } = await fixture.api.get(\`\${BASE_PATH}/ping\`).expect(StatusCodes.OK);
       `,
       output: `
-        const response = await fetch(\`\${BASE_PATH}/ping\`, {
+        const pingGetResponse = await fetch(\`\${BASE_PATH}/ping\`, {
           method: 'GET',
         });
-        assert.equal(response.status, StatusCodes.OK);
-        const etag = response.headers.get('etag');
+        assert.equal(pingGetResponse.status, StatusCodes.OK);
+        const etag = pingGetResponse.headers.get('etag');
       `,
       errors: [{ messageId: 'preferNativeFetch' }],
     },
@@ -686,12 +690,12 @@ createTester().run(ruleId, rule, {
         const { headers: { 'created-on': createdOn, 'updated-on': updatedOn } } = await fixture.api.get(\`\${BASE_PATH}/ping\`).expect(StatusCodes.OK);
       `,
       output: `
-        const response = await fetch(\`\${BASE_PATH}/ping\`, {
+        const pingGetResponse = await fetch(\`\${BASE_PATH}/ping\`, {
           method: 'GET',
         });
-        assert.equal(response.status, StatusCodes.OK);
-        const createdOn = response.headers.get('created-on');
-        const updatedOn = response.headers.get('updated-on');
+        assert.equal(pingGetResponse.status, StatusCodes.OK);
+        const createdOn = pingGetResponse.headers.get('created-on');
+        const updatedOn = pingGetResponse.headers.get('updated-on');
       `,
       errors: [{ messageId: 'preferNativeFetch' }],
     },
@@ -720,25 +724,25 @@ createTester().run(ruleId, rule, {
         const { statusCode } = await fixture.api.get(\`\${BASE_PATH}/ping\`).expect(StatusCodes.OK);
       }`,
       output: `async function test() {
-        const response = await fetch(\`\${BASE_PATH}/ping\`, {
+        const pingGetResponse = await fetch(\`\${BASE_PATH}/ping\`, {
           method: 'GET',
         });
-        assert.equal(response.status, StatusCodes.OK);
-        const statusCode = response.status;
+        assert.equal(pingGetResponse.status, StatusCodes.OK);
+        const statusCode = pingGetResponse.status;
       }`,
       errors: [{ messageId: 'preferNativeFetch' }],
     },
     {
-      name: 'statusCode destructuring should be renamed',
+      name: 'statusCode destructuring should be renamed - with renaming',
       code: `async function test() {
         const { statusCode: pingStatusCode } = await fixture.api.get(\`\${BASE_PATH}/ping\`).expect(StatusCodes.OK);
       }`,
       output: `async function test() {
-        const response = await fetch(\`\${BASE_PATH}/ping\`, {
+        const pingGetResponse = await fetch(\`\${BASE_PATH}/ping\`, {
           method: 'GET',
         });
-        assert.equal(response.status, StatusCodes.OK);
-        const pingStatusCode = response.status;
+        assert.equal(pingGetResponse.status, StatusCodes.OK);
+        const pingStatusCode = pingGetResponse.status;
       }`,
       errors: [{ messageId: 'preferNativeFetch' }],
     },

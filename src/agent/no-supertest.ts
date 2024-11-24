@@ -36,9 +36,6 @@ interface FixtureCallInformation {
   fixtureNode: TSESTree.AwaitExpression | TSESTree.CallExpression;
   variableDeclaration?: TSESTree.VariableDeclaration;
   variableAssignment?: TSESTree.ExpressionStatement;
-  requestBody?: TSESTree.Expression;
-  requestHeaders?: { name: TSESTree.Expression; value: TSESTree.Expression }[];
-  requestHeadersObjectLiteral?: TSESTree.ObjectExpression;
   assertions?: TSESTree.Expression[][];
   inlineStatementNode?: TSESTree.Node;
   inlineBodyReference?: TSESTree.MemberExpression;
@@ -107,23 +104,6 @@ function analyzeFixtureCall(call: TSESTree.CallExpression, results: FixtureCallI
       assert.ok(assertionCall && assertionCall.type === AST_NODE_TYPES.CallExpression);
       results.assertions = [...(results.assertions ?? []), assertionCall.arguments as TSESTree.Expression[]];
       nextCall = assertionCall;
-    } else if (parent.property.name === 'send') {
-      // request body
-      const sendRequestBodyCall = getParent(parent);
-      assert.ok(sendRequestBodyCall && sendRequestBodyCall.type === AST_NODE_TYPES.CallExpression);
-      results.requestBody = sendRequestBodyCall.arguments[0] as TSESTree.Expression;
-      nextCall = sendRequestBodyCall;
-    } else if (parent.property.name === 'set') {
-      // request headers
-      const setRequestHeaderCall = getParent(parent);
-      assert.ok(setRequestHeaderCall && setRequestHeaderCall.type === AST_NODE_TYPES.CallExpression);
-      const [arg1, arg2] = setRequestHeaderCall.arguments as [TSESTree.Expression, TSESTree.Expression];
-      if (arg1.type === AST_NODE_TYPES.ObjectExpression) {
-        results.requestHeadersObjectLiteral = arg1;
-      } else {
-        results.requestHeaders = [...(results.requestHeaders ?? []), { name: arg1, value: arg2 }];
-      }
-      nextCall = setRequestHeaderCall;
     }
   } else {
     throw new Error(`Unexpected expression in fixture/supertest call ${sourceCode.getText(parent)}.`);
@@ -211,6 +191,7 @@ function createResponseAssertions(
 }
 
 function getResponseVariableNameToUse(
+  supertestFunctionName: string,
   scopeManager: ScopeManager,
   fixtureCallInformation: FixtureCallInformation,
   scopeVariablesMap: Map<Scope, string[]>,
@@ -245,11 +226,11 @@ function getResponseVariableNameToUse(
   let responseVariableCounter = 0;
   let responseVariableNameToUse;
   while (responseVariableNameToUse === undefined) {
-    responseVariableCounter++;
-    responseVariableNameToUse = `response${responseVariableCounter === 1 ? '' : responseVariableCounter.toString()}`;
+    responseVariableNameToUse = `${supertestFunctionName}Response${responseVariableCounter === 0 ? '' : responseVariableCounter.toString()}`;
     if (scopeVariables.includes(responseVariableNameToUse)) {
       responseVariableNameToUse = undefined;
     }
+    responseVariableCounter++;
   }
   scopeVariables.push(responseVariableNameToUse);
   return responseVariableNameToUse;
@@ -299,9 +280,24 @@ const rule: ESLintUtils.RuleModule<'unknownError' | 'preferNativeFetch'> = creat
               supertestCall.callee.object.callee.property.type === AST_NODE_TYPES.Identifier &&
               supertestCall.callee.object.callee.property.name === 'expect')
           ) {
+            // skip nested expect call chain, only focus on the first expect call
+            return;
+          }
+          if (
+            supertestCall.callee.object.callee.type === AST_NODE_TYPES.MemberExpression &&
+            supertestCall.callee.object.callee.object.type === AST_NODE_TYPES.MemberExpression &&
+            supertestCall.callee.object.callee.object.object.type === AST_NODE_TYPES.Identifier &&
+            supertestCall.callee.object.callee.object.object.name === 'fixture' &&
+            supertestCall.callee.object.callee.object.property.type === AST_NODE_TYPES.Identifier &&
+            supertestCall.callee.object.callee.object.property.name === 'api'
+          ) {
             // skip nested expect calls, only focus on the top level
             return;
           }
+
+          const fullSupertestFunctionName = sourceCode.getText(supertestCall.callee.object.callee);
+          const supertestFunctionName = fullSupertestFunctionName.split('.').pop();
+          assert.ok(supertestFunctionName !== undefined);
 
           if (isUsedInArrayOrAsArgument(supertestCall) || getEnclosingFunction(supertestCall)?.async === false) {
             // skip and leave it to "fetch-then" rule to handle it because no "await" can be used here
@@ -326,6 +322,7 @@ const rule: ESLintUtils.RuleModule<'unknownError' | 'preferNativeFetch'> = creat
           } = analyzeResponseReferences(fixtureCallInformation.variableDeclaration, scopeManager);
 
           const responseVariableNameToUse = getResponseVariableNameToUse(
+            supertestFunctionName,
             scopeManager,
             fixtureCallInformation,
             scopeVariablesMap,

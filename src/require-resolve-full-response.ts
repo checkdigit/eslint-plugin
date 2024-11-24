@@ -38,8 +38,8 @@ const rule: ESLintUtils.RuleModule<'invalidOptions' | 'unknownError'> = createRu
   create(context) {
     const sourceCode = context.sourceCode;
     const scopeManager = sourceCode.scopeManager;
-    const parserService = ESLintUtils.getParserServices(context);
-    const typeChecker = parserService.program.getTypeChecker();
+    const parserServices = ESLintUtils.getParserServices(context);
+    const typeChecker = parserServices.program.getTypeChecker();
 
     function isUrlArgumentValid(urlArgument: TSESTree.Node | undefined, scope: Scope) {
       if (
@@ -67,7 +67,7 @@ const rule: ESLintUtils.RuleModule<'invalidOptions' | 'unknownError'> = createRu
     }
 
     function getType(identifier: TSESTree.Identifier) {
-      const variable = parserService.esTreeNodeToTSNodeMap.get(identifier);
+      const variable = parserServices.esTreeNodeToTSNodeMap.get(identifier);
       const variableType = typeChecker.getTypeAtLocation(variable);
       return typeChecker.typeToString(variableType);
     }
@@ -171,7 +171,7 @@ const rule: ESLintUtils.RuleModule<'invalidOptions' | 'unknownError'> = createRu
             if (optionsTypeString === 'FullResponseOptions') {
               return;
             }
-            const variable = parserService.esTreeNodeToTSNodeMap.get(optionsArgument);
+            const variable = parserServices.esTreeNodeToTSNodeMap.get(optionsArgument);
             const optionType = typeChecker.getTypeAtLocation(variable);
             const resolveWithFullResponseProperty = optionType.getProperty('resolveWithFullResponse');
             if (resolveWithFullResponseProperty?.declarations?.[0]?.getText() === 'resolveWithFullResponse: true') {
