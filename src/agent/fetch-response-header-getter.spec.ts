@@ -78,14 +78,16 @@ createTester().run(ruleId, rule, {
   invalid: [
     {
       name: 'use get() method to get header value from the headers object if the typing allows.',
-      code: `
+      code: `async function doSomething() {
+        const ETAG = 'etag';
         const response = await fetch('https://openapi-cli.checkdigit/sample/v1/ping');
-        response.headers[ETAG];
-      `,
-      output: `
+        assert.equal(response.headers[ETAG], '123');
+      }`,
+      output: `async function doSomething() {
+        const ETAG = 'etag';
         const response = await fetch('https://openapi-cli.checkdigit/sample/v1/ping');
-        response.headers.get(ETAG);
-      `,
+        assert.equal(response.headers.get(ETAG), '123');
+      }`,
       errors: [{ messageId: 'useGetter' }],
     },
     {

@@ -144,21 +144,6 @@ createTester().run(ruleId, rule, {
       errors: [{ messageId: 'preferNativeFetch' }],
     },
     {
-      name: 'replace header access through response.get() with response.headers.get()',
-      code: `async function test() {
-        const response = await ping().expect(StatusCodes.OK);
-        assert.equal(response.get(ETAG), correctVersion);
-        assert.equal(response.get('etag'), correctVersion);
-      }`,
-      output: `async function test() {
-        const response = await ping();
-        assert.equal(response.status, StatusCodes.OK);
-        assert.equal(response.headers.get(ETAG), correctVersion);
-        assert.equal(response.headers.get('etag'), correctVersion);
-      }`,
-      errors: [{ messageId: 'preferNativeFetch' }],
-    },
-    {
       name: 'work with response status literal (e.g. 200 instead of StatusCoodes.OK) as well',
       code: `async function test() {
         await util.ping().expect(200);

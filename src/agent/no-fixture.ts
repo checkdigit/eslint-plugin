@@ -263,8 +263,8 @@ function getResponseVariableNameToUse(
       : // eslint-disable-next-line no-magic-numbers
         urlWithoutQuery.split('/').slice(3);
 
-    responseVariableNameBase = [...parts, methodName.toLocaleLowerCase()]
-      .map((part) => part.split(/[-=]/u))
+    responseVariableNameBase = [...parts.filter((part) => part !== 'tenant'), methodName.toLocaleLowerCase()]
+      .map((part) => part.split(/[-]/u))
       .flat()
       .filter((part) => part.trim() !== '' && !/\$\{.*\}/u.test(part)) // keep only non-empty parts that are not path parameters
       .map((part) => `${part[0]?.toUpperCase() ?? ''}${part.slice(1)}`)
@@ -343,7 +343,7 @@ const rule: ESLintUtils.RuleModule<'unknownError' | 'preferNativeFetch'> = creat
           const {
             variable: responseVariable,
             bodyReferences: responseBodyReferences,
-            headersReferences: responseHeadersReferences,
+            // headersReferences: responseHeadersReferences,
             statusReferences: responseStatusReferences,
             destructuringBodyVariable: destructuringResponseBodyVariable,
             destructuringStatusVariable: destructuringResponseStatusVariable,
@@ -521,23 +521,23 @@ const rule: ESLintUtils.RuleModule<'unknownError' | 'preferNativeFetch'> = creat
                 yield fixer.replaceText(fixtureCallInformation.inlineBodyReference, redefineResponseBodyVariableName);
               }
 
-              // handle response headers references
-              for (const responseHeadersReference of responseHeadersReferences) {
-                const parent = getParent(responseHeadersReference);
-                assert.ok(parent);
-                let headerName;
-                if (parent.type === AST_NODE_TYPES.MemberExpression) {
-                  const headerNameNode = parent.property;
-                  headerName = parent.computed
-                    ? sourceCode.getText(headerNameNode)
-                    : `'${sourceCode.getText(headerNameNode)}'`;
-                } else if (parent.type === AST_NODE_TYPES.CallExpression) {
-                  const headerNameNode = parent.arguments[0];
-                  headerName = sourceCode.getText(headerNameNode);
-                }
-                assert.ok(headerName !== undefined);
-                yield fixer.replaceText(parent, `${responseVariableNameToUse}.headers.get(${headerName})`);
-              }
+              // // handle response headers references
+              // for (const responseHeadersReference of responseHeadersReferences) {
+              //   const parent = getParent(responseHeadersReference);
+              //   assert.ok(parent);
+              //   let headerName;
+              //   if (parent.type === AST_NODE_TYPES.MemberExpression) {
+              //     const headerNameNode = parent.property;
+              //     headerName = parent.computed
+              //       ? sourceCode.getText(headerNameNode)
+              //       : `'${sourceCode.getText(headerNameNode)}'`;
+              //   } else if (parent.type === AST_NODE_TYPES.CallExpression) {
+              //     const headerNameNode = parent.arguments[0];
+              //     headerName = sourceCode.getText(headerNameNode);
+              //   }
+              //   assert.ok(headerName !== undefined);
+              //   yield fixer.replaceText(parent, `${responseVariableNameToUse}.headers.get(${headerName})`);
+              // }
 
               // convert response.statusCode to response.status
               for (const responseStatusReference of responseStatusReferences) {

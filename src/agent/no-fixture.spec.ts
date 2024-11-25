@@ -371,25 +371,6 @@ createTester().run(ruleId, rule, {
       errors: [{ messageId: 'preferNativeFetch' }, { messageId: 'preferNativeFetch' }],
     },
     {
-      name: 'replace header access through response.get() with response.headers.get()',
-      code: `
-          import { BASE_PATH } from './index';
-          const response = await fixture.api.get(\`/sample-service/v2/ping\`).expect(StatusCodes.OK);
-          assert.equal(response.get(ETAG), correctVersion);
-          assert.equal(response.get('etag'), correctVersion);
-        `,
-      output: `
-          import { BASE_PATH } from './index';
-          const response = await fetch(\`\${BASE_PATH}/ping\`, {
-            method: 'GET',
-          });
-          assert.equal(response.status, StatusCodes.OK);
-          assert.equal(response.headers.get(ETAG), correctVersion);
-          assert.equal(response.headers.get('etag'), correctVersion);
-        `,
-      errors: [{ messageId: 'preferNativeFetch' }],
-    },
-    {
       name: 'work with response status literal (e.g. 200 instead of StatusCoodes.OK) as well',
       code: `
           import { BASE_PATH } from './index';

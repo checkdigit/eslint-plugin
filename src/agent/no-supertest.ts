@@ -314,7 +314,7 @@ const rule: ESLintUtils.RuleModule<'unknownError' | 'preferNativeFetch'> = creat
           const {
             variable: responseVariable,
             bodyReferences: responseBodyReferences,
-            headersReferences: responseHeadersReferences,
+            // headersReferences: responseHeadersReferences,
             statusReferences: responseStatusReferences,
             destructuringBodyVariable: destructuringResponseBodyVariable,
             destructuringHeadersVariable: destructuringResponseHeadersVariable,
@@ -457,23 +457,23 @@ const rule: ESLintUtils.RuleModule<'unknownError' | 'preferNativeFetch'> = creat
                 yield fixer.replaceText(fixtureCallInformation.inlineBodyReference, redefineResponseBodyVariableName);
               }
 
-              // handle response headers references
-              for (const responseHeadersReference of responseHeadersReferences) {
-                const parent = getParent(responseHeadersReference);
-                assert.ok(parent);
-                let headerName;
-                if (parent.type === AST_NODE_TYPES.MemberExpression) {
-                  const headerNameNode = parent.property;
-                  headerName = parent.computed
-                    ? sourceCode.getText(headerNameNode)
-                    : `'${sourceCode.getText(headerNameNode)}'`;
-                } else if (parent.type === AST_NODE_TYPES.CallExpression) {
-                  const headerNameNode = parent.arguments[0];
-                  headerName = sourceCode.getText(headerNameNode);
-                }
-                assert.ok(headerName !== undefined);
-                yield fixer.replaceText(parent, `${responseVariableNameToUse}.headers.get(${headerName})`);
-              }
+              // // handle response headers references
+              // for (const responseHeadersReference of responseHeadersReferences) {
+              //   const parent = getParent(responseHeadersReference);
+              //   assert.ok(parent);
+              //   let headerName;
+              //   if (parent.type === AST_NODE_TYPES.MemberExpression) {
+              //     const headerNameNode = parent.property;
+              //     headerName = parent.computed
+              //       ? sourceCode.getText(headerNameNode)
+              //       : `'${sourceCode.getText(headerNameNode)}'`;
+              //   } else if (parent.type === AST_NODE_TYPES.CallExpression) {
+              //     const headerNameNode = parent.arguments[0];
+              //     headerName = sourceCode.getText(headerNameNode);
+              //   }
+              //   assert.ok(headerName !== undefined);
+              //   yield fixer.replaceText(parent, `${responseVariableNameToUse}.headers.get(${headerName})`);
+              // }
 
               // convert response.statusCode to response.status
               for (const responseStatusReference of responseStatusReferences) {

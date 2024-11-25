@@ -28,7 +28,7 @@ export function analyzeResponseReferences(
 ): {
   variable?: Variable;
   bodyReferences: TSESTree.MemberExpression[];
-  headersReferences: TSESTree.MemberExpression[];
+  // headersReferences: TSESTree.MemberExpression[];
   statusReferences: TSESTree.MemberExpression[];
   destructuringBodyVariable?: Variable | TSESTree.ObjectPattern;
   destructuringHeadersVariable?: Variable | TSESTree.ObjectPattern;
@@ -38,7 +38,7 @@ export function analyzeResponseReferences(
   const results: {
     variable?: Variable;
     bodyReferences: TSESTree.MemberExpression[];
-    headersReferences: TSESTree.MemberExpression[];
+    // headersReferences: TSESTree.MemberExpression[];
     statusReferences: TSESTree.MemberExpression[];
     destructuringBodyVariable?: Variable | TSESTree.ObjectPattern;
     destructuringHeadersVariable?: Variable | TSESTree.ObjectPattern;
@@ -46,7 +46,7 @@ export function analyzeResponseReferences(
     destructuringHeadersReferences?: TSESTree.MemberExpression[] | undefined;
   } = {
     bodyReferences: [],
-    headersReferences: [],
+    // headersReferences: [],
     statusReferences: [],
   };
   if (!variableDeclaration) {
@@ -72,13 +72,13 @@ export function analyzeResponseReferences(
           node.property.type === AST_NODE_TYPES.Identifier &&
           node.property.name === 'body',
       );
-      // e.g. response.headers / response.header / response.get()
-      results.headersReferences = responseReferences.filter(
-        (node): node is TSESTree.MemberExpression =>
-          node?.type === AST_NODE_TYPES.MemberExpression &&
-          node.property.type === AST_NODE_TYPES.Identifier &&
-          (node.property.name === 'header' || node.property.name === 'headers' || node.property.name === 'get'),
-      );
+      // // e.g. response.headers / response.header / response.get()
+      // results.headersReferences = responseReferences.filter(
+      //   (node): node is TSESTree.MemberExpression =>
+      //     node?.type === AST_NODE_TYPES.MemberExpression &&
+      //     node.property.type === AST_NODE_TYPES.Identifier &&
+      //     (node.property.name === 'header' || node.property.name === 'headers' || node.property.name === 'get'),
+      // );
       // e.g. response.status / response.statusCode
       results.statusReferences = responseReferences.filter(
         (node): node is TSESTree.MemberExpression =>
