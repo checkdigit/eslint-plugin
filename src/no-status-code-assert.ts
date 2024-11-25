@@ -60,11 +60,11 @@ const rule: TSESLint.RuleModule<typeof NO_STATUS_CODE_ASSERT> = createRule({
   meta: {
     type: 'problem',
     docs: {
-      description: 'Disallow the use of status, code, or value as parameter in assert',
+      description: 'Disallow the use of statusCode as parameter in assert',
     },
     schema: [],
     messages: {
-      [NO_STATUS_CODE_ASSERT]: 'Avoid using status, code, or value in assert',
+      [NO_STATUS_CODE_ASSERT]: 'Avoid using statusCode in the assert',
     },
   },
   defaultOptions: [],
