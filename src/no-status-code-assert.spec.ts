@@ -6,6 +6,13 @@ import createTester from './ts-tester.test';
 createTester().run(ruleId, rule, {
   valid: [
     {
+      name: 'Valid case with await and expect',
+      code: `await fixture.api
+            .put(testURI)
+            .send(testData)
+            .expect(StatusCodes.CREATED);`,
+    },
+    {
       name: 'Valid case with different property',
       code: `assert(response.otherProperty === 'test');`,
     },

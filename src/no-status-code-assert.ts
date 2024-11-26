@@ -16,15 +16,6 @@ const keywords = ['status', 'code', 'StatusCodes', 'statusCode'];
 const createRule = ESLintUtils.RuleCreator((name) => getDocumentationUrl(name));
 
 /**
- * Checks if a given string contains any of the specified keywords ('status', 'code', 'StatusCodes', or 'statusCode').
- *
- * @param name - The string to check.
- * @returns `true` if the string contains any of the specified keywords, otherwise `false`.
- */
-const checkName = (name?: string): boolean =>
-  name !== undefined && keywords.some((keyword) => name.toLowerCase().includes(keyword));
-
-/**
  * Checks if a given AST node contains any identifier, member expression, or binary expression
  * that includes the keywords 'status', 'code', 'StatusCodes', or 'statusCode'.
  *
@@ -32,6 +23,9 @@ const checkName = (name?: string): boolean =>
  * @returns `true` if the node or its sub-nodes contain any of the specified keywords, otherwise `false`.
  */
 const hasStatusCodeOrValue = (arg: TSESTree.Node): boolean => {
+  const checkName = (name?: string): boolean =>
+    name !== undefined && keywords.some((keyword) => name.toLowerCase().includes(keyword));
+
   switch (arg.type) {
     case AST_NODE_TYPES.Identifier:
       return checkName(arg.name);
@@ -55,6 +49,27 @@ const hasStatusCodeOrValue = (arg: TSESTree.Node): boolean => {
   return false;
 };
 
+/**
+ * Checks if a given AST node is an identifier with the name 'assert'.
+ *
+ * @param node - The AST node to check.
+ * @returns `true` if the node is an identifier with the name 'assert', otherwise `false`.
+ */
+const isAssertIdentifier = (node: TSESTree.Node): boolean =>
+  node.type === AST_NODE_TYPES.Identifier && node.name === 'assert';
+
+/**
+ * Checks if a given AST node is a member expression with the object named 'assert'.
+ *
+ * @param node - The AST node to check.
+ * @returns `true` if the node is a member expression with the object named 'assert', otherwise `false`.
+ */
+const isAssertMemberExpression = (node: TSESTree.Node): boolean =>
+  node.type === AST_NODE_TYPES.MemberExpression &&
+  node.object.type === AST_NODE_TYPES.Identifier &&
+  node.object.name === 'assert' &&
+  node.property.type === AST_NODE_TYPES.Identifier;
+
 const rule: TSESLint.RuleModule<typeof NO_STATUS_CODE_ASSERT> = createRule({
   name: ruleId,
   meta: {
@@ -71,7 +86,11 @@ const rule: TSESLint.RuleModule<typeof NO_STATUS_CODE_ASSERT> = createRule({
   create(context) {
     return {
       CallExpression(node: TSESTree.CallExpression) {
-        if (node.arguments.some(hasStatusCodeOrValue)) {
+        const callee = node.callee;
+        if (
+          (isAssertIdentifier(callee) || isAssertMemberExpression(callee)) &&
+          node.arguments.some(hasStatusCodeOrValue)
+        ) {
           context.report({
             node,
             messageId: NO_STATUS_CODE_ASSERT,
