@@ -26,6 +26,7 @@ import filePathComment from './file-path-comment';
 import noCardNumbers from './no-card-numbers';
 import noSideEffects from './no-side-effects';
 import noRandomV4UUID from './no-random-v4-uuid';
+import noStatusCodeAssert from './no-status-code-assert';
 import noTestImport from './no-test-import';
 import noUuid from './no-uuid';
 import noWallabyComment from './no-wallaby-comment';
@@ -38,6 +39,7 @@ const rules: Record<string, TSESLint.LooseRuleDefinition> = {
   'file-path-comment': filePathComment,
   'no-card-numbers': noCardNumbers,
   'no-random-v4-uuid': noRandomV4UUID,
+  'no-status-code-assert': noStatusCodeAssert,
   'no-uuid': noUuid,
   'require-strict-assert': requireStrictAssert,
   'no-test-import': noTestImport,
@@ -71,6 +73,7 @@ const configs: Record<string, TSESLint.FlatConfig.Config[]> = {
         '@checkdigit/no-card-numbers': 'error',
         '@checkdigit/file-path-comment': 'error',
         '@checkdigit/no-random-v4-uuid': 'error',
+        '@checkdigit/no-status-code-assert': 'error',
         '@checkdigit/no-uuid': 'error',
         '@checkdigit/require-strict-assert': 'error',
         '@checkdigit/no-wallaby-comment': 'error',
@@ -100,6 +103,7 @@ const configs: Record<string, TSESLint.FlatConfig.Config[]> = {
         '@checkdigit/no-card-numbers': 'error',
         '@checkdigit/file-path-comment': 'off',
         '@checkdigit/no-random-v4-uuid': 'error',
+        '@checkdigit/no-status-code-assert': 'error',
         '@checkdigit/no-uuid': 'error',
         '@checkdigit/require-strict-assert': 'error',
         '@checkdigit/no-wallaby-comment': 'off',
