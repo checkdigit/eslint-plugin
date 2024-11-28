@@ -104,7 +104,7 @@ export function analyzeResponseReferences(
       // header reference through destruction/renaming, e.g. "const { headers } = ..."
       identifierParent.type === AST_NODE_TYPES.Property &&
       identifierParent.key.type === AST_NODE_TYPES.Identifier &&
-      identifierParent.key.name === 'headers'
+      (identifierParent.key.name === 'headers' || identifierParent.key.name === 'header')
     ) {
       results.destructuringHeadersVariable = responseVariable;
       results.destructuringHeadersReferences = responseVariable.references

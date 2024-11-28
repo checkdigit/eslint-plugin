@@ -12,7 +12,7 @@ import rule, { ruleId } from './supertest-then';
 createTester().run(ruleId, rule, {
   valid: [
     {
-      name: 'skip regular supertest calls which will be handled in "no-supertest" rule',
+      name: 'skip regular supertest calls which will be handled in "no-expect-assertion" rule',
       code: `
           const pingResponse = ping().expect(StatusCodes.OK);
           const body = pingResponse.body;

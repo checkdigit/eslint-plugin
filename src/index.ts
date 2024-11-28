@@ -15,15 +15,15 @@ import fetchResponseHeaderGetter, {
   ruleId as fetchResponseHeaderGetterRuleId,
 } from './agent/fetch-response-header-getter';
 import fetchResponseStatus, { ruleId as fetchResponseStatusRuleId } from './agent/fetch-response-status';
-import fetchThen, { ruleId as fetchThenRuleId } from './agent/fetch-then';
+// import fetchThen, { ruleId as fetchThenRuleId } from './agent/fetch-then';
 import fixFunctionCallArguments, {
   ruleId as fixFunctionCallArgumentsRuleId,
 } from './agent/fix-function-call-arguments';
 import invalidJsonStringify, { ruleId as invalidJsonStringifyRuleId } from './invalid-json-stringify';
 import noDuplicatedImports, { ruleId as noDuplicatedImportsRuleId } from './no-duplicated-imports';
 import noFixture, { ruleId as noFixtureRuleId } from './agent/no-fixture';
-import noSupertest, { ruleId as noSupertestRuleId } from './agent/no-supertest';
-import supertestThen, { ruleId as supertestThenRuleId } from './agent/supertest-then';
+import noExpectAssertion, { ruleId as noExpectAssertionRuleId } from './agent/no-expect-assertion';
+// import supertestThen, { ruleId as supertestThenRuleId } from './agent/supertest-then';
 import noLegacyServiceTyping, { ruleId as noLegacyServiceTypingRuleId } from './no-legacy-service-typing';
 import noMappedResponse, { ruleId as noMappedResponseRuleId } from './agent/no-mapped-response';
 import noPromiseInstanceMethod, { ruleId as noPromiseInstanceMethodRuleId } from './no-promise-instance-method';
@@ -74,9 +74,9 @@ const rules: Record<string, TSESLint.LooseRuleDefinition> = {
   [invalidJsonStringifyRuleId]: invalidJsonStringify,
   [noPromiseInstanceMethodRuleId]: noPromiseInstanceMethod,
   [noFixtureRuleId]: noFixture,
-  [noSupertestRuleId]: noSupertest,
-  [supertestThenRuleId]: supertestThen,
-  [fetchThenRuleId]: fetchThen,
+  [noExpectAssertionRuleId]: noExpectAssertion,
+  // [supertestThenRuleId]: supertestThen,
+  // [fetchThenRuleId]: fetchThen,
   [noServiceWrapperRuleId]: noServiceWrapper,
   [noStatusCodeRuleId]: noStatusCode,
   [fetchResponseBodyJsonRuleId]: fetchResponseBodyJson,
@@ -135,14 +135,14 @@ const configs: Record<string, TSESLint.FlatConfig.Config[]> = {
         [`@checkdigit/${noMappedResponseRuleId}`]: 'off',
         [`@checkdigit/${addUrlDomainRuleId}`]: 'off',
         [`@checkdigit/${noFixtureRuleId}`]: 'off',
-        [`@checkdigit/${noSupertestRuleId}`]: 'off',
-        [`@checkdigit/${supertestThenRuleId}`]: 'off',
+        [`@checkdigit/${noExpectAssertionRuleId}`]: 'off',
+        // [`@checkdigit/${supertestThenRuleId}`]: 'off',
         [`@checkdigit/${noServiceWrapperRuleId}`]: 'off',
         [`@checkdigit/${noStatusCodeRuleId}`]: 'off',
         [`@checkdigit/${fetchResponseBodyJsonRuleId}`]: 'off',
         [`@checkdigit/${fetchResponseHeaderGetterRuleId}`]: 'off',
         [`@checkdigit/${fetchResponseStatusRuleId}`]: 'off',
-        [`@checkdigit/${fetchThenRuleId}`]: 'off',
+        // [`@checkdigit/${fetchThenRuleId}`]: 'off',
         [`@checkdigit/${noUnusedFunctionArgumentsRuleId}`]: 'off',
         [`@checkdigit/${noUnusedServiceVariablesRuleId}`]: 'off',
         [`@checkdigit/${noUnusedImportsRuleId}`]: 'off',
@@ -185,14 +185,14 @@ const configs: Record<string, TSESLint.FlatConfig.Config[]> = {
         [`@checkdigit/${noMappedResponseRuleId}`]: 'off',
         [`@checkdigit/${addUrlDomainRuleId}`]: 'off',
         [`@checkdigit/${noFixtureRuleId}`]: 'off',
-        [`@checkdigit/${noSupertestRuleId}`]: 'off',
-        [`@checkdigit/${supertestThenRuleId}`]: 'off',
+        [`@checkdigit/${noExpectAssertionRuleId}`]: 'off',
+        // [`@checkdigit/${supertestThenRuleId}`]: 'off',
         [`@checkdigit/${noServiceWrapperRuleId}`]: 'off',
         [`@checkdigit/${noStatusCodeRuleId}`]: 'off',
         [`@checkdigit/${fetchResponseBodyJsonRuleId}`]: 'off',
         [`@checkdigit/${fetchResponseHeaderGetterRuleId}`]: 'off',
         [`@checkdigit/${fetchResponseStatusRuleId}`]: 'off',
-        [`@checkdigit/${fetchThenRuleId}`]: 'off',
+        // [`@checkdigit/${fetchThenRuleId}`]: 'off',
         [`@checkdigit/${noUnusedFunctionArgumentsRuleId}`]: 'off',
         [`@checkdigit/${noUnusedServiceVariablesRuleId}`]: 'off',
         [`@checkdigit/${noUnusedImportsRuleId}`]: 'off',
@@ -221,7 +221,7 @@ const configs: Record<string, TSESLint.FlatConfig.Config[]> = {
         [`@checkdigit/${fetchResponseBodyJsonRuleId}`]: 'error',
         [`@checkdigit/${fetchResponseHeaderGetterRuleId}`]: 'error',
         [`@checkdigit/${fetchResponseStatusRuleId}`]: 'error',
-        [`@checkdigit/${fetchThenRuleId}`]: 'error',
+        // [`@checkdigit/${fetchThenRuleId}`]: 'error',
         [`@checkdigit/${noUnusedFunctionArgumentsRuleId}`]: 'error',
         [`@checkdigit/${noUnusedServiceVariablesRuleId}`]: 'error',
         [`@checkdigit/${noUnusedImportsRuleId}`]: 'error',
@@ -230,8 +230,8 @@ const configs: Record<string, TSESLint.FlatConfig.Config[]> = {
         [`@checkdigit/${addBasePathImportRuleId}`]: 'error',
         [`@checkdigit/${addAssertImportRuleId}`]: 'error',
         [`@checkdigit/${noFixtureRuleId}`]: 'error',
-        [`@checkdigit/${noSupertestRuleId}`]: 'error',
-        [`@checkdigit/${supertestThenRuleId}`]: 'error',
+        [`@checkdigit/${noExpectAssertionRuleId}`]: 'error',
+        // [`@checkdigit/${supertestThenRuleId}`]: 'error',
       },
     },
     {
@@ -260,7 +260,7 @@ const configs: Record<string, TSESLint.FlatConfig.Config[]> = {
         [`@checkdigit/${fetchResponseBodyJsonRuleId}`]: 'error',
         [`@checkdigit/${fetchResponseHeaderGetterRuleId}`]: 'error',
         [`@checkdigit/${fetchResponseStatusRuleId}`]: 'error',
-        [`@checkdigit/${fetchThenRuleId}`]: 'error',
+        // [`@checkdigit/${fetchThenRuleId}`]: 'error',
         [`@checkdigit/${noUnusedFunctionArgumentsRuleId}`]: 'error',
         [`@checkdigit/${noUnusedServiceVariablesRuleId}`]: 'error',
         [`@checkdigit/${noUnusedImportsRuleId}`]: 'error',

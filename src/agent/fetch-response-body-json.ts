@@ -38,7 +38,7 @@ const rule: ESLintUtils.RuleModule<'unknownError' | 'replaceBodyWithJson' | 'ref
     },
     messages: {
       refactorNeeded:
-        'Please extract the fetch call and check its reponse status code before accessing its response body.',
+        'Please extract the fetch call and check its response status code before accessing its response body.',
       replaceBodyWithJson: 'Replace "response.body" with "await response.json()".',
       unknownError: 'Unknown error occurred in file "{{fileName}}": {{ error }}.',
     },

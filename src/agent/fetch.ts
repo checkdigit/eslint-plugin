@@ -63,7 +63,9 @@ export function hasAssertions(fixtureCall: TSESTree.Node): boolean {
 
 export function isFetchResponse(type: ts.Type): boolean {
   return (
-    type.getProperties().some((symbol) => symbol.name === 'body') &&
-    type.getProperties().some((symbol) => symbol.name === 'json')
+    type.getProperties().some((symbol) => symbol.name === 'json') &&
+    type.getProperties().some((symbol) => symbol.name === 'status') &&
+    type.getProperties().some((symbol) => symbol.name === 'headers') &&
+    type.getProperties().some((symbol) => symbol.name === 'body')
   );
 }
