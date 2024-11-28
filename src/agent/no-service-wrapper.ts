@@ -1,4 +1,4 @@
-// require-resolve-full-response.ts
+// agent/no-service-wrapper.ts
 
 /*
  * Copyright (c) 2021-2024 Check Digit, LLC
@@ -7,20 +7,20 @@
  */
 
 import { strict as assert } from 'node:assert';
-import { AST_NODE_TYPES, ESLintUtils, TSESTree } from '@typescript-eslint/utils';
-import { DefinitionType, type Scope } from '@typescript-eslint/scope-manager';
-import getDocumentationUrl from './get-documentation-url';
-import { getEnclosingScopeNode } from './library/ts-tree';
 
-export const ruleId = 'require-resolve-full-response';
-// eslint-disable-next-line @typescript-eslint/no-inferrable-types
-export const PLAIN_URL_REGEXP: RegExp = /^[`']\/\w+(?<serviceNamePart>-\w+)*\/v\d+\/(?<any>.|\r|\n)+[`']$/u;
-// eslint-disable-next-line @typescript-eslint/no-inferrable-types
-export const TOKENIZED_URL_REGEXP: RegExp = /^`\$\{(?<serviceNamePart>[A-Z]+_)*BASE_PATH\}\/(?<any>.|\r|\n)+`$/u;
+import { DefinitionType, type Scope } from '@typescript-eslint/scope-manager';
+import { AST_NODE_TYPES, ESLintUtils, TSESTree } from '@typescript-eslint/utils';
+
+import getDocumentationUrl from '../get-documentation-url';
+import { getEnclosingScopeNode } from '../library/ts-tree';
+import { getIndentation } from '../library/format';
+import { isServiceApiCallUrl, replaceEndpointUrlPrefixWithDomain } from './url';
+
+export const ruleId = 'no-service-wrapper';
 
 const createRule = ESLintUtils.RuleCreator((name) => getDocumentationUrl(name));
 
-const rule: ESLintUtils.RuleModule<'invalidOptions' | 'unknownError'> = createRule({
+const rule: ESLintUtils.RuleModule<'unknownError' | 'preferNativeFetch' | 'invalidOptions'> = createRule({
   name: ruleId,
   meta: {
     type: 'suggestion',
@@ -28,10 +28,13 @@ const rule: ESLintUtils.RuleModule<'invalidOptions' | 'unknownError'> = createRu
       description: 'Prefer native fetch over customized service wrapper.',
     },
     messages: {
+      preferNativeFetch: 'Prefer native fetch over customized service wrapper.',
       invalidOptions:
-        '"options" argument should be provided with "resolveWithFullResponse" property set as "true". Otherwise, it indicates that the response body will be obtained without status code assertion which could result in unexpected issue.',
-      unknownError: 'Unknown error occurred in file "{{fileName}}": {{ error }}.',
+        '"options" argument should be provided with "resolveWithFullResponse" property set as "true". Otherwise, it indicates that the response body will be obtained without status code assertion which could result in unexpected issue. Please manually convert the usage of customized service wrapper call to native fetch.',
+      unknownError:
+        'Unknown error occurred in file "{{fileName}}": {{ error }}. Please manually convert the usage of customized service wrapper call to native fetch.',
     },
+    fixable: 'code',
     schema: [],
   },
   defaultOptions: [],
@@ -47,14 +50,14 @@ const rule: ESLintUtils.RuleModule<'invalidOptions' | 'unknownError'> = createRu
         urlArgument?.type === AST_NODE_TYPES.TemplateLiteral
       ) {
         const urlText = sourceCode.getText(urlArgument);
-        return PLAIN_URL_REGEXP.test(urlText) || TOKENIZED_URL_REGEXP.test(urlText);
+        return isServiceApiCallUrl(urlText);
       }
 
       if (urlArgument?.type === AST_NODE_TYPES.Identifier) {
         const foundVariable = scope.variables.find((variable) => variable.name === urlArgument.name);
         if (foundVariable) {
           const variableDefinition = foundVariable.defs.find((def) => def.type === DefinitionType.Variable);
-          if (variableDefinition) {
+          if (variableDefinition !== undefined) {
             const variableDefinitionNode = variableDefinition.node;
             assert.ok(variableDefinitionNode.init, 'Variable definition node has no init property');
             return isUrlArgumentValid(variableDefinitionNode.init, scope);
@@ -154,47 +157,69 @@ const rule: ESLintUtils.RuleModule<'invalidOptions' | 'unknownError'> = createRu
           // method
           const method = serviceCall.callee.property.name;
 
+          // body
+          let requestBodyProperty = ['put', 'post', 'options'].includes(method) ? serviceCall.arguments[1] : undefined;
+          if (
+            requestBodyProperty !== undefined &&
+            requestBodyProperty.type === AST_NODE_TYPES.Identifier &&
+            requestBodyProperty.name === 'undefined'
+          ) {
+            requestBodyProperty = undefined;
+          }
           // options
           const optionsArgument = ['get', 'head', 'del'].includes(method)
             ? serviceCall.arguments[1]
             : serviceCall.arguments[2];
-          if (optionsArgument === undefined) {
+          if (optionsArgument === undefined || optionsArgument.type !== AST_NODE_TYPES.ObjectExpression) {
             context.report({
               node: serviceCall,
               messageId: 'invalidOptions',
             });
             return;
           }
-
-          if (optionsArgument.type === AST_NODE_TYPES.Identifier) {
-            const optionsTypeString = getType(optionsArgument);
-            if (optionsTypeString === 'FullResponseOptions') {
-              return;
-            }
-            const variable = parserServices.esTreeNodeToTSNodeMap.get(optionsArgument);
-            const optionType = typeChecker.getTypeAtLocation(variable);
-            const resolveWithFullResponseProperty = optionType.getProperty('resolveWithFullResponse');
-            if (resolveWithFullResponseProperty?.declarations?.[0]?.getText() === 'resolveWithFullResponse: true') {
-              return;
-            }
-          } else if (optionsArgument.type === AST_NODE_TYPES.ObjectExpression) {
-            const resolveWithFullResponseProperty = optionsArgument.properties.find(
-              (property) =>
-                property.type === AST_NODE_TYPES.Property &&
-                property.key.type === AST_NODE_TYPES.Identifier &&
-                property.key.name === 'resolveWithFullResponse',
-            );
-            if (
-              resolveWithFullResponseProperty?.type === AST_NODE_TYPES.Property &&
-              resolveWithFullResponseProperty.value.type === AST_NODE_TYPES.Literal &&
-              resolveWithFullResponseProperty.value.value === true
-            ) {
-              return;
-            }
+          const resolveWithFullResponseProperty = optionsArgument.properties.find(
+            (property) =>
+              property.type === AST_NODE_TYPES.Property &&
+              property.key.type === AST_NODE_TYPES.Identifier &&
+              property.key.name === 'resolveWithFullResponse',
+          );
+          if (
+            resolveWithFullResponseProperty?.type !== AST_NODE_TYPES.Property ||
+            resolveWithFullResponseProperty.value.type !== AST_NODE_TYPES.Literal ||
+            resolveWithFullResponseProperty.value.value !== true
+          ) {
+            context.report({
+              node: optionsArgument,
+              messageId: 'invalidOptions',
+            });
+            return;
           }
+
+          // headers
+          const requestHeadersProperty = optionsArgument.properties.find(
+            (property) =>
+              property.type === AST_NODE_TYPES.Property &&
+              property.key.type === AST_NODE_TYPES.Identifier &&
+              property.key.name === 'headers',
+          );
+
           context.report({
-            node: optionsArgument,
-            messageId: 'invalidOptions',
+            messageId: 'preferNativeFetch',
+            node: serviceCall,
+            fix(fixer) {
+              const url = sourceCode.getText(urlArgument);
+              const replacedUrl = replaceEndpointUrlPrefixWithDomain(url);
+              const indentation = getIndentation(serviceCall, sourceCode);
+
+              const fetchText = [
+                `fetch(${replacedUrl}, {`,
+                `  method: '${method.toLowerCase() === 'del' ? 'DELETE' : method.toUpperCase()}',`,
+                ...(requestHeadersProperty ? [`  ${sourceCode.getText(requestHeadersProperty)},`] : []),
+                ...(requestBodyProperty ? [`  body: JSON.stringify(${sourceCode.getText(requestBodyProperty)}),`] : []),
+                '})',
+              ].join(`\n${indentation}`);
+              return fixer.replaceText(serviceCall, fetchText);
+            },
           });
         } catch (error) {
           // eslint-disable-next-line no-console
