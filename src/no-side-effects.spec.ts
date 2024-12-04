@@ -97,7 +97,8 @@ createTester().run(ruleId, rule, {
                                 
                 const unresolvedConfiguration = getConfiguration(root());
                 const configuration = await service(unresolvedConfiguration);
-               
+                const symbol1 = Symbol.for('foo');
+
                 const server = http.createServer(logger(configuration.requestHandler, unresolvedConfiguration.name));
                 server.listen(Number.parseInt(unresolvedConfiguration.env['PORT'], 10), '0.0.0.0');
                 
@@ -111,7 +112,7 @@ createTester().run(ruleId, rule, {
         { messageId: 'NO_SIDE_EFFECTS' },
         { messageId: 'NO_SIDE_EFFECTS' },
       ],
-      options: [{ excludedIdentifiers: ['assert', 'debug', 'log'] }],
+      options: [{ excludedIdentifiers: ['assert', 'debug', 'log', 'Symbol.for'] }],
       name: 'Invalid case with multiple side effects including server creation and async operations',
     },
   ],

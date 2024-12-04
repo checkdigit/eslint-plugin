@@ -46,7 +46,7 @@ function isVariableDeclarationAwaitExpression(node: TSESTree.Node): boolean {
   );
 }
 
-// To check if it is a variable declaration with a call expression
+// To check if it is a variable declaration with a call expression i.e const configuration = new Class(); or Member Expressions i.e const server = http.createServer();
 function isVariableDeclarationCallExpression(node: TSESTree.Node, excludedIdentifiers: string[]): boolean {
   return (
     node.type === TSESTree.AST_NODE_TYPES.VariableDeclaration &&
@@ -54,7 +54,14 @@ function isVariableDeclarationCallExpression(node: TSESTree.Node, excludedIdenti
     node.declarations[0]?.init?.type === TSESTree.AST_NODE_TYPES.CallExpression &&
     ((node.declarations[0].init.callee.type === TSESTree.AST_NODE_TYPES.Identifier &&
       !excludedIdentifiers.includes(node.declarations[0].init.callee.name)) ||
-      node.declarations[0].init.callee.type === TSESTree.AST_NODE_TYPES.MemberExpression)
+      (node.declarations[0].init.callee.type === TSESTree.AST_NODE_TYPES.MemberExpression &&
+        node.declarations[0].init.callee.object.type !== TSESTree.AST_NODE_TYPES.Identifier) ||
+      (node.declarations[0].init.callee.type === TSESTree.AST_NODE_TYPES.MemberExpression &&
+        node.declarations[0].init.callee.object.type === TSESTree.AST_NODE_TYPES.Identifier &&
+        node.declarations[0].init.callee.property.type === TSESTree.AST_NODE_TYPES.Identifier &&
+        !excludedIdentifiers.includes(
+          `${node.declarations[0].init.callee.object.name}.${node.declarations[0].init.callee.property.name}`,
+        )))
   );
 }
 
@@ -90,7 +97,7 @@ const rule: ReturnType<typeof createRule> = createRule({
 
     return {
       Program(node: TSESTree.Program) {
-        node.body.forEach((statement) => {
+        node.body.forEach((statement: TSESTree.Node) => {
           if (
             isAwaitExpression(statement) ||
             isCallExpressionCalleeMemberExpression(statement, excludedIdentifiers) ||
