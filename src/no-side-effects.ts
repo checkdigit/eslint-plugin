@@ -46,22 +46,44 @@ function isVariableDeclarationAwaitExpression(node: TSESTree.Node): boolean {
   );
 }
 
+// Helper function to check if the callee is an identifier and not excluded
+function isIdentifierCallee(node: TSESTree.CallExpression, excludedIdentifiers: string[]): boolean {
+  return node.callee.type === TSESTree.AST_NODE_TYPES.Identifier && !excludedIdentifiers.includes(node.callee.name);
+}
+
+// Helper function to check if the callee is a member expression and not excluded
+function isMemberExpressionCallee(node: TSESTree.CallExpression, excludedIdentifiers: string[]): boolean {
+  return (
+    node.callee.type === TSESTree.AST_NODE_TYPES.MemberExpression &&
+    node.callee.object.type === TSESTree.AST_NODE_TYPES.Identifier &&
+    node.callee.property.type === TSESTree.AST_NODE_TYPES.Identifier &&
+    !excludedIdentifiers.includes(`${node.callee.object.name}.${node.callee.property.name}`)
+  );
+}
+
+// Helper function to check if the callee is a member expression with a non-identifier object
+function isNonIdentifierObjectMemberExpressionCallee(node: TSESTree.CallExpression): boolean {
+  return (
+    node.callee.type === TSESTree.AST_NODE_TYPES.MemberExpression &&
+    node.callee.object.type !== TSESTree.AST_NODE_TYPES.Identifier
+  );
+}
+
 // To check if it is a variable declaration with a call expression i.e const configuration = new Class(); or Member Expressions i.e const server = http.createServer();
 function isVariableDeclarationCallExpression(node: TSESTree.Node, excludedIdentifiers: string[]): boolean {
+  if (node.type !== TSESTree.AST_NODE_TYPES.VariableDeclaration || node.declarations.length === 0) {
+    return false;
+  }
+
+  const init = node.declarations[0]?.init;
+  if (init?.type !== TSESTree.AST_NODE_TYPES.CallExpression) {
+    return false;
+  }
+
   return (
-    node.type === TSESTree.AST_NODE_TYPES.VariableDeclaration &&
-    node.declarations.length > 0 &&
-    node.declarations[0]?.init?.type === TSESTree.AST_NODE_TYPES.CallExpression &&
-    ((node.declarations[0].init.callee.type === TSESTree.AST_NODE_TYPES.Identifier &&
-      !excludedIdentifiers.includes(node.declarations[0].init.callee.name)) ||
-      (node.declarations[0].init.callee.type === TSESTree.AST_NODE_TYPES.MemberExpression &&
-        node.declarations[0].init.callee.object.type !== TSESTree.AST_NODE_TYPES.Identifier) ||
-      (node.declarations[0].init.callee.type === TSESTree.AST_NODE_TYPES.MemberExpression &&
-        node.declarations[0].init.callee.object.type === TSESTree.AST_NODE_TYPES.Identifier &&
-        node.declarations[0].init.callee.property.type === TSESTree.AST_NODE_TYPES.Identifier &&
-        !excludedIdentifiers.includes(
-          `${node.declarations[0].init.callee.object.name}.${node.declarations[0].init.callee.property.name}`,
-        )))
+    isIdentifierCallee(init, excludedIdentifiers) ||
+    isMemberExpressionCallee(init, excludedIdentifiers) ||
+    isNonIdentifierObjectMemberExpressionCallee(init)
   );
 }
 
