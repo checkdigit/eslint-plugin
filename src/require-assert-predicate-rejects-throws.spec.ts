@@ -9,7 +9,7 @@
 import { RuleTester } from 'eslint';
 import { describe } from '@jest/globals';
 
-import rule from './require-assert-predicate-rejects-throws';
+import rule from './require-assert-predicate-rejects-throws.ts';
 
 describe('require-assert-predicate-rejects-throws', () => {
   const ruleTester = new RuleTester({
