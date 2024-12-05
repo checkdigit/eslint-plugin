@@ -24,6 +24,10 @@ createTester().run(ruleId, rule, {
       name: 'Valid case with assert.ok and different property',
       code: `assert.ok(response.otherProperty === 'test');`,
     },
+    {
+      name: 'Valid case with response.code',
+      code: `assert(message.code, 'Expected response.value to be StatusCodes.BAD_REQUEST');`,
+    },
   ],
   invalid: [
     {
@@ -128,15 +132,6 @@ createTester().run(ruleId, rule, {
     {
       name: 'Invalid case with response.status and StatusCodes',
       code: `assert(response.status === StatusCodes.SOME_STATUS);`,
-      errors: [
-        {
-          messageId: 'NO_STATUS_CODE_ASSERT',
-        },
-      ],
-    },
-    {
-      name: 'Invalid case with response.code',
-      code: `assert(message.code, 'Expected response.value to be StatusCodes.BAD_REQUEST');`,
       errors: [
         {
           messageId: 'NO_STATUS_CODE_ASSERT',
