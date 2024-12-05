@@ -6,12 +6,25 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
+import { StatusCodes } from 'http-status-codes';
+
 import { AST_NODE_TYPES, ESLintUtils, TSESLint, TSESTree } from '@typescript-eslint/utils';
 import getDocumentationUrl from './get-documentation-url';
 
 export const ruleId = 'no-status-code-assert';
 const NO_STATUS_CODE_ASSERT = 'NO_STATUS_CODE_ASSERT';
 const keywords = ['status', 'code', 'StatusCodes', 'statusCode'];
+
+const statusCodes = [
+  StatusCodes.OK,
+  StatusCodes.CREATED,
+  StatusCodes.BAD_REQUEST,
+  StatusCodes.UNAUTHORIZED,
+  StatusCodes.FORBIDDEN,
+  StatusCodes.NOT_FOUND,
+  StatusCodes.CONFLICT,
+  StatusCodes.INTERNAL_SERVER_ERROR,
+];
 
 const createRule = ESLintUtils.RuleCreator((name) => getDocumentationUrl(name));
 
@@ -24,7 +37,10 @@ const createRule = ESLintUtils.RuleCreator((name) => getDocumentationUrl(name));
  */
 const hasStatusCodeOrValue = (arg: TSESTree.Node): boolean => {
   const checkName = (name?: string): boolean =>
-    name !== undefined && keywords.some((keyword) => name.toLowerCase().includes(keyword));
+    name !== undefined && keywords.some((keyword) => name.toLowerCase().includes(keyword.toLowerCase()));
+
+  const isStatusCodeLiteral = (value: number): boolean => statusCodes.includes(value);
+  console.log(arg.type);
 
   switch (arg.type) {
     case AST_NODE_TYPES.Identifier:
@@ -43,6 +59,11 @@ const hasStatusCodeOrValue = (arg: TSESTree.Node): boolean => {
       }
       break;
     }
+    case AST_NODE_TYPES.Literal:
+      if (typeof arg.value === 'number') {
+        return isStatusCodeLiteral(arg.value);
+      }
+      break;
     case AST_NODE_TYPES.BinaryExpression:
       return hasStatusCodeOrValue(arg.left) || hasStatusCodeOrValue(arg.right);
   }

@@ -136,7 +136,7 @@ createTester().run(ruleId, rule, {
     },
     {
       name: 'Invalid case with response.code',
-      code: `assert(response.code === 200, 'Expected response.value to be StatusCodes.BAD_REQUEST');`,
+      code: `assert(message.code, 'Expected response.value to be StatusCodes.BAD_REQUEST');`,
       errors: [
         {
           messageId: 'NO_STATUS_CODE_ASSERT',
@@ -146,6 +146,15 @@ createTester().run(ruleId, rule, {
     {
       name: 'Invalid case with response.value',
       code: `assert(response.value === StatusCodes.BAD_REQUEST, 'Expected response.value to be StatusCodes.BAD_REQUEST');`,
+      errors: [
+        {
+          messageId: 'NO_STATUS_CODE_ASSERT',
+        },
+      ],
+    },
+    {
+      name: 'Invalid case with statusCode as a number literal',
+      code: `assert(test === 400);`,
       errors: [
         {
           messageId: 'NO_STATUS_CODE_ASSERT',
