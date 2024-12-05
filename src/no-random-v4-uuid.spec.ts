@@ -1,7 +1,7 @@
 // no-random-v4-uuid.spec.ts
 
-import rule, { ruleId } from './no-random-v4-uuid';
-import createTester from './ts-tester.test';
+import rule, { ruleId } from './no-random-v4-uuid.ts';
+import createTester from './ts-tester.test.ts';
 
 createTester().run(ruleId, rule, {
   valid: [

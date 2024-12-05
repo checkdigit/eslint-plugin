@@ -7,7 +7,7 @@
  */
 
 import { AST_NODE_TYPES, ESLintUtils, TSESLint, TSESTree } from '@typescript-eslint/utils';
-import getDocumentationUrl from './get-documentation-url';
+import getDocumentationUrl from './get-documentation-url.ts';
 
 export const ruleId = 'no-random-v4-uuid';
 const NO_RANDOM_V4_UUID = 'NO_RANDOM_V4_UUID';
