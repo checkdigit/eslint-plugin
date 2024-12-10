@@ -45,7 +45,13 @@ const rule: ESLintUtils.RuleModule<'mergeDuplicatedImports'> = createRule({
         declarations.push(node);
       },
       'Program:exit'() {
-        for (const [moduleName, declarations] of importDeclarations.entries()) {
+        for (const [moduleName, allDeclarations] of importDeclarations.entries()) {
+          const declarations = allDeclarations.filter(
+            (declaration) =>
+              !declaration.specifiers.some(
+                (specifier) => specifier.type === TSESTree.AST_NODE_TYPES.ImportNamespaceSpecifier,
+              ),
+          );
           if (declarations.length <= 1) {
             continue;
           }
