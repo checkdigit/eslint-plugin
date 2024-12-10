@@ -1,6 +1,6 @@
 {
   "name": "@checkdigit/eslint-plugin",
-  "version": "7.6.0",
+  "version": "7.6.1",
   "description": "Check Digit eslint plugins",
   "keywords": [
     "eslint",
@@ -61,8 +61,8 @@
     "preset": "@checkdigit/jest-config"
   },
   "dependencies": {
-    "@typescript-eslint/type-utils": "^8.17.0",
-    "@typescript-eslint/utils": "^8.17.0",
+    "@typescript-eslint/type-utils": "^8.18.0",
+    "@typescript-eslint/utils": "^8.18.0",
     "ts-api-utils": "^2.0.0"
   },
   "devDependencies": {
@@ -72,8 +72,8 @@
     "@eslint/js": "^9.16.0",
     "@types/eslint": "^9.6.1",
     "@types/eslint-config-prettier": "^6.11.3",
-    "@typescript-eslint/parser": "^8.17.0",
-    "@typescript-eslint/rule-tester": "^8.17.0",
+    "@typescript-eslint/parser": "^8.18.0",
+    "@typescript-eslint/rule-tester": "^8.18.0",
     "eslint": "^9.16.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-import-resolver-typescript": "^3.7.0",
@@ -85,7 +85,7 @@
     "eslint-plugin-sonarjs": "1.0.4",
     "http-status-codes": "^2.3.0",
     "rimraf": "^6.0.1",
-    "typescript-eslint": "^8.17.0"
+    "typescript-eslint": "^8.18.0"
   },
   "peerDependencies": {
     "eslint": ">=9 <10"
