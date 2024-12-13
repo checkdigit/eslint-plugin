@@ -6,12 +6,12 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import { TSESTree } from '@typescript-eslint/typescript-estree';
 import { ESLintUtils } from '@typescript-eslint/utils';
 import getDocumentationUrl from './get-documentation-url.ts';
 
 export const ruleId = 'require-ts-extension-imports';
 const REQUIRE_TS_EXTENSION_IMPORTS = 'REQUIRE-TS-EXTENSION-IMPORTS';
+const SERVICE_TYPINGS_IMPORT_PATH_PREFIX = /(?<path>\.\.\/)+services/u;
 
 const createRule: ReturnType<typeof ESLintUtils.RuleCreator> = ESLintUtils.RuleCreator((name) =>
   getDocumentationUrl(name),
@@ -37,15 +37,19 @@ const rule: ReturnType<typeof createRule> = createRule({
       return {};
     }
     return {
-      ImportDeclaration(node: TSESTree.ImportDeclaration) {
+      ImportDeclaration(node) {
         const importPath = node.source.value;
-        if (importPath.startsWith('.') && !importPath.endsWith('.ts') && !importPath.endsWith('.json')) {
+        if (
+          importPath.startsWith('.') &&
+          !importPath.endsWith('.ts') &&
+          !importPath.endsWith('.json') &&
+          !SERVICE_TYPINGS_IMPORT_PATH_PREFIX.test(importPath)
+        ) {
           context.report({
             loc: node.source.loc,
             messageId: REQUIRE_TS_EXTENSION_IMPORTS,
-            fix(fixer) {
-              const fixedPath = `${importPath}.ts`;
-              return fixer.replaceText(node.source, `'${fixedPath}'`);
+            *fix(fixer) {
+              yield fixer.replaceText(node.source, `'${importPath}.ts'`);
             },
           });
         }

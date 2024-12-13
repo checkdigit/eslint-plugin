@@ -17,6 +17,10 @@ createTester().run(ruleId, rule, {
       code: `import { StatusCodes } from 'http-status-codes';`,
       name: 'Valid case with importing a package',
     },
+    {
+      code: `import type { ping } from '../../../services';`,
+      name: 'correctly import service typing',
+    },
   ],
   invalid: [
     {
