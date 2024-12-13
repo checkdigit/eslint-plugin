@@ -6,7 +6,7 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import fs from 'fs';
+import fs from 'node:fs';
 import { ESLintUtils } from '@typescript-eslint/utils';
 import { TSESTree } from '@typescript-eslint/typescript-estree';
 import getDocumentationUrl from './get-documentation-url.ts';
@@ -40,19 +40,22 @@ const rule: ReturnType<typeof createRule> = createRule({
     return {
       ImportDeclaration(node: TSESTree.ImportDeclaration) {
         const importPath = node.source.value;
-        if (importPath.startsWith('.') && !importPath.endsWith('.ts') && !importPath.endsWith('.json')) {
-          if (fs.existsSync(importPath)) {
-            const stats = fs.statSync(importPath);
-            const isDirectory = stats.isDirectory();
-            context.report({
-              node: node.source,
-              messageId: REQUIRE_TS_EXTENSION_IMPORTS,
-              fix(fixer) {
-                const fixedPath = isDirectory ? `${importPath}/index.ts` : `${importPath}.ts`;
-                return fixer.replaceText(node.source, `'${fixedPath}'`);
-              },
-            });
-          }
+        if (
+          importPath.startsWith('.') &&
+          !importPath.endsWith('.ts') &&
+          !importPath.endsWith('.json') &&
+          fs.existsSync(importPath)
+        ) {
+          const stats = fs.statSync(importPath);
+          const isDirectory = stats.isDirectory();
+          context.report({
+            node: node.source,
+            messageId: REQUIRE_TS_EXTENSION_IMPORTS,
+            fix(fixer) {
+              const fixedPath = isDirectory ? `${importPath}/index.ts` : `${importPath}.ts`;
+              return fixer.replaceText(node.source, `'${fixedPath}'`);
+            },
+          });
         }
       },
     };
