@@ -18,5 +18,18 @@ createTester().run(ruleId, rule, {
       name: 'Valid case with importing a package',
     },
   ],
-  invalid: [],
+  invalid: [
+    {
+      code: `import foo from './bar';`,
+      errors: [{ messageId: 'REQUIRE-TS-EXTENSION-IMPORTS' }],
+      output: `import foo from './bar.ts';`,
+      name: 'Invalid case with importing a file without .ts extension',
+    },
+    {
+      code: `import foo from '../src/bar';`,
+      errors: [{ messageId: 'REQUIRE-TS-EXTENSION-IMPORTS' }],
+      output: `import foo from '../src/bar.ts';`,
+      name: 'Import without .ts extension in relative path',
+    },
+  ],
 });

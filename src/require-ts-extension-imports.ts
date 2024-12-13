@@ -6,9 +6,8 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import fs from 'node:fs';
-import { ESLintUtils } from '@typescript-eslint/utils';
 import { TSESTree } from '@typescript-eslint/typescript-estree';
+import { ESLintUtils } from '@typescript-eslint/utils';
 import getDocumentationUrl from './get-documentation-url.ts';
 
 export const ruleId = 'require-ts-extension-imports';
@@ -40,19 +39,12 @@ const rule: ReturnType<typeof createRule> = createRule({
     return {
       ImportDeclaration(node: TSESTree.ImportDeclaration) {
         const importPath = node.source.value;
-        if (
-          importPath.startsWith('.') &&
-          !importPath.endsWith('.ts') &&
-          !importPath.endsWith('.json') &&
-          fs.existsSync(importPath)
-        ) {
-          const stats = fs.statSync(importPath);
-          const isDirectory = stats.isDirectory();
+        if (importPath.startsWith('.') && !importPath.endsWith('.ts') && !importPath.endsWith('.json')) {
           context.report({
-            node: node.source,
+            loc: node.source.loc,
             messageId: REQUIRE_TS_EXTENSION_IMPORTS,
             fix(fixer) {
-              const fixedPath = isDirectory ? `${importPath}/index.ts` : `${importPath}.ts`;
+              const fixedPath = `${importPath}.ts`;
               return fixer.replaceText(node.source, `'${fixedPath}'`);
             },
           });
