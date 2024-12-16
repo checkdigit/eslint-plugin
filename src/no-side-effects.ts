@@ -116,18 +116,31 @@ const rule: ReturnType<typeof createRule> = createRule({
   create(context) {
     const options: RuleOptions = context.options[0] as RuleOptions;
     const excludedIdentifiers = options.excludedIdentifiers.length > 0 ? options.excludedIdentifiers : [];
+    let hasExport = false;
 
     return {
       Program(node: TSESTree.Program) {
         node.body.forEach((statement: TSESTree.Node) => {
+          let declaration = statement;
+
           if (
-            isAwaitExpression(statement) ||
-            isCallExpressionCalleeMemberExpression(statement, excludedIdentifiers) ||
-            isVariableDeclarationAwaitExpression(statement) ||
-            isVariableDeclarationCallExpression(statement, excludedIdentifiers)
+            (declaration.type === TSESTree.AST_NODE_TYPES.ExportNamedDeclaration ||
+              declaration.type === TSESTree.AST_NODE_TYPES.ExportDefaultDeclaration ||
+              declaration.type === TSESTree.AST_NODE_TYPES.ExportAllDeclaration) &&
+            (declaration as TSESTree.ExportNamedDeclaration).declaration !== null
+          ) {
+            declaration = (declaration as TSESTree.ExportNamedDeclaration).declaration as TSESTree.Node;
+            hasExport = true;
+          }
+
+          if (hasExport &&
+              (isAwaitExpression(declaration) ||
+            isCallExpressionCalleeMemberExpression(declaration, excludedIdentifiers) ||
+            isVariableDeclarationAwaitExpression(declaration) ||
+            isVariableDeclarationCallExpression(declaration, excludedIdentifiers))
           ) {
             context.report({
-              node: statement,
+              node: declaration,
               messageId: NO_SIDE_EFFECTS,
             });
           }

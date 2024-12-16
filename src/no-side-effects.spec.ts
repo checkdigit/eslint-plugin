@@ -50,8 +50,6 @@ createTester().run(ruleId, rule, {
       options: [{ excludedIdentifiers: ['assert', 'debug', 'log'] }],
       name: 'Valid case with no side effects',
     },
-  ],
-  invalid: [
     {
       code: `import { strict as assert } from 'node:assert';
                import debug from 'debug';
@@ -84,6 +82,43 @@ createTester().run(ruleId, rule, {
               }
               assert(\`I'm a number, \${numberValue}\`);
               const jsonSchemaValidator = new Ajv({ allErrors: true }).compile(schema);`,
+      options: [{ excludedIdentifiers: ['assert', 'debug', 'log'] }],
+      name: 'Valid case with no exports with assertions and schema validation',
+    },
+  ],
+  invalid: [
+    {
+      code: `import { strict as assert } from 'node:assert';
+               import debug from 'debug';
+               import Koa from 'koa';
+               import { v4 as uuid } from 'uuid';
+               import Router from '@koa/router';
+               import { StatusCodes } from 'http-status-codes';    
+               
+               const log = debug('report:event');
+              
+               const reportName = 'TEST_REPORT';
+
+               type records = Record;
+               
+               interface Report {
+                  reportName: string;
+                  report: [];
+               }
+               
+               export function createS3ObjectKey(
+                from: string,
+                to: string,
+                bin: string,
+                reportId: string,
+                createdAt = new Date().toISOString(),
+              ): string {
+                // YYYY/MM/DD/HH
+                const prefix = formatUtc(createdAt, 'yyyy/MM/dd/HH');
+                return prefix;
+              }
+              assert(\`I'm a number, \${numberValue}\`);
+              const jsonSchemaValidator = new Ajv({ allErrors: true }).compile(schema);`,
       errors: [{ messageId: 'NO_SIDE_EFFECTS' }],
       options: [{ excludedIdentifiers: ['assert', 'debug', 'log'] }],
       name: 'Invalid case with side effects in assertions and schema validation',
@@ -99,7 +134,7 @@ createTester().run(ruleId, rule, {
                 const configuration = await service(unresolvedConfiguration);
                 const symbol1 = Symbol.for('foo');
 
-                const server = http.createServer(logger(configuration.requestHandler, unresolvedConfiguration.name));
+                export const server = http.createServer(logger(configuration.requestHandler, unresolvedConfiguration.name));
                 server.listen(Number.parseInt(unresolvedConfiguration.env['PORT'], 10), '0.0.0.0');
                 
                 await new Promise((resolve) => {
