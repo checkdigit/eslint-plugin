@@ -11,6 +11,8 @@ import getDocumentationUrl from './get-documentation-url.ts';
 
 export const ruleId = 'require-ts-extension-imports';
 const REQUIRE_TS_EXTENSION_IMPORTS = 'REQUIRE-TS-EXTENSION-IMPORTS';
+
+// Matches paths that start with one or more ../, followed by services
 const SERVICE_TYPINGS_IMPORT_PATH_PREFIX = /(?<path>\.\.\/)+services/u;
 
 const createRule: ReturnType<typeof ESLintUtils.RuleCreator> = ESLintUtils.RuleCreator((name) =>
@@ -39,17 +41,16 @@ const rule: ReturnType<typeof createRule> = createRule({
     return {
       ImportDeclaration(node) {
         const importPath = node.source.value;
-        if (
-          importPath.startsWith('.') &&
-          !importPath.endsWith('.ts') &&
-          !importPath.endsWith('.json') &&
-          !SERVICE_TYPINGS_IMPORT_PATH_PREFIX.test(importPath)
-        ) {
+        if (importPath.startsWith('.') && !importPath.endsWith('.ts') && !importPath.endsWith('.json')) {
+          const isServiceTypingImport = SERVICE_TYPINGS_IMPORT_PATH_PREFIX.test(importPath);
+          const newImportPath =
+            isServiceTypingImport && !importPath.endsWith('/index.ts') ? `${importPath}/index.ts` : `${importPath}.ts`;
+
           context.report({
             loc: node.source.loc,
             messageId: REQUIRE_TS_EXTENSION_IMPORTS,
             *fix(fixer) {
-              yield fixer.replaceText(node.source, `'${importPath}.ts'`);
+              yield fixer.replaceText(node.source, `'${newImportPath}'`);
             },
           });
         }

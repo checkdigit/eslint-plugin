@@ -18,7 +18,7 @@ createTester().run(ruleId, rule, {
       name: 'Valid case with importing a package',
     },
     {
-      code: `import type { ping } from '../../../services';`,
+      code: `import type { ping } from '../../../services/index.ts';`,
       name: 'correctly import service typing',
     },
   ],
@@ -34,6 +34,12 @@ createTester().run(ruleId, rule, {
       errors: [{ messageId: 'REQUIRE-TS-EXTENSION-IMPORTS' }],
       output: `import foo from '../src/bar.ts';`,
       name: 'Import without .ts extension in relative path',
+    },
+    {
+      code: `import type { ping } from '../../../services';`,
+      errors: [{ messageId: 'REQUIRE-TS-EXTENSION-IMPORTS' }],
+      output: `import type { ping } from '../../../services/index.ts';`,
+      name: 'Invalid import service typing',
     },
   ],
 });
