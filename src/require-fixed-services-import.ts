@@ -48,7 +48,7 @@ const rule: ESLintUtils.RuleModule<
           const match = SERVICE_TYPINGS_IMPORT_PATH_WITH_VERSION.exec(moduleName);
           if (match?.groups) {
             // need to import the service typings from the fixed path, and also apply the namespace to the referenced types
-            const { service, version } = match.groups; /*?*/
+            const { service, version } = match.groups;
             assert.ok(service !== undefined && version !== undefined);
 
             // remember the type name and the corresponding service, which will be used to rename the references
