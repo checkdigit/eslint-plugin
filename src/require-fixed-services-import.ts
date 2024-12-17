@@ -57,7 +57,7 @@ const rule: ESLintUtils.RuleModule<
                 specifier.type === AST_NODE_TYPES.ImportSpecifier &&
                 specifier.imported.type === AST_NODE_TYPES.Identifier
               ) {
-                importedServiceTypeMapping.set(specifier.imported.name, service);
+                importedServiceTypeMapping.set(specifier.local.name, `${service}.${specifier.imported.name}`);
               }
             }
 
@@ -94,14 +94,13 @@ const rule: ESLintUtils.RuleModule<
           typeReference.typeName.type === AST_NODE_TYPES.Identifier &&
           importedServiceTypeMapping.has(typeReference.typeName.name)
         ) {
-          const referencedTypeName = typeReference.typeName.name;
-          const serviceNamespace = importedServiceTypeMapping.get(referencedTypeName);
-          assert.ok(serviceNamespace !== undefined);
+          const renamedTypeName = importedServiceTypeMapping.get(typeReference.typeName.name);
+          assert.ok(renamedTypeName !== undefined);
           context.report({
             messageId: 'renameServiceTypeReference',
             node: typeReference.typeName,
             fix(fixer) {
-              return fixer.replaceText(typeReference.typeName, `${serviceNamespace}.${referencedTypeName}`);
+              return fixer.replaceText(typeReference.typeName, renamedTypeName);
             },
           });
         }
