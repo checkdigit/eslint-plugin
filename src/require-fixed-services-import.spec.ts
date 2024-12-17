@@ -83,5 +83,17 @@ createTester().run(ruleId, rule, {
         { messageId: 'renameServiceTypeReference' },
       ],
     },
+    {
+      name: 'update service typing import from a particular version - leave type rename in the import',
+      code: `
+        import type { Person as P } from '../../services/person/v1';
+        const person = {} as P;
+      `,
+      output: `
+        import type { personV1 as person } from '../../services/index.ts';
+        const person = {} as P;
+      `,
+      errors: [{ messageId: 'updateServicesImportSpecifier' }, { messageId: 'updateServicesImportSource' }],
+    },
   ],
 });

@@ -53,7 +53,12 @@ const rule: ESLintUtils.RuleModule<
 
             // remember the type name and the corresponding service, which will be used to rename the references
             for (const specifier of importDeclaration.specifiers) {
-              importedServiceTypeMapping.set(specifier.local.name, service);
+              if (
+                specifier.type === AST_NODE_TYPES.ImportSpecifier &&
+                specifier.imported.type === AST_NODE_TYPES.Identifier
+              ) {
+                importedServiceTypeMapping.set(specifier.imported.name, service);
+              }
             }
 
             const rangeStart = importDeclaration.specifiers[0]?.range[0];
