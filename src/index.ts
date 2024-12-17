@@ -74,7 +74,10 @@ const configs: Record<string, TSESLint.FlatConfig.Config[]> = {
         '@checkdigit/no-uuid': 'error',
         '@checkdigit/require-strict-assert': 'error',
         '@checkdigit/no-wallaby-comment': 'error',
-        '@checkdigit/no-side-effects': ['error', { excludedIdentifiers: ['assert', 'debug', 'log', 'promisify'] }],
+        '@checkdigit/no-side-effects': [
+          'error',
+          { excludedIdentifiers: ['assert', 'debug', 'log', 'promisify', 'Symbol.for'] },
+        ],
         '@checkdigit/regular-expression-comment': 'error',
         '@checkdigit/require-assert-predicate-rejects-throws': 'error',
         '@checkdigit/object-literal-response': 'error',
