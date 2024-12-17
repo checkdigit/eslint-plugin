@@ -148,7 +148,65 @@ createTester().run(ruleId, rule, {
         { messageId: 'NO_SIDE_EFFECTS' },
       ],
       options: [{ excludedIdentifiers: ['assert', 'debug', 'log', 'Symbol.for'] }],
-      name: 'Invalid case with multiple side effects including server creation and async operations',
+      name: 'Invalid case with multiple side effects including name export name declaration with server creation and async operations',
+    },
+    {
+      code: `import { strict as assert } from 'node:assert';
+                import http from 'node:http';
+                import debug from 'debug';
+                
+                import { getConfiguration } from 'test';
+                                
+                const unresolvedConfiguration = getConfiguration(root());
+                const configuration = await service(unresolvedConfiguration);
+                const symbol1 = Symbol.for('foo');
+
+                const server = http.createServer(logger(configuration.requestHandler, unresolvedConfiguration.name));
+                server.listen(Number.parseInt(unresolvedConfiguration.env['PORT'], 10), '0.0.0.0');
+                
+                export default function myFunction() {
+                  // function body
+                }
+                
+                await new Promise((resolve) => {
+                  server.on('listening', resolve);
+                });`,
+      errors: [
+        { messageId: 'NO_SIDE_EFFECTS' },
+        { messageId: 'NO_SIDE_EFFECTS' },
+        { messageId: 'NO_SIDE_EFFECTS' },
+        { messageId: 'NO_SIDE_EFFECTS' },
+        { messageId: 'NO_SIDE_EFFECTS' },
+      ],
+      options: [{ excludedIdentifiers: ['assert', 'debug', 'log', 'Symbol.for'] }],
+      name: 'Invalid case with multiple side effects including export default declarations and async operations',
+    },
+    {
+      code: `import { strict as assert } from 'node:assert';
+                import http from 'node:http';
+                import debug from 'debug';
+                
+                import { getConfiguration } from 'test';
+                                
+                const unresolvedConfiguration = getConfiguration(root());
+                const configuration = await service(unresolvedConfiguration);
+                const symbol1 = Symbol.for('foo');
+                const server = http.createServer(logger(configuration.requestHandler, unresolvedConfiguration.name));
+                server.listen(Number.parseInt(unresolvedConfiguration.env['PORT'], 10), '0.0.0.0');
+                
+                await new Promise((resolve) => {
+                  server.on('listening', resolve);
+                });
+                export * from './module';`,
+      errors: [
+        { messageId: 'NO_SIDE_EFFECTS' },
+        { messageId: 'NO_SIDE_EFFECTS' },
+        { messageId: 'NO_SIDE_EFFECTS' },
+        { messageId: 'NO_SIDE_EFFECTS' },
+        { messageId: 'NO_SIDE_EFFECTS' },
+      ],
+      options: [{ excludedIdentifiers: ['assert', 'debug', 'log', 'Symbol.for'] }],
+      name: 'Invalid case with multiple side effects including export all declarations and async operations',
     },
   ],
 });

@@ -87,6 +87,20 @@ function isVariableDeclarationCallExpression(node: TSESTree.Node, excludedIdenti
   );
 }
 
+// Helper function to check if a given AST node (statement) has any side effects that should be reported
+function hasSideEffects(statement: TSESTree.Node, excludedIdentifiers: string[]): boolean {
+  return (
+    isAwaitExpression(statement) ||
+    isCallExpressionCalleeMemberExpression(statement, excludedIdentifiers) ||
+    isVariableDeclarationAwaitExpression(statement) ||
+    isVariableDeclarationCallExpression(statement, excludedIdentifiers) ||
+    (statement.type === TSESTree.AST_NODE_TYPES.ExportNamedDeclaration &&
+      statement.declaration !== null &&
+      (isVariableDeclarationAwaitExpression(statement.declaration) ||
+        isVariableDeclarationCallExpression(statement.declaration, excludedIdentifiers)))
+  );
+}
+
 const createRule: ReturnType<typeof ESLintUtils.RuleCreator> = ESLintUtils.RuleCreator((name) => name);
 
 const rule: ReturnType<typeof createRule> = createRule({
@@ -116,31 +130,23 @@ const rule: ReturnType<typeof createRule> = createRule({
   create(context) {
     const options: RuleOptions = context.options[0] as RuleOptions;
     const excludedIdentifiers = options.excludedIdentifiers.length > 0 ? options.excludedIdentifiers : [];
-    let hasExport = false;
-
     return {
       Program(node: TSESTree.Program) {
+        const hasExport = node.body.some(
+          (statement: TSESTree.Node) =>
+            statement.type === TSESTree.AST_NODE_TYPES.ExportNamedDeclaration ||
+            statement.type === TSESTree.AST_NODE_TYPES.ExportDefaultDeclaration ||
+            statement.type === TSESTree.AST_NODE_TYPES.ExportAllDeclaration,
+        );
+
+        if (!hasExport) {
+          return;
+        }
+
         node.body.forEach((statement: TSESTree.Node) => {
-          let declaration = statement;
-
-          if (
-            (declaration.type === TSESTree.AST_NODE_TYPES.ExportNamedDeclaration ||
-              declaration.type === TSESTree.AST_NODE_TYPES.ExportDefaultDeclaration ||
-              declaration.type === TSESTree.AST_NODE_TYPES.ExportAllDeclaration) &&
-            (declaration as TSESTree.ExportNamedDeclaration).declaration !== null
-          ) {
-            declaration = (declaration as TSESTree.ExportNamedDeclaration).declaration as TSESTree.Node;
-            hasExport = true;
-          }
-
-          if (hasExport &&
-              (isAwaitExpression(declaration) ||
-            isCallExpressionCalleeMemberExpression(declaration, excludedIdentifiers) ||
-            isVariableDeclarationAwaitExpression(declaration) ||
-            isVariableDeclarationCallExpression(declaration, excludedIdentifiers))
-          ) {
+          if (hasSideEffects(statement, excludedIdentifiers)) {
             context.report({
-              node: declaration,
+              node: statement,
               messageId: NO_SIDE_EFFECTS,
             });
           }
