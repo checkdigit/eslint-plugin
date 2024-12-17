@@ -9,8 +9,8 @@
 import { strict as assert } from 'node:assert';
 import { AST_NODE_TYPES, ESLintUtils, TSESTree } from '@typescript-eslint/utils';
 import { DefinitionType, type Scope } from '@typescript-eslint/scope-manager';
-import getDocumentationUrl from './get-documentation-url';
-import { getEnclosingScopeNode } from './library/ts-tree';
+import getDocumentationUrl from './get-documentation-url.ts';
+import { getEnclosingScopeNode } from './library/ts-tree.ts';
 
 export const ruleId = 'require-resolve-full-response';
 // eslint-disable-next-line @typescript-eslint/no-inferrable-types

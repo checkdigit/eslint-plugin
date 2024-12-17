@@ -8,31 +8,31 @@
 
 import type { TSESLint } from '@typescript-eslint/utils';
 
-import invalidJsonStringify, { ruleId as invalidJsonStringifyRuleId } from './invalid-json-stringify';
-import noDuplicatedImports, { ruleId as noDuplicatedImportsRuleId } from './no-duplicated-imports';
-import noLegacyServiceTyping, { ruleId as noLegacyServiceTypingRuleId } from './no-legacy-service-typing';
-import noPromiseInstanceMethod, { ruleId as noPromiseInstanceMethodRuleId } from './no-promise-instance-method';
+import invalidJsonStringify, { ruleId as invalidJsonStringifyRuleId } from './invalid-json-stringify.ts';
+import noDuplicatedImports, { ruleId as noDuplicatedImportsRuleId } from './no-duplicated-imports.ts';
+import noLegacyServiceTyping, { ruleId as noLegacyServiceTypingRuleId } from './no-legacy-service-typing.ts';
+import noPromiseInstanceMethod, { ruleId as noPromiseInstanceMethodRuleId } from './no-promise-instance-method.ts';
 import requireFixedServicesImport, {
   ruleId as requireFixedServicesImportRuleId,
-} from './require-fixed-services-import';
+} from './require-fixed-services-import.ts';
 import requireResolveFullResponse, {
   ruleId as requireResolveFullResponseRuleId,
-} from './require-resolve-full-response';
+} from './require-resolve-full-response.ts';
 import requireTypeOutOfTypeOnlyImports, {
   ruleId as requireTypeOutOfTypeOnlyImportsRuleId,
-} from './require-type-out-of-type-only-imports';
-import noServeRuntime, { ruleId as noServeRuntimeRuleId } from './no-serve-runtime';
-import filePathComment from './file-path-comment';
-import noCardNumbers from './no-card-numbers';
-import noSideEffects from './no-side-effects';
-import noRandomV4UUID from './no-random-v4-uuid';
-import noTestImport from './no-test-import';
-import noUuid from './no-uuid';
-import noWallabyComment from './no-wallaby-comment';
-import objectLiteralResponse from './object-literal-response';
-import regexComment from './regular-expression-comment';
-import requireAssertPredicateRejectsThrows from './require-assert-predicate-rejects-throws';
-import requireStrictAssert from './require-strict-assert';
+} from './require-type-out-of-type-only-imports.ts';
+import noServeRuntime, { ruleId as noServeRuntimeRuleId } from './no-serve-runtime.ts';
+import filePathComment from './file-path-comment.ts';
+import noCardNumbers from './no-card-numbers.ts';
+import noSideEffects from './no-side-effects.ts';
+import noRandomV4UUID from './no-random-v4-uuid.ts';
+import noTestImport from './no-test-import.ts';
+import noUuid from './no-uuid.ts';
+import noWallabyComment from './no-wallaby-comment.ts';
+import objectLiteralResponse from './object-literal-response.ts';
+import regexComment from './regular-expression-comment.ts';
+import requireAssertPredicateRejectsThrows from './require-assert-predicate-rejects-throws.ts';
+import requireStrictAssert from './require-strict-assert.ts';
 
 const rules: Record<string, TSESLint.LooseRuleDefinition> = {
   'file-path-comment': filePathComment,

@@ -8,7 +8,7 @@
 
 import { RuleTester } from 'eslint';
 import { describe } from '@jest/globals';
-import rule, { INVALID_JSON_STRINGIFY, ruleId } from './invalid-json-stringify';
+import rule, { INVALID_JSON_STRINGIFY, ruleId } from './invalid-json-stringify.ts';
 
 describe(ruleId, () => {
   new RuleTester({

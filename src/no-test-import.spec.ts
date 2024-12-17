@@ -8,7 +8,7 @@
 
 import { RuleTester } from 'eslint';
 import { describe } from '@jest/globals';
-import rule, { NO_TEST_IMPORT, type NoTestImportRuleOptions } from './no-test-import';
+import rule, { NO_TEST_IMPORT, type NoTestImportRuleOptions } from './no-test-import.ts';
 
 describe('no-test-import', () => {
   new RuleTester({

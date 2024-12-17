@@ -9,7 +9,7 @@
 import { RuleTester } from 'eslint';
 import { describe } from '@jest/globals';
 
-import rule from './file-path-comment';
+import rule from './file-path-comment.ts';
 
 describe('file-path-comment', () => {
   const ruleTester = new RuleTester({ languageOptions: { parserOptions: { ecmaVersion: 2020 } } });

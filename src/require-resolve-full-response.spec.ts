@@ -6,8 +6,8 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import rule, { ruleId } from './require-resolve-full-response';
-import createTester from './ts-tester.test';
+import rule, { ruleId } from './require-resolve-full-response.ts';
+import createTester from './ts-tester.test.ts';
 
 createTester().run(ruleId, rule, {
   valid: [

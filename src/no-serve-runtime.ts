@@ -7,7 +7,7 @@
  */
 
 import { ESLintUtils, TSESTree } from '@typescript-eslint/utils';
-import getDocumentationUrl from './get-documentation-url';
+import getDocumentationUrl from './get-documentation-url.ts';
 
 export const ruleId = 'no-serve-runtime';
 
