@@ -38,7 +38,12 @@ const rule: ReturnType<typeof createRule> = createRule({
     return {
       ImportDeclaration(node: TSESTree.ImportDeclaration) {
         const importPath = node.source.value;
-        if (importPath.startsWith('.') && !importPath.endsWith('.ts') && !importPath.endsWith('.json')) {
+        if (
+          importPath.startsWith('.') &&
+          !importPath.endsWith('.ts') &&
+          !importPath.endsWith('.json') &&
+          fs.existsSync(importPath)
+        ) {
           const absoluteImportPath = path.resolve(path.dirname(filename), importPath);
           const stats = fs.statSync(absoluteImportPath);
           const isDirectory = stats.isDirectory();

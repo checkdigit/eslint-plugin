@@ -7,6 +7,15 @@ type StatSyncFn = (path: PathLike) => Stats;
 
 jest.unstable_mockModule('fs', () => ({
   default: {
+    existsSync: jest.fn(
+      (path) =>
+        typeof path === 'string' &&
+        (path.endsWith('bar') ||
+          path.endsWith('src/bar') ||
+          path.endsWith('bar-dir') ||
+          path.endsWith('services') ||
+          path.endsWith('.test')),
+    ),
     statSync: jest.fn<StatSyncFn>().mockImplementation(((path) => ({
       isDirectory: () => typeof path === 'string' && (path.endsWith('bar-dir') || path.endsWith('services')),
     })) as StatSyncFn),
@@ -65,6 +74,12 @@ createTester().run(ruleId, rule, {
       errors: [{ messageId: 'REQUIRE-TS-EXTENSION-IMPORTS' }],
       output: `import type { ping } from '../../../services/index.ts';`,
       name: 'Invalid import typing from directory without .ts extension',
+    },
+    {
+      code: `import { bar, foo, foo1 } from './test/bar.test';`,
+      errors: [{ messageId: 'REQUIRE-TS-EXTENSION-IMPORTS' }],
+      output: `import { bar, foo, foo1 } from './test/bar.test.ts';`,
+      name: 'Invalid import typing from test file without .ts extension',
     },
   ],
 });
