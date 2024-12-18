@@ -9,7 +9,6 @@
 import path from 'path';
 import fs from 'fs';
 import { ESLintUtils } from '@typescript-eslint/utils';
-import { TSESTree } from '@typescript-eslint/typescript-estree';
 import getDocumentationUrl from './get-documentation-url.ts';
 
 export const ruleId = 'require-ts-extension-imports';
@@ -36,25 +35,24 @@ const rule: ReturnType<typeof createRule> = createRule({
   create(context) {
     const filename = context.filename;
     return {
-      ImportDeclaration(node: TSESTree.ImportDeclaration) {
+      ImportDeclaration(node) {
         const importPath = node.source.value;
-        if (
-          importPath.startsWith('.') &&
-          !importPath.endsWith('.ts') &&
-          !importPath.endsWith('.json') &&
-          fs.existsSync(importPath)
-        ) {
+        if (importPath.startsWith('.') && !importPath.endsWith('.ts') && !importPath.endsWith('.json')) {
           const absoluteImportPath = path.resolve(path.dirname(filename), importPath);
-          const stats = fs.statSync(absoluteImportPath);
-          const isDirectory = stats.isDirectory();
-          const fixedPath = isDirectory ? `${importPath}/index.ts` : `${importPath}.ts`;
-          context.report({
-            loc: node.source.loc,
-            messageId: REQUIRE_TS_EXTENSION_IMPORTS,
-            *fix(fixer) {
-              yield fixer.replaceText(node.source, `'${fixedPath}'`);
-            },
-          });
+          if (fs.existsSync(absoluteImportPath) || fs.existsSync(`${absoluteImportPath}.ts`)) {
+            const stats = fs.existsSync(absoluteImportPath)
+              ? fs.statSync(absoluteImportPath)
+              : fs.statSync(`${absoluteImportPath}.ts`);
+            const isDirectory = stats.isDirectory();
+            const fixedPath = isDirectory ? `${importPath}/index.ts` : `${importPath}.ts`;
+            context.report({
+              loc: node.source.loc,
+              messageId: REQUIRE_TS_EXTENSION_IMPORTS,
+              *fix(fixer) {
+                yield fixer.replaceText(node.source, `'${fixedPath}'`);
+              },
+            });
+          }
         }
       },
     };
