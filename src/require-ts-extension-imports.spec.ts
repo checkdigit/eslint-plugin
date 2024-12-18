@@ -1,6 +1,25 @@
 // require-ts-extension-imports.spec.ts
 
-import rule, { ruleId } from './require-ts-extension-imports.ts';
+import type { PathLike, Stats } from 'fs';
+import { jest } from '@jest/globals';
+
+type StatSyncFn = (path: PathLike) => Stats;
+
+jest.unstable_mockModule('fs', () => ({
+  default: {
+    existsSync: jest.fn(
+      (path) =>
+        typeof path === 'string' &&
+        (path.endsWith('bar') || path.endsWith('src/bar') || path.endsWith('bar-dir') || path.endsWith('services')),
+    ),
+    statSync: jest.fn<StatSyncFn>().mockImplementation(((path) => ({
+      isDirectory: () => typeof path === 'string' && (path.endsWith('bar-dir') || path.endsWith('services')),
+      isFile: () => typeof path === 'string' && (path.endsWith('bar') || path.endsWith('src/bar')),
+    })) as StatSyncFn),
+  },
+}));
+
+const { default: rule, ruleId } = await import('./require-ts-extension-imports.ts');
 import createTester from './ts-tester.test.ts';
 
 createTester().run(ruleId, rule, {
@@ -36,10 +55,22 @@ createTester().run(ruleId, rule, {
       name: 'Import without .ts extension in relative path',
     },
     {
+      code: `import foo from './bar-dir';`,
+      errors: [{ messageId: 'REQUIRE-TS-EXTENSION-IMPORTS' }],
+      output: `import foo from './bar-dir/index.ts';`,
+      name: 'Import without .ts extension in directory',
+    },
+    {
+      code: `import foo from '../bar-dir';`,
+      errors: [{ messageId: 'REQUIRE-TS-EXTENSION-IMPORTS' }],
+      output: `import foo from '../bar-dir/index.ts';`,
+      name: 'Import without .ts extension in relative path in directory',
+    },
+    {
       code: `import type { ping } from '../../../services';`,
       errors: [{ messageId: 'REQUIRE-TS-EXTENSION-IMPORTS' }],
       output: `import type { ping } from '../../../services/index.ts';`,
-      name: 'Invalid import service typing',
+      name: 'Invalid import typing from directory without .ts extension',
     },
   ],
 });

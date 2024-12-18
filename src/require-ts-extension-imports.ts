@@ -6,14 +6,13 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
+import fs from 'fs';
 import { ESLintUtils } from '@typescript-eslint/utils';
+import { TSESTree } from '@typescript-eslint/typescript-estree';
 import getDocumentationUrl from './get-documentation-url.ts';
 
 export const ruleId = 'require-ts-extension-imports';
 const REQUIRE_TS_EXTENSION_IMPORTS = 'REQUIRE-TS-EXTENSION-IMPORTS';
-
-// Matches paths that start with one or more ../, followed by services
-const SERVICE_TYPINGS_IMPORT_PATH_PREFIX = /(?<path>\.\.\/)+services/u;
 
 const createRule: ReturnType<typeof ESLintUtils.RuleCreator> = ESLintUtils.RuleCreator((name) =>
   getDocumentationUrl(name),
@@ -39,18 +38,22 @@ const rule: ReturnType<typeof createRule> = createRule({
       return {};
     }
     return {
-      ImportDeclaration(node) {
+      ImportDeclaration(node: TSESTree.ImportDeclaration) {
         const importPath = node.source.value;
-        if (importPath.startsWith('.') && !importPath.endsWith('.ts') && !importPath.endsWith('.json')) {
-          const isServiceTypingImport = SERVICE_TYPINGS_IMPORT_PATH_PREFIX.test(importPath);
-          const newImportPath =
-            isServiceTypingImport && !importPath.endsWith('/index.ts') ? `${importPath}/index.ts` : `${importPath}.ts`;
-
+        if (
+          importPath.startsWith('.') &&
+          !importPath.endsWith('.ts') &&
+          !importPath.endsWith('.json') &&
+          fs.existsSync(importPath)
+        ) {
+          const stats = fs.statSync(importPath);
+          const isDirectory = stats.isDirectory();
+          const fixedPath = isDirectory ? `${importPath}/index.ts` : `${importPath}.ts`;
           context.report({
             loc: node.source.loc,
             messageId: REQUIRE_TS_EXTENSION_IMPORTS,
             *fix(fixer) {
-              yield fixer.replaceText(node.source, `'${newImportPath}'`);
+              yield fixer.replaceText(node.source, `'${fixedPath}'`);
             },
           });
         }
