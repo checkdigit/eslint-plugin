@@ -6,6 +6,7 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
+import path from 'path';
 import fs from 'fs';
 import { ESLintUtils } from '@typescript-eslint/utils';
 import { TSESTree } from '@typescript-eslint/typescript-estree';
@@ -34,19 +35,12 @@ const rule: ReturnType<typeof createRule> = createRule({
   defaultOptions: [],
   create(context) {
     const filename = context.filename;
-    if (!filename.endsWith('.ts')) {
-      return {};
-    }
     return {
       ImportDeclaration(node: TSESTree.ImportDeclaration) {
         const importPath = node.source.value;
-        if (
-          importPath.startsWith('.') &&
-          !importPath.endsWith('.ts') &&
-          !importPath.endsWith('.json') &&
-          fs.existsSync(importPath)
-        ) {
-          const stats = fs.statSync(importPath);
+        if (importPath.startsWith('.') && !importPath.endsWith('.ts') && !importPath.endsWith('.json')) {
+          const absoluteImportPath = path.resolve(path.dirname(filename), importPath);
+          const stats = fs.statSync(absoluteImportPath);
           const isDirectory = stats.isDirectory();
           const fixedPath = isDirectory ? `${importPath}/index.ts` : `${importPath}.ts`;
           context.report({

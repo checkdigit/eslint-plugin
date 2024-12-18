@@ -7,14 +7,8 @@ type StatSyncFn = (path: PathLike) => Stats;
 
 jest.unstable_mockModule('fs', () => ({
   default: {
-    existsSync: jest.fn(
-      (path) =>
-        typeof path === 'string' &&
-        (path.endsWith('bar') || path.endsWith('src/bar') || path.endsWith('bar-dir') || path.endsWith('services')),
-    ),
     statSync: jest.fn<StatSyncFn>().mockImplementation(((path) => ({
       isDirectory: () => typeof path === 'string' && (path.endsWith('bar-dir') || path.endsWith('services')),
-      isFile: () => typeof path === 'string' && (path.endsWith('bar') || path.endsWith('src/bar')),
     })) as StatSyncFn),
   },
 }));
