@@ -39,10 +39,10 @@ const rule: ReturnType<typeof createRule> = createRule({
         const importPath = node.source.value;
         if (importPath.startsWith('.') && !importPath.endsWith('.ts') && !importPath.endsWith('.json')) {
           const absoluteImportPath = path.resolve(path.dirname(filename), importPath);
-          if (fs.existsSync(absoluteImportPath) || fs.existsSync(`${absoluteImportPath}.ts`)) {
-            const stats = fs.existsSync(absoluteImportPath)
-              ? fs.statSync(absoluteImportPath)
-              : fs.statSync(`${absoluteImportPath}.ts`);
+          const tsImportPath = `${absoluteImportPath}.ts`;
+          const existsPath = [absoluteImportPath, tsImportPath].find(fs.existsSync);
+          if (existsPath !== undefined) {
+            const stats = fs.statSync(existsPath);
             const isDirectory = stats.isDirectory();
             const fixedPath = isDirectory ? `${importPath}/index.ts` : `${importPath}.ts`;
             context.report({
