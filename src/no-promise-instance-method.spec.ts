@@ -11,8 +11,8 @@ import rule, {
   NO_PROMISE_INSTANCE_METHOD_CATCH_FINALLY,
   NO_PROMISE_INSTANCE_METHOD_THEN,
   ruleId,
-} from './no-promise-instance-method';
-import createTester from './tester.test';
+} from './no-promise-instance-method.ts';
+import createTester from './tester.test.ts';
 
 describe(ruleId, () => {
   createTester().run(ruleId, rule, {

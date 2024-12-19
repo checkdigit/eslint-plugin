@@ -6,8 +6,8 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import createTester from './ts-tester.test';
-import rule, { ruleId } from './no-serve-runtime';
+import createTester from './ts-tester.test.ts';
+import rule, { ruleId } from './no-serve-runtime.ts';
 
 createTester().run(ruleId, rule, {
   valid: [

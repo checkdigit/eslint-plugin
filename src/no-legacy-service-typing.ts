@@ -7,7 +7,7 @@
  */
 
 import { AST_NODE_TYPES, ESLintUtils, TSESTree } from '@typescript-eslint/utils';
-import getDocumentationUrl from './get-documentation-url';
+import getDocumentationUrl from './get-documentation-url.ts';
 
 export const ruleId = 'no-legacy-service-typing';
 
