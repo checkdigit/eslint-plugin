@@ -46,15 +46,58 @@ function isVariableDeclarationAwaitExpression(node: TSESTree.Node): boolean {
   );
 }
 
-// To check if it is a variable declaration with a call expression
-function isVariableDeclarationCallExpression(node: TSESTree.Node, excludedIdentifiers: string[]): boolean {
+// Helper function to check if the callee is an identifier and not excluded
+function isIdentifierCallee(node: TSESTree.CallExpression, excludedIdentifiers: string[]): boolean {
+  return node.callee.type === TSESTree.AST_NODE_TYPES.Identifier && !excludedIdentifiers.includes(node.callee.name);
+}
+
+// Helper function to check if the callee is a member expression and not excluded
+function isMemberExpressionCallee(node: TSESTree.CallExpression, excludedIdentifiers: string[]): boolean {
   return (
-    node.type === TSESTree.AST_NODE_TYPES.VariableDeclaration &&
-    node.declarations.length > 0 &&
-    node.declarations[0]?.init?.type === TSESTree.AST_NODE_TYPES.CallExpression &&
-    ((node.declarations[0].init.callee.type === TSESTree.AST_NODE_TYPES.Identifier &&
-      !excludedIdentifiers.includes(node.declarations[0].init.callee.name)) ||
-      node.declarations[0].init.callee.type === TSESTree.AST_NODE_TYPES.MemberExpression)
+    node.callee.type === TSESTree.AST_NODE_TYPES.MemberExpression &&
+    node.callee.object.type === TSESTree.AST_NODE_TYPES.Identifier &&
+    node.callee.property.type === TSESTree.AST_NODE_TYPES.Identifier &&
+    !excludedIdentifiers.includes(`${node.callee.object.name}.${node.callee.property.name}`)
+  );
+}
+
+// Helper function to check if the callee is a member expression with a non-identifier object
+function isNonIdentifierObjectMemberExpressionCallee(node: TSESTree.CallExpression): boolean {
+  return (
+    node.callee.type === TSESTree.AST_NODE_TYPES.MemberExpression &&
+    node.callee.object.type !== TSESTree.AST_NODE_TYPES.Identifier
+  );
+}
+
+// To check if it is a variable declaration with a call expression i.e const configuration = new Class(); or Member Expressions i.e const server = http.createServer();
+function isVariableDeclarationCallExpression(node: TSESTree.Node, excludedIdentifiers: string[]): boolean {
+  if (node.type !== TSESTree.AST_NODE_TYPES.VariableDeclaration || node.declarations.length === 0) {
+    return false;
+  }
+
+  const init = node.declarations[0]?.init;
+  if (init?.type !== TSESTree.AST_NODE_TYPES.CallExpression) {
+    return false;
+  }
+
+  return (
+    isIdentifierCallee(init, excludedIdentifiers) ||
+    isMemberExpressionCallee(init, excludedIdentifiers) ||
+    isNonIdentifierObjectMemberExpressionCallee(init)
+  );
+}
+
+// Helper function to check if a given AST node (statement) has any side effects that should be reported
+function hasSideEffects(statement: TSESTree.Node, excludedIdentifiers: string[]): boolean {
+  return (
+    isAwaitExpression(statement) ||
+    isCallExpressionCalleeMemberExpression(statement, excludedIdentifiers) ||
+    isVariableDeclarationAwaitExpression(statement) ||
+    isVariableDeclarationCallExpression(statement, excludedIdentifiers) ||
+    (statement.type === TSESTree.AST_NODE_TYPES.ExportNamedDeclaration &&
+      statement.declaration !== null &&
+      (isVariableDeclarationAwaitExpression(statement.declaration) ||
+        isVariableDeclarationCallExpression(statement.declaration, excludedIdentifiers)))
   );
 }
 
@@ -87,16 +130,21 @@ const rule: ReturnType<typeof createRule> = createRule({
   create(context) {
     const options: RuleOptions = context.options[0] as RuleOptions;
     const excludedIdentifiers = options.excludedIdentifiers.length > 0 ? options.excludedIdentifiers : [];
-
     return {
       Program(node: TSESTree.Program) {
-        node.body.forEach((statement) => {
-          if (
-            isAwaitExpression(statement) ||
-            isCallExpressionCalleeMemberExpression(statement, excludedIdentifiers) ||
-            isVariableDeclarationAwaitExpression(statement) ||
-            isVariableDeclarationCallExpression(statement, excludedIdentifiers)
-          ) {
+        const hasExport = node.body.some(
+          (statement: TSESTree.Node) =>
+            statement.type === TSESTree.AST_NODE_TYPES.ExportNamedDeclaration ||
+            statement.type === TSESTree.AST_NODE_TYPES.ExportDefaultDeclaration ||
+            statement.type === TSESTree.AST_NODE_TYPES.ExportAllDeclaration,
+        );
+
+        if (!hasExport) {
+          return;
+        }
+
+        node.body.forEach((statement: TSESTree.Node) => {
+          if (hasSideEffects(statement, excludedIdentifiers)) {
             context.report({
               node: statement,
               messageId: NO_SIDE_EFFECTS,
