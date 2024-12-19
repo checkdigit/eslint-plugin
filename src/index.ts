@@ -33,6 +33,7 @@ import objectLiteralResponse from './object-literal-response.ts';
 import regexComment from './regular-expression-comment.ts';
 import requireAssertPredicateRejectsThrows from './require-assert-predicate-rejects-throws.ts';
 import requireStrictAssert from './require-strict-assert.ts';
+import requireTsExtensionImports from './require-ts-extension-imports';
 
 const rules: Record<string, TSESLint.LooseRuleDefinition> = {
   'file-path-comment': filePathComment,
@@ -40,6 +41,7 @@ const rules: Record<string, TSESLint.LooseRuleDefinition> = {
   'no-random-v4-uuid': noRandomV4UUID,
   'no-uuid': noUuid,
   'require-strict-assert': requireStrictAssert,
+  'require-ts-extension-imports': requireTsExtensionImports,
   'no-test-import': noTestImport,
   'no-wallaby-comment': noWallabyComment,
   'no-side-effects': noSideEffects,
@@ -73,6 +75,7 @@ const configs: Record<string, TSESLint.FlatConfig.Config[]> = {
         '@checkdigit/no-random-v4-uuid': 'error',
         '@checkdigit/no-uuid': 'error',
         '@checkdigit/require-strict-assert': 'error',
+        '@checkdigit/require-ts-extension-imports': 'error',
         '@checkdigit/no-wallaby-comment': 'error',
         '@checkdigit/no-side-effects': [
           'error',
@@ -105,6 +108,7 @@ const configs: Record<string, TSESLint.FlatConfig.Config[]> = {
         '@checkdigit/no-random-v4-uuid': 'error',
         '@checkdigit/no-uuid': 'error',
         '@checkdigit/require-strict-assert': 'error',
+        '@checkdigit/require-ts-extension-imports': 'error',
         '@checkdigit/no-wallaby-comment': 'off',
         '@checkdigit/no-side-effects': 'error',
         '@checkdigit/regular-expression-comment': 'error',
