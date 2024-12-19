@@ -20,6 +20,7 @@ Copyright (c) 2021-2024 [Check Digit, LLC](https://checkdigit.com)
 - `@checkdigit/no-legacy-service-typing`
 - `@checkdigit/require-resolve-full-response`
 - `@checkdigit/require-type-out-of-type-only-imports`
+- `@checkdigit/require-ts-extension-imports`
 
 ## Configurations
 
