@@ -12,7 +12,7 @@ import invalidJsonStringify, { ruleId as invalidJsonStringifyRuleId } from './in
 import noDuplicatedImports, { ruleId as noDuplicatedImportsRuleId } from './no-duplicated-imports.ts';
 import noLegacyServiceTyping, { ruleId as noLegacyServiceTypingRuleId } from './no-legacy-service-typing.ts';
 import noPromiseInstanceMethod, { ruleId as noPromiseInstanceMethodRuleId } from './no-promise-instance-method.ts';
-import noStatusCodeAssert from "./no-status-code-assert.ts";
+import noStatusCodeAssert from './no-status-code-assert.ts';
 import requireFixedServicesImport, {
   ruleId as requireFixedServicesImportRuleId,
 } from './require-fixed-services-import.ts';

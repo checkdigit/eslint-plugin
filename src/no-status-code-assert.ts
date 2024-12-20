@@ -13,7 +13,6 @@ import getDocumentationUrl from './get-documentation-url';
 
 export const ruleId = 'no-status-code-assert';
 const NO_STATUS_CODE_ASSERT = 'NO_STATUS_CODE_ASSERT';
-const keywords = ['status', 'code', 'StatusCodes', 'statusCode'];
 
 const statusCodes = [
   StatusCodes.OK,
@@ -29,41 +28,32 @@ const statusCodes = [
 const createRule = ESLintUtils.RuleCreator((name) => getDocumentationUrl(name));
 
 /**
- * Checks if a given AST node contains any identifier, member expression, or binary expression
- * that includes the keywords 'status', 'code', 'StatusCodes', or 'statusCode'.
+ * Checks if a given AST node contains any status code value.
  *
  * @param arg - The AST node to check.
- * @returns `true` if the node or its sub-nodes contain any of the specified keywords, otherwise `false`.
+ * @returns `true` if the node or its sub-nodes contain any status code value, otherwise `false`.
  */
 const hasStatusCodeOrValue = (arg: TSESTree.Node): boolean => {
-  const checkName = (name?: string): boolean =>
-    name !== undefined && keywords.some((keyword) => name.toLowerCase().includes(keyword.toLowerCase()));
-
   const isStatusCodeLiteral = (value: number): boolean => statusCodes.includes(value);
-  console.log(arg.type);
 
   switch (arg.type) {
-    case AST_NODE_TYPES.Identifier:
-      return checkName(arg.name);
-    case AST_NODE_TYPES.MemberExpression: {
-      const object = arg.object;
-      const property = arg.property;
-      if (object.type === AST_NODE_TYPES.Identifier && checkName(object.name)) {
-        return true;
-      }
-      if (property.type === AST_NODE_TYPES.Identifier) {
-        return checkName(property.name);
-      }
-      if (property.type === AST_NODE_TYPES.Literal && typeof property.value === 'string') {
-        return checkName(property.value);
-      }
-      break;
-    }
     case AST_NODE_TYPES.Literal:
       if (typeof arg.value === 'number') {
         return isStatusCodeLiteral(arg.value);
       }
       break;
+    case AST_NODE_TYPES.MemberExpression: {
+      const object = arg.object;
+      const property = arg.property;
+      if (
+        object.type === AST_NODE_TYPES.Identifier &&
+        object.name === 'StatusCodes' &&
+        property.type === AST_NODE_TYPES.Identifier
+      ) {
+        return true;
+      }
+      break;
+    }
     case AST_NODE_TYPES.BinaryExpression:
       return hasStatusCodeOrValue(arg.left) || hasStatusCodeOrValue(arg.right);
   }
@@ -91,6 +81,17 @@ const isAssertMemberExpression = (node: TSESTree.Node): boolean =>
   node.object.name === 'assert' &&
   node.property.type === AST_NODE_TYPES.Identifier;
 
+/**
+ * Checks if a given AST node is an identifier with the name 'assert'.
+ *
+ * @returns `true` if the node is an identifier with the name 'assert', otherwise `false`.
+ * @param callee
+ * @param args
+ */
+const isAssertCallWithStatusCode = (callee: TSESTree.Node, args: TSESTree.Node[]): boolean =>
+  (isAssertIdentifier(callee) || isAssertMemberExpression(callee)) &&
+  args.some((arg) => hasStatusCodeOrValue(arg) && arg.type !== AST_NODE_TYPES.Identifier);
+
 const rule: TSESLint.RuleModule<typeof NO_STATUS_CODE_ASSERT> = createRule({
   name: ruleId,
   meta: {
@@ -108,10 +109,7 @@ const rule: TSESLint.RuleModule<typeof NO_STATUS_CODE_ASSERT> = createRule({
     return {
       CallExpression(node: TSESTree.CallExpression) {
         const callee = node.callee;
-        if (
-          (isAssertIdentifier(callee) || isAssertMemberExpression(callee)) &&
-          node.arguments.some(hasStatusCodeOrValue)
-        ) {
+        if (isAssertCallWithStatusCode(callee, node.arguments)) {
           context.report({
             node,
             messageId: NO_STATUS_CODE_ASSERT,

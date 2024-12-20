@@ -32,7 +32,7 @@ createTester().run(ruleId, rule, {
   invalid: [
     {
       name: 'Invalid case with statusCode directly',
-      code: `assert(statusCode === 200);`,
+      code: `assert(statusCode === StatusCodes.OK);`,
       errors: [
         {
           messageId: 'NO_STATUS_CODE_ASSERT',
@@ -41,16 +41,7 @@ createTester().run(ruleId, rule, {
     },
     {
       name: 'Invalid case with statusCode directly and different status code',
-      code: `assert(statusCode === 400);`,
-      errors: [
-        {
-          messageId: 'NO_STATUS_CODE_ASSERT',
-        },
-      ],
-    },
-    {
-      name: 'Invalid case with statusCode directly in assert.ok',
-      code: `assert.ok(statusCode === 400);`,
+      code: `assert(StatusCodes.BAD_REQUEST === statusCode);`,
       errors: [
         {
           messageId: 'NO_STATUS_CODE_ASSERT',
@@ -76,8 +67,17 @@ createTester().run(ruleId, rule, {
       ],
     },
     {
+      name: 'Invalid case with assert.INTERNAL_SERVER_ERROR in statusCode',
+      code: `assert.ok(StatusCodes.INTERNAL_SERVER_ERROR === statusCode);`,
+      errors: [
+        {
+          messageId: 'NO_STATUS_CODE_ASSERT',
+        },
+      ],
+    },
+    {
       name: 'Invalid case with statusCode in assert.equal',
-      code: `assert.equal(statusCode, 200);`,
+      code: `assert.equal(StatusCodes.CREATED, statusCode);`,
       errors: [
         {
           messageId: 'NO_STATUS_CODE_ASSERT',
@@ -104,7 +104,7 @@ createTester().run(ruleId, rule, {
     },
     {
       name: 'Invalid case in a binary expression with response.statusCode',
-      code: `assert(response.statusCode === 200);`,
+      code: `assert(response.statusCode === StatusCodes.OK);`,
       errors: [
         {
           messageId: 'NO_STATUS_CODE_ASSERT',
@@ -113,16 +113,7 @@ createTester().run(ruleId, rule, {
     },
     {
       name: 'Invalid case with StatusCode',
-      code: `assert(StatusCode === 200);`,
-      errors: [
-        {
-          messageId: 'NO_STATUS_CODE_ASSERT',
-        },
-      ],
-    },
-    {
-      name: 'Invalid case with response.status',
-      code: `assert(response.status === StatusCodes.OK);`,
+      code: `assert(test.code === StatusCodes.BAD_REQUEST);`,
       errors: [
         {
           messageId: 'NO_STATUS_CODE_ASSERT',
@@ -131,7 +122,7 @@ createTester().run(ruleId, rule, {
     },
     {
       name: 'Invalid case with response.status and StatusCodes',
-      code: `assert(response.status === StatusCodes.SOME_STATUS);`,
+      code: `assert(StatusCodes.BAD_REQUEST === response.status);`,
       errors: [
         {
           messageId: 'NO_STATUS_CODE_ASSERT',
@@ -141,15 +132,6 @@ createTester().run(ruleId, rule, {
     {
       name: 'Invalid case with response.value',
       code: `assert(response.value === StatusCodes.BAD_REQUEST, 'Expected response.value to be StatusCodes.BAD_REQUEST');`,
-      errors: [
-        {
-          messageId: 'NO_STATUS_CODE_ASSERT',
-        },
-      ],
-    },
-    {
-      name: 'Invalid case with statusCode as a number literal',
-      code: `assert(test === 400);`,
       errors: [
         {
           messageId: 'NO_STATUS_CODE_ASSERT',
