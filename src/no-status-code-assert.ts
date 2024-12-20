@@ -27,12 +27,7 @@ const statusCodes = [
 
 const createRule = ESLintUtils.RuleCreator((name) => getDocumentationUrl(name));
 
-/**
- * Checks if a given AST node contains any status code value.
- *
- * @param arg - The AST node to check.
- * @returns `true` if the node or its sub-nodes contain any status code value, otherwise `false`.
- */
+// Checks if a given AST node contains any status code value.
 const hasStatusCodeOrValue = (arg: TSESTree.Node): boolean => {
   const isStatusCodeLiteral = (value: number): boolean => statusCodes.includes(value);
 
@@ -60,34 +55,19 @@ const hasStatusCodeOrValue = (arg: TSESTree.Node): boolean => {
   return false;
 };
 
-/**
- * Checks if a given AST node is an identifier with the name 'assert'.
- *
- * @param node - The AST node to check.
- * @returns `true` if the node is an identifier with the name 'assert', otherwise `false`.
- */
+// Checks if a given AST node is an identifier with the name 'assert'.
 const isAssertIdentifier = (node: TSESTree.Node): boolean =>
   node.type === AST_NODE_TYPES.Identifier && node.name === 'assert';
 
-/**
- * Checks if a given AST node is a member expression with the object named 'assert'.
- *
- * @param node - The AST node to check.
- * @returns `true` if the node is a member expression with the object named 'assert', otherwise `false`.
- */
+// Checks if a given AST node is a member expression with the object named 'assert'.
 const isAssertMemberExpression = (node: TSESTree.Node): boolean =>
   node.type === AST_NODE_TYPES.MemberExpression &&
   node.object.type === AST_NODE_TYPES.Identifier &&
   node.object.name === 'assert' &&
   node.property.type === AST_NODE_TYPES.Identifier;
 
-/**
- * Checks if a given AST node is an identifier with the name 'assert'.
- *
- * @returns `true` if the node is an identifier with the name 'assert', otherwise `false`.
- * @param callee
- * @param args
- */
+//Checks if a given AST node is an identifier with the name 'assert'.
+
 const isAssertCallWithStatusCode = (callee: TSESTree.Node, args: TSESTree.Node[]): boolean =>
   (isAssertIdentifier(callee) || isAssertMemberExpression(callee)) &&
   args.some((arg) => hasStatusCodeOrValue(arg) && arg.type !== AST_NODE_TYPES.Identifier);
