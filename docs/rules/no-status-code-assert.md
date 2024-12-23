@@ -3,8 +3,8 @@
 ## Fail
 
 ```js
-assert(statusCode === 200);
-assert.equal(statusCode, 200);
+assert(statusCode === StatusCodes.OK);
+assert.equal(statusCode, StatusCodes.OK);
 ```
 
 ## Pass
