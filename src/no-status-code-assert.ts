@@ -6,37 +6,17 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import { StatusCodes } from 'http-status-codes';
-
 import { AST_NODE_TYPES, ESLintUtils, TSESLint, TSESTree } from '@typescript-eslint/utils';
 import getDocumentationUrl from './get-documentation-url';
 
 export const ruleId = 'no-status-code-assert';
 const NO_STATUS_CODE_ASSERT = 'NO_STATUS_CODE_ASSERT';
 
-const statusCodes = [
-  StatusCodes.OK,
-  StatusCodes.CREATED,
-  StatusCodes.BAD_REQUEST,
-  StatusCodes.UNAUTHORIZED,
-  StatusCodes.FORBIDDEN,
-  StatusCodes.NOT_FOUND,
-  StatusCodes.CONFLICT,
-  StatusCodes.INTERNAL_SERVER_ERROR,
-];
-
 const createRule = ESLintUtils.RuleCreator((name) => getDocumentationUrl(name));
 
 // Checks if a given AST node contains any status code value.
 const hasStatusCodeOrValue = (arg: TSESTree.Node): boolean => {
-  const isStatusCodeLiteral = (value: number): boolean => statusCodes.includes(value);
-
   switch (arg.type) {
-    case AST_NODE_TYPES.Literal:
-      if (typeof arg.value === 'number') {
-        return isStatusCodeLiteral(arg.value);
-      }
-      break;
     case AST_NODE_TYPES.MemberExpression: {
       const object = arg.object;
       const property = arg.property;
@@ -66,11 +46,8 @@ const isAssertMemberExpression = (node: TSESTree.Node): boolean =>
   node.object.name === 'assert' &&
   node.property.type === AST_NODE_TYPES.Identifier;
 
-//Checks if a given AST node is an identifier with the name 'assert'.
-
 const isAssertCallWithStatusCode = (callee: TSESTree.Node, args: TSESTree.Node[]): boolean =>
-  (isAssertIdentifier(callee) || isAssertMemberExpression(callee)) &&
-  args.some((arg) => hasStatusCodeOrValue(arg) && arg.type !== AST_NODE_TYPES.Identifier);
+  (isAssertIdentifier(callee) || isAssertMemberExpression(callee)) && args.some((arg) => hasStatusCodeOrValue(arg));
 
 const rule: TSESLint.RuleModule<typeof NO_STATUS_CODE_ASSERT> = createRule({
   name: ruleId,
