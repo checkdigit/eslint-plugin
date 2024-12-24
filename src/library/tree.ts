@@ -64,6 +64,7 @@ export function isUsedInArrayOrAsArgument(node: Node): boolean {
 
   if (
     parent.type === 'ArrayExpression' ||
+    parent.type === 'ArrowFunctionExpression' ||
     (parent.type === 'CallExpression' && parent.arguments.includes(node as Expression))
   ) {
     return true;

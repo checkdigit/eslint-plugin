@@ -1,7 +1,7 @@
 // no-promise-instance-method.ts
 
 import type { Rule } from 'eslint';
-import getDocumentationUrl from './get-documentation-url';
+import getDocumentationUrl from './get-documentation-url.ts';
 
 /*
  * Copyright (c) 2021-2024 Check Digit, LLC

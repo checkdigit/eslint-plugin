@@ -6,8 +6,8 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import rule, { ruleId } from './no-duplicated-imports';
-import createTester from './ts-tester.test';
+import rule, { ruleId } from './no-duplicated-imports.ts';
+import createTester from './ts-tester.test.ts';
 
 createTester().run(ruleId, rule, {
   valid: [
@@ -22,6 +22,13 @@ createTester().run(ruleId, rule, {
     {
       name: 'distinct import statement - mix of type and value',
       code: `import { type TypeOne, ValueOne } from 'abc';`,
+    },
+    {
+      name: 'don not report error if not mergable',
+      code: `
+        import { type TypeOne, ValueOne } from 'abc';
+        import * as abc from 'abc';
+      `,
     },
   ],
   invalid: [
@@ -53,6 +60,12 @@ createTester().run(ruleId, rule, {
       name: 'works with default import',
       code: `import type { TypeOne as T1 } from 'abc';\nimport { ValueOne as V1 } from 'abc';\nimport abc from 'abc';\n`,
       output: `import abc, { type TypeOne as T1, ValueOne as V1 } from 'abc';\n`,
+      errors: [{ messageId: 'mergeDuplicatedImports' }],
+    },
+    {
+      name: 'works with default import, and still leave out the namespace import',
+      code: `import type { TypeOne as T1 } from 'abc';\nimport { ValueOne as V1 } from 'abc';\nimport abc from 'abc';\nimport * as aaa from 'abc';`,
+      output: `import abc, { type TypeOne as T1, ValueOne as V1 } from 'abc';\nimport * as aaa from 'abc';`,
       errors: [{ messageId: 'mergeDuplicatedImports' }],
     },
   ],

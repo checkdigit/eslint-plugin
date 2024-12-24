@@ -8,7 +8,7 @@
 import { RuleTester } from 'eslint';
 import { describe } from '@jest/globals';
 
-import rule from './require-strict-assert';
+import rule from './require-strict-assert.ts';
 
 describe('require-strict-assert', () => {
   const ruleTester = new RuleTester({

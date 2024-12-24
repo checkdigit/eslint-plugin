@@ -6,8 +6,8 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import rule, { ruleId } from './require-resolve-full-response';
-import createTester from './ts-tester.test';
+import rule, { ruleId } from './require-resolve-full-response.ts';
+import createTester from './ts-tester.test.ts';
 
 createTester().run(ruleId, rule, {
   valid: [
@@ -22,6 +22,24 @@ createTester().run(ruleId, rule, {
             await pingService.get(\`\${PING_BASE_PATH}/key/\${keyId}\`, {
               resolveWithFullResponse: true,
             });
+          }
+        `,
+    },
+    {
+      name: 'no error if options is an identifier with type of FullResponseOptions',
+      code: `
+          async function getKey(pingService: Endpoint) {
+            const options: FullResponseOptions = { resolveWithFullResponse: true };
+            await pingService.get(\`\${PING_BASE_PATH}/key/\${keyId}\`, options);
+          }
+        `,
+    },
+    {
+      name: 'no error if options is an identifier with FullResponseOptions-ish type',
+      code: `
+          async function getKey(pingService: Endpoint) {
+            const options = { resolveWithFullResponse: true };
+            await pingService.get(\`\${PING_BASE_PATH}/key/\${keyId}\`, options);
           }
         `,
     },
@@ -184,6 +202,24 @@ createTester().run(ruleId, rule, {
           toDate,
         )}fields=ADVICE_RESPONSE,CATEGORIZATION,CREATED_ON,MATCHED_MESSAGE_ID,SETTLEMENT_AMOUNT,MESSAGE_ID,RECEIVED_DATE_TIME\`);
       `,
+      errors: [{ messageId: 'invalidOptions' }],
+    },
+    {
+      name: 'handle url provided as a function argument',
+      code: `
+          async function getKey(
+            fixture: Fixture,
+            keyRequest: ping.KeyRequest,
+            url: string,
+          ) {
+            const pingService = fixture.config.service.ping(EMPTY_CONTEXT);
+            const response = await pingService.post(url, keyRequest, {
+              headers: {
+                etag: '123',
+              },
+            });
+          }
+        `,
       errors: [{ messageId: 'invalidOptions' }],
     },
   ],

@@ -6,8 +6,8 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import rule, { ruleId } from './require-type-out-of-type-only-imports';
-import createTester from './ts-tester.test';
+import rule, { ruleId } from './require-type-out-of-type-only-imports.ts';
+import createTester from './ts-tester.test.ts';
 
 createTester().run(ruleId, rule, {
   valid: [

@@ -12,7 +12,7 @@ import rule, {
   REQUIRE_OBJECT_LITERAL_FOR_ERROR_RESPONSE_MESSAGE_ID,
   REQUIRE_OBJECT_LITERAL_FOR_HEADERS_MESSAGE_ID,
   REQUIRE_OBJECT_LITERAL_MESSAGE_ID,
-} from './object-literal-response';
+} from './object-literal-response.ts';
 
 const RESPONSE_200_OBJECT_LITERAL = `
 setResponse(response, {status: StatusCodes.OK, body: {foo: 'bar'}});
