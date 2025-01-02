@@ -1,7 +1,7 @@
 // index.ts
 
 /*
- * Copyright (c) 2021-2024 Check Digit, LLC
+ * Copyright (c) 2021-2025 Check Digit, LLC
  *
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
@@ -80,7 +80,10 @@ const configs: Record<string, TSESLint.FlatConfig.Config[]> = {
         '@checkdigit/require-strict-assert': 'error',
         '@checkdigit/require-ts-extension-imports': 'error',
         '@checkdigit/no-wallaby-comment': 'error',
-        '@checkdigit/no-side-effects': ['error', { excludedIdentifiers: ['assert', 'debug', 'log', 'promisify'] }],
+        '@checkdigit/no-side-effects': [
+          'error',
+          { excludedIdentifiers: ['assert', 'debug', 'log', 'promisify', 'Symbol.for'] },
+        ],
         '@checkdigit/regular-expression-comment': 'error',
         '@checkdigit/require-assert-predicate-rejects-throws': 'error',
         '@checkdigit/object-literal-response': 'error',

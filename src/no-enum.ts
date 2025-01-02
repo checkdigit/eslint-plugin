@@ -1,7 +1,7 @@
 // no-enum.ts
 
 /*
- * Copyright (c) 2021-2024 Check Digit, LLC
+ * Copyright (c) 2021-2025 Check Digit, LLC
  *
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
@@ -12,20 +12,6 @@ export const ruleId = 'no-enum';
 const NO_ENUM = 'NO_ENUM';
 
 const createRule = ESLintUtils.RuleCreator((name) => name);
-
-function isJsonSchemaProperty(node?: TSESTree.Node): boolean {
-  if (!node) {
-    return false;
-  }
-  if (
-    node.type === TSESTree.AST_NODE_TYPES.Property &&
-    node.key.type === TSESTree.AST_NODE_TYPES.Identifier &&
-    node.key.name === 'properties'
-  ) {
-    return true;
-  }
-  return isJsonSchemaProperty(node.parent);
-}
 
 const rule: ESLintUtils.RuleModule<typeof NO_ENUM> = createRule({
   name: ruleId,
@@ -47,19 +33,6 @@ const rule: ESLintUtils.RuleModule<typeof NO_ENUM> = createRule({
           node,
           messageId: NO_ENUM,
         });
-      },
-      Property(node: TSESTree.Property) {
-        if (
-          node.key.type === TSESTree.AST_NODE_TYPES.Identifier &&
-          node.key.name === 'enum' &&
-          node.value.type === TSESTree.AST_NODE_TYPES.ArrayExpression &&
-          !isJsonSchemaProperty(node.parent)
-        ) {
-          context.report({
-            node,
-            messageId: NO_ENUM,
-          });
-        }
       },
     };
   },
