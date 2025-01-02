@@ -1,7 +1,7 @@
 // no-status-code-assert.ts
 
 /*
- * Copyright (c) 2022-2024 Check Digit, LLC
+ * Copyright (c) 2022-2025 Check Digit, LLC
  *
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
