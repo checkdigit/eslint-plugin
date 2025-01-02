@@ -1,7 +1,7 @@
 // index.ts
 
 /*
- * Copyright (c) 2021-2024 Check Digit, LLC
+ * Copyright (c) 2021-2025 Check Digit, LLC
  *
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
@@ -24,6 +24,7 @@ import requireTypeOutOfTypeOnlyImports, {
 import noServeRuntime, { ruleId as noServeRuntimeRuleId } from './no-serve-runtime.ts';
 import filePathComment from './file-path-comment.ts';
 import noCardNumbers from './no-card-numbers.ts';
+import noEnum from './no-enum.ts';
 import noSideEffects from './no-side-effects.ts';
 import noRandomV4UUID from './no-random-v4-uuid.ts';
 import noTestImport from './no-test-import.ts';
@@ -38,6 +39,7 @@ import requireTsExtensionImports from './require-ts-extension-imports';
 const rules: Record<string, TSESLint.LooseRuleDefinition> = {
   'file-path-comment': filePathComment,
   'no-card-numbers': noCardNumbers,
+  'no-enum': noEnum,
   'no-random-v4-uuid': noRandomV4UUID,
   'no-uuid': noUuid,
   'require-strict-assert': requireStrictAssert,
@@ -71,6 +73,7 @@ const configs: Record<string, TSESLint.FlatConfig.Config[]> = {
       },
       rules: {
         '@checkdigit/no-card-numbers': 'error',
+        '@checkdigit/no-enum': 'error',
         '@checkdigit/file-path-comment': 'error',
         '@checkdigit/no-random-v4-uuid': 'error',
         '@checkdigit/no-uuid': 'error',
@@ -104,6 +107,7 @@ const configs: Record<string, TSESLint.FlatConfig.Config[]> = {
       },
       rules: {
         '@checkdigit/no-card-numbers': 'error',
+        '@checkdigit/no-enum': 'error',
         '@checkdigit/file-path-comment': 'off',
         '@checkdigit/no-random-v4-uuid': 'error',
         '@checkdigit/no-uuid': 'error',
