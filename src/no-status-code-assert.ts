@@ -6,6 +6,7 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
+import { StatusCodes } from 'http-status-codes';
 import { AST_NODE_TYPES, ESLintUtils, TSESLint, TSESTree } from '@typescript-eslint/utils';
 import getDocumentationUrl from './get-documentation-url';
 
@@ -29,6 +30,11 @@ const hasStatusCodeOrValue = (arg: TSESTree.Node): boolean => {
       }
       break;
     }
+    case AST_NODE_TYPES.Literal:
+      if (typeof arg.value === 'number' && Object.values(StatusCodes).includes(arg.value)) {
+        return true;
+      }
+      break;
     case AST_NODE_TYPES.BinaryExpression:
       return hasStatusCodeOrValue(arg.left) || hasStatusCodeOrValue(arg.right);
   }

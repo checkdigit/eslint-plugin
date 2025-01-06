@@ -138,5 +138,32 @@ createTester().run(ruleId, rule, {
         },
       ],
     },
+    {
+      name: 'Invalid case with response.status and StatusCode BAD_REQUEST',
+      code: `assert.ok(response.status === StatusCodes.BAD_REQUEST);`,
+      errors: [
+        {
+          messageId: 'NO_STATUS_CODE_ASSERT',
+        },
+      ],
+    },
+    {
+      name: 'Invalid case with response.status and 200',
+      code: `assert.equal(testStatusCode, 200);`,
+      errors: [
+        {
+          messageId: 'NO_STATUS_CODE_ASSERT',
+        },
+      ],
+    },
+    {
+      name: 'Invalid case with assert response.status and 400',
+      code: `assert(response.status === 400);`,
+      errors: [
+        {
+          messageId: 'NO_STATUS_CODE_ASSERT',
+        },
+      ],
+    },
   ],
 });
