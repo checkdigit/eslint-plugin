@@ -8,10 +8,12 @@ You need to include the `.ts` extension explicitly when importing TypeScript fil
 
 ```js
 import foo from './bar';
+export { foo } from './bar';
 ```
 
 ## Pass
 
 ```js
 import foo from './bar.ts';
+export { foo } from './bar.ts';
 ```
