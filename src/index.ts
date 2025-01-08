@@ -25,6 +25,7 @@ import requireTypeOutOfTypeOnlyImports, {
 import noServeRuntime, { ruleId as noServeRuntimeRuleId } from './no-serve-runtime.ts';
 import filePathComment from './file-path-comment.ts';
 import noCardNumbers from './no-card-numbers.ts';
+import noEnum from './no-enum.ts';
 import noSideEffects from './no-side-effects.ts';
 import noRandomV4UUID from './no-random-v4-uuid.ts';
 import noTestImport from './no-test-import.ts';
@@ -39,6 +40,7 @@ import requireTsExtensionImportsExports from './require-ts-extension-imports-exp
 const rules: Record<string, TSESLint.LooseRuleDefinition> = {
   'file-path-comment': filePathComment,
   'no-card-numbers': noCardNumbers,
+  'no-enum': noEnum,
   'no-random-v4-uuid': noRandomV4UUID,
   'no-status-code-assert': noStatusCodeAssert,
   'no-uuid': noUuid,
@@ -73,6 +75,7 @@ const configs: Record<string, TSESLint.FlatConfig.Config[]> = {
       },
       rules: {
         '@checkdigit/no-card-numbers': 'error',
+        '@checkdigit/no-enum': 'error',
         '@checkdigit/file-path-comment': 'error',
         '@checkdigit/no-random-v4-uuid': 'error',
         '@checkdigit/no-status-code-assert': 'error',
@@ -107,6 +110,7 @@ const configs: Record<string, TSESLint.FlatConfig.Config[]> = {
       },
       rules: {
         '@checkdigit/no-card-numbers': 'error',
+        '@checkdigit/no-enum': 'error',
         '@checkdigit/file-path-comment': 'off',
         '@checkdigit/no-random-v4-uuid': 'error',
         '@checkdigit/no-status-code-assert': 'error',
