@@ -1,6 +1,6 @@
 {
   "name": "@checkdigit/eslint-plugin",
-  "version": "7.9.0",
+  "version": "7.10.0",
   "description": "Check Digit eslint plugins",
   "keywords": [
     "eslint",
@@ -63,6 +63,7 @@
   "dependencies": {
     "@typescript-eslint/type-utils": "^8.18.1",
     "@typescript-eslint/utils": "^8.18.1",
+    "http-status-codes": "^2.3.0",
     "ts-api-utils": "^2.0.0"
   },
   "devDependencies": {
@@ -83,7 +84,6 @@
     "eslint-plugin-no-secrets": "^2.1.1",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-sonarjs": "1.0.4",
-    "http-status-codes": "^2.3.0",
     "rimraf": "^6.0.1",
     "typescript-eslint": "^8.18.1"
   },

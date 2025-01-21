@@ -12,6 +12,7 @@ import invalidJsonStringify, { ruleId as invalidJsonStringifyRuleId } from './in
 import noDuplicatedImports, { ruleId as noDuplicatedImportsRuleId } from './no-duplicated-imports.ts';
 import noLegacyServiceTyping, { ruleId as noLegacyServiceTypingRuleId } from './no-legacy-service-typing.ts';
 import noPromiseInstanceMethod, { ruleId as noPromiseInstanceMethodRuleId } from './no-promise-instance-method.ts';
+import noStatusCodeAssert from './no-status-code-assert.ts';
 import requireFixedServicesImport, {
   ruleId as requireFixedServicesImportRuleId,
 } from './require-fixed-services-import.ts';
@@ -41,6 +42,7 @@ const rules: Record<string, TSESLint.LooseRuleDefinition> = {
   'no-card-numbers': noCardNumbers,
   'no-enum': noEnum,
   'no-random-v4-uuid': noRandomV4UUID,
+  'no-status-code-assert': noStatusCodeAssert,
   'no-uuid': noUuid,
   'require-strict-assert': requireStrictAssert,
   'require-ts-extension-imports-exports': requireTsExtensionImportsExports,
@@ -76,6 +78,7 @@ const configs: Record<string, TSESLint.FlatConfig.Config[]> = {
         '@checkdigit/no-enum': 'error',
         '@checkdigit/file-path-comment': 'error',
         '@checkdigit/no-random-v4-uuid': 'error',
+        '@checkdigit/no-status-code-assert': 'error',
         '@checkdigit/no-uuid': 'error',
         '@checkdigit/require-strict-assert': 'error',
         '@checkdigit/require-ts-extension-imports-exports': 'error',
@@ -110,6 +113,7 @@ const configs: Record<string, TSESLint.FlatConfig.Config[]> = {
         '@checkdigit/no-enum': 'error',
         '@checkdigit/file-path-comment': 'off',
         '@checkdigit/no-random-v4-uuid': 'error',
+        '@checkdigit/no-status-code-assert': 'error',
         '@checkdigit/no-uuid': 'error',
         '@checkdigit/require-strict-assert': 'error',
         '@checkdigit/require-ts-extension-imports-exports': 'error',
