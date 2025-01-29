@@ -8,7 +8,7 @@
 import { RuleTester } from 'eslint';
 import { describe } from '@jest/globals';
 
-import rule from './no-wallaby-comment';
+import rule from './no-wallaby-comment.ts';
 
 const LINE_ONE_NO_COMMENTS = `const NOT_A_SECRET = "A template that isn't a secret.";`;
 const LINE_TWO_NO_COMMENTS = `/*
@@ -208,7 +208,11 @@ const TEST = "this isn't secret"; // testing with ? here and there ??.
 `;
 
 describe('no-wallaby-comment', () => {
-  const ruleTester = new RuleTester({ parserOptions: { ecmaVersion: 2020 } });
+  const ruleTester = new RuleTester({
+    languageOptions: {
+      parserOptions: { ecmaVersion: 2020 },
+    },
+  });
 
   ruleTester.run('no-wallaby-comment', rule, {
     valid: [

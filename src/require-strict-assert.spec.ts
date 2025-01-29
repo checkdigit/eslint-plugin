@@ -8,10 +8,14 @@
 import { RuleTester } from 'eslint';
 import { describe } from '@jest/globals';
 
-import rule from './require-strict-assert';
+import rule from './require-strict-assert.ts';
 
 describe('require-strict-assert', () => {
-  const ruleTester = new RuleTester({ parserOptions: { ecmaVersion: 2020, sourceType: 'module' } });
+  const ruleTester = new RuleTester({
+    languageOptions: {
+      parserOptions: { ecmaVersion: 2020, sourceType: 'module' },
+    },
+  });
   ruleTester.run('require-strict-assert', rule, {
     valid: [
       {

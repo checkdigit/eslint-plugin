@@ -1,7 +1,7 @@
 // invalid-json-stringify.ts
 
 import type { Rule } from 'eslint';
-import getDocumentationUrl from './get-documentation-url';
+import getDocumentationUrl from './get-documentation-url.ts';
 
 /*
  * Copyright (c) 2021-2024 Check Digit, LLC
@@ -10,7 +10,7 @@ import getDocumentationUrl from './get-documentation-url';
  */
 
 export const ruleId = 'invalid-json-stringify';
-const INVALID_JSON_STRINGIFY = 'INVALID_JSON_STRINGIFY';
+export const INVALID_JSON_STRINGIFY = 'INVALID_JSON_STRINGIFY';
 const DEFAULT_OPTIONS = ['error|.*Error'];
 
 export default {

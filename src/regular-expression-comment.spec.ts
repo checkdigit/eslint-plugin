@@ -9,7 +9,7 @@
 import { RuleTester } from 'eslint';
 import { describe } from '@jest/globals';
 
-import rule from './regular-expression-comment';
+import rule from './regular-expression-comment.ts';
 
 const VALID_TEST_1 = `// This regular expression removes all non-alphanumeric characters.
 const NOT_A_SECRET = /W/gu;`;
@@ -96,7 +96,11 @@ const testRegex2 = /created test file for the new file TEST\\.123456789\\./gmu;
 const INVALID_TEST_7 = `const testRegex1 = /error processing x:test\\.test-xyz\\.test\\.xyz\\.abc/gmu;`;
 
 describe('regular-expression-comment', () => {
-  const ruleTester = new RuleTester({ parserOptions: { ecmaVersion: 2020 } });
+  const ruleTester = new RuleTester({
+    languageOptions: {
+      parserOptions: { ecmaVersion: 2020 },
+    },
+  });
   ruleTester.run('regular-expression-comment', rule, {
     valid: [
       {

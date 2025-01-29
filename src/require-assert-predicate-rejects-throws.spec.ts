@@ -9,10 +9,14 @@
 import { RuleTester } from 'eslint';
 import { describe } from '@jest/globals';
 
-import rule from './require-assert-predicate-rejects-throws';
+import rule from './require-assert-predicate-rejects-throws.ts';
 
 describe('require-assert-predicate-rejects-throws', () => {
-  const ruleTester = new RuleTester({ parserOptions: { ecmaVersion: 2020, sourceType: 'module' } });
+  const ruleTester = new RuleTester({
+    languageOptions: {
+      parserOptions: { ecmaVersion: 2020, sourceType: 'module' },
+    },
+  });
   ruleTester.run('require-assert-predicate-rejects-throws', rule, {
     valid: [
       {

@@ -6,15 +6,17 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import rule, { NO_TEST_IMPORT, type NoTestImportRuleOptions } from './no-test-import';
 import { RuleTester } from 'eslint';
 import { describe } from '@jest/globals';
+import rule, { NO_TEST_IMPORT, type NoTestImportRuleOptions } from './no-test-import.ts';
 
 describe('no-test-import', () => {
   new RuleTester({
-    parserOptions: {
-      ecmaVersion: 2020,
-      sourceType: 'module',
+    languageOptions: {
+      parserOptions: {
+        ecmaVersion: 2020,
+        sourceType: 'module',
+      },
     },
   }).run('no-test-import with default configuration', rule, {
     valid: [
@@ -85,9 +87,11 @@ describe('no-test-import', () => {
 
   const overwrittenConfiguration: NoTestImportRuleOptions = { testFilePattern: '\\.test\\.xyz$' };
   new RuleTester({
-    parserOptions: {
-      ecmaVersion: 2020,
-      sourceType: 'module',
+    languageOptions: {
+      parserOptions: {
+        ecmaVersion: 2020,
+        sourceType: 'module',
+      },
     },
   }).run('no-test-import with overwritten configuration', rule, {
     valid: [
