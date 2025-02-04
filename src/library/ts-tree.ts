@@ -75,11 +75,7 @@ export function isUsedInArrayOrAsArgument(node: TSESTree.Node): boolean {
 
 export function getEnclosingFunction(
   node: TSESTree.Node,
-):
-  | TSESTree.ArrowFunctionExpression
-  | TSESTree.FunctionDeclarationWithOptionalName
-  | TSESTree.FunctionExpression
-  | undefined {
+): TSESTree.ArrowFunctionExpression | TSESTree.FunctionDeclaration | TSESTree.FunctionExpression | undefined {
   if (
     node.type === AST_NODE_TYPES.FunctionDeclaration ||
     node.type === AST_NODE_TYPES.FunctionExpression ||
