@@ -27,6 +27,18 @@ createTester().run(ruleId, rule, {
              }`,
     },
     {
+      name: 'Valid case with assert.ifError',
+      code: `import { strict as assert } from 'node:assert';
+              assert.ifError('error');`,
+    },
+    {
+      name: 'Valid case with assert.ifError random error frames',
+      code: `import { strict as assert } from 'node:assert';
+              (function ifErrorFrame() {
+                assert.ifError(err);
+              })();`,
+    },
+    {
       name: 'Valid case with assert.ok and message in spec file',
       code: `import { strict as assert } from 'node:assert';
              assert.ok(statusCode === StatusCodes.OK, 'Status code is not OK');`,

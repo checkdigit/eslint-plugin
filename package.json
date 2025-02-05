@@ -92,5 +92,12 @@
   },
   "engines": {
     "node": ">=22.11"
+  },
+  "wallaby": {
+    "env": {
+      "params": {
+        "runner": "--experimental-vm-modules"
+      }
+    }
   }
 }

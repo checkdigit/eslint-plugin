@@ -32,6 +32,9 @@ const rule: TSESLint.RuleModule<string, unknown[]> = createRule({
   defaultOptions: [],
   create(context) {
     let assertAlias = 'assert';
+    const parserServices = ESLintUtils.getParserServices(context);
+    const checker = parserServices.program.getTypeChecker();
+    const messageIndexCache: Record<string, number> = {};
 
     return {
       ImportDeclaration(node: TSESTree.ImportDeclaration) {
@@ -57,13 +60,15 @@ const rule: TSESLint.RuleModule<string, unknown[]> = createRule({
           const methodName = callee.property.name;
 
           if (objectName === assertAlias && methodsRequiringMessage.includes(methodName)) {
-            const messageIndexMap: Record<string, number> = {
-              fail: 0,
-              ok: 1,
-            };
-            const messageIndex = messageIndexMap[methodName] ?? 2;
+            if (!(methodName in messageIndexCache)) {
+              const tsNode = parserServices.esTreeNodeToTSNodeMap.get(node);
+              const signature = checker.getResolvedSignature(tsNode);
+              const messageParameterIndex = signature?.getParameters().findIndex((param) => param.name === 'message');
+              messageIndexCache[methodName] = messageParameterIndex ?? 2;
+            }
 
-            if (node.arguments.length <= messageIndex) {
+            const messageIndex = messageIndexCache[methodName];
+            if (messageIndex !== undefined && node.arguments.length <= messageIndex) {
               context.report({
                 node,
                 messageId: MISSING_ASSERT_MESSAGE,
