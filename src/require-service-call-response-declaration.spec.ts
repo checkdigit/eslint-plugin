@@ -14,7 +14,7 @@ createTester().run(ruleId, rule, {
     {
       name: 'awaited service wrapper call with the legacy typings already has a response variable declared',
       code: `
-          import type { Endpoint } from './typings.ts';
+          import type { Endpoint } from './typings.test.ts';
           async function getKey(pingService: Endpoint) {
             const response = await pingService.get(\`/ping/v1/ping\`, {
               resolveWithFullResponse: true,
@@ -26,7 +26,7 @@ createTester().run(ruleId, rule, {
     {
       name: 'awaited service wrapper call with the latest service typings already has a response variable declared',
       code: `
-          import type { SampleApi } from './typings.ts';
+          import type { SampleApi } from './typings.test.ts';
           async function getKey(pingService: SampleApi) {
             const response = await pingService.get(\`/ping/v1/ping\`, {
               resolveWithFullResponse: true,
@@ -42,7 +42,7 @@ createTester().run(ruleId, rule, {
     {
       name: 'non-awaited service wrapper call with the legacy typings without response variable declared',
       code: `
-          import type { Endpoint } from './typings.ts';
+          import type { Endpoint } from './typings.test.ts';
           function getKey(pingService: Endpoint) {
             pingService.get(\`/ping/v1/ping\`, {
               resolveWithFullResponse: true,
@@ -53,7 +53,7 @@ createTester().run(ruleId, rule, {
     {
       name: 'non-awaited service wrapper call with the latest service typings without response variable declared',
       code: `
-          import type { SampleApi } from './typings.ts';
+          import type { SampleApi } from './typings.test.ts';
           function getKey(pingService: SampleApi) {
             return pingService.get(\`/ping/v1/ping\`, {
               resolveWithFullResponse: true,
@@ -70,7 +70,7 @@ createTester().run(ruleId, rule, {
     {
       name: 'awaited service wrapper call with the legacy type does not have variable declared',
       code: `
-          import type { Endpoint } from './typings.ts';
+          import type { Endpoint } from './typings.test.ts';
           async function getKey(pingService: Endpoint) {
             await pingService.get(\`/ping/v1/ping\`, {
               resolveWithFullResponse: true,
@@ -82,7 +82,7 @@ createTester().run(ruleId, rule, {
     {
       name: 'awaited service wrapper call with the latest service typings does not have variable declared',
       code: `
-          import type { SampleApi } from './typings.ts';
+          import type { SampleApi } from './typings.test.ts';
           async function getKey(pingService: SampleApi) {
             await pingService.get(\`/ping/v1/ping\`, {
               resolveWithFullResponse: true,

@@ -97,21 +97,6 @@ type ContextType<FunctionTypes, MatchingUrl> = FunctionTypes extends [infer Head
     : never
   : never;
 
-// type BodyArgument<Context> = Context extends { request: { body: infer Body } }
-//   ? [body: Body]
-//   : Context extends { request: { body?: infer Body } }
-//     ? [body?: Body]
-//     : [body?: undefined];
-
-// type ArgumentsWithBody<Context, IsFull> = [
-//   ...BodyArgument<Context>,
-//   options?: Context extends { request: { headers: infer Headers } }
-//     ? { headers: Headers; resolveWithFullResponse: IsFull }
-//     : Context extends { request: { headers?: infer Headers } }
-//       ? { headers?: Headers; resolveWithFullResponse: IsFull }
-//       : { headers?: Record<string, string>; resolveWithFullResponse: IsFull },
-// ];
-
 type ArgumentsWithoutBody<Context, IsFull> = [
   options?: Context extends { request: { headers: infer Headers } }
     ? { headers: Headers; resolveWithFullResponse: IsFull }
