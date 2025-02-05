@@ -23,6 +23,9 @@ import requireTypeOutOfTypeOnlyImports, {
   ruleId as requireTypeOutOfTypeOnlyImportsRuleId,
 } from './require-type-out-of-type-only-imports.ts';
 import noServeRuntime, { ruleId as noServeRuntimeRuleId } from './no-serve-runtime.ts';
+import requireServiceCallResponseDeclaration, {
+  ruleId as requireServiceCallResponseDeclarationRuleId,
+} from './require-service-call-response-declaration.ts';
 import filePathComment from './file-path-comment.ts';
 import noCardNumbers from './no-card-numbers.ts';
 import noEnum from './no-enum.ts';
@@ -60,6 +63,7 @@ const rules: Record<string, TSESLint.LooseRuleDefinition> = {
   [requireResolveFullResponseRuleId]: requireResolveFullResponse,
   [noDuplicatedImportsRuleId]: noDuplicatedImports,
   [noServeRuntimeRuleId]: noServeRuntime,
+  [requireServiceCallResponseDeclarationRuleId]: requireServiceCallResponseDeclaration,
   [requireFixedServicesImportRuleId]: requireFixedServicesImport,
   [requireTypeOutOfTypeOnlyImportsRuleId]: requireTypeOutOfTypeOnlyImports,
 };
@@ -102,6 +106,7 @@ const configs: Record<string, TSESLint.FlatConfig.Config[]> = {
         [`@checkdigit/${requireFixedServicesImportRuleId}`]: 'error',
         [`@checkdigit/${requireTypeOutOfTypeOnlyImportsRuleId}`]: 'error',
         [`@checkdigit/${noServeRuntimeRuleId}`]: 'error',
+        [`@checkdigit/${requireServiceCallResponseDeclarationRuleId}`]: 'error',
       },
     },
   ],
@@ -135,6 +140,7 @@ const configs: Record<string, TSESLint.FlatConfig.Config[]> = {
         [`@checkdigit/${requireFixedServicesImportRuleId}`]: 'off',
         [`@checkdigit/${requireTypeOutOfTypeOnlyImportsRuleId}`]: 'error',
         [`@checkdigit/${noServeRuntimeRuleId}`]: 'off',
+        [`@checkdigit/${requireServiceCallResponseDeclarationRuleId}`]: 'off',
       },
     },
   ],
