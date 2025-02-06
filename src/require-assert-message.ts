@@ -6,7 +6,6 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import { strict as assert } from 'node:assert';
 import { ESLintUtils, TSESLint } from '@typescript-eslint/utils';
 import { TSESTree } from '@typescript-eslint/types';
 import getDocumentationUrl from './get-documentation-url.ts';
@@ -14,9 +13,8 @@ import getDocumentationUrl from './get-documentation-url.ts';
 export const ruleId = 'require-assert-message';
 const MISSING_ASSERT_MESSAGE = 'MISSING_ASSERT_MESSAGE';
 
-const assertMethods = Object.keys(assert).filter((key) => typeof (assert as never)[key] === 'function');
-
 const messageIndexCache: Record<string, number | undefined> = {};
+let assertAlias = 'assert';
 
 const createRule = ESLintUtils.RuleCreator((name) => getDocumentationUrl(name));
 const rule: TSESLint.RuleModule<string, unknown[]> = createRule({
@@ -33,7 +31,6 @@ const rule: TSESLint.RuleModule<string, unknown[]> = createRule({
   },
   defaultOptions: [],
   create(context) {
-    let assertAlias = 'assert';
     const parserServices = ESLintUtils.getParserServices(context);
     const checker = parserServices.program.getTypeChecker();
 
@@ -60,7 +57,7 @@ const rule: TSESLint.RuleModule<string, unknown[]> = createRule({
           const objectName = callee.object.name;
           const methodName = callee.property.name;
 
-          if (objectName === assertAlias && assertMethods.includes(methodName)) {
+          if (objectName === assertAlias) {
             if (!(methodName in messageIndexCache)) {
               const tsNode = parserServices.esTreeNodeToTSNodeMap.get(node);
               const signature = checker.getResolvedSignature(tsNode);
