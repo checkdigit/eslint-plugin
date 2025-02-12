@@ -38,6 +38,7 @@ import objectLiteralResponse from './object-literal-response.ts';
 import regexComment from './regular-expression-comment.ts';
 import requireAssertPredicateRejectsThrows from './require-assert-predicate-rejects-throws.ts';
 import requireStrictAssert from './require-strict-assert.ts';
+import requireAssertMessage from './require-assert-message';
 import requireTsExtensionImportsExports from './require-ts-extension-imports-exports.ts';
 
 const rules: Record<string, TSESLint.LooseRuleDefinition> = {
@@ -47,6 +48,7 @@ const rules: Record<string, TSESLint.LooseRuleDefinition> = {
   'no-random-v4-uuid': noRandomV4UUID,
   'no-status-code-assert': noStatusCodeAssert,
   'no-uuid': noUuid,
+  'require-assert-message': requireAssertMessage,
   'require-strict-assert': requireStrictAssert,
   'require-ts-extension-imports-exports': requireTsExtensionImportsExports,
   'no-test-import': noTestImport,
@@ -84,6 +86,7 @@ const configs: Record<string, TSESLint.FlatConfig.Config[]> = {
         '@checkdigit/no-random-v4-uuid': 'error',
         '@checkdigit/no-status-code-assert': 'error',
         '@checkdigit/no-uuid': 'error',
+        '@checkdigit/require-assert-message': 'error',
         '@checkdigit/require-strict-assert': 'error',
         '@checkdigit/require-ts-extension-imports-exports': 'error',
         '@checkdigit/no-wallaby-comment': 'error',
@@ -120,6 +123,7 @@ const configs: Record<string, TSESLint.FlatConfig.Config[]> = {
         '@checkdigit/no-random-v4-uuid': 'error',
         '@checkdigit/no-status-code-assert': 'error',
         '@checkdigit/no-uuid': 'error',
+        '@checkdigit/require-assert-message': 'error',
         '@checkdigit/require-strict-assert': 'error',
         '@checkdigit/require-ts-extension-imports-exports': 'error',
         '@checkdigit/no-wallaby-comment': 'off',
