@@ -82,7 +82,27 @@ createTester().run(ruleId, rule, {
     {
       name: 'TRY_CAST',
       code: `\`SELECT TRY_CAST(url as JSON) FROM person\``,
-      skip: true,
+    },
+    {
+      name: 'CROSS JOIN UNNEST',
+      code: `\`SELECT student, score
+        FROM tests
+        CROSS JOIN UNNEST(scores) AS t (score);
+        \``,
+    },
+    {
+      name: 'complex query',
+      code: `\`SELECT
+        DISTINCT split(url, '/') [5] AS linkedCardId,
+        split(url, '/') [7] AS linkedCardHolderId,
+        json_extract_scalar(responseheaders, '$["created-on"]') AS linkCreatedOn
+      FROM
+        link
+      WHERE
+        split(url, '/') [6] = 'card.hasProfile'
+        AND method = 'PUT'
+        AND responsestatus = '204'\``,
+      only: true,
     },
   ],
   invalid: [

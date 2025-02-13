@@ -2255,7 +2255,7 @@ scalar_func
   / KW_SYSTEM_USER
 
 cast_expr
-  = c:KW_CAST __ LPAREN __ e:expr __ KW_AS __ t:data_type __ RPAREN {
+  = c:(KW_CAST/KW_TRY_CAST) __ LPAREN __ e:expr __ KW_AS __ t:data_type __ RPAREN {
     return {
       type: 'cast',
       keyword: c.toLowerCase(),
@@ -2565,6 +2565,7 @@ KW_ELSE     = "ELSE"i       !ident_start
 KW_END      = "END"i        !ident_start
 
 KW_CAST     = "CAST"i       !ident_start { return 'CAST' }
+KW_TRY_CAST = "TRY_CAST"i       !ident_start { return 'TRY_CAST' }
 
 KW_ARRAY    = "ARRAY"i !ident_start { return 'ARRAY'; }
 KW_ARRAY_AGG = "ARRAY_AGG"i !ident_start { return 'ARRAY_AGG'; }
