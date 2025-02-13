@@ -38,7 +38,7 @@ ruleTester.run(ruleId, rule, {
     },
     {
       filename: 'src/util.ts',
-      code: `// eslint-disable-next-line @checkdigit/no-util\nconst x = 123;`,
+      code: `// eslint-disable-next-line...../no-util\nconst x = 123;`,
     },
   ],
   invalid: [

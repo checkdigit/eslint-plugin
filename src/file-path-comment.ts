@@ -10,7 +10,8 @@ import { ESLintUtils } from '@typescript-eslint/utils';
 
 export const ruleId = 'validate-first-line-path';
 const VALIDATE_FIRST_LINE_PATH = 'VALIDATE_FIRST_LINE_PATH';
-const DISABLE_NEXT_LINE = 'eslint-disable-next-line @checkdigit/no-util';
+const DISABLE_NEXT_LINE = 'eslint-disable-next-line';
+const DISABLED_RULE = 'no-util';
 
 const createRule = ESLintUtils.RuleCreator((name) => name);
 
@@ -60,7 +61,7 @@ const rule: ESLintUtils.RuleModule<typeof VALIDATE_FIRST_LINE_PATH> = createRule
         } else {
           const actualComment = firstLine.split('// ')[1];
 
-          if (actualComment === DISABLE_NEXT_LINE) {
+          if (actualComment?.startsWith(DISABLE_NEXT_LINE) === true && actualComment.endsWith(DISABLED_RULE)) {
             return;
           }
 
