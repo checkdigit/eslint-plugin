@@ -32,9 +32,16 @@ createTester().run(ruleId, rule, {
         select DISTINCT split(url, '/') [1] as messageId FROM m\``,
     },
     {
+      name: 'parse JSON property access - in column',
+      code: `const sql = \`select posting['amount'] FROM m\``,
+    },
+    {
       name: 'parse function expression with array access - in condition',
-      code: `const sql = \`SELECT * FROM person WHERE split(url, '/') = 'person'\``,
-      only: true,
+      code: `const sql = \`SELECT * FROM person WHERE url[4] = 'person'\``,
+    },
+    {
+      name: 'parse function expression with array access - in condition',
+      code: `const sql = \`SELECT * FROM person WHERE split(url, '/') [4] = 'person'\``,
     },
   ],
   invalid: [

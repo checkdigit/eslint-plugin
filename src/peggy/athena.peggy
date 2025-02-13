@@ -1859,6 +1859,11 @@ primary
   = cast_expr
   / literal
   / aggr_func
+  / f:func_call __ a:array_index_list {
+    // => column_ref
+    f.array_index = a
+    return f
+  }
   / func_call
   / case_expr
   / interval_expr
