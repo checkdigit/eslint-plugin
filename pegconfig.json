@@ -1,0 +1,8 @@
+{
+  "includeLocations": true,
+  "returnTypes": {
+    "select": "Select",
+    "column_ref": "ColumnRef",
+    "column_list_item": "ColumnListItem"
+  }
+}

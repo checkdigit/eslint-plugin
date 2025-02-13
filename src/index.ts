@@ -26,6 +26,7 @@ import noServeRuntime, { ruleId as noServeRuntimeRuleId } from './no-serve-runti
 import requireServiceCallResponseDeclaration, {
   ruleId as requireServiceCallResponseDeclarationRuleId,
 } from './require-service-call-response-declaration.ts';
+import athena, { ruleId as athenaRuleId } from './athena.ts';
 import filePathComment from './file-path-comment.ts';
 import noCardNumbers from './no-card-numbers.ts';
 import noEnum from './no-enum.ts';
@@ -64,6 +65,7 @@ const rules: Record<string, TSESLint.LooseRuleDefinition> = {
   [requireServiceCallResponseDeclarationRuleId]: requireServiceCallResponseDeclaration,
   [requireFixedServicesImportRuleId]: requireFixedServicesImport,
   [requireTypeOutOfTypeOnlyImportsRuleId]: requireTypeOutOfTypeOnlyImports,
+  [athenaRuleId]: athena,
 };
 
 const plugin: TSESLint.FlatConfig.Plugin = {
@@ -104,6 +106,7 @@ const configs: Record<string, TSESLint.FlatConfig.Config[]> = {
         [`@checkdigit/${requireTypeOutOfTypeOnlyImportsRuleId}`]: 'error',
         [`@checkdigit/${noServeRuntimeRuleId}`]: 'error',
         [`@checkdigit/${requireServiceCallResponseDeclarationRuleId}`]: 'error',
+        [`@checkdigit/${athenaRuleId}`]: 'error',
       },
     },
   ],
@@ -137,6 +140,7 @@ const configs: Record<string, TSESLint.FlatConfig.Config[]> = {
         [`@checkdigit/${requireTypeOutOfTypeOnlyImportsRuleId}`]: 'error',
         [`@checkdigit/${noServeRuntimeRuleId}`]: 'off',
         [`@checkdigit/${requireServiceCallResponseDeclarationRuleId}`]: 'off',
+        [`@checkdigit/${athenaRuleId}`]: 'off',
       },
     },
   ],
