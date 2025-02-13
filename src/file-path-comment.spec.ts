@@ -1,7 +1,7 @@
 // file-path-comment.spec.ts
 
 /*
- * Copyright (c) 2021-2022 Check Digit, LLC
+ * Copyright (c) 2021-2024 Check Digit, LLC
  *
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
@@ -9,18 +9,20 @@
 import { RuleTester } from 'eslint';
 import { describe } from '@jest/globals';
 
-import rule from './file-path-comment';
+import rule from './file-path-comment.ts';
 
 describe('file-path-comment', () => {
-  const ruleTester = new RuleTester({ parserOptions: { ecmaVersion: 2020 } });
+  const ruleTester = new RuleTester({ languageOptions: { parserOptions: { ecmaVersion: 2020 } } });
 
   ruleTester.run('file-path-comment', rule, {
     valid: [
       {
         filename: 'src/world/hello.ts',
         code: `// world/hello.ts`,
-        parserOptions: {
-          project: './tsconfig.json',
+        languageOptions: {
+          parserOptions: {
+            project: './tsconfig.json',
+          },
         },
       },
       {

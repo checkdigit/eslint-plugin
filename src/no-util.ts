@@ -1,20 +1,31 @@
 // no-util.ts
 
 /*
- * Copyright (c) 2021-2024 Check Digit, LLC
+ * Copyright (c) 2021-2025 Check Digit, LLC
  *
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import type { Rule } from 'eslint';
-export default {
+import { ESLintUtils } from '@typescript-eslint/utils';
+
+export const ruleId = 'no-util-filename';
+const NO_UTIL_FILENAME = 'NO_UTIL_FILENAME';
+
+const createRule = ESLintUtils.RuleCreator((name) => name);
+
+const rule: ESLintUtils.RuleModule<typeof NO_UTIL_FILENAME> = createRule({
+  name: ruleId,
   meta: {
     type: 'problem',
     docs: {
       description: 'Detects if file name is util',
-      url: 'https://github.com/checkdigit/eslint-plugin',
+    },
+    schema: [],
+    messages: {
+      [NO_UTIL_FILENAME]: "File name '{{filename}}' contains banned 'util' pattern.",
     },
   },
+  defaultOptions: [],
   create(context) {
     return {
       Program() {
@@ -22,7 +33,8 @@ export default {
         const utilRegex = /(?:^|[-_/])util(?=[-_./]|$)/iu;
         if (utilRegex.test(filename)) {
           context.report({
-            message: `File name '${filename}' contains banned 'util' pattern.`,
+            messageId: NO_UTIL_FILENAME,
+            data: { filename },
             loc: {
               start: {
                 line: 0,
@@ -38,4 +50,6 @@ export default {
       },
     };
   },
-} as Rule.RuleModule;
+});
+
+export default rule;

@@ -9,7 +9,7 @@
 import { RuleTester } from 'eslint';
 import { describe } from '@jest/globals';
 
-import rule from './no-card-numbers';
+import rule from './no-card-numbers.ts';
 
 const CARD_NUMBER_FOUND = 'CARD_NUMBER_FOUND';
 const CARD_NUMBERS_FOUND = 'CARD_NUMBERS_FOUND';
@@ -37,11 +37,11 @@ const CONTAINS_A_PASSING_CARD_NUMBER = `
 const foo = 4111111111111111;
 const fuz = 123111111111111111567;
 const bar = 111111111111111;
-const baz = 000000000000000;
-const far = 0000000000000000;
-const faz = 00000000000000000;
-const doo = 000000000000000000;
-const dar = 0000000000000000000;
+const baz = '000000000000000';
+const far = '0000000000000000';
+const faz = '00000000000000000';
+const doo = '000000000000000000';
+const dar = '0000000000000000000';
 `;
 
 const CONTAINS_A_PASSING_CARD_NUMBER_IN_COMMENT = `
@@ -94,7 +94,11 @@ const foo = '9118724531442999';
 `;
 
 describe('no-card-numbers', () => {
-  const ruleTester = new RuleTester({ parserOptions: { ecmaVersion: 2020 } });
+  const ruleTester = new RuleTester({
+    languageOptions: {
+      parserOptions: { ecmaVersion: 2020 },
+    },
+  });
   ruleTester.run('no-card-numbers', rule, {
     valid: [
       {

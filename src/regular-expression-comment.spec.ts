@@ -1,7 +1,7 @@
 // regular-expression-comment.spec.ts
 
 /*
- * Copyright (c) 2021-2023 Check Digit, LLC
+ * Copyright (c) 2021-2024 Check Digit, LLC
  *
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
@@ -9,7 +9,7 @@
 import { RuleTester } from 'eslint';
 import { describe } from '@jest/globals';
 
-import rule from './regular-expression-comment';
+import rule from './regular-expression-comment.ts';
 
 const VALID_TEST_1 = `// This regular expression removes all non-alphanumeric characters.
 const NOT_A_SECRET = /W/gu;`;
@@ -63,94 +63,44 @@ const VALID_TEST_10 = `
   const disallowedCharacters = /\\\\t+|\\\\n+|\\\\r+/gu;
 `;
 
-const INVALID_TEST_1 = `
+const VALID_TEST_11 = `
 const NOT_A_SECRET = "I'm not a secret, I think"; 
 const NEVER_A_SECRET = /W/gu;
 const NOT_SECRET = "I'm not a secret, I think";
 `;
 
-const INVALID_TEST_2 = `const UUID_REGEX = /[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}/gmu;`;
+const INVALID_TEST_1 = `const UUID_REGEX = /[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}/gmu;`;
 
-const INVALID_TEST_3 = `
-/** 
-**/
-const testDate1 = test1.replaceAll(/\\W/gu, ''); //
-const testDate2 = test2.replaceAll(/\\W/gu, '');
-const fileName = \`TEST_testDate1_testDate2}_fileId.txt\`;
+const INVALID_TEST_2 = `
+const testRegex1 = /Test connection established.*TEST_20/gmsu;
+const testRegex2 = /Error with Test connection. Exiting process.*TEST_20/gmsu;
 `;
 
+const INVALID_TEST_3 = `const testDate1 = /Test Count: [1-9]\\d*.*\\r\\nTest Count: [1-9]\\d*.*\\r\\nTest & Records Count: [1-9]\\d*.*/gmu;`;
+
 const INVALID_TEST_4 = `
-//
-const testDate1 = test1.replaceAll(/\\W/gu, ''); //
-const testDate2 = test2.replaceAll(/\\W/gu, '');
-const fileName = \`TEST_testDate1_testDate2}_fileId.txt\`;
+const testRegex1 = /Downloaded test file \\/1234567\\/test\\/download\\/test123\\/XYZ\\.XY\\.test123\\./gmu;
+const testRegex2 = /error downloading test file.*test123/gmu;
 `;
 
 const INVALID_TEST_5 = `
-// test1
-const testDate1 = test1.replaceAll(/\\W/gu, ''); // test2
-const testDate2 = test2.replaceAll(/\\W/gu, '');
-const fileName = \`TEST_testDate1_testDate2}_fileId.txt\`;
+const testRegex1 = /[1-9]\\d* test records processed between.*UNMATCHED: 0/gmu;
+const testRegex2 = /successfully processed test1\\.test-1\\.test-file\\.test.*XYZ\\.XY\\.X123/gmu;
 `;
 
 const INVALID_TEST_6 = `
-// test1
-const testDate1 = test1.replaceAll(/\\W/gu, ''); //
-const testDate2 = test2.replaceAll(/\\W/gu, '');
-const fileName = \`TEST_testDate1_testDate2}_fileId.txt\`;
+const testRegex1 = /Transferred file sftp:.*test-xy-z\\.testClients\\.xyz.*XYZ098/gmu;
+const testRegex2 = /created test file for the new file TEST\\.123456789\\./gmu;
 `;
 
-const INVALID_TEST_7 = `
-// test1
-const testDate1 = test1.replaceAll(/\\W/gu, ''); //
-const testDate2 = test2.replaceAll(/\\W/gu, '');
-const testNewDate = testDate.replaceAll(/\\W/gu, ''); // test2
-const fileName = \`TEST_testDate1_testDate2}_fileId.txt\`;
-`;
-
-const INVALID_TEST_8 = `
-// test1
-const testDate1 = test1.replaceAll(/\\W/gu, ''); //
-const testDate2 = test2.replaceAll(/\\W/gu, '');
-const testNewDate = testDate.replaceAll(/\\W/gu, ''); // 
-const fileName = \`TEST_testDate1_testDate2}_fileId.txt\`;
-`;
-
-const INVALID_TEST_9 = `
-/**
-**/
-const testDate1 = test1.replaceAll(/\\W/gu, ''); 
-const testDate2 = test2.replaceAll(/\\W/gu, ''); /** test **/
-const fileName = \`TEST_testDate1_testDate2}_fileId.txt\`;
-`;
-
-const INVALID_TEST_10 = `
-/** 
-**/
-const testDate1 = test1.replaceAll(/\\W/gu, ''); /**  */
-const testDate2 = test2.replaceAll(/\\W/gu, '');
-const fileName = \`TEST_testDate1_testDate2}_fileId.txt\`;
-`;
-
-const INVALID_TEST_11 = `
-/** 
-**/
-const testDate1 = test1.replaceAll(/\\W/gu, ''); 
-/**  */
-const testDate2 = test2.replaceAll(/\\W/gu, '');
-const fileName = \`TEST_testDate1_testDate2}_fileId.txt\`;
-`;
-
-const INVALID_TEST_12 = `
-/** 
-**/
-const testDate1 = test1.replaceAll(/\\W/gu, ''); //
-const testDate2 = test2.replaceAll(/\\W/gu, ''); // 
-const fileName = \`TEST_testDate1_testDate2}_fileId.txt\`;
-`;
+const INVALID_TEST_7 = `const testRegex1 = /error processing x:test\\.test-xyz\\.test\\.xyz\\.abc/gmu;`;
 
 describe('regular-expression-comment', () => {
-  const ruleTester = new RuleTester({ parserOptions: { ecmaVersion: 2020 } });
+  const ruleTester = new RuleTester({
+    languageOptions: {
+      parserOptions: { ecmaVersion: 2020 },
+    },
+  });
   ruleTester.run('regular-expression-comment', rule, {
     valid: [
       {
@@ -183,6 +133,9 @@ describe('regular-expression-comment', () => {
       {
         code: VALID_TEST_10,
       },
+      {
+        code: VALID_TEST_11,
+      },
     ],
     invalid: [
       {
@@ -199,14 +152,14 @@ describe('regular-expression-comment', () => {
           {
             message: 'Missing comment for regular expression',
           },
+          {
+            message: 'Missing comment for regular expression',
+          },
         ],
       },
       {
         code: INVALID_TEST_3,
         errors: [
-          {
-            message: 'Missing comment for regular expression',
-          },
           {
             message: 'Missing comment for regular expression',
           },
@@ -229,6 +182,9 @@ describe('regular-expression-comment', () => {
           {
             message: 'Missing comment for regular expression',
           },
+          {
+            message: 'Missing comment for regular expression',
+          },
         ],
       },
       {
@@ -237,63 +193,14 @@ describe('regular-expression-comment', () => {
           {
             message: 'Missing comment for regular expression',
           },
+          {
+            message: 'Missing comment for regular expression',
+          },
         ],
       },
       {
         code: INVALID_TEST_7,
         errors: [
-          {
-            message: 'Missing comment for regular expression',
-          },
-        ],
-      },
-      {
-        code: INVALID_TEST_8,
-        errors: [
-          {
-            message: 'Missing comment for regular expression',
-          },
-          {
-            message: 'Missing comment for regular expression',
-          },
-        ],
-      },
-      {
-        code: INVALID_TEST_9,
-        errors: [
-          {
-            message: 'Missing comment for regular expression',
-          },
-        ],
-      },
-      {
-        code: INVALID_TEST_10,
-        errors: [
-          {
-            message: 'Missing comment for regular expression',
-          },
-          {
-            message: 'Missing comment for regular expression',
-          },
-        ],
-      },
-      {
-        code: INVALID_TEST_11,
-        errors: [
-          {
-            message: 'Missing comment for regular expression',
-          },
-          {
-            message: 'Missing comment for regular expression',
-          },
-        ],
-      },
-      {
-        code: INVALID_TEST_12,
-        errors: [
-          {
-            message: 'Missing comment for regular expression',
-          },
           {
             message: 'Missing comment for regular expression',
           },

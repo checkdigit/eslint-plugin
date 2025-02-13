@@ -1,17 +1,21 @@
 // require-strict-assert.spec.ts
 
 /*
- * Copyright (c) 2021-2023 Check Digit, LLC
+ * Copyright (c) 2021-2024 Check Digit, LLC
  *
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 import { RuleTester } from 'eslint';
 import { describe } from '@jest/globals';
 
-import rule from './require-strict-assert';
+import rule from './require-strict-assert.ts';
 
 describe('require-strict-assert', () => {
-  const ruleTester = new RuleTester({ parserOptions: { ecmaVersion: 2020, sourceType: 'module' } });
+  const ruleTester = new RuleTester({
+    languageOptions: {
+      parserOptions: { ecmaVersion: 2020, sourceType: 'module' },
+    },
+  });
   ruleTester.run('require-strict-assert', rule, {
     valid: [
       {

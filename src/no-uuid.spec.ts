@@ -1,7 +1,7 @@
 // no-uuid.spec.ts
 
 /*
- * Copyright (c) 2022 Check Digit, LLC
+ * Copyright (c) 2022-2024 Check Digit, LLC
  *
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
@@ -9,7 +9,7 @@
 import { RuleTester } from 'eslint';
 import { describe } from '@jest/globals';
 
-import rule from './no-uuid';
+import rule from './no-uuid.ts';
 
 const UUID_FOUND = 'UUID_FOUND';
 const UUIDS_FOUND = 'UUIDS_FOUND';
@@ -52,7 +52,11 @@ const foo = 'nothing wrong here';
 `;
 
 describe('no-uuid', () => {
-  const ruleTester = new RuleTester({ parserOptions: { ecmaVersion: 2020 } });
+  const ruleTester = new RuleTester({
+    languageOptions: {
+      parserOptions: { ecmaVersion: 2020 },
+    },
+  });
   ruleTester.run('no-uuid', rule, {
     valid: [
       {
