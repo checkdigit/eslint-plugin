@@ -2579,6 +2579,7 @@ KW_INT      = "INT"i      !ident_start { return 'INT'; }
 KW_ZEROFILL = "ZEROFILL"i !ident_start { return 'ZEROFILL'; }
 KW_INTEGER  = "INTEGER"i  !ident_start { return 'INTEGER'; }
 KW_JSON     = "JSON"i     !ident_start { return 'JSON'; }
+KW_MAP     = "MAP"i     !ident_start { return 'MAP'; }
 KW_SMALLINT = "SMALLINT"i !ident_start { return 'SMALLINT'; }
 KW_TINYINT  = "TINYINT"i  !ident_start { return 'TINYINT'; }
 KW_TINYTEXT = "TINYTEXT"i !ident_start { return 'TINYTEXT'; }
@@ -2873,12 +2874,14 @@ mem_chain
 data_type
   = data_type_item
   / array_type
+  / map_type
 
 data_type_item
   = character_string_type
   / numeric_type
   / datetime_type
   / json_type
+  / map_type
   / text_type
 
 data_type_list
@@ -2907,6 +2910,29 @@ array_type
       },
     }
   }
+
+map_type
+  = t:KW_MAP __ LPAREN __ a:data_type_list __ RPAREN {
+    return {
+      dataType: t,
+      parentheses: true,
+      expr: {
+        type: 'expr_list',
+        value: a.map(d => ({ type: 'datatype', ...d }))
+      },
+    }
+  }
+  / t:KW_MAP __ LANGLE_BRACKET __ a:data_type_list __ RANGLE_BRACKET {
+    return {
+      dataType: t,
+      angle_brackets: true,
+      expr: {
+        type: 'expr_list',
+        value: a.map(d => ({ type: 'datatype', ...d }))
+      },
+    }
+  }
+
 character_string_type
   = t:(KW_CHAR / KW_VARCHAR) __ LPAREN __ l:[0-9]+ __ RPAREN {
     return { dataType: t, length: parseInt(l.join(''), 10), parentheses: true };

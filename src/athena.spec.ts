@@ -7,47 +7,88 @@ import createTester from './ts-tester.test';
 createTester().run(ruleId, rule, {
   valid: [
     {
-      name: 'not a sql',
-      code: `const foo = \`bar\``,
+      name: 'non-sql',
+      code: `\`bar\``,
     },
     {
-      name: 'not SELECT or WITH sql',
-      code: `const sql = \`drop table foo\``,
+      name: 'not SELECT nor WITH sql',
+      code: `\`drop table foo\``,
     },
     {
       name: 'SELECT without FROM',
-      code: `const sql = \`select 1\``,
+      code: `\`select 1\``,
     },
     {
-      name: 'good sql',
-      code: `const sql = \`select * from message\``,
+      name: 'SELECT with FROM',
+      code: `\`select * from message\``,
     },
     {
-      name: 'good sql using WITH',
-      code: `const sql = \`WITH m AS (select * from message) select requestbody from m\``,
+      name: 'SELECT with FROM - table name with single quotes',
+      code: `\`select * from 'message'\``,
+    },
+    {
+      name: 'SELECT with FROM - table name with double quotes',
+      code: `\`select * from "message"\``,
+    },
+    {
+      name: 'SELECT with FROM - table name with underscores',
+      code: `\`select * from foo_bar\``,
+    },
+    {
+      name: 'table name alias',
+      code: `\`select m.url from message as m\``,
+    },
+    {
+      name: 'using WITH',
+      code: `\`WITH m AS (select * from message) select requestbody from m\``,
     },
     {
       name: 'parse function expression with array access - in column',
-      code: `const sql = \`WITH m AS (select * from message) 
+      code: `\`WITH m AS (select * from message) 
         select DISTINCT split(url, '/') [1] as messageId FROM m\``,
     },
     {
       name: 'parse JSON property access - in column',
-      code: `const sql = \`select posting['amount'] FROM m\``,
+      code: `\`select posting['amount'] FROM m\``,
     },
     {
       name: 'parse function expression with array access - in condition',
-      code: `const sql = \`SELECT * FROM person WHERE url[4] = 'person'\``,
+      code: `\`SELECT * FROM person WHERE split(url, '/') [4] = 'person'\``,
     },
     {
-      name: 'parse function expression with array access - in condition',
-      code: `const sql = \`SELECT * FROM person WHERE split(url, '/') [4] = 'person'\``,
+      name: 'CAST to simple type',
+      code: `\`SELECT CAST(url as integer ) FROM person\``,
+    },
+    {
+      name: 'CAST to BIGINT',
+      code: `\`SELECT CAST(url as BIGINT) FROM person\``,
+    },
+    {
+      name: 'CAST to ARRAY',
+      code: `\`SELECT CAST(url as ARRAY<VARCHAR>) FROM person\``,
+    },
+    {
+      name: 'CAST to JSON',
+      code: `\`SELECT CAST(url as JSON) FROM person\``,
+    },
+    {
+      name: 'CAST to MAP',
+      code: `\`SELECT CAST(requestheaders as MAP<VARCHAR,VARCHAR>) FROM person\``,
+    },
+    {
+      name: 'CAST to complex ARRAY/MAP combination',
+      code: `\`SELECT CAST(requestheaders as ARRAY<MAP<VARCHAR, VARCHAR>>) FROM person\``,
+    },
+    {
+      name: 'TRY_CAST',
+      code: `\`SELECT TRY_CAST(url as JSON) FROM person\``,
+      skip: true,
     },
   ],
   invalid: [
     {
       name: 'invalid sql',
-      code: `const sql = \`select foo as bar ffrom message\``,
+      code: `\`select foo as bar ffrom message\``,
       errors: [
         {
           messageId: 'SyntextError',
