@@ -1,14 +1,21 @@
 // file-path-comment.ts
 
-import type { Rule } from 'eslint';
-
 /*
- * Copyright (c) 2021-2024 Check Digit, LLC
+ * Copyright (c) 2021-2025 Check Digit, LLC
  *
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-export default {
+import { ESLintUtils } from '@typescript-eslint/utils';
+
+export const ruleId = 'validate-first-line-path';
+const VALIDATE_FIRST_LINE_PATH = 'VALIDATE_FIRST_LINE_PATH';
+const DISABLE_NEXT_LINE = 'eslint-disable-next-line @checkdigit/no-util';
+
+const createRule = ESLintUtils.RuleCreator((name) => name);
+
+const rule: ESLintUtils.RuleModule<typeof VALIDATE_FIRST_LINE_PATH> = createRule({
+  name: ruleId,
   meta: {
     type: 'suggestion',
     docs: {
@@ -16,73 +23,70 @@ export default {
       url: 'https://github.com/checkdigit/eslint-plugin',
     },
     fixable: 'code',
+    schema: [],
+    messages: {
+      [VALIDATE_FIRST_LINE_PATH]: "First line '{{firstLine}}' is not a valid path to the file.",
+    },
   },
+  defaultOptions: [],
   create(context) {
-    const firstLine = context.sourceCode.getLines()[0];
-    const expectedPath = context.filename.split('src/')[1];
+    return {
+      Program() {
+        const firstLine = context.sourceCode.getLines()[0];
+        const expectedPath = context.filename.split('src/')[1];
 
-    if (firstLine === undefined || expectedPath === undefined) {
-      return {};
-    }
+        if (firstLine === undefined || expectedPath === undefined) {
+          return;
+        }
 
-    if (!firstLine.startsWith('//')) {
-      if (firstLine.startsWith('/*')) {
-        context.report({
-          loc: {
-            start: {
-              line: 0,
-              column: 0,
+        if (!firstLine.startsWith('//')) {
+          context.report({
+            loc: {
+              start: {
+                line: 0,
+                column: 0,
+              },
+              end: {
+                line: 0,
+                column: 1,
+              },
             },
-            end: {
-              line: 0,
-              column: 1,
+            messageId: VALIDATE_FIRST_LINE_PATH,
+            data: { firstLine },
+            fix(fixer) {
+              return fixer.insertTextBeforeRange([0, 0], `// ${expectedPath}\n\n`);
             },
-          },
-          message: 'first line cannot be a block comment',
-          fix(fixer: Rule.RuleFixer) {
-            return fixer.insertTextBeforeRange([0, 0], `// ${expectedPath}\n\n`);
-          },
-        });
-      } else {
-        context.report({
-          loc: {
-            start: {
-              line: 0,
-              column: 0,
-            },
-            end: {
-              line: 0,
-              column: 1,
-            },
-          },
-          message: 'first line is not a comment with the file path',
-          fix(fixer: Rule.RuleFixer) {
-            return fixer.insertTextBeforeRange([0, 0], `// ${expectedPath}\n\n`);
-          },
-        });
-      }
-    } else {
-      const actualComment = firstLine.split('// ')[1];
-      if (expectedPath !== actualComment) {
-        context.report({
-          loc: {
-            start: {
-              line: 0,
-              column: 0,
-            },
-            end: {
-              line: 0,
-              column: 1,
-            },
-          },
-          message: 'first line is a comment but is not a path to the file',
-          fix(fixer: Rule.RuleFixer) {
-            return fixer.replaceTextRange([0, firstLine.length], `// ${expectedPath}`);
-          },
-        });
-      }
-    }
+          });
+        } else {
+          const actualComment = firstLine.split('// ')[1];
 
-    return {};
+          if (actualComment === DISABLE_NEXT_LINE) {
+            return;
+          }
+
+          if (expectedPath !== actualComment) {
+            context.report({
+              loc: {
+                start: {
+                  line: 0,
+                  column: 0,
+                },
+                end: {
+                  line: 0,
+                  column: 1,
+                },
+              },
+              messageId: VALIDATE_FIRST_LINE_PATH,
+              data: { firstLine },
+              fix(fixer) {
+                return fixer.replaceTextRange([0, firstLine.length], `// ${expectedPath}`);
+              },
+            });
+          }
+        }
+      },
+    };
   },
-} as Rule.RuleModule;
+});
+
+export default rule;

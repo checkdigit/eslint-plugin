@@ -1,74 +1,76 @@
 // file-path-comment.spec.ts
 
 /*
- * Copyright (c) 2021-2024 Check Digit, LLC
+ * Copyright (c) 2021-2025 Check Digit, LLC
  *
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import { RuleTester } from 'eslint';
-import { describe } from '@jest/globals';
+import { RuleTester } from '@typescript-eslint/rule-tester';
+import rule, { ruleId } from './file-path-comment.ts';
 
-import rule from './file-path-comment.ts';
+const ruleTester = new RuleTester({
+  languageOptions: {
+    parserOptions: {
+      ecmaVersion: 2020,
+      sourceType: 'module',
+    },
+  },
+});
 
-describe('file-path-comment', () => {
-  const ruleTester = new RuleTester({ languageOptions: { parserOptions: { ecmaVersion: 2020 } } });
-
-  ruleTester.run('file-path-comment', rule, {
-    valid: [
-      {
-        filename: 'src/world/hello.ts',
-        code: `// world/hello.ts`,
-        languageOptions: {
-          parserOptions: {
-            project: './tsconfig.json',
-          },
-        },
-      },
-      {
-        filename: 'src/hello.ts',
-        code: `// hello.ts\n`,
-      },
-      {
-        filename: 'hello.ts',
-        code: `// whatever does not matter\n`,
-      },
-      {
-        filename: 'source/hello.ts',
-        code: `// whatever does not matter\n`,
-      },
-    ],
-    invalid: [
-      {
-        filename: 'src/hello.ts',
-        code: `// not-hello.ts`,
-        errors: [{ message: 'first line is a comment but is not a path to the file' }],
-        output: `// hello.ts`,
-      },
-      {
-        filename: 'src/hello.ts',
-        code: `//hello.ts\n`,
-        errors: [{ message: 'first line is a comment but is not a path to the file' }],
-        output: `// hello.ts\n`,
-      },
-      {
-        filename: 'src/hello.ts',
-        code: `/* not-hello.ts */`,
-        errors: [{ message: 'first line cannot be a block comment' }],
-        output: `// hello.ts\n\n/* not-hello.ts */`,
-      },
-      {
-        filename: 'src/hello.ts',
-        code: `const x = 123;`,
-        errors: [{ message: 'first line is not a comment with the file path' }],
-        output: `// hello.ts\n\nconst x = 123;`,
-      },
-      {
-        filename: 'src/hello.ts',
-        code: ``,
-        errors: [{ message: 'first line is not a comment with the file path' }],
-        output: `// hello.ts\n\n`,
-      },
-    ],
-  });
+ruleTester.run(ruleId, rule, {
+  valid: [
+    {
+      filename: 'src/world/hello.ts',
+      code: `// world/hello.ts`,
+    },
+    {
+      filename: 'src/hello.ts',
+      code: `// hello.ts\n`,
+    },
+    {
+      filename: 'hello.ts',
+      code: `// whatever does not matter\n`,
+    },
+    {
+      filename: 'source/hello.ts',
+      code: `// whatever does not matter\n`,
+    },
+    {
+      filename: 'src/util.ts',
+      code: `// eslint-disable-next-line @checkdigit/no-util\nconst x = 123;`,
+    },
+  ],
+  invalid: [
+    {
+      filename: 'src/hello.ts',
+      code: `// not-hello.ts`,
+      errors: [{ messageId: 'VALIDATE_FIRST_LINE_PATH' }],
+      output: `// hello.ts`,
+    },
+    {
+      filename: 'src/hello.ts',
+      code: `//hello.ts\n`,
+      errors: [{ messageId: 'VALIDATE_FIRST_LINE_PATH' }],
+      output: `// hello.ts\n`,
+    },
+    {
+      filename: 'src/hello.ts',
+      code: `/* not-hello.ts */`,
+      errors: [{ messageId: 'VALIDATE_FIRST_LINE_PATH' }],
+      output: `// hello.ts\n\n/* not-hello.ts */`,
+    },
+    {
+      filename: 'src/hello.ts',
+      code: `const x = 123;`,
+      errors: [{ messageId: 'VALIDATE_FIRST_LINE_PATH' }],
+      output: `// hello.ts\n\nconst x = 123;`,
+    },
+    {
+      filename: 'src/hello.ts',
+      code: ``,
+      errors: [{ messageId: 'VALIDATE_FIRST_LINE_PATH' }],
+      output: `// hello.ts\n\n`,
+    },
+  ],
 });
