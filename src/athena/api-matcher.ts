@@ -1,16 +1,26 @@
 // athena/api-matcher.ts
 
+import { strict as assert } from 'node:assert';
+
 import debug from 'debug';
 import { JSONPath } from 'jsonpath-plus';
+import type { AnySchemaObject } from 'ajv/dist/2020';
 
 import type { ApiSchemas, OperationSchemas } from '../openapi/generate-schema';
 
 const log = debug('eslint-plugin:athena:api-matcher');
 
-export interface Operation {
+export interface OperationToMatch {
   path: string;
   method: string;
   operationSchemas: OperationSchemas;
+}
+
+export interface MatchedOperation {
+  path: string;
+  method: string;
+  request: AnySchemaObject;
+  response: AnySchemaObject;
 }
 
 type Matcher = (path: string, method: string) => boolean;
@@ -66,9 +76,17 @@ function getMethodMatcher(selectAST: object, _tableAST: object): Matcher | undef
   return undefined;
 }
 
-// [TODO] responseStatusMatcher: Matcher;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function getResponseStatusToMatch(selectAST: object, _tableAST: object): string | undefined {
+  const [responseStatus]: string[] = JSONPath({
+    json: selectAST,
+    path: "$.where..[?(@ && @.type === 'binary_expr' && @.operator === '=' && @.left && @.left.type === 'column_ref' && @.left.column === 'responsestatus' && @.right && @.right.type === 'single_quote_string')].right.value",
+  }); /*?*/
 
-export function matchApi(selectAST: object, tableAST: object, apiSchemas: ApiSchemas[]): Operation[] {
+  return responseStatus;
+}
+
+export function matchApi(selectAST: object, tableAST: object, apiSchemas: ApiSchemas[]): MatchedOperation | undefined {
   const schemaMatchers: Matcher[] = [
     getVersionMatcher(selectAST, tableAST),
     getPathMatchers(selectAST, tableAST),
@@ -77,7 +95,7 @@ export function matchApi(selectAST: object, tableAST: object, apiSchemas: ApiSch
     .flat()
     .filter<Matcher>((matcher) => matcher !== undefined);
 
-  const allOperationSchemas: Operation[] = apiSchemas
+  const allOperationSchemas: OperationToMatch[] = apiSchemas
     .flatMap((apiSchema) => Object.entries(apiSchema.apis))
     .flatMap(([path, operations]) =>
       Object.entries(operations).map(([method, operationSchemas]) => ({
@@ -93,5 +111,28 @@ export function matchApi(selectAST: object, tableAST: object, apiSchemas: ApiSch
   );
   log('matched operation schemas', matchedOperationSchemas.length);
 
-  return matchedOperationSchemas;
+  if (matchedOperationSchemas.length === 0) {
+    log('no matched operation schema');
+    throw new Error('no matched operation schema');
+  } else if (matchedOperationSchemas.length > 1) {
+    log('multiple matched operation schemas');
+    return undefined;
+  }
+
+  const operation = matchedOperationSchemas[0];
+  assert.ok(operation !== undefined);
+
+  const matchedResponseStatus = getResponseStatusToMatch(selectAST, tableAST);
+  assert.ok(matchedResponseStatus !== undefined);
+  log('matchedResponseStatus', matchedResponseStatus);
+
+  const responseSchema = operation.operationSchemas.responses[matchedResponseStatus];
+  assert.ok(responseSchema !== undefined);
+
+  return {
+    path: operation.path,
+    method: operation.method,
+    request: operation.operationSchemas.request,
+    response: responseSchema,
+  };
 }

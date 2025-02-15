@@ -1,9 +1,15 @@
 import fs from 'node:fs';
 import { describe, it } from '@jest/globals';
 import { JSONPath } from 'jsonpath-plus';
+import { generateSchemas } from '../openapi/generate-schema';
 
 describe('json.spec.ts', () => {
   const json = JSON.parse(fs.readFileSync('ast.json', 'utf-8'));
+
+  it.skip('create schema', async () => {
+    await generateSchemas();
+  });
+
   it('should work', () => {
     // // tables in the select statement
     // JSONPath({ json, path: '$.from[?(@.table)]' }); /*?*/

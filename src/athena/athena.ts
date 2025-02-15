@@ -15,12 +15,10 @@ import { ESLintUtils } from '@typescript-eslint/utils';
 import type { OpenAPIV3_1 as v3 } from 'openapi-types';
 
 import { parse } from '../peggy/athena-peggy';
-import { type ApiOperation, type ApiSchemas, generateSchemas } from '../openapi/generate-schema';
+import { type ApiOperation, type ApiSchemas } from '../openapi/generate-schema';
 import { type AST, type BaseFrom, type Select, type With } from './types';
 import { matchApi } from './api-matcher';
 import { locateApi } from './api-locator';
-
-await generateSchemas();
 
 export const ruleId = 'athena';
 const SYNTEXT_ERROR = 'SyntextError';
