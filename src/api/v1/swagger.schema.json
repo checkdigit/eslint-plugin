@@ -1,0 +1,494 @@
+{
+  "apis": {
+    "/link/v1/ping": {
+      "get": {
+        "request": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://eslint-plugin.checkdigit/link/v1/schemas/api/PingGetRequestContext",
+          "type": "object",
+          "properties": {
+            "headers": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "responses": {
+          "200": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/link/v1/schemas/api/PingGetResponseOK",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$ref": "/link/v1/schemas/definitions/Ping"
+              }
+            },
+            "required": [
+              "body"
+            ],
+            "additionalProperties": false
+          },
+          "default": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/link/v1/schemas/api/PingGetResponseDefault",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$ref": "/link/v1/schemas/definitions/Error"
+              }
+            },
+            "required": [
+              "body"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "/link/v1/link/:subjectId": {
+      "get": {
+        "request": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://eslint-plugin.checkdigit/link/v1/schemas/api/LinkSubjectGetRequestContext",
+          "type": "object",
+          "properties": {
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "at"
+              ]
+            },
+            "headers": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "required": [
+            "params",
+            "query"
+          ],
+          "additionalProperties": false
+        },
+        "responses": {
+          "200": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/link/v1/schemas/api/LinkSubjectGetResponseOK",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$ref": "/link/v1/schemas/definitions/Linkages"
+              }
+            },
+            "required": [
+              "body"
+            ],
+            "additionalProperties": false
+          },
+          "default": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/link/v1/schemas/api/LinkSubjectGetResponseDefault",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$ref": "/link/v1/schemas/definitions/Error"
+              }
+            },
+            "required": [
+              "body"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "/link/v1/link/:subjectId/:predicate": {
+      "get": {
+        "request": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://eslint-plugin.checkdigit/link/v1/schemas/api/LinkSubjectPredicateGetRequestContext",
+          "type": "object",
+          "properties": {
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "at"
+              ]
+            },
+            "headers": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "required": [
+            "params",
+            "query"
+          ],
+          "additionalProperties": false
+        },
+        "responses": {
+          "200": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/link/v1/schemas/api/LinkSubjectPredicateGetResponseOK",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$ref": "/link/v1/schemas/definitions/Linkages"
+              }
+            },
+            "required": [
+              "body"
+            ],
+            "additionalProperties": false
+          },
+          "default": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/link/v1/schemas/api/LinkSubjectPredicateGetResponseDefault",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$ref": "/link/v1/schemas/definitions/Error"
+              }
+            },
+            "required": [
+              "body"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "/link/v1/link/:subjectId/:predicate/:objectId": {
+      "get": {
+        "request": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://eslint-plugin.checkdigit/link/v1/schemas/api/LinkSubjectPredicateObjectGetRequestContext",
+          "type": "object",
+          "properties": {
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "at"
+              ]
+            },
+            "headers": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "required": [
+            "params",
+            "query"
+          ],
+          "additionalProperties": false
+        },
+        "responses": {
+          "200": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/link/v1/schemas/api/LinkSubjectPredicateObjectGetResponseOK",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "properties": {
+                  "last-modified": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "created-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "updated-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              },
+              "body": {
+                "$ref": "/link/v1/schemas/definitions/Link"
+              }
+            },
+            "required": [
+              "body"
+            ],
+            "additionalProperties": false
+          },
+          "404": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/link/v1/schemas/api/LinkSubjectPredicateObjectGetResponseNotFound",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "default": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/link/v1/schemas/api/LinkSubjectPredicateObjectGetResponseDefault",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$ref": "/link/v1/schemas/definitions/Error"
+              }
+            },
+            "required": [
+              "body"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "put": {
+        "request": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://eslint-plugin.checkdigit/link/v1/schemas/api/LinkSubjectPredicateObjectPutRequestContext",
+          "type": "object",
+          "properties": {
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "subjectId": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "predicate": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "objectId": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "subjectId",
+                "predicate",
+                "objectId"
+              ]
+            },
+            "headers": {
+              "type": "object",
+              "additionalProperties": true,
+              "properties": {
+                "last-modified": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "created-on": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          },
+          "required": [
+            "params"
+          ],
+          "additionalProperties": false
+        },
+        "responses": {
+          "204": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/link/v1/schemas/api/LinkSubjectPredicateObjectPutResponseNoContent",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "properties": {
+                  "last-modified": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "created-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "updated-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "409": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/link/v1/schemas/api/LinkSubjectPredicateObjectPutResponseConflict",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "default": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/link/v1/schemas/api/LinkSubjectPredicateObjectPutResponseDefault",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$ref": "/link/v1/schemas/definitions/Error"
+              }
+            },
+            "required": [
+              "body"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Ping": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/link/v1/schemas/definitions/Ping",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "serverTime"
+      ],
+      "properties": {
+        "serverTime": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Current server time"
+        }
+      }
+    },
+    "Error": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/link/v1/schemas/definitions/Error",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "message"
+      ],
+      "description": "Error message.",
+      "properties": {
+        "message": {
+          "type": "string"
+        },
+        "code": {
+          "type": "string"
+        }
+      }
+    },
+    "Link": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/link/v1/schemas/definitions/Link",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "subjectId",
+        "predicate",
+        "objectId",
+        "createdOn"
+      ],
+      "properties": {
+        "subjectId": {
+          "type": "string",
+          "description": "Unique identifier for the subject.",
+          "minLength": 1
+        },
+        "predicate": {
+          "type": "string",
+          "description": "Predicate linking the subject to the object.",
+          "minLength": 1
+        },
+        "objectId": {
+          "type": "string",
+          "description": "Unique identifier for the object.",
+          "minLength": 1
+        },
+        "createdOn": {
+          "type": "string",
+          "description": "Date linkage was created",
+          "minLength": 1
+        }
+      }
+    },
+    "Linkages": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/link/v1/schemas/definitions/Linkages",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "links"
+      ],
+      "properties": {
+        "links": {
+          "type": "array",
+          "items": {
+            "$ref": "/link/v1/schemas/definitions/Link"
+          }
+        }
+      }
+    }
+  }
+}

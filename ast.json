@@ -1,0 +1,350 @@
+{
+  "with": null,
+  "type": "select",
+  "options": null,
+  "distinct": "DISTINCT",
+  "columns": [
+    {
+      "type": "expr",
+      "expr": {
+        "type": "function",
+        "name": {
+          "name": [
+            {
+              "type": "default",
+              "value": "split"
+            }
+          ]
+        },
+        "args": {
+          "type": "expr_list",
+          "value": [
+            {
+              "type": "column_ref",
+              "table": null,
+              "column": "url",
+              "collate": null
+            },
+            {
+              "type": "single_quote_string",
+              "value": "/"
+            }
+          ]
+        },
+        "over": null,
+        "loc": {
+          "start": {
+            "offset": 24,
+            "line": 2,
+            "column": 18
+          },
+          "end": {
+            "offset": 40,
+            "line": 2,
+            "column": 34
+          }
+        },
+        "array_index": [
+          {
+            "brackets": true,
+            "index": {
+              "type": "number",
+              "value": 5
+            }
+          }
+        ]
+      },
+      "as": "linkedCardId"
+    },
+    {
+      "type": "expr",
+      "expr": {
+        "type": "function",
+        "name": {
+          "name": [
+            {
+              "type": "default",
+              "value": "split"
+            }
+          ]
+        },
+        "args": {
+          "type": "expr_list",
+          "value": [
+            {
+              "type": "column_ref",
+              "table": null,
+              "column": "url",
+              "collate": null
+            },
+            {
+              "type": "single_quote_string",
+              "value": "/"
+            }
+          ]
+        },
+        "over": null,
+        "loc": {
+          "start": {
+            "offset": 69,
+            "line": 3,
+            "column": 9
+          },
+          "end": {
+            "offset": 85,
+            "line": 3,
+            "column": 25
+          }
+        },
+        "array_index": [
+          {
+            "brackets": true,
+            "index": {
+              "type": "number",
+              "value": 7
+            }
+          }
+        ]
+      },
+      "as": "linkedCardHolderId"
+    },
+    {
+      "type": "expr",
+      "expr": {
+        "type": "function",
+        "name": {
+          "name": [
+            {
+              "type": "default",
+              "value": "json_extract_scalar"
+            }
+          ]
+        },
+        "args": {
+          "type": "expr_list",
+          "value": [
+            {
+              "type": "column_ref",
+              "table": null,
+              "column": "responseheaders",
+              "collate": null
+            },
+            {
+              "type": "single_quote_string",
+              "value": "$[\"created-on\"]"
+            }
+          ]
+        },
+        "over": null,
+        "loc": {
+          "start": {
+            "offset": 120,
+            "line": 4,
+            "column": 9
+          },
+          "end": {
+            "offset": 176,
+            "line": 4,
+            "column": 65
+          }
+        }
+      },
+      "as": "linkCreatedOn"
+    }
+  ],
+  "from": [
+    {
+      "db": null,
+      "table": "link",
+      "as": null
+    }
+  ],
+  "where": {
+    "type": "binary_expr",
+    "operator": "AND",
+    "left": {
+      "type": "binary_expr",
+      "operator": "AND",
+      "left": {
+        "type": "binary_expr",
+        "operator": "AND",
+        "left": {
+          "type": "binary_expr",
+          "operator": "=",
+          "left": {
+            "type": "function",
+            "name": {
+              "name": [
+                {
+                  "type": "default",
+                  "value": "split"
+                }
+              ]
+            },
+            "args": {
+              "type": "expr_list",
+              "value": [
+                {
+                  "type": "column_ref",
+                  "table": null,
+                  "column": "url",
+                  "collate": null
+                },
+                {
+                  "type": "single_quote_string",
+                  "value": "/"
+                }
+              ]
+            },
+            "over": null,
+            "loc": {
+              "start": {
+                "offset": 237,
+                "line": 8,
+                "column": 9
+              },
+              "end": {
+                "offset": 253,
+                "line": 8,
+                "column": 25
+              }
+            },
+            "array_index": [
+              {
+                "brackets": true,
+                "index": {
+                  "type": "number",
+                  "value": 6
+                }
+              }
+            ]
+          },
+          "right": {
+            "type": "single_quote_string",
+            "value": "card.hasProfile"
+          }
+        },
+        "right": {
+          "type": "binary_expr",
+          "operator": "=",
+          "left": {
+            "type": "function",
+            "name": {
+              "name": [
+                {
+                  "type": "default",
+                  "value": "cardinality"
+                }
+              ]
+            },
+            "args": {
+              "type": "expr_list",
+              "value": [
+                {
+                  "type": "function",
+                  "name": {
+                    "name": [
+                      {
+                        "type": "default",
+                        "value": "split"
+                      }
+                    ]
+                  },
+                  "args": {
+                    "type": "expr_list",
+                    "value": [
+                      {
+                        "type": "column_ref",
+                        "table": null,
+                        "column": "url",
+                        "collate": null
+                      },
+                      {
+                        "type": "single_quote_string",
+                        "value": "/"
+                      }
+                    ]
+                  },
+                  "over": null,
+                  "loc": {
+                    "start": {
+                      "offset": 301,
+                      "line": 9,
+                      "column": 25
+                    },
+                    "end": {
+                      "offset": 316,
+                      "line": 9,
+                      "column": 40
+                    }
+                  }
+                }
+              ]
+            },
+            "over": null,
+            "loc": {
+              "start": {
+                "offset": 289,
+                "line": 9,
+                "column": 13
+              },
+              "end": {
+                "offset": 318,
+                "line": 9,
+                "column": 42
+              }
+            }
+          },
+          "right": {
+            "type": "number",
+            "value": 7
+          }
+        }
+      },
+      "right": {
+        "type": "binary_expr",
+        "operator": "=",
+        "left": {
+          "type": "column_ref",
+          "table": null,
+          "column": "method",
+          "collate": null
+        },
+        "right": {
+          "type": "single_quote_string",
+          "value": "PUT"
+        }
+      }
+    },
+    "right": {
+      "type": "binary_expr",
+      "operator": "=",
+      "left": {
+        "type": "column_ref",
+        "table": null,
+        "column": "responsestatus",
+        "collate": null
+      },
+      "right": {
+        "type": "single_quote_string",
+        "value": "204"
+      }
+    }
+  },
+  "groupby": null,
+  "having": null,
+  "orderby": null,
+  "limit": null,
+  "loc": {
+    "start": {
+      "offset": 0,
+      "line": 1,
+      "column": 1
+    },
+    "end": {
+      "offset": 383,
+      "line": 11,
+      "column": 35
+    }
+  }
+}

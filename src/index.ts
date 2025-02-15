@@ -26,7 +26,7 @@ import noServeRuntime, { ruleId as noServeRuntimeRuleId } from './no-serve-runti
 import requireServiceCallResponseDeclaration, {
   ruleId as requireServiceCallResponseDeclarationRuleId,
 } from './require-service-call-response-declaration.ts';
-import athena, { ruleId as athenaRuleId } from './athena.ts';
+import athena, { ruleId as athenaRuleId } from './athena/athena.ts';
 import filePathComment from './file-path-comment.ts';
 import noCardNumbers from './no-card-numbers.ts';
 import noEnum from './no-enum.ts';

@@ -1,0 +1,343 @@
+openapi: 3.0.0
+info:
+  title: Link Service
+  version: 1.5.2
+  contact:
+    name: Check Digit
+  description: |
+    ## Introduction
+
+      The Link API can be used to handle one-to-one, one-to-many, or many-to-many relationships between items defined
+      by a universally unique id (UUID) and related to each other by a predicate. Predicates are defined with a namespace
+      in order to avoid conflicts with system required values. There are no requirements on what the UUIDs represent or
+      what the meaning of a specific caller namespace predicate.
+
+    ## General Concepts
+
+      * There are no requirements on what the UUIDs represent or what the meaning of a specific caller namespace predicate. Please refer to the documentation related to the API using the Link service to know what subjectId, predicateId, and predicates should be used.
+      * All `PUT` operations are idempotent (repeating the same route/parameters will not result in duplicate entries)
+      * All `GET` operations are cache-able (same route/parameters will always lead to the same result)
+
+    ## Examples
+
+    Defining the individual associated with a card:
+
+    ```
+    PUT /link/v1/link/f01147ce-01cb-4e27-bca5-427a6051c47e/card.ownedBy/908aed38-907f-4100-b257-385ecc48eb66
+    ```
+
+    Defining the account that can be accessed by a card:
+
+    ```
+    PUT /link/v1/link/f01147ce-01cb-4e27-bca5-427a6051c47e/card.canAccessFunds/5136753e-8e91-4123-840d-898be2c13510
+    ```
+
+    Defining the configuration associated with a card:
+
+    ```
+    PUT /link/v1/link/f01147ce-01cb-4e27-bca5-427a6051c47e/card.hasConfiguration/6c9c83ef-6e42-4b01-8a48-791b5eca2461
+    ```
+
+    Defining a child parent relationship between individuals:
+
+    ```
+    PUT /link/v1/link/908aed38-907f-4100-b257-385ecc48eb66/individual.primaryOf/57baf41e-552c-47ac-b122-da5289d686a3
+    ```
+
+    Example: Obtain the accounts that can be accessed by a card:
+
+    ```
+    GET /link/v1/link/f01147ce-01cb-4e27-bca5-427a6051c47e/card.canAccessFunds?at=2019-07-11T20%3A14%3A32.115Z
+    ```
+
+    ## Commonly Defined Predicates
+
+    Some predicates are used throughout the platform and are relied upon by various systems:
+
+    * card.ownedBy - indicates that an cardId (subjectId) is associated with an individual (objectId)
+    * card.canAccessFunds - indicates that an cardId (subjectId) can access the funds in an account (objectId)
+    * card.hasConfiguration - indicates that cardId (subjectId) has a configuration (objectId)
+    * card.ownedBy - indicates that a cardId (subjectId) exists is used by an individual (objectId)
+    * individual.primaryOf - indicates that an individual (subjectId) is the primary for a secondary individual (objectId)
+
+    © Check Digit LLC. 2019-2023
+
+servers:
+  - url: /link/v1
+
+tags:
+  - name: Service Health
+  - name: API
+
+x-firehose-logged: false
+
+paths:
+  /ping:
+    get:
+      operationId: 'ping-get'
+      tags:
+        - Service Health
+      description: Tests the availability of the service and returns the current server
+        time.
+      responses:
+        '200':
+          $ref: '#/components/responses/Ping'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+  /link/{subjectId}:
+    get:
+      operationId: 'link-subject-get'
+      tags:
+        - API
+      description: Retrieves all links for a subjectId. Returns 200 with an empty array if
+        no links exist.
+      parameters:
+        - $ref: '#/components/parameters/subjectId'
+        - $ref: '#/components/parameters/at'
+      responses:
+        '200':
+          $ref: '#/components/responses/LinkagesResponse'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+  /link/{subjectId}/{predicate}:
+    get:
+      operationId: 'link-subject-predicate-get'
+      tags:
+        - API
+      description: Retrieves all of the linkages for subject and predicate. This does not
+        return a 404 if no link exist, just an empty array.
+      parameters:
+        - $ref: '#/components/parameters/subjectId'
+        - $ref: '#/components/parameters/predicate'
+        - $ref: '#/components/parameters/at'
+      responses:
+        '200':
+          $ref: '#/components/responses/LinkagesResponse'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+  /link/{subjectId}/{predicate}/{objectId}:
+    get:
+      operationId: 'link-subject-predicate-object-get'
+      tags:
+        - API
+      description: Obtains a specific link between a subject and an object.
+      parameters:
+        - $ref: '#/components/parameters/subjectId'
+        - $ref: '#/components/parameters/predicate'
+        - $ref: '#/components/parameters/objectId'
+        - $ref: '#/components/parameters/at'
+      responses:
+        '200':
+          $ref: '#/components/responses/LinkResponse'
+        '404':
+          description: Link not found.
+        default:
+          $ref: '#/components/responses/ServerError'
+    put:
+      operationId: 'link-subject-predicate-object-put'
+      tags:
+        - API
+      description: Stores a link between a subject and an object. The subjectId, predicate,
+        and objectId cannot contain '/' (%2F).
+      x-firehose-logged: true
+      parameters:
+        - $ref: '#/components/parameters/subjectId'
+        - $ref: '#/components/parameters/predicate'
+        - $ref: '#/components/parameters/objectId'
+        - $ref: '#/components/parameters/lastModified'
+        - $ref: '#/components/parameters/createdOn'
+      responses:
+        '204':
+          description: Link successfully created.
+          headers:
+            Last-Modified:
+              $ref: '#/components/headers/Last-Modified'
+            Created-On:
+              $ref: '#/components/headers/Created-On'
+            Updated-On:
+              $ref: '#/components/headers/Updated-On'
+        '409':
+          description: Record exists but with different data
+        default:
+          $ref: '#/components/responses/ServerError'
+
+components:
+  parameters:
+    subjectId:
+      name: subjectId
+      in: path
+      description: Unique identifier for the subject.
+      required: true
+      schema:
+        type: string
+        minLength: 1
+
+    predicate:
+      name: predicate
+      in: path
+      description: Predicate that describes the link.
+      required: true
+      schema:
+        type: string
+        minLength: 1
+
+    objectId:
+      name: objectId
+      in: path
+      description: Unique identifier for the object.
+      required: true
+      schema:
+        type: string
+        minLength: 1
+
+    at:
+      name: at
+      in: query
+      description: Identifies at what point in time the data should be returned. Must not
+        be in the future.
+      required: true
+      schema:
+        type: string
+        format: date-time
+
+    createdOn:
+      name: Created-On
+      in: header
+      description: |
+        Created-On header, establishes createdOn and last-modified values for the created data.
+        If both Created-On and Last-Modified values are provided, the value provided in Created-On
+        will be used for creating the data and the value provided in Last-Modified will be ignored.
+      example: '1970-01-01T00:00:00.000Z'
+      required: false
+      schema:
+        type: string
+        format: date-time
+
+    lastModified:
+      name: Last-Modified
+      in: header
+      description: last-modified header, establishes createdOn and last-modified value for created data
+      example: '1970-01-01T00:00:00.000Z'
+      required: false
+      schema:
+        type: string
+        format: date-time
+
+  schemas:
+    Ping:
+      type: object
+      additionalProperties: false
+      required:
+        - serverTime
+      properties:
+        serverTime:
+          type: string
+          format: date-time
+          description: Current server time
+
+    Error:
+      type: object
+      additionalProperties: false
+      required:
+        - message
+      description: Error message.
+      properties:
+        message:
+          type: string
+        code:
+          type: string
+
+    Link:
+      type: object
+      additionalProperties: false
+      required:
+        - subjectId
+        - predicate
+        - objectId
+        - createdOn
+      properties:
+        subjectId:
+          type: string
+          description: Unique identifier for the subject.
+          minLength: 1
+        predicate:
+          type: string
+          description: Predicate linking the subject to the object.
+          minLength: 1
+        objectId:
+          type: string
+          description: Unique identifier for the object.
+          minLength: 1
+        createdOn:
+          type: string
+          description: Date linkage was created
+          minLength: 1
+
+    Linkages:
+      type: object
+      additionalProperties: false
+      required:
+        - links
+      properties:
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/Link'
+
+  responses:
+    Ping:
+      description: ping successful response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Ping'
+
+    ServerError:
+      description: Server Error response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    LinkResponse:
+      description: Link retrieved successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Link'
+      headers:
+        Last-Modified:
+          $ref: '#/components/headers/Last-Modified'
+        Created-On:
+          $ref: '#/components/headers/Created-On'
+        Updated-On:
+          $ref: '#/components/headers/Updated-On'
+
+    LinkagesResponse:
+      description: Linkages retrieved successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Linkages'
+
+  headers:
+    Last-Modified:
+      description: Date and time at which the record was last modified
+      schema:
+        type: string
+        format: date-time
+
+    Created-On:
+      description: CreatedOn timestamp for the newly created record
+      schema:
+        type: string
+        format: date-time
+
+    Updated-On:
+      description: UpdatedOn timestamp for the existing record
+      schema:
+        type: string
+        format: date-time

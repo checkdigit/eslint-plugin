@@ -1,8 +1,7 @@
-// athena.spec.ts
+// athena/athena.spec.ts
 
+import createTester from '../ts-tester.test';
 import rule, { ruleId } from './athena';
-
-import createTester from './ts-tester.test';
 
 createTester().run(ruleId, rule, {
   valid: [
@@ -100,6 +99,7 @@ createTester().run(ruleId, rule, {
         link
       WHERE
         split(url, '/') [6] = 'card.hasProfile'
+        AND cardinality(split(url, '/')) = 7
         AND method = 'PUT'
         AND responsestatus = '204'\``,
       only: true,
