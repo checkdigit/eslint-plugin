@@ -31,11 +31,31 @@ function getVersionMatcher(_selectAST: object, _tableAST: object): Matcher | und
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-function getPathPartMatcher(_selectAST: object, _tableAST: object): Matcher | undefined {
-  // const pathPartCondition = JSONPath({
-  //   json,
-  //   path: "$.where..[?(@ !== null && @.type === 'binary_expr' && @.operator === '=' && @.left.type === 'function' && @.left.name.name[0].value && @.left.name.name[0].value === 'SPLIT' && @.left.args.value[0].type === 'column_ref' && @.left.args.value[0].column === 'URL' && @.left.args.value[1].type === 'single_quote_string' && @.left.args.value[1].value === '/')]",
-  // }); /*?*/
+function getPathPartMatcher(selectAST: object, _tableAST: object): Matcher | undefined {
+  const [pathPartCondition]: object[] = JSONPath({
+    json: selectAST,
+    path: "$.where..[?(@ && @.type === 'binary_expr' && @.operator === '=' && @.left && @.left.type === 'function' && @.left.name && @.left.name.name && @.left.name.name[0] && @.left.name.name[0].value === 'split' && @.left.args && @.left.args.value && @.left.args.value[0] && @.left.args.value[0].type === 'column_ref' && @.left.args.value[0].column === 'url' && @.left.args.value[1] && @.left.args.value[1].type === 'single_quote_string' && @.left.args.value[1].value === '/' && @.left.array_index && @.left.array_index[0] && @.left.array_index[0].brackets === true && @.left.array_index[0].index && @.left.array_index[0].index.type === 'number')]",
+  }); /*?*/
+  log('pathPartCondition', pathPartCondition);
+
+  if (pathPartCondition !== undefined) {
+    const [pathPartIndex]: [number] = JSONPath({
+      json: pathPartCondition,
+      path: '$.left.array_index[0].index.value',
+    }); /*?*/
+    const [pathPartMatch]: [string] = JSONPath({
+      json: pathPartCondition,
+      path: '$.right.value',
+    }); /*?*/
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    return (path: string, _method: string) => {
+      const parts = path.split('/'); /*?*/
+      const part = parts[pathPartIndex]; /*?*/
+      return part?.startsWith(':') === true
+        ? true // ignore path part if it presents a dynamic input parameter
+        : parts[pathPartIndex - 1] === pathPartMatch; // try to match with static path part
+    };
+  }
 
   return undefined;
 }
@@ -86,6 +106,7 @@ function getResponseStatusToMatch(selectAST: object, _tableAST: object): string 
   return responseStatus;
 }
 
+// [TODO:] match only relevent table in case multiple tables are joined
 export function matchApi(selectAST: object, tableAST: object, apiSchemas: ApiSchemas[]): MatchedOperation | undefined {
   const schemaMatchers: Matcher[] = [
     getVersionMatcher(selectAST, tableAST),

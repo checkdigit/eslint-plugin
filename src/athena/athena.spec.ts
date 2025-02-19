@@ -2,7 +2,7 @@
 
 import createTester from '../ts-tester.test';
 import rule, { ruleId } from './athena';
-
+// file.only
 createTester().run(ruleId, rule, {
   valid: [
     {
@@ -94,7 +94,7 @@ createTester().run(ruleId, rule, {
       code: `\`SELECT
         DISTINCT split(url, '/') [5] AS linkedCardId,
         split(url, '/') [7] AS linkedCardHolderId,
-        json_extract_scalar(responseheaders, '$["created-on"]') AS linkCreatedOn
+        json_extract_scalar(responseheaders, '$["XXXcreated-on"]') AS linkCreatedOn
       FROM
         link
       WHERE
