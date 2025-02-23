@@ -31,6 +31,7 @@ const SCHEMA_OBJECT: AnySchemaObject = {
 
 export const ruleId = 'athena';
 const SYNTEXT_ERROR = 'SyntextError';
+const ATHENA_ERROR = 'AthenaError';
 const log = debug('eslint-plugin:athena');
 const createRule = ESLintUtils.RuleCreator((name) => name);
 
@@ -60,22 +61,40 @@ function getColumn(name: string, schema: v3.SchemaObject, ast?: object): Resolve
   };
 }
 
-function checkSelect(selectAST: With | Select, context: AthenaContext) {
+class AthenaError extends Error {
+  public code: string;
+  constructor(code: string, message: string) {
+    super(message);
+    this.code = code;
+    this.name = 'AthenaError';
+  }
+}
+
+export function getErrorLocation(ast: object): string {
+  return JSON.stringify(JSONPath({ json: ast, path: '$..loc' }), undefined, 2);
+}
+
+// eslint-disable-next-line sonarjs/cognitive-complexity
+function checkSelect(selectAST: With | Select, context: AthenaContext, withTableName?: string) {
   log('checking SELECT', selectAST);
 
   // get all tables in the select statement
   const tableASTs = JSONPath<BaseFrom[]>({ json: selectAST, path: '$.from..[?(@ && @.table)]' });
   log('table ASTs', tableASTs);
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-  const withTableName = (selectAST as With).name?.value; /*?*/
-  // eslint-disable-next-line @typescript-eslint/no-inferrable-types
-  let defaultTableReferenceName: string = '';
+  const allTableNames = tableASTs.map((tableAST) => tableAST.table); /*?*/
 
+  const tableAliases: Record<string, string> = {};
+
+  const allResolvedTables = [];
   for (const tableAST of tableASTs) {
     const tableName = tableAST.table; /*?*/
-    defaultTableReferenceName = tableName;
+    const tableAlias = tableAST.as; /*?*/
+    if (tableAlias !== null) {
+      tableAliases[tableAlias] = tableName;
+    }
     if (context.tables[tableName] !== undefined) {
       log('table already processed', tableName);
+      allResolvedTables.push(context.tables[tableName]);
       continue;
     }
 
@@ -113,24 +132,34 @@ function checkSelect(selectAST: With | Select, context: AthenaContext) {
         responseheaders: getColumn('responseheaders', tableSchemas?.response['properties']?.headers ?? SCHEMA_OBJECT),
       },
     };
+    allResolvedTables.push(context.tables[tableName]);
   }
 
   const columns: Record<string, ResolvedColumn> = {};
-  for (const columnAST of selectAST.columns ?? []) {
+  for (const [index, columnAST] of selectAST.columns?.entries() ?? []) {
     log('checking column', columnAST);
 
     const columnReferences = JSONPath<ColumnRefItem[]>({
       json: columnAST as object,
       path: "$..[?(@ && @.type === 'column_ref' && @.column)]",
     }); /*?*/
+
+    const columnAlias = (columnAST as Column).as as null | string; /*?*/
+    let columnNameToUse = columnAlias ?? `_col${String(index)}`; /*?*/
+    log('column name to use', columnNameToUse);
+
+    if (columnReferences.length === 0) {
+      log('no column references found, keep it as default type');
+      columns[columnNameToUse] = getColumn(columnNameToUse, SCHEMA_STRING, columnAST as object);
+      continue;
+    }
     const columnKeys = new Set(
       columnReferences.map((column) => `${column.table ?? '<default>'}/${column.column as string}`),
     ); /*?*/
 
-    const columnAlias = (columnAST as Column).as as string; /*?*/
     if (columnKeys.size > 1) {
       log('multiple table/column references used in column, defaulting it as default type');
-      columns[columnAlias] = getColumn(columnAlias, SCHEMA_STRING, columnAST as object);
+      columns[columnNameToUse] = getColumn(columnNameToUse, SCHEMA_STRING, columnAST as object);
       continue;
     }
 
@@ -138,20 +167,52 @@ function checkSelect(selectAST: With | Select, context: AthenaContext) {
       string,
       string,
     ]; /*?*/
-    const tableReferenceNameToUse =
-      tableReferenceName === '<default>' ? defaultTableReferenceName : tableReferenceName; /*?*/
-    const resolvedTable = context.tables[tableReferenceNameToUse];
-    assert.ok(resolvedTable !== undefined);
-    const resolvedColumn = resolvedTable.columns[columnReferenceName]; /*?*/
-    assert.ok(resolvedColumn !== undefined);
 
+    const referencedTables =
+      tableReferenceName !== '<default>'
+        ? [context.tables[tableAliases[tableReferenceName] ?? tableReferenceName]].filter(
+            (table): table is Table => table !== undefined,
+          )
+        : allResolvedTables; /*?*/
+    assert.ok(referencedTables.length > 0);
+
+    if (columnReferenceName === '*') {
+      log('column reference is *, so adding all columns from table');
+      for (const table of referencedTables) {
+        for (const [columnName, column] of Object.entries(table.columns)) {
+          columns[columnName] = column;
+        }
+      }
+      continue;
+    }
+
+    const functionsUsedInColumn = JSONPath<object[]>({
+      json: columnAST as object,
+      path: "$..[?(@ && @.type === 'function')]",
+    }); /*?*/
+    if (functionsUsedInColumn.length === 0) {
+      columnNameToUse = columnReferenceName; /*?*/
+    }
+
+    const resolvedColumns = referencedTables.map((table) => table.columns[columnReferenceName]).filter(Boolean); /*?*/
+    if (resolvedColumns.length === 0) {
+      throw new AthenaError(
+        ATHENA_ERROR,
+        `can't found column ${columnReferenceName} in tables: ${allTableNames.toString()}`,
+      );
+    } else if (resolvedColumns.length > 1) {
+      throw new AthenaError(ATHENA_ERROR, `column exists in multiple referenced tables ${allTableNames.toString()}`);
+    }
+
+    const resolvedColumn = resolvedColumns[0]; /*?*/
+    assert.ok(resolvedColumn !== undefined);
     const [propertyAccessor] = JSONPath<string[]>({
       json: columnAST as object,
       path: "$..[?(@ && @.type === 'function' && @.name && @.name.name && @.name.name[0] && @.name.name[0].value === 'json_extract_scalar')].args.value[1].value",
     }); /*?*/
     if (propertyAccessor === undefined) {
       log('no property accessor found, keep it as default type');
-      columns[columnAlias] = getColumn(columnAlias, resolvedColumn.schema, columnAST as object);
+      columns[columnNameToUse] = getColumn(columnNameToUse, resolvedColumn.schema, columnAST as object);
       continue;
     }
 
@@ -159,16 +220,14 @@ function checkSelect(selectAST: With | Select, context: AthenaContext) {
       json: resolvedColumn.schema,
       path: `$.properties.${propertyAccessor}`,
     }); /*?*/
-    assert.ok(
-      propertySchema !== undefined,
-      JSON.stringify(JSONPath({ json: columnAST as object, path: '$..loc' }), undefined, 2),
-    );
-    columns[columnAlias] = getColumn(columnAlias, propertySchema, columnAST as object);
+    if (propertySchema === undefined) {
+      throw new AthenaError(ATHENA_ERROR, `property not found ${columnReferenceName} - ${propertyAccessor}`);
+    }
+    columns[columnNameToUse] = getColumn(columnNameToUse, propertySchema, columnAST as object);
   }
 
   log('resolved columns', columns);
 
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if (withTableName !== undefined) {
     context.tables[withTableName] = {
       ast: selectAST,
@@ -184,7 +243,7 @@ function checkAthenaAst(ast: AST, context: AthenaContext) {
 
   if (ast.with !== null) {
     for (const withItem of ast.with) {
-      checkSelect(withItem, context);
+      checkSelect(withItem.stmt.ast, context, withItem.name.value);
     }
     ast.with = null;
   }
@@ -192,7 +251,7 @@ function checkAthenaAst(ast: AST, context: AthenaContext) {
   checkSelect(ast, context);
 }
 
-const rule: ESLintUtils.RuleModule<typeof SYNTEXT_ERROR> = createRule({
+const rule: ESLintUtils.RuleModule<typeof SYNTEXT_ERROR | typeof ATHENA_ERROR> = createRule({
   name: ruleId,
   meta: {
     type: 'problem',
@@ -202,6 +261,7 @@ const rule: ESLintUtils.RuleModule<typeof SYNTEXT_ERROR> = createRule({
     schema: [],
     messages: {
       [SYNTEXT_ERROR]: `SyntextError {{ errorMessage }}`,
+      [ATHENA_ERROR]: `AthenaError {{ errorMessage }}`,
     },
   },
   defaultOptions: [],
@@ -232,9 +292,31 @@ const rule: ESLintUtils.RuleModule<typeof SYNTEXT_ERROR> = createRule({
         const athenaContext: AthenaContext = {
           apiSchemas: {},
           tables: {},
-          // tableAliases: {}
         };
-        checkAthenaAst(ast, athenaContext);
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+          checkAthenaAst(Array.isArray(ast) ? ast[0] : ast, athenaContext);
+        } catch (error) {
+          if (error instanceof AthenaError) {
+            context.report({
+              node: sqlNode,
+              messageId: ATHENA_ERROR,
+              data: {
+                errorMessage: error.message,
+              },
+            });
+          } else {
+            // eslint-disable-next-line no-console
+            console.error(`Failed to apply ${ruleId} rule for file "${context.filename}":`, error);
+            context.report({
+              node: sqlNode,
+              messageId: ATHENA_ERROR,
+              data: {
+                errorMessage: error instanceof Error ? String(error) : JSON.stringify(error, undefined, 2),
+              },
+            });
+          }
+        }
       },
     };
   },

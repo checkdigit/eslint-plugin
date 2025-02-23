@@ -4,13 +4,12 @@ import { JSONPath } from 'jsonpath-plus';
 import { generateSchemas } from '../openapi/generate-schema';
 
 describe('json.spec.ts', () => {
-  const json = JSON.parse(fs.readFileSync('ast.json', 'utf-8'));
-
-  it.skip('create schema', async () => {
+  it('create schema', async () => {
     await generateSchemas();
   });
 
-  it('should work', () => {
+  it.skip('should work', () => {
+    const json = JSON.parse(fs.readFileSync('ast.json', 'utf-8'));
     // // tables in the select statement
     // JSONPath({ json, path: '$.from[?(@.table)]' }); /*?*/
 

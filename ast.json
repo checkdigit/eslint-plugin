@@ -1,252 +1,508 @@
 {
-  "with": null,
-  "type": "select",
-  "options": null,
-  "distinct": "DISTINCT",
-  "columns": [
+  "with": [
     {
-      "type": "expr",
-      "expr": {
-        "type": "function",
-        "name": {
-          "name": [
-            {
-              "type": "default",
-              "value": "split"
-            }
-          ]
-        },
-        "args": {
-          "type": "expr_list",
-          "value": [
-            {
-              "type": "column_ref",
-              "table": null,
-              "column": "url",
-              "collate": null
-            },
-            {
-              "type": "single_quote_string",
-              "value": "/"
-            }
-          ]
-        },
-        "over": null,
-        "loc": {
-          "start": {
-            "offset": 24,
-            "line": 2,
-            "column": 18
-          },
-          "end": {
-            "offset": 40,
-            "line": 2,
-            "column": 34
-          }
-        },
-        "array_index": [
-          {
-            "brackets": true,
-            "index": {
-              "type": "number",
-              "value": 5
-            }
-          }
-        ]
+      "name": {
+        "type": "default",
+        "value": "parameters"
       },
-      "as": "linkedCardId"
-    },
-    {
-      "type": "expr",
-      "expr": {
-        "type": "function",
-        "name": {
-          "name": [
+      "stmt": {
+        "tableList": [],
+        "columnList": [],
+        "ast": {
+          "with": null,
+          "type": "select",
+          "options": null,
+          "distinct": null,
+          "columns": [
             {
-              "type": "default",
-              "value": "split"
-            }
-          ]
-        },
-        "args": {
-          "type": "expr_list",
-          "value": [
-            {
-              "type": "column_ref",
-              "table": null,
-              "column": "url",
-              "collate": null
+              "type": "expr",
+              "expr": {
+                "type": "single_quote_string",
+                "value": ""
+              },
+              "as": "p_from"
             },
             {
-              "type": "single_quote_string",
-              "value": "/"
+              "type": "expr",
+              "expr": {
+                "type": "single_quote_string",
+                "value": ""
+              },
+              "as": "p_to"
             }
-          ]
-        },
-        "over": null,
-        "loc": {
-          "start": {
-            "offset": 69,
-            "line": 3,
-            "column": 9
-          },
-          "end": {
-            "offset": 85,
-            "line": 3,
-            "column": 25
-          }
-        },
-        "array_index": [
-          {
-            "brackets": true,
-            "index": {
-              "type": "number",
-              "value": 7
-            }
-          }
-        ]
-      },
-      "as": "linkedCardHolderId"
-    },
-    {
-      "type": "expr",
-      "expr": {
-        "type": "function",
-        "name": {
-          "name": [
-            {
-              "type": "default",
-              "value": "json_extract_scalar"
-            }
-          ]
-        },
-        "args": {
-          "type": "expr_list",
-          "value": [
-            {
-              "type": "column_ref",
-              "table": null,
-              "column": "responseheaders",
-              "collate": null
+          ],
+          "from": null,
+          "where": null,
+          "groupby": null,
+          "having": null,
+          "orderby": null,
+          "limit": null,
+          "loc": {
+            "start": {
+              "offset": 23,
+              "line": 2,
+              "column": 3
             },
-            {
-              "type": "single_quote_string",
-              "value": "$[\"XXXcreated-on\"]"
+            "end": {
+              "offset": 170,
+              "line": 9,
+              "column": 1
             }
-          ]
-        },
-        "over": null,
-        "loc": {
-          "start": {
-            "offset": 120,
-            "line": 4,
-            "column": 9
-          },
-          "end": {
-            "offset": 179,
-            "line": 4,
-            "column": 68
           }
         }
       },
-      "as": "linkCreatedOn"
-    }
-  ],
-  "from": [
+      "columns": null
+    },
     {
-      "db": null,
-      "table": "link",
-      "as": null
-    }
-  ],
-  "where": {
-    "type": "binary_expr",
-    "operator": "AND",
-    "left": {
-      "type": "binary_expr",
-      "operator": "AND",
-      "left": {
-        "type": "binary_expr",
-        "operator": "AND",
-        "left": {
-          "type": "binary_expr",
-          "operator": "=",
-          "left": {
-            "type": "function",
-            "name": {
-              "name": [
-                {
-                  "type": "default",
-                  "value": "split"
-                }
-              ]
-            },
-            "args": {
-              "type": "expr_list",
-              "value": [
-                {
-                  "type": "column_ref",
-                  "table": null,
-                  "column": "url",
-                  "collate": null
+      "name": {
+        "type": "default",
+        "value": "person_data"
+      },
+      "stmt": {
+        "tableList": [
+          "select::null::person",
+          "select::null::parameters"
+        ],
+        "columnList": [
+          "select::null::url",
+          "select::null::responsebody",
+          "select::null::responseheaders",
+          "select::null::method",
+          "select::null::responsestatus",
+          "select::null::p_from",
+          "select::null::p_to"
+        ],
+        "ast": {
+          "with": null,
+          "type": "select",
+          "options": null,
+          "distinct": "DISTINCT",
+          "columns": [
+            {
+              "type": "expr",
+              "expr": {
+                "type": "function",
+                "name": {
+                  "name": [
+                    {
+                      "type": "default",
+                      "value": "split"
+                    }
+                  ]
                 },
-                {
-                  "type": "single_quote_string",
-                  "value": "/"
-                }
-              ]
-            },
-            "over": null,
-            "loc": {
-              "start": {
-                "offset": 240,
-                "line": 8,
-                "column": 9
+                "args": {
+                  "type": "expr_list",
+                  "value": [
+                    {
+                      "type": "column_ref",
+                      "table": null,
+                      "column": "url",
+                      "collate": null
+                    },
+                    {
+                      "type": "single_quote_string",
+                      "value": "/"
+                    }
+                  ]
+                },
+                "over": null,
+                "loc": {
+                  "start": {
+                    "offset": 212,
+                    "line": 12,
+                    "column": 14
+                  },
+                  "end": {
+                    "offset": 228,
+                    "line": 12,
+                    "column": 30
+                  }
+                },
+                "array_index": [
+                  {
+                    "brackets": true,
+                    "index": {
+                      "type": "number",
+                      "value": 5
+                    }
+                  }
+                ]
               },
-              "end": {
-                "offset": 256,
-                "line": 8,
-                "column": 25
-              }
+              "as": "personId"
             },
-            "array_index": [
-              {
-                "brackets": true,
-                "index": {
-                  "type": "number",
-                  "value": 6
+            {
+              "type": "expr",
+              "expr": {
+                "type": "function",
+                "name": {
+                  "name": [
+                    {
+                      "type": "default",
+                      "value": "json_extract"
+                    }
+                  ]
+                },
+                "args": {
+                  "type": "expr_list",
+                  "value": [
+                    {
+                      "type": "column_ref",
+                      "table": null,
+                      "column": "responsebody",
+                      "collate": null
+                    },
+                    {
+                      "type": "single_quote_string",
+                      "value": "$.person"
+                    }
+                  ]
+                },
+                "over": null,
+                "loc": {
+                  "start": {
+                    "offset": 251,
+                    "line": 13,
+                    "column": 5
+                  },
+                  "end": {
+                    "offset": 290,
+                    "line": 13,
+                    "column": 44
+                  }
                 }
-              }
-            ]
-          },
-          "right": {
-            "type": "single_quote_string",
-            "value": "card.hasProfile"
-          }
-        },
-        "right": {
-          "type": "binary_expr",
-          "operator": "=",
-          "left": {
-            "type": "function",
-            "name": {
-              "name": [
-                {
-                  "type": "default",
-                  "value": "cardinality"
-                }
-              ]
+              },
+              "as": "person"
             },
-            "args": {
-              "type": "expr_list",
-              "value": [
-                {
+            {
+              "type": "expr",
+              "expr": {
+                "type": "function",
+                "name": {
+                  "name": [
+                    {
+                      "type": "default",
+                      "value": "json_extract_scalar"
+                    }
+                  ]
+                },
+                "args": {
+                  "type": "expr_list",
+                  "value": [
+                    {
+                      "type": "column_ref",
+                      "table": null,
+                      "column": "responsebody",
+                      "collate": null
+                    },
+                    {
+                      "type": "single_quote_string",
+                      "value": "$.storageKeyId"
+                    }
+                  ]
+                },
+                "over": null,
+                "loc": {
+                  "start": {
+                    "offset": 305,
+                    "line": 14,
+                    "column": 5
+                  },
+                  "end": {
+                    "offset": 357,
+                    "line": 14,
+                    "column": 57
+                  }
+                }
+              },
+              "as": "keyId"
+            },
+            {
+              "type": "expr",
+              "expr": {
+                "type": "function",
+                "name": {
+                  "name": [
+                    {
+                      "type": "default",
+                      "value": "json_extract_scalar"
+                    }
+                  ]
+                },
+                "args": {
+                  "type": "expr_list",
+                  "value": [
+                    {
+                      "type": "column_ref",
+                      "table": null,
+                      "column": "responseheaders",
+                      "collate": null
+                    },
+                    {
+                      "type": "single_quote_string",
+                      "value": "$[\"created-on\"]"
+                    }
+                  ]
+                },
+                "over": null,
+                "loc": {
+                  "start": {
+                    "offset": 371,
+                    "line": 15,
+                    "column": 5
+                  },
+                  "end": {
+                    "offset": 427,
+                    "line": 15,
+                    "column": 61
+                  }
+                }
+              },
+              "as": "createdOn"
+            },
+            {
+              "type": "expr",
+              "expr": {
+                "type": "function",
+                "name": {
+                  "name": [
+                    {
+                      "type": "default",
+                      "value": "json_extract_scalar"
+                    }
+                  ]
+                },
+                "args": {
+                  "type": "expr_list",
+                  "value": [
+                    {
+                      "type": "column_ref",
+                      "table": null,
+                      "column": "responseheaders",
+                      "collate": null
+                    },
+                    {
+                      "type": "single_quote_string",
+                      "value": "$[\"updated-on\"]"
+                    }
+                  ]
+                },
+                "over": null,
+                "loc": {
+                  "start": {
+                    "offset": 445,
+                    "line": 16,
+                    "column": 5
+                  },
+                  "end": {
+                    "offset": 501,
+                    "line": 16,
+                    "column": 61
+                  }
+                }
+              },
+              "as": "updatedOn"
+            }
+          ],
+          "from": [
+            {
+              "db": null,
+              "table": "person",
+              "as": null
+            },
+            {
+              "db": null,
+              "table": "parameters",
+              "as": null
+            }
+          ],
+          "where": {
+            "type": "binary_expr",
+            "operator": "AND",
+            "left": {
+              "type": "binary_expr",
+              "operator": "AND",
+              "left": {
+                "type": "binary_expr",
+                "operator": "AND",
+                "left": {
+                  "type": "binary_expr",
+                  "operator": "AND",
+                  "left": {
+                    "type": "binary_expr",
+                    "operator": "AND",
+                    "left": {
+                      "type": "binary_expr",
+                      "operator": "=",
+                      "left": {
+                        "type": "column_ref",
+                        "table": null,
+                        "column": "method",
+                        "collate": null
+                      },
+                      "right": {
+                        "type": "single_quote_string",
+                        "value": "PUT"
+                      }
+                    },
+                    "right": {
+                      "type": "binary_expr",
+                      "operator": "=",
+                      "left": {
+                        "type": "column_ref",
+                        "table": null,
+                        "column": "responsestatus",
+                        "collate": null
+                      },
+                      "right": {
+                        "type": "single_quote_string",
+                        "value": "200"
+                      }
+                    }
+                  },
+                  "right": {
+                    "type": "binary_expr",
+                    "operator": "=",
+                    "left": {
+                      "type": "function",
+                      "name": {
+                        "name": [
+                          {
+                            "type": "default",
+                            "value": "split"
+                          }
+                        ]
+                      },
+                      "args": {
+                        "type": "expr_list",
+                        "value": [
+                          {
+                            "type": "column_ref",
+                            "table": null,
+                            "column": "url",
+                            "collate": null
+                          },
+                          {
+                            "type": "single_quote_string",
+                            "value": "/"
+                          }
+                        ]
+                      },
+                      "over": null,
+                      "loc": {
+                        "start": {
+                          "offset": 614,
+                          "line": 23,
+                          "column": 9
+                        },
+                        "end": {
+                          "offset": 630,
+                          "line": 23,
+                          "column": 25
+                        }
+                      },
+                      "array_index": [
+                        {
+                          "brackets": true,
+                          "index": {
+                            "type": "number",
+                            "value": 4
+                          }
+                        }
+                      ]
+                    },
+                    "right": {
+                      "type": "single_quote_string",
+                      "value": "person"
+                    }
+                  }
+                },
+                "right": {
+                  "type": "binary_expr",
+                  "operator": "=",
+                  "left": {
+                    "type": "function",
+                    "name": {
+                      "name": [
+                        {
+                          "type": "default",
+                          "value": "CARDINALITY"
+                        }
+                      ]
+                    },
+                    "args": {
+                      "type": "expr_list",
+                      "value": [
+                        {
+                          "type": "function",
+                          "name": {
+                            "name": [
+                              {
+                                "type": "default",
+                                "value": "split"
+                              }
+                            ]
+                          },
+                          "args": {
+                            "type": "expr_list",
+                            "value": [
+                              {
+                                "type": "column_ref",
+                                "table": null,
+                                "column": "url",
+                                "collate": null
+                              },
+                              {
+                                "type": "single_quote_string",
+                                "value": "/"
+                              }
+                            ]
+                          },
+                          "over": null,
+                          "loc": {
+                            "start": {
+                              "offset": 667,
+                              "line": 24,
+                              "column": 21
+                            },
+                            "end": {
+                              "offset": 682,
+                              "line": 24,
+                              "column": 36
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "over": null,
+                    "loc": {
+                      "start": {
+                        "offset": 655,
+                        "line": 24,
+                        "column": 9
+                      },
+                      "end": {
+                        "offset": 684,
+                        "line": 24,
+                        "column": 38
+                      }
+                    }
+                  },
+                  "right": {
+                    "type": "number",
+                    "value": 5
+                  }
+                }
+              },
+              "right": {
+                "type": "binary_expr",
+                "operator": ">=",
+                "left": {
                   "type": "function",
                   "name": {
                     "name": [
                       {
                         "type": "default",
-                        "value": "split"
+                        "value": "json_extract_scalar"
                       }
                     ]
                   },
@@ -256,84 +512,2794 @@
                       {
                         "type": "column_ref",
                         "table": null,
-                        "column": "url",
+                        "column": "responseheaders",
                         "collate": null
                       },
                       {
                         "type": "single_quote_string",
-                        "value": "/"
+                        "value": "$[\"updated-on\"]"
                       }
                     ]
                   },
                   "over": null,
                   "loc": {
                     "start": {
-                      "offset": 304,
-                      "line": 9,
-                      "column": 25
+                      "offset": 696,
+                      "line": 25,
+                      "column": 9
                     },
                     "end": {
-                      "offset": 319,
-                      "line": 9,
-                      "column": 40
+                      "offset": 752,
+                      "line": 25,
+                      "column": 65
                     }
                   }
+                },
+                "right": {
+                  "type": "column_ref",
+                  "table": null,
+                  "column": "p_from",
+                  "collate": null
                 }
-              ]
+              }
             },
-            "over": null,
-            "loc": {
-              "start": {
-                "offset": 292,
-                "line": 9,
-                "column": 13
+            "right": {
+              "type": "binary_expr",
+              "operator": "<",
+              "left": {
+                "type": "function",
+                "name": {
+                  "name": [
+                    {
+                      "type": "default",
+                      "value": "json_extract_scalar"
+                    }
+                  ]
+                },
+                "args": {
+                  "type": "expr_list",
+                  "value": [
+                    {
+                      "type": "column_ref",
+                      "table": null,
+                      "column": "responseheaders",
+                      "collate": null
+                    },
+                    {
+                      "type": "single_quote_string",
+                      "value": "$[\"updated-on\"]"
+                    }
+                  ]
+                },
+                "over": null,
+                "loc": {
+                  "start": {
+                    "offset": 770,
+                    "line": 26,
+                    "column": 9
+                  },
+                  "end": {
+                    "offset": 826,
+                    "line": 26,
+                    "column": 65
+                  }
+                }
               },
-              "end": {
-                "offset": 321,
-                "line": 9,
-                "column": 42
+              "right": {
+                "type": "column_ref",
+                "table": null,
+                "column": "p_to",
+                "collate": null
               }
             }
           },
-          "right": {
-            "type": "number",
-            "value": 7
+          "groupby": null,
+          "having": null,
+          "orderby": null,
+          "limit": null,
+          "loc": {
+            "start": {
+              "offset": 192,
+              "line": 11,
+              "column": 3
+            },
+            "end": {
+              "offset": 833,
+              "line": 27,
+              "column": 1
+            }
           }
         }
       },
-      "right": {
-        "type": "binary_expr",
-        "operator": "=",
-        "left": {
-          "type": "column_ref",
-          "table": null,
-          "column": "method",
-          "collate": null
-        },
-        "right": {
-          "type": "single_quote_string",
-          "value": "PUT"
-        }
-      }
+      "columns": null
     },
-    "right": {
-      "type": "binary_expr",
-      "operator": "=",
-      "left": {
+    {
+      "name": {
+        "type": "default",
+        "value": "flatten_attributes"
+      },
+      "stmt": {
+        "tableList": [
+          "select::null::person",
+          "select::null::parameters",
+          "select::null::person_data"
+        ],
+        "columnList": [
+          "select::null::url",
+          "select::null::responsebody",
+          "select::null::responseheaders",
+          "select::null::method",
+          "select::null::responsestatus",
+          "select::null::p_from",
+          "select::null::p_to",
+          "select::null::keyId",
+          "select::null::personId",
+          "select::null::createdOn",
+          "select::null::updatedOn",
+          "select::null::person"
+        ],
+        "ast": {
+          "with": null,
+          "type": "select",
+          "options": null,
+          "distinct": null,
+          "columns": [
+            {
+              "type": "expr",
+              "expr": {
+                "type": "column_ref",
+                "table": null,
+                "column": "keyId",
+                "collate": null
+              },
+              "as": null
+            },
+            {
+              "type": "expr",
+              "expr": {
+                "type": "column_ref",
+                "table": null,
+                "column": "personId",
+                "collate": null
+              },
+              "as": null
+            },
+            {
+              "type": "expr",
+              "expr": {
+                "type": "column_ref",
+                "table": null,
+                "column": "createdOn",
+                "collate": null
+              },
+              "as": null
+            },
+            {
+              "type": "expr",
+              "expr": {
+                "type": "column_ref",
+                "table": null,
+                "column": "updatedOn",
+                "collate": null
+              },
+              "as": null
+            },
+            {
+              "type": "expr",
+              "expr": {
+                "type": "cast",
+                "keyword": "cast",
+                "expr": {
+                  "type": "function",
+                  "name": {
+                    "name": [
+                      {
+                        "type": "default",
+                        "value": "json_extract"
+                      }
+                    ]
+                  },
+                  "args": {
+                    "type": "expr_list",
+                    "value": [
+                      {
+                        "type": "column_ref",
+                        "table": null,
+                        "column": "person",
+                        "collate": null
+                      },
+                      {
+                        "type": "single_quote_string",
+                        "value": "$.addresses"
+                      }
+                    ]
+                  },
+                  "over": null,
+                  "loc": {
+                    "start": {
+                      "offset": 940,
+                      "line": 35,
+                      "column": 7
+                    },
+                    "end": {
+                      "offset": 976,
+                      "line": 35,
+                      "column": 43
+                    }
+                  }
+                },
+                "symbol": "as",
+                "target": [
+                  {
+                    "dataType": "ARRAY",
+                    "parentheses": true,
+                    "expr": {
+                      "type": "expr_list",
+                      "value": [
+                        {
+                          "type": "datatype",
+                          "dataType": "MAP",
+                          "parentheses": true,
+                          "expr": {
+                            "type": "expr_list",
+                            "value": [
+                              {
+                                "type": "datatype",
+                                "dataType": "VARCHAR"
+                              },
+                              {
+                                "type": "datatype",
+                                "dataType": "JSON"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "as": "addresses"
+            },
+            {
+              "type": "expr",
+              "expr": {
+                "type": "cast",
+                "keyword": "cast",
+                "expr": {
+                  "type": "function",
+                  "name": {
+                    "name": [
+                      {
+                        "type": "default",
+                        "value": "json_extract"
+                      }
+                    ]
+                  },
+                  "args": {
+                    "type": "expr_list",
+                    "value": [
+                      {
+                        "type": "column_ref",
+                        "table": null,
+                        "column": "person",
+                        "collate": null
+                      },
+                      {
+                        "type": "single_quote_string",
+                        "value": "$.phones"
+                      }
+                    ]
+                  },
+                  "over": null,
+                  "loc": {
+                    "start": {
+                      "offset": 1041,
+                      "line": 38,
+                      "column": 7
+                    },
+                    "end": {
+                      "offset": 1074,
+                      "line": 38,
+                      "column": 40
+                    }
+                  }
+                },
+                "symbol": "as",
+                "target": [
+                  {
+                    "dataType": "ARRAY",
+                    "parentheses": true,
+                    "expr": {
+                      "type": "expr_list",
+                      "value": [
+                        {
+                          "type": "datatype",
+                          "dataType": "MAP",
+                          "parentheses": true,
+                          "expr": {
+                            "type": "expr_list",
+                            "value": [
+                              {
+                                "type": "datatype",
+                                "dataType": "VARCHAR"
+                              },
+                              {
+                                "type": "datatype",
+                                "dataType": "VARCHAR"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "as": "phones"
+            },
+            {
+              "type": "expr",
+              "expr": {
+                "type": "function",
+                "name": {
+                  "name": [
+                    {
+                      "type": "default",
+                      "value": "json_extract_scalar"
+                    }
+                  ]
+                },
+                "args": {
+                  "type": "expr_list",
+                  "value": [
+                    {
+                      "type": "column_ref",
+                      "table": null,
+                      "column": "person",
+                      "collate": null
+                    },
+                    {
+                      "type": "single_quote_string",
+                      "value": "$.company"
+                    }
+                  ]
+                },
+                "over": null,
+                "loc": {
+                  "start": {
+                    "offset": 1127,
+                    "line": 40,
+                    "column": 5
+                  },
+                  "end": {
+                    "offset": 1168,
+                    "line": 40,
+                    "column": 46
+                  }
+                }
+              },
+              "as": "company"
+            },
+            {
+              "type": "expr",
+              "expr": {
+                "type": "function",
+                "name": {
+                  "name": [
+                    {
+                      "type": "default",
+                      "value": "json_extract_scalar"
+                    }
+                  ]
+                },
+                "args": {
+                  "type": "expr_list",
+                  "value": [
+                    {
+                      "type": "column_ref",
+                      "table": null,
+                      "column": "person",
+                      "collate": null
+                    },
+                    {
+                      "type": "single_quote_string",
+                      "value": "$.title"
+                    }
+                  ]
+                },
+                "over": null,
+                "loc": {
+                  "start": {
+                    "offset": 1184,
+                    "line": 41,
+                    "column": 5
+                  },
+                  "end": {
+                    "offset": 1223,
+                    "line": 41,
+                    "column": 44
+                  }
+                }
+              },
+              "as": "title"
+            },
+            {
+              "type": "expr",
+              "expr": {
+                "type": "function",
+                "name": {
+                  "name": [
+                    {
+                      "type": "default",
+                      "value": "json_extract_scalar"
+                    }
+                  ]
+                },
+                "args": {
+                  "type": "expr_list",
+                  "value": [
+                    {
+                      "type": "column_ref",
+                      "table": null,
+                      "column": "person",
+                      "collate": null
+                    },
+                    {
+                      "type": "single_quote_string",
+                      "value": "$.firstName"
+                    }
+                  ]
+                },
+                "over": null,
+                "loc": {
+                  "start": {
+                    "offset": 1237,
+                    "line": 42,
+                    "column": 5
+                  },
+                  "end": {
+                    "offset": 1280,
+                    "line": 42,
+                    "column": 48
+                  }
+                }
+              },
+              "as": "firstName"
+            },
+            {
+              "type": "expr",
+              "expr": {
+                "type": "function",
+                "name": {
+                  "name": [
+                    {
+                      "type": "default",
+                      "value": "json_extract_scalar"
+                    }
+                  ]
+                },
+                "args": {
+                  "type": "expr_list",
+                  "value": [
+                    {
+                      "type": "column_ref",
+                      "table": null,
+                      "column": "person",
+                      "collate": null
+                    },
+                    {
+                      "type": "single_quote_string",
+                      "value": "$.middleName"
+                    }
+                  ]
+                },
+                "over": null,
+                "loc": {
+                  "start": {
+                    "offset": 1298,
+                    "line": 43,
+                    "column": 5
+                  },
+                  "end": {
+                    "offset": 1342,
+                    "line": 43,
+                    "column": 49
+                  }
+                }
+              },
+              "as": "middleName"
+            },
+            {
+              "type": "expr",
+              "expr": {
+                "type": "function",
+                "name": {
+                  "name": [
+                    {
+                      "type": "default",
+                      "value": "json_extract_scalar"
+                    }
+                  ]
+                },
+                "args": {
+                  "type": "expr_list",
+                  "value": [
+                    {
+                      "type": "column_ref",
+                      "table": null,
+                      "column": "person",
+                      "collate": null
+                    },
+                    {
+                      "type": "single_quote_string",
+                      "value": "$.lastName"
+                    }
+                  ]
+                },
+                "over": null,
+                "loc": {
+                  "start": {
+                    "offset": 1361,
+                    "line": 44,
+                    "column": 5
+                  },
+                  "end": {
+                    "offset": 1403,
+                    "line": 44,
+                    "column": 47
+                  }
+                }
+              },
+              "as": "lastName"
+            },
+            {
+              "type": "expr",
+              "expr": {
+                "type": "function",
+                "name": {
+                  "name": [
+                    {
+                      "type": "default",
+                      "value": "json_extract_scalar"
+                    }
+                  ]
+                },
+                "args": {
+                  "type": "expr_list",
+                  "value": [
+                    {
+                      "type": "column_ref",
+                      "table": null,
+                      "column": "person",
+                      "collate": null
+                    },
+                    {
+                      "type": "single_quote_string",
+                      "value": "$.email"
+                    }
+                  ]
+                },
+                "over": null,
+                "loc": {
+                  "start": {
+                    "offset": 1420,
+                    "line": 45,
+                    "column": 5
+                  },
+                  "end": {
+                    "offset": 1459,
+                    "line": 45,
+                    "column": 44
+                  }
+                }
+              },
+              "as": "email"
+            },
+            {
+              "type": "expr",
+              "expr": {
+                "type": "function",
+                "name": {
+                  "name": [
+                    {
+                      "type": "default",
+                      "value": "json_extract"
+                    }
+                  ]
+                },
+                "args": {
+                  "type": "expr_list",
+                  "value": [
+                    {
+                      "type": "column_ref",
+                      "table": null,
+                      "column": "person",
+                      "collate": null
+                    },
+                    {
+                      "type": "single_quote_string",
+                      "value": "$.language"
+                    }
+                  ]
+                },
+                "over": null,
+                "loc": {
+                  "start": {
+                    "offset": 1473,
+                    "line": 46,
+                    "column": 5
+                  },
+                  "end": {
+                    "offset": 1508,
+                    "line": 46,
+                    "column": 40
+                  }
+                }
+              },
+              "as": "language"
+            },
+            {
+              "type": "expr",
+              "expr": {
+                "type": "function",
+                "name": {
+                  "name": [
+                    {
+                      "type": "default",
+                      "value": "json_extract"
+                    }
+                  ]
+                },
+                "args": {
+                  "type": "expr_list",
+                  "value": [
+                    {
+                      "type": "column_ref",
+                      "table": null,
+                      "column": "person",
+                      "collate": null
+                    },
+                    {
+                      "type": "single_quote_string",
+                      "value": "$.timeZone"
+                    }
+                  ]
+                },
+                "over": null,
+                "loc": {
+                  "start": {
+                    "offset": 1525,
+                    "line": 47,
+                    "column": 5
+                  },
+                  "end": {
+                    "offset": 1560,
+                    "line": 47,
+                    "column": 40
+                  }
+                }
+              },
+              "as": "timeZone"
+            }
+          ],
+          "from": [
+            {
+              "db": null,
+              "table": "person_data",
+              "as": null
+            }
+          ],
+          "where": null,
+          "groupby": null,
+          "having": null,
+          "orderby": null,
+          "limit": null,
+          "loc": {
+            "start": {
+              "offset": 862,
+              "line": 29,
+              "column": 3
+            },
+            "end": {
+              "offset": 1595,
+              "line": 50,
+              "column": 1
+            }
+          }
+        }
+      },
+      "columns": null
+    },
+    {
+      "name": {
+        "type": "default",
+        "value": "transformed_data"
+      },
+      "stmt": {
+        "tableList": [
+          "select::null::person",
+          "select::null::parameters",
+          "select::null::person_data",
+          "select::null::flatten_attributes"
+        ],
+        "columnList": [
+          "select::null::url",
+          "select::null::responsebody",
+          "select::null::responseheaders",
+          "select::null::method",
+          "select::null::responsestatus",
+          "select::null::p_from",
+          "select::null::p_to",
+          "select::null::keyId",
+          "select::null::personId",
+          "select::null::createdOn",
+          "select::null::updatedOn",
+          "select::null::person",
+          "select::null::addresses",
+          "select::null::eachAddress",
+          "select::null::phones",
+          "select::null::eachPhone",
+          "select::null::company",
+          "select::null::title",
+          "select::null::firstName",
+          "select::null::middleName",
+          "select::null::lastName",
+          "select::null::email",
+          "select::null::language",
+          "select::null::timeZone"
+        ],
+        "ast": {
+          "with": null,
+          "type": "select",
+          "options": null,
+          "distinct": null,
+          "columns": [
+            {
+              "type": "expr",
+              "expr": {
+                "type": "function",
+                "name": {
+                  "name": [
+                    {
+                      "type": "default",
+                      "value": "COALESCE"
+                    }
+                  ]
+                },
+                "args": {
+                  "type": "expr_list",
+                  "value": [
+                    {
+                      "type": "cast",
+                      "keyword": "cast",
+                      "expr": {
+                        "type": "function",
+                        "name": {
+                          "name": [
+                            {
+                              "type": "default",
+                              "value": "transform"
+                            }
+                          ]
+                        },
+                        "args": {
+                          "type": "expr_list",
+                          "value": [
+                            {
+                              "type": "column_ref",
+                              "table": null,
+                              "column": "addresses",
+                              "collate": null
+                            },
+                            {
+                              "type": "binary_expr",
+                              "operator": "->",
+                              "left": {
+                                "type": "column_ref",
+                                "table": null,
+                                "column": "eachAddress",
+                                "collate": null
+                              },
+                              "right": {
+                                "type": "function",
+                                "name": {
+                                  "name": [
+                                    {
+                                      "type": "default",
+                                      "value": "MAP"
+                                    }
+                                  ]
+                                },
+                                "args": {
+                                  "type": "expr_list",
+                                  "value": [
+                                    {
+                                      "expr_list": {
+                                        "type": "expr_list",
+                                        "value": [
+                                          {
+                                            "type": "single_quote_string",
+                                            "value": "postalCode"
+                                          },
+                                          {
+                                            "type": "single_quote_string",
+                                            "value": "city"
+                                          },
+                                          {
+                                            "type": "single_quote_string",
+                                            "value": "region"
+                                          },
+                                          {
+                                            "type": "single_quote_string",
+                                            "value": "type"
+                                          },
+                                          {
+                                            "type": "single_quote_string",
+                                            "value": "country"
+                                          },
+                                          {
+                                            "type": "single_quote_string",
+                                            "value": "streetLines"
+                                          }
+                                        ]
+                                      },
+                                      "type": "array",
+                                      "keyword": "array",
+                                      "brackets": true
+                                    },
+                                    {
+                                      "expr_list": {
+                                        "type": "expr_list",
+                                        "value": [
+                                          {
+                                            "type": "cast",
+                                            "keyword": "cast",
+                                            "expr": {
+                                              "type": "function",
+                                              "name": {
+                                                "name": [
+                                                  {
+                                                    "type": "default",
+                                                    "value": "COALESCE"
+                                                  }
+                                                ]
+                                              },
+                                              "args": {
+                                                "type": "expr_list",
+                                                "value": [
+                                                  {
+                                                    "type": "binary_expr",
+                                                    "operator": "||",
+                                                    "left": {
+                                                      "type": "binary_expr",
+                                                      "operator": "||",
+                                                      "left": {
+                                                        "type": "binary_expr",
+                                                        "operator": "||",
+                                                        "left": {
+                                                          "type": "binary_expr",
+                                                          "operator": "||",
+                                                          "left": {
+                                                            "type": "single_quote_string",
+                                                            "value": "\"{{"
+                                                          },
+                                                          "right": {
+                                                            "type": "column_ref",
+                                                            "table": null,
+                                                            "column": "keyId",
+                                                            "collate": null
+                                                          }
+                                                        },
+                                                        "right": {
+                                                          "type": "single_quote_string",
+                                                          "value": ":"
+                                                        }
+                                                      },
+                                                      "right": {
+                                                        "type": "cast",
+                                                        "keyword": "cast",
+                                                        "expr": {
+                                                          "type": "column_ref",
+                                                          "table": null,
+                                                          "column": "eachAddress",
+                                                          "collate": null,
+                                                          "array_index": [
+                                                            {
+                                                              "brackets": true,
+                                                              "index": {
+                                                                "type": "single_quote_string",
+                                                                "value": "postalCode"
+                                                              }
+                                                            }
+                                                          ]
+                                                        },
+                                                        "symbol": "as",
+                                                        "target": [
+                                                          {
+                                                            "dataType": "VARCHAR"
+                                                          }
+                                                        ]
+                                                      }
+                                                    },
+                                                    "right": {
+                                                      "type": "single_quote_string",
+                                                      "value": "}}\""
+                                                    }
+                                                  },
+                                                  {
+                                                    "type": "single_quote_string",
+                                                    "value": "\"\""
+                                                  }
+                                                ]
+                                              },
+                                              "over": null,
+                                              "loc": {
+                                                "start": {
+                                                  "offset": 1913,
+                                                  "line": 65,
+                                                  "column": 15
+                                                },
+                                                "end": {
+                                                  "offset": 2057,
+                                                  "line": 68,
+                                                  "column": 17
+                                                }
+                                              }
+                                            },
+                                            "symbol": "as",
+                                            "target": [
+                                              {
+                                                "dataType": "JSON"
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "type": "function",
+                                            "name": {
+                                              "name": [
+                                                {
+                                                  "type": "default",
+                                                  "value": "COALESCE"
+                                                }
+                                              ]
+                                            },
+                                            "args": {
+                                              "type": "expr_list",
+                                              "value": [
+                                                {
+                                                  "type": "column_ref",
+                                                  "table": null,
+                                                  "column": "eachAddress",
+                                                  "collate": null,
+                                                  "array_index": [
+                                                    {
+                                                      "brackets": true,
+                                                      "index": {
+                                                        "type": "single_quote_string",
+                                                        "value": "city"
+                                                      }
+                                                    }
+                                                  ]
+                                                },
+                                                {
+                                                  "type": "cast",
+                                                  "keyword": "cast",
+                                                  "expr": {
+                                                    "type": "single_quote_string",
+                                                    "value": "\"\""
+                                                  },
+                                                  "symbol": "as",
+                                                  "target": [
+                                                    {
+                                                      "dataType": "JSON"
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            },
+                                            "over": null,
+                                            "loc": {
+                                              "start": {
+                                                "offset": 2092,
+                                                "line": 70,
+                                                "column": 13
+                                              },
+                                              "end": {
+                                                "offset": 2144,
+                                                "line": 70,
+                                                "column": 65
+                                              }
+                                            }
+                                          },
+                                          {
+                                            "type": "function",
+                                            "name": {
+                                              "name": [
+                                                {
+                                                  "type": "default",
+                                                  "value": "COALESCE"
+                                                }
+                                              ]
+                                            },
+                                            "args": {
+                                              "type": "expr_list",
+                                              "value": [
+                                                {
+                                                  "type": "column_ref",
+                                                  "table": null,
+                                                  "column": "eachAddress",
+                                                  "collate": null,
+                                                  "array_index": [
+                                                    {
+                                                      "brackets": true,
+                                                      "index": {
+                                                        "type": "single_quote_string",
+                                                        "value": "region"
+                                                      }
+                                                    }
+                                                  ]
+                                                },
+                                                {
+                                                  "type": "cast",
+                                                  "keyword": "cast",
+                                                  "expr": {
+                                                    "type": "single_quote_string",
+                                                    "value": "\"\""
+                                                  },
+                                                  "symbol": "as",
+                                                  "target": [
+                                                    {
+                                                      "dataType": "JSON"
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            },
+                                            "over": null,
+                                            "loc": {
+                                              "start": {
+                                                "offset": 2158,
+                                                "line": 71,
+                                                "column": 13
+                                              },
+                                              "end": {
+                                                "offset": 2212,
+                                                "line": 71,
+                                                "column": 67
+                                              }
+                                            }
+                                          },
+                                          {
+                                            "type": "function",
+                                            "name": {
+                                              "name": [
+                                                {
+                                                  "type": "default",
+                                                  "value": "COALESCE"
+                                                }
+                                              ]
+                                            },
+                                            "args": {
+                                              "type": "expr_list",
+                                              "value": [
+                                                {
+                                                  "type": "column_ref",
+                                                  "table": null,
+                                                  "column": "eachAddress",
+                                                  "collate": null,
+                                                  "array_index": [
+                                                    {
+                                                      "brackets": true,
+                                                      "index": {
+                                                        "type": "single_quote_string",
+                                                        "value": "type"
+                                                      }
+                                                    }
+                                                  ]
+                                                },
+                                                {
+                                                  "type": "cast",
+                                                  "keyword": "cast",
+                                                  "expr": {
+                                                    "type": "single_quote_string",
+                                                    "value": "\"\""
+                                                  },
+                                                  "symbol": "as",
+                                                  "target": [
+                                                    {
+                                                      "dataType": "JSON"
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            },
+                                            "over": null,
+                                            "loc": {
+                                              "start": {
+                                                "offset": 2226,
+                                                "line": 72,
+                                                "column": 13
+                                              },
+                                              "end": {
+                                                "offset": 2278,
+                                                "line": 72,
+                                                "column": 65
+                                              }
+                                            }
+                                          },
+                                          {
+                                            "type": "function",
+                                            "name": {
+                                              "name": [
+                                                {
+                                                  "type": "default",
+                                                  "value": "COALESCE"
+                                                }
+                                              ]
+                                            },
+                                            "args": {
+                                              "type": "expr_list",
+                                              "value": [
+                                                {
+                                                  "type": "column_ref",
+                                                  "table": null,
+                                                  "column": "eachAddress",
+                                                  "collate": null,
+                                                  "array_index": [
+                                                    {
+                                                      "brackets": true,
+                                                      "index": {
+                                                        "type": "single_quote_string",
+                                                        "value": "country"
+                                                      }
+                                                    }
+                                                  ]
+                                                },
+                                                {
+                                                  "type": "cast",
+                                                  "keyword": "cast",
+                                                  "expr": {
+                                                    "type": "single_quote_string",
+                                                    "value": "\"\""
+                                                  },
+                                                  "symbol": "as",
+                                                  "target": [
+                                                    {
+                                                      "dataType": "JSON"
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            },
+                                            "over": null,
+                                            "loc": {
+                                              "start": {
+                                                "offset": 2292,
+                                                "line": 73,
+                                                "column": 13
+                                              },
+                                              "end": {
+                                                "offset": 2348,
+                                                "line": 73,
+                                                "column": 69
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      "type": "array",
+                                      "keyword": "array",
+                                      "brackets": true
+                                    }
+                                  ]
+                                },
+                                "over": null,
+                                "loc": {
+                                  "start": {
+                                    "offset": 1720,
+                                    "line": 57,
+                                    "column": 26
+                                  },
+                                  "end": {
+                                    "offset": 2370,
+                                    "line": 75,
+                                    "column": 9
+                                  }
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "over": null,
+                        "loc": {
+                          "start": {
+                            "offset": 1663,
+                            "line": 55,
+                            "column": 9
+                          },
+                          "end": {
+                            "offset": 2372,
+                            "line": 75,
+                            "column": 11
+                          }
+                        }
+                      },
+                      "symbol": "as",
+                      "target": [
+                        {
+                          "dataType": "JSON"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "cast",
+                      "keyword": "cast",
+                      "expr": {
+                        "expr_list": {
+                          "type": "origin",
+                          "value": ""
+                        },
+                        "type": "array",
+                        "keyword": "array",
+                        "brackets": true
+                      },
+                      "symbol": "as",
+                      "target": [
+                        {
+                          "dataType": "JSON"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "over": null,
+                "loc": {
+                  "start": {
+                    "offset": 1633,
+                    "line": 53,
+                    "column": 5
+                  },
+                  "end": {
+                    "offset": 2425,
+                    "line": 78,
+                    "column": 7
+                  }
+                }
+              },
+              "as": "addresses"
+            },
+            {
+              "type": "expr",
+              "expr": {
+                "type": "function",
+                "name": {
+                  "name": [
+                    {
+                      "type": "default",
+                      "value": "COALESCE"
+                    }
+                  ]
+                },
+                "args": {
+                  "type": "expr_list",
+                  "value": [
+                    {
+                      "type": "cast",
+                      "keyword": "cast",
+                      "expr": {
+                        "type": "function",
+                        "name": {
+                          "name": [
+                            {
+                              "type": "default",
+                              "value": "transform"
+                            }
+                          ]
+                        },
+                        "args": {
+                          "type": "expr_list",
+                          "value": [
+                            {
+                              "type": "column_ref",
+                              "table": null,
+                              "column": "phones",
+                              "collate": null
+                            },
+                            {
+                              "type": "binary_expr",
+                              "operator": "->",
+                              "left": {
+                                "type": "column_ref",
+                                "table": null,
+                                "column": "eachPhone",
+                                "collate": null
+                              },
+                              "right": {
+                                "type": "function",
+                                "name": {
+                                  "name": [
+                                    {
+                                      "type": "default",
+                                      "value": "MAP"
+                                    }
+                                  ]
+                                },
+                                "args": {
+                                  "type": "expr_list",
+                                  "value": [
+                                    {
+                                      "expr_list": {
+                                        "type": "expr_list",
+                                        "value": [
+                                          {
+                                            "type": "single_quote_string",
+                                            "value": "number"
+                                          },
+                                          {
+                                            "type": "single_quote_string",
+                                            "value": "extension"
+                                          },
+                                          {
+                                            "type": "single_quote_string",
+                                            "value": "type"
+                                          }
+                                        ]
+                                      },
+                                      "type": "array",
+                                      "keyword": "array",
+                                      "brackets": true
+                                    },
+                                    {
+                                      "expr_list": {
+                                        "type": "expr_list",
+                                        "value": [
+                                          {
+                                            "type": "function",
+                                            "name": {
+                                              "name": [
+                                                {
+                                                  "type": "default",
+                                                  "value": "COALESCE"
+                                                }
+                                              ]
+                                            },
+                                            "args": {
+                                              "type": "expr_list",
+                                              "value": [
+                                                {
+                                                  "type": "binary_expr",
+                                                  "operator": "||",
+                                                  "left": {
+                                                    "type": "binary_expr",
+                                                    "operator": "||",
+                                                    "left": {
+                                                      "type": "binary_expr",
+                                                      "operator": "||",
+                                                      "left": {
+                                                        "type": "binary_expr",
+                                                        "operator": "||",
+                                                        "left": {
+                                                          "type": "single_quote_string",
+                                                          "value": "{{"
+                                                        },
+                                                        "right": {
+                                                          "type": "column_ref",
+                                                          "table": null,
+                                                          "column": "keyId",
+                                                          "collate": null
+                                                        }
+                                                      },
+                                                      "right": {
+                                                        "type": "single_quote_string",
+                                                        "value": ":"
+                                                      }
+                                                    },
+                                                    "right": {
+                                                      "type": "column_ref",
+                                                      "table": null,
+                                                      "column": "eachPhone",
+                                                      "collate": null,
+                                                      "array_index": [
+                                                        {
+                                                          "brackets": true,
+                                                          "index": {
+                                                            "type": "single_quote_string",
+                                                            "value": "number"
+                                                          }
+                                                        }
+                                                      ]
+                                                    }
+                                                  },
+                                                  "right": {
+                                                    "type": "single_quote_string",
+                                                    "value": "}}"
+                                                  }
+                                                },
+                                                {
+                                                  "type": "single_quote_string",
+                                                  "value": ""
+                                                }
+                                              ]
+                                            },
+                                            "over": null,
+                                            "loc": {
+                                              "start": {
+                                                "offset": 2628,
+                                                "line": 87,
+                                                "column": 21
+                                              },
+                                              "end": {
+                                                "offset": 2696,
+                                                "line": 87,
+                                                "column": 89
+                                              }
+                                            }
+                                          },
+                                          {
+                                            "type": "function",
+                                            "name": {
+                                              "name": [
+                                                {
+                                                  "type": "default",
+                                                  "value": "COALESCE"
+                                                }
+                                              ]
+                                            },
+                                            "args": {
+                                              "type": "expr_list",
+                                              "value": [
+                                                {
+                                                  "type": "binary_expr",
+                                                  "operator": "||",
+                                                  "left": {
+                                                    "type": "binary_expr",
+                                                    "operator": "||",
+                                                    "left": {
+                                                      "type": "binary_expr",
+                                                      "operator": "||",
+                                                      "left": {
+                                                        "type": "binary_expr",
+                                                        "operator": "||",
+                                                        "left": {
+                                                          "type": "single_quote_string",
+                                                          "value": "{{"
+                                                        },
+                                                        "right": {
+                                                          "type": "column_ref",
+                                                          "table": null,
+                                                          "column": "keyId",
+                                                          "collate": null
+                                                        }
+                                                      },
+                                                      "right": {
+                                                        "type": "single_quote_string",
+                                                        "value": ":"
+                                                      }
+                                                    },
+                                                    "right": {
+                                                      "type": "column_ref",
+                                                      "table": null,
+                                                      "column": "eachPhone",
+                                                      "collate": null,
+                                                      "array_index": [
+                                                        {
+                                                          "brackets": true,
+                                                          "index": {
+                                                            "type": "single_quote_string",
+                                                            "value": "extension"
+                                                          }
+                                                        }
+                                                      ]
+                                                    }
+                                                  },
+                                                  "right": {
+                                                    "type": "single_quote_string",
+                                                    "value": "}}"
+                                                  }
+                                                },
+                                                {
+                                                  "type": "single_quote_string",
+                                                  "value": ""
+                                                }
+                                              ]
+                                            },
+                                            "over": null,
+                                            "loc": {
+                                              "start": {
+                                                "offset": 2710,
+                                                "line": 88,
+                                                "column": 13
+                                              },
+                                              "end": {
+                                                "offset": 2823,
+                                                "line": 91,
+                                                "column": 14
+                                              }
+                                            }
+                                          },
+                                          {
+                                            "type": "function",
+                                            "name": {
+                                              "name": [
+                                                {
+                                                  "type": "default",
+                                                  "value": "COALESCE"
+                                                }
+                                              ]
+                                            },
+                                            "args": {
+                                              "type": "expr_list",
+                                              "value": [
+                                                {
+                                                  "type": "column_ref",
+                                                  "table": null,
+                                                  "column": "eachPhone",
+                                                  "collate": null,
+                                                  "array_index": [
+                                                    {
+                                                      "brackets": true,
+                                                      "index": {
+                                                        "type": "single_quote_string",
+                                                        "value": "type"
+                                                      }
+                                                    }
+                                                  ]
+                                                },
+                                                {
+                                                  "type": "single_quote_string",
+                                                  "value": ""
+                                                }
+                                              ]
+                                            },
+                                            "over": null,
+                                            "loc": {
+                                              "start": {
+                                                "offset": 2837,
+                                                "line": 92,
+                                                "column": 13
+                                              },
+                                              "end": {
+                                                "offset": 2872,
+                                                "line": 92,
+                                                "column": 48
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      "type": "array",
+                                      "keyword": "array",
+                                      "brackets": true
+                                    }
+                                  ]
+                                },
+                                "over": null,
+                                "loc": {
+                                  "start": {
+                                    "offset": 2526,
+                                    "line": 83,
+                                    "column": 24
+                                  },
+                                  "end": {
+                                    "offset": 2894,
+                                    "line": 94,
+                                    "column": 9
+                                  }
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "over": null,
+                        "loc": {
+                          "start": {
+                            "offset": 2474,
+                            "line": 81,
+                            "column": 9
+                          },
+                          "end": {
+                            "offset": 2896,
+                            "line": 94,
+                            "column": 11
+                          }
+                        }
+                      },
+                      "symbol": "as",
+                      "target": [
+                        {
+                          "dataType": "JSON"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "cast",
+                      "keyword": "cast",
+                      "expr": {
+                        "expr_list": {
+                          "type": "origin",
+                          "value": ""
+                        },
+                        "type": "array",
+                        "keyword": "array",
+                        "brackets": true
+                      },
+                      "symbol": "as",
+                      "target": [
+                        {
+                          "dataType": "JSON"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "over": null,
+                "loc": {
+                  "start": {
+                    "offset": 2443,
+                    "line": 79,
+                    "column": 5
+                  },
+                  "end": {
+                    "offset": 2949,
+                    "line": 97,
+                    "column": 7
+                  }
+                }
+              },
+              "as": "phones"
+            },
+            {
+              "type": "expr",
+              "expr": {
+                "type": "cast",
+                "keyword": "cast",
+                "expr": {
+                  "type": "function",
+                  "name": {
+                    "name": [
+                      {
+                        "type": "default",
+                        "value": "COALESCE"
+                      }
+                    ]
+                  },
+                  "args": {
+                    "type": "expr_list",
+                    "value": [
+                      {
+                        "type": "binary_expr",
+                        "operator": "||",
+                        "left": {
+                          "type": "binary_expr",
+                          "operator": "||",
+                          "left": {
+                            "type": "binary_expr",
+                            "operator": "||",
+                            "left": {
+                              "type": "binary_expr",
+                              "operator": "||",
+                              "left": {
+                                "type": "single_quote_string",
+                                "value": "\"{{"
+                              },
+                              "right": {
+                                "type": "column_ref",
+                                "table": null,
+                                "column": "keyId",
+                                "collate": null
+                              }
+                            },
+                            "right": {
+                              "type": "single_quote_string",
+                              "value": ":"
+                            }
+                          },
+                          "right": {
+                            "type": "column_ref",
+                            "table": null,
+                            "column": "company",
+                            "collate": null
+                          }
+                        },
+                        "right": {
+                          "type": "single_quote_string",
+                          "value": "}}\""
+                        }
+                      },
+                      {
+                        "type": "single_quote_string",
+                        "value": "\"\""
+                      }
+                    ]
+                  },
+                  "over": null,
+                  "loc": {
+                    "start": {
+                      "offset": 2976,
+                      "line": 99,
+                      "column": 7
+                    },
+                    "end": {
+                      "offset": 3034,
+                      "line": 99,
+                      "column": 65
+                    }
+                  }
+                },
+                "symbol": "as",
+                "target": [
+                  {
+                    "dataType": "JSON"
+                  }
+                ]
+              },
+              "as": "company"
+            },
+            {
+              "type": "expr",
+              "expr": {
+                "type": "cast",
+                "keyword": "cast",
+                "expr": {
+                  "type": "function",
+                  "name": {
+                    "name": [
+                      {
+                        "type": "default",
+                        "value": "COALESCE"
+                      }
+                    ]
+                  },
+                  "args": {
+                    "type": "expr_list",
+                    "value": [
+                      {
+                        "type": "binary_expr",
+                        "operator": "||",
+                        "left": {
+                          "type": "binary_expr",
+                          "operator": "||",
+                          "left": {
+                            "type": "binary_expr",
+                            "operator": "||",
+                            "left": {
+                              "type": "binary_expr",
+                              "operator": "||",
+                              "left": {
+                                "type": "single_quote_string",
+                                "value": "\"{{"
+                              },
+                              "right": {
+                                "type": "column_ref",
+                                "table": null,
+                                "column": "keyId",
+                                "collate": null
+                              }
+                            },
+                            "right": {
+                              "type": "single_quote_string",
+                              "value": ":"
+                            }
+                          },
+                          "right": {
+                            "type": "column_ref",
+                            "table": null,
+                            "column": "title",
+                            "collate": null
+                          }
+                        },
+                        "right": {
+                          "type": "single_quote_string",
+                          "value": "}}\""
+                        }
+                      },
+                      {
+                        "type": "single_quote_string",
+                        "value": "\"\""
+                      }
+                    ]
+                  },
+                  "over": null,
+                  "loc": {
+                    "start": {
+                      "offset": 3076,
+                      "line": 102,
+                      "column": 7
+                    },
+                    "end": {
+                      "offset": 3132,
+                      "line": 102,
+                      "column": 63
+                    }
+                  }
+                },
+                "symbol": "as",
+                "target": [
+                  {
+                    "dataType": "JSON"
+                  }
+                ]
+              },
+              "as": "title"
+            },
+            {
+              "type": "expr",
+              "expr": {
+                "type": "cast",
+                "keyword": "cast",
+                "expr": {
+                  "type": "function",
+                  "name": {
+                    "name": [
+                      {
+                        "type": "default",
+                        "value": "COALESCE"
+                      }
+                    ]
+                  },
+                  "args": {
+                    "type": "expr_list",
+                    "value": [
+                      {
+                        "type": "binary_expr",
+                        "operator": "||",
+                        "left": {
+                          "type": "binary_expr",
+                          "operator": "||",
+                          "left": {
+                            "type": "binary_expr",
+                            "operator": "||",
+                            "left": {
+                              "type": "binary_expr",
+                              "operator": "||",
+                              "left": {
+                                "type": "single_quote_string",
+                                "value": "\"{{"
+                              },
+                              "right": {
+                                "type": "column_ref",
+                                "table": null,
+                                "column": "keyId",
+                                "collate": null
+                              }
+                            },
+                            "right": {
+                              "type": "single_quote_string",
+                              "value": ":"
+                            }
+                          },
+                          "right": {
+                            "type": "column_ref",
+                            "table": null,
+                            "column": "firstName",
+                            "collate": null
+                          }
+                        },
+                        "right": {
+                          "type": "single_quote_string",
+                          "value": "}}\""
+                        }
+                      },
+                      {
+                        "type": "single_quote_string",
+                        "value": "\"\""
+                      }
+                    ]
+                  },
+                  "over": null,
+                  "loc": {
+                    "start": {
+                      "offset": 3172,
+                      "line": 105,
+                      "column": 7
+                    },
+                    "end": {
+                      "offset": 3232,
+                      "line": 105,
+                      "column": 67
+                    }
+                  }
+                },
+                "symbol": "as",
+                "target": [
+                  {
+                    "dataType": "JSON"
+                  }
+                ]
+              },
+              "as": "firstName"
+            },
+            {
+              "type": "expr",
+              "expr": {
+                "type": "cast",
+                "keyword": "cast",
+                "expr": {
+                  "type": "function",
+                  "name": {
+                    "name": [
+                      {
+                        "type": "default",
+                        "value": "COALESCE"
+                      }
+                    ]
+                  },
+                  "args": {
+                    "type": "expr_list",
+                    "value": [
+                      {
+                        "type": "binary_expr",
+                        "operator": "||",
+                        "left": {
+                          "type": "binary_expr",
+                          "operator": "||",
+                          "left": {
+                            "type": "binary_expr",
+                            "operator": "||",
+                            "left": {
+                              "type": "binary_expr",
+                              "operator": "||",
+                              "left": {
+                                "type": "single_quote_string",
+                                "value": "\"{{"
+                              },
+                              "right": {
+                                "type": "column_ref",
+                                "table": null,
+                                "column": "keyId",
+                                "collate": null
+                              }
+                            },
+                            "right": {
+                              "type": "single_quote_string",
+                              "value": ":"
+                            }
+                          },
+                          "right": {
+                            "type": "column_ref",
+                            "table": null,
+                            "column": "middleName",
+                            "collate": null
+                          }
+                        },
+                        "right": {
+                          "type": "single_quote_string",
+                          "value": "}}\""
+                        }
+                      },
+                      {
+                        "type": "single_quote_string",
+                        "value": "\"\""
+                      }
+                    ]
+                  },
+                  "over": null,
+                  "loc": {
+                    "start": {
+                      "offset": 3276,
+                      "line": 108,
+                      "column": 7
+                    },
+                    "end": {
+                      "offset": 3337,
+                      "line": 108,
+                      "column": 68
+                    }
+                  }
+                },
+                "symbol": "as",
+                "target": [
+                  {
+                    "dataType": "JSON"
+                  }
+                ]
+              },
+              "as": "middleName"
+            },
+            {
+              "type": "expr",
+              "expr": {
+                "type": "cast",
+                "keyword": "cast",
+                "expr": {
+                  "type": "function",
+                  "name": {
+                    "name": [
+                      {
+                        "type": "default",
+                        "value": "COALESCE"
+                      }
+                    ]
+                  },
+                  "args": {
+                    "type": "expr_list",
+                    "value": [
+                      {
+                        "type": "binary_expr",
+                        "operator": "||",
+                        "left": {
+                          "type": "binary_expr",
+                          "operator": "||",
+                          "left": {
+                            "type": "binary_expr",
+                            "operator": "||",
+                            "left": {
+                              "type": "binary_expr",
+                              "operator": "||",
+                              "left": {
+                                "type": "single_quote_string",
+                                "value": "\"{{"
+                              },
+                              "right": {
+                                "type": "column_ref",
+                                "table": null,
+                                "column": "keyId",
+                                "collate": null
+                              }
+                            },
+                            "right": {
+                              "type": "single_quote_string",
+                              "value": ":"
+                            }
+                          },
+                          "right": {
+                            "type": "column_ref",
+                            "table": null,
+                            "column": "lastName",
+                            "collate": null
+                          }
+                        },
+                        "right": {
+                          "type": "single_quote_string",
+                          "value": "}}\""
+                        }
+                      },
+                      {
+                        "type": "single_quote_string",
+                        "value": "\"\""
+                      }
+                    ]
+                  },
+                  "over": null,
+                  "loc": {
+                    "start": {
+                      "offset": 3382,
+                      "line": 111,
+                      "column": 7
+                    },
+                    "end": {
+                      "offset": 3441,
+                      "line": 111,
+                      "column": 66
+                    }
+                  }
+                },
+                "symbol": "as",
+                "target": [
+                  {
+                    "dataType": "JSON"
+                  }
+                ]
+              },
+              "as": "lastName"
+            },
+            {
+              "type": "expr",
+              "expr": {
+                "type": "cast",
+                "keyword": "cast",
+                "expr": {
+                  "type": "function",
+                  "name": {
+                    "name": [
+                      {
+                        "type": "default",
+                        "value": "COALESCE"
+                      }
+                    ]
+                  },
+                  "args": {
+                    "type": "expr_list",
+                    "value": [
+                      {
+                        "type": "binary_expr",
+                        "operator": "||",
+                        "left": {
+                          "type": "binary_expr",
+                          "operator": "||",
+                          "left": {
+                            "type": "binary_expr",
+                            "operator": "||",
+                            "left": {
+                              "type": "binary_expr",
+                              "operator": "||",
+                              "left": {
+                                "type": "single_quote_string",
+                                "value": "\"{{"
+                              },
+                              "right": {
+                                "type": "column_ref",
+                                "table": null,
+                                "column": "keyId",
+                                "collate": null
+                              }
+                            },
+                            "right": {
+                              "type": "single_quote_string",
+                              "value": ":"
+                            }
+                          },
+                          "right": {
+                            "type": "column_ref",
+                            "table": null,
+                            "column": "email",
+                            "collate": null
+                          }
+                        },
+                        "right": {
+                          "type": "single_quote_string",
+                          "value": "}}\""
+                        }
+                      },
+                      {
+                        "type": "single_quote_string",
+                        "value": "\"\""
+                      }
+                    ]
+                  },
+                  "over": null,
+                  "loc": {
+                    "start": {
+                      "offset": 3484,
+                      "line": 114,
+                      "column": 7
+                    },
+                    "end": {
+                      "offset": 3540,
+                      "line": 114,
+                      "column": 63
+                    }
+                  }
+                },
+                "symbol": "as",
+                "target": [
+                  {
+                    "dataType": "JSON"
+                  }
+                ]
+              },
+              "as": "email"
+            },
+            {
+              "type": "expr",
+              "expr": {
+                "type": "function",
+                "name": {
+                  "name": [
+                    {
+                      "type": "default",
+                      "value": "COALESCE"
+                    }
+                  ]
+                },
+                "args": {
+                  "type": "expr_list",
+                  "value": [
+                    {
+                      "type": "column_ref",
+                      "table": null,
+                      "column": "language",
+                      "collate": null
+                    },
+                    {
+                      "type": "cast",
+                      "keyword": "cast",
+                      "expr": {
+                        "type": "single_quote_string",
+                        "value": "\"\""
+                      },
+                      "symbol": "as",
+                      "target": [
+                        {
+                          "dataType": "JSON"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "over": null,
+                "loc": {
+                  "start": {
+                    "offset": 3568,
+                    "line": 116,
+                    "column": 5
+                  },
+                  "end": {
+                    "offset": 3607,
+                    "line": 116,
+                    "column": 44
+                  }
+                }
+              },
+              "as": "language"
+            },
+            {
+              "type": "expr",
+              "expr": {
+                "type": "function",
+                "name": {
+                  "name": [
+                    {
+                      "type": "default",
+                      "value": "COALESCE"
+                    }
+                  ]
+                },
+                "args": {
+                  "type": "expr_list",
+                  "value": [
+                    {
+                      "type": "column_ref",
+                      "table": null,
+                      "column": "timeZone",
+                      "collate": null
+                    },
+                    {
+                      "type": "cast",
+                      "keyword": "cast",
+                      "expr": {
+                        "type": "single_quote_string",
+                        "value": "\"\""
+                      },
+                      "symbol": "as",
+                      "target": [
+                        {
+                          "dataType": "JSON"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "over": null,
+                "loc": {
+                  "start": {
+                    "offset": 3624,
+                    "line": 117,
+                    "column": 5
+                  },
+                  "end": {
+                    "offset": 3663,
+                    "line": 117,
+                    "column": 44
+                  }
+                }
+              },
+              "as": "timeZone"
+            },
+            {
+              "type": "expr",
+              "expr": {
+                "type": "cast",
+                "keyword": "cast",
+                "expr": {
+                  "type": "binary_expr",
+                  "operator": "||",
+                  "left": {
+                    "type": "binary_expr",
+                    "operator": "||",
+                    "left": {
+                      "type": "single_quote_string",
+                      "value": "\""
+                    },
+                    "right": {
+                      "type": "column_ref",
+                      "table": null,
+                      "column": "personId",
+                      "collate": null
+                    }
+                  },
+                  "right": {
+                    "type": "single_quote_string",
+                    "value": "\""
+                  }
+                },
+                "symbol": "as",
+                "target": [
+                  {
+                    "dataType": "JSON"
+                  }
+                ]
+              },
+              "as": "personId"
+            },
+            {
+              "type": "expr",
+              "expr": {
+                "type": "cast",
+                "keyword": "cast",
+                "expr": {
+                  "type": "binary_expr",
+                  "operator": "||",
+                  "left": {
+                    "type": "binary_expr",
+                    "operator": "||",
+                    "left": {
+                      "type": "single_quote_string",
+                      "value": "\""
+                    },
+                    "right": {
+                      "type": "column_ref",
+                      "table": null,
+                      "column": "createdOn",
+                      "collate": null
+                    }
+                  },
+                  "right": {
+                    "type": "single_quote_string",
+                    "value": "\""
+                  }
+                },
+                "symbol": "as",
+                "target": [
+                  {
+                    "dataType": "JSON"
+                  }
+                ]
+              },
+              "as": "createdOn"
+            },
+            {
+              "type": "expr",
+              "expr": {
+                "type": "column_ref",
+                "table": null,
+                "column": "updatedOn",
+                "collate": null
+              },
+              "as": null
+            }
+          ],
+          "from": [
+            {
+              "db": null,
+              "table": "flatten_attributes",
+              "as": null
+            }
+          ],
+          "where": null,
+          "groupby": null,
+          "having": null,
+          "orderby": null,
+          "limit": null,
+          "loc": {
+            "start": {
+              "offset": 1622,
+              "line": 52,
+              "column": 3
+            },
+            "end": {
+              "offset": 3830,
+              "line": 123,
+              "column": 1
+            }
+          }
+        }
+      },
+      "columns": null
+    },
+    {
+      "name": {
+        "type": "default",
+        "value": "constant_values"
+      },
+      "stmt": {
+        "tableList": [
+          "select::null::person",
+          "select::null::parameters",
+          "select::null::person_data",
+          "select::null::flatten_attributes"
+        ],
+        "columnList": [
+          "select::null::url",
+          "select::null::responsebody",
+          "select::null::responseheaders",
+          "select::null::method",
+          "select::null::responsestatus",
+          "select::null::p_from",
+          "select::null::p_to",
+          "select::null::keyId",
+          "select::null::personId",
+          "select::null::createdOn",
+          "select::null::updatedOn",
+          "select::null::person",
+          "select::null::addresses",
+          "select::null::eachAddress",
+          "select::null::phones",
+          "select::null::eachPhone",
+          "select::null::company",
+          "select::null::title",
+          "select::null::firstName",
+          "select::null::middleName",
+          "select::null::lastName",
+          "select::null::email",
+          "select::null::language",
+          "select::null::timeZone"
+        ],
+        "ast": {
+          "with": null,
+          "type": "select",
+          "options": null,
+          "distinct": null,
+          "columns": [
+            {
+              "type": "expr",
+              "expr": {
+                "type": "cast",
+                "keyword": "cast",
+                "expr": {
+                  "type": "single_quote_string",
+                  "value": "\"\""
+                },
+                "symbol": "as",
+                "target": [
+                  {
+                    "dataType": "JSON"
+                  }
+                ]
+              },
+              "as": "dependentOfPerson"
+            },
+            {
+              "type": "expr",
+              "expr": {
+                "type": "cast",
+                "keyword": "cast",
+                "expr": {
+                  "type": "single_quote_string",
+                  "value": "\"teampay-prod\""
+                },
+                "symbol": "as",
+                "target": [
+                  {
+                    "dataType": "JSON"
+                  }
+                ]
+              },
+              "as": "source"
+            },
+            {
+              "type": "expr",
+              "expr": {
+                "type": "cast",
+                "keyword": "cast",
+                "expr": {
+                  "type": "single_quote_string",
+                  "value": "\"choice-prod\""
+                },
+                "symbol": "as",
+                "target": [
+                  {
+                    "dataType": "JSON"
+                  }
+                ]
+              },
+              "as": "destination"
+            }
+          ],
+          "from": null,
+          "where": null,
+          "groupby": null,
+          "having": null,
+          "orderby": null,
+          "limit": null,
+          "loc": {
+            "start": {
+              "offset": 3856,
+              "line": 125,
+              "column": 3
+            },
+            "end": {
+              "offset": 4003,
+              "line": 129,
+              "column": 1
+            }
+          }
+        }
+      },
+      "columns": null
+    }
+  ],
+  "type": "select",
+  "options": null,
+  "distinct": null,
+  "columns": [
+    {
+      "type": "expr",
+      "expr": {
+        "type": "cast",
+        "keyword": "cast",
+        "expr": {
+          "type": "function",
+          "name": {
+            "name": [
+              {
+                "type": "default",
+                "value": "MAP"
+              }
+            ]
+          },
+          "args": {
+            "type": "expr_list",
+            "value": [
+              {
+                "expr_list": {
+                  "type": "expr_list",
+                  "value": [
+                    {
+                      "type": "single_quote_string",
+                      "value": "source"
+                    },
+                    {
+                      "type": "single_quote_string",
+                      "value": "destination"
+                    },
+                    {
+                      "type": "single_quote_string",
+                      "value": "company"
+                    },
+                    {
+                      "type": "single_quote_string",
+                      "value": "title"
+                    },
+                    {
+                      "type": "single_quote_string",
+                      "value": "firstName"
+                    },
+                    {
+                      "type": "single_quote_string",
+                      "value": "middleName"
+                    },
+                    {
+                      "type": "single_quote_string",
+                      "value": "lastName"
+                    },
+                    {
+                      "type": "single_quote_string",
+                      "value": "email"
+                    },
+                    {
+                      "type": "single_quote_string",
+                      "value": "language"
+                    },
+                    {
+                      "type": "single_quote_string",
+                      "value": "timeZone"
+                    },
+                    {
+                      "type": "single_quote_string",
+                      "value": "personId"
+                    },
+                    {
+                      "type": "single_quote_string",
+                      "value": "dependentOfPerson"
+                    },
+                    {
+                      "type": "single_quote_string",
+                      "value": "phones"
+                    },
+                    {
+                      "type": "single_quote_string",
+                      "value": "addresses"
+                    },
+                    {
+                      "type": "single_quote_string",
+                      "value": "createdOn"
+                    },
+                    {
+                      "type": "single_quote_string",
+                      "value": "updatedOn"
+                    }
+                  ]
+                },
+                "type": "array",
+                "keyword": "array",
+                "brackets": true
+              },
+              {
+                "expr_list": {
+                  "type": "expr_list",
+                  "value": [
+                    {
+                      "type": "column_ref",
+                      "table": null,
+                      "column": "source",
+                      "collate": null
+                    },
+                    {
+                      "type": "column_ref",
+                      "table": null,
+                      "column": "destination",
+                      "collate": null
+                    },
+                    {
+                      "type": "column_ref",
+                      "table": null,
+                      "column": "company",
+                      "collate": null
+                    },
+                    {
+                      "type": "column_ref",
+                      "table": null,
+                      "column": "title",
+                      "collate": null
+                    },
+                    {
+                      "type": "column_ref",
+                      "table": null,
+                      "column": "firstName",
+                      "collate": null
+                    },
+                    {
+                      "type": "column_ref",
+                      "table": null,
+                      "column": "middleName",
+                      "collate": null
+                    },
+                    {
+                      "type": "column_ref",
+                      "table": null,
+                      "column": "lastName",
+                      "collate": null
+                    },
+                    {
+                      "type": "column_ref",
+                      "table": null,
+                      "column": "email",
+                      "collate": null
+                    },
+                    {
+                      "type": "column_ref",
+                      "table": null,
+                      "column": "language",
+                      "collate": null
+                    },
+                    {
+                      "type": "column_ref",
+                      "table": null,
+                      "column": "timeZone",
+                      "collate": null
+                    },
+                    {
+                      "type": "column_ref",
+                      "table": null,
+                      "column": "personId",
+                      "collate": null
+                    },
+                    {
+                      "type": "column_ref",
+                      "table": null,
+                      "column": "dependentOfPerson",
+                      "collate": null
+                    },
+                    {
+                      "type": "column_ref",
+                      "table": null,
+                      "column": "phones",
+                      "collate": null
+                    },
+                    {
+                      "type": "column_ref",
+                      "table": null,
+                      "column": "addresses",
+                      "collate": null
+                    },
+                    {
+                      "type": "column_ref",
+                      "table": null,
+                      "column": "createdOn",
+                      "collate": null
+                    },
+                    {
+                      "type": "cast",
+                      "keyword": "cast",
+                      "expr": {
+                        "type": "binary_expr",
+                        "operator": "||",
+                        "left": {
+                          "type": "binary_expr",
+                          "operator": "||",
+                          "left": {
+                            "type": "single_quote_string",
+                            "value": "\""
+                          },
+                          "right": {
+                            "type": "column_ref",
+                            "table": null,
+                            "column": "updatedOn",
+                            "collate": null
+                          }
+                        },
+                        "right": {
+                          "type": "single_quote_string",
+                          "value": "\""
+                        }
+                      },
+                      "symbol": "as",
+                      "target": [
+                        {
+                          "dataType": "JSON"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "type": "array",
+                "keyword": "array",
+                "brackets": true
+              }
+            ]
+          },
+          "over": null,
+          "loc": {
+            "start": {
+              "offset": 4024,
+              "line": 132,
+              "column": 5
+            },
+            "end": {
+              "offset": 4640,
+              "line": 165,
+              "column": 7
+            }
+          }
+        },
+        "symbol": "as",
+        "target": [
+          {
+            "dataType": "JSON"
+          }
+        ]
+      },
+      "as": "CustomerReport"
+    },
+    {
+      "type": "expr",
+      "expr": {
         "type": "column_ref",
         "table": null,
-        "column": "responsestatus",
+        "column": "updatedOn",
         "collate": null
       },
-      "right": {
-        "type": "single_quote_string",
-        "value": "204"
-      }
+      "as": null
     }
-  },
+  ],
+  "from": [
+    {
+      "db": null,
+      "table": "transformed_data",
+      "as": null
+    },
+    {
+      "db": null,
+      "table": "constant_values",
+      "as": null
+    }
+  ],
+  "where": null,
   "groupby": null,
   "having": null,
-  "orderby": null,
+  "orderby": [
+    {
+      "expr": {
+        "type": "column_ref",
+        "table": null,
+        "column": "updatedOn",
+        "collate": null
+      },
+      "type": null
+    }
+  ],
   "limit": null,
   "loc": {
     "start": {
@@ -342,9 +3308,9 @@
       "column": 1
     },
     "end": {
-      "offset": 386,
-      "line": 11,
-      "column": 35
+      "offset": 4746,
+      "line": 172,
+      "column": 12
     }
   }
 }

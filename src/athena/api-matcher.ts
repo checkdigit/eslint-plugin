@@ -50,7 +50,8 @@ function getPathPartMatcher(selectAST: object, _tableAST: object): Matcher | und
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     return (path: string, _method: string) => {
       const parts = path.split('/'); /*?*/
-      const part = parts[pathPartIndex]; /*?*/
+      const part = parts[pathPartIndex-1]; //athena index is larger than js index by one /*?*/
+      log(`checking path part`, { path, pathPartIndex, part, pathPartMatch });
       return part?.startsWith(':') === true
         ? true // ignore path part if it presents a dynamic input parameter
         : parts[pathPartIndex - 1] === pathPartMatch; // try to match with static path part
@@ -136,7 +137,7 @@ export function matchApi(selectAST: object, tableAST: object, apiSchemas: ApiSch
     log('no matched operation schema');
     throw new Error('no matched operation schema');
   } else if (matchedOperationSchemas.length > 1) {
-    log('multiple matched operation schemas');
+    log('multiple matched operation schemas', matchedOperationSchemas);
     return undefined;
   }
 

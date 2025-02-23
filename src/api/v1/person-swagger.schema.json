@@ -1,0 +1,1575 @@
+{
+  "apis": {
+    "/person/v1/ping": {
+      "get": {
+        "request": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/api/PingGetRequestContext",
+          "type": "object",
+          "properties": {
+            "headers": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "responses": {
+          "200": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/api/PingGetResponseOK",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$ref": "/person/v1/schemas/definitions/Ping"
+              }
+            },
+            "required": [
+              "body"
+            ],
+            "additionalProperties": false
+          },
+          "default": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/api/PingGetResponseDefault",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$ref": "/person/v1/schemas/definitions/Error"
+              }
+            },
+            "required": [
+              "body"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "/person/v1/public-key": {
+      "get": {
+        "request": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/api/PublicKeyGetRequestContext",
+          "type": "object",
+          "properties": {
+            "headers": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "responses": {
+          "200": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/api/PublicKeyGetResponseOK",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "properties": {
+                  "created-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "updated-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                },
+                "required": [
+                  "created-on",
+                  "updated-on"
+                ]
+              },
+              "body": {
+                "$ref": "/person/v1/schemas/definitions/PublicKeyResponse"
+              }
+            },
+            "required": [
+              "headers",
+              "body"
+            ],
+            "additionalProperties": false
+          },
+          "default": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/api/PublicKeyGetResponseDefault",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$ref": "/person/v1/schemas/definitions/Error"
+              }
+            },
+            "required": [
+              "body"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "/person/v1/data-encryption-key/:dataEncryptionKeyId": {
+      "get": {
+        "request": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/api/DataEncryptionKeyGetRequestContext",
+          "type": "object",
+          "properties": {
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "dataEncryptionKeyId": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              },
+              "required": [
+                "dataEncryptionKeyId"
+              ]
+            },
+            "headers": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "required": [
+            "params"
+          ],
+          "additionalProperties": false
+        },
+        "responses": {
+          "200": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/api/DataEncryptionKeyGetResponseOK",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "properties": {
+                  "created-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "updated-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "last-modified": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              },
+              "body": {
+                "$ref": "/person/v1/schemas/definitions/DataEncryptionKeyResponse"
+              }
+            },
+            "required": [
+              "body"
+            ],
+            "additionalProperties": false
+          },
+          "404": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/api/DataEncryptionKeyGetResponseNotFound",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "default": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/api/DataEncryptionKeyGetResponseDefault",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$ref": "/person/v1/schemas/definitions/Error"
+              }
+            },
+            "required": [
+              "body"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "put": {
+        "request": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/api/DataEncryptionKeyPutRequestContext",
+          "type": "object",
+          "properties": {
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "dataEncryptionKeyId": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              },
+              "required": [
+                "dataEncryptionKeyId"
+              ]
+            },
+            "headers": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "body": {
+              "$ref": "/person/v1/schemas/definitions/DataEncryptionKeyRequest"
+            }
+          },
+          "required": [
+            "params",
+            "body"
+          ],
+          "additionalProperties": false
+        },
+        "responses": {
+          "200": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/api/DataEncryptionKeyPutResponseOK",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "properties": {
+                  "created-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "updated-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "last-modified": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              },
+              "body": {
+                "$ref": "/person/v1/schemas/definitions/DataEncryptionKeyResponse"
+              }
+            },
+            "required": [
+              "body"
+            ],
+            "additionalProperties": false
+          },
+          "default": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/api/DataEncryptionKeyPutResponseDefault",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$ref": "/person/v1/schemas/definitions/Error"
+              }
+            },
+            "required": [
+              "body"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "/person/v1/person/:personId": {
+      "get": {
+        "request": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/api/PersonGetRequestContext",
+          "type": "object",
+          "properties": {
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "publicKeyHash": {
+                  "type": "string",
+                  "format": "uuid",
+                  "example": "15a85f64-5717-4562-b3fc-2c963f66afa6"
+                }
+              },
+              "required": [
+                "at"
+              ]
+            },
+            "headers": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "required": [
+            "params",
+            "query"
+          ],
+          "additionalProperties": false
+        },
+        "responses": {
+          "200": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/api/PersonGetResponseOK",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "properties": {
+                  "last-modified": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "created-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "updated-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "etag": {
+                    "type": "string"
+                  }
+                }
+              },
+              "body": {
+                "$ref": "/person/v1/schemas/definitions/PersonResponse"
+              }
+            },
+            "required": [
+              "body"
+            ],
+            "additionalProperties": false
+          },
+          "404": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/api/PersonGetResponseNotFound",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "default": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/api/PersonGetResponseDefault",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$ref": "/person/v1/schemas/definitions/Error"
+              }
+            },
+            "required": [
+              "body"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "put": {
+        "request": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/api/PersonPutRequestContext",
+          "type": "object",
+          "properties": {
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "personId": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              },
+              "required": [
+                "personId"
+              ]
+            },
+            "headers": {
+              "type": "object",
+              "additionalProperties": true,
+              "properties": {
+                "if-match": {
+                  "type": "string"
+                },
+                "created-on": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "last-modified": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            },
+            "body": {
+              "$ref": "/person/v1/schemas/definitions/PersonRequest"
+            }
+          },
+          "required": [
+            "params",
+            "body"
+          ],
+          "additionalProperties": false
+        },
+        "responses": {
+          "200": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/api/PersonPutResponseOK",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "properties": {
+                  "last-modified": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "created-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "updated-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "etag": {
+                    "type": "string"
+                  }
+                }
+              },
+              "body": {
+                "$ref": "/person/v1/schemas/definitions/PersonResponse"
+              }
+            },
+            "required": [
+              "body"
+            ],
+            "additionalProperties": false
+          },
+          "409": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/api/PersonPutResponseConflict",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "412": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/api/PersonPutResponsePreconditionFailed",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "default": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/api/PersonPutResponseDefault",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$ref": "/person/v1/schemas/definitions/Error"
+              }
+            },
+            "required": [
+              "body"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "/person/v1/person/:personId/history": {
+      "get": {
+        "request": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/api/PersonHistoryGetRequestContext",
+          "type": "object",
+          "properties": {
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "toDate": {
+                  "type": "string",
+                  "description": "Date time in simplified extended ISO format",
+                  "format": "date-time"
+                },
+                "fromDate": {
+                  "type": "string",
+                  "description": "Date time in simplified extended ISO format",
+                  "default": "1970-01-01T00:00:00.000Z",
+                  "format": "date-time"
+                },
+                "publicKeyHash": {
+                  "type": "string",
+                  "format": "uuid",
+                  "example": "15a85f64-5717-4562-b3fc-2c963f66afa6"
+                }
+              },
+              "required": [
+                "toDate"
+              ]
+            },
+            "headers": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "required": [
+            "params",
+            "query"
+          ],
+          "additionalProperties": false
+        },
+        "responses": {
+          "200": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/api/PersonHistoryGetResponseOK",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$ref": "/person/v1/schemas/definitions/History"
+              }
+            },
+            "required": [
+              "body"
+            ],
+            "additionalProperties": false
+          },
+          "404": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/api/PersonHistoryGetResponseNotFound",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "default": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/api/PersonHistoryGetResponseDefault",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$ref": "/person/v1/schemas/definitions/Error"
+              }
+            },
+            "required": [
+              "body"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "/person/v1/person/:personId/masked": {
+      "get": {
+        "request": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/api/PersonMaskedGetRequestContext",
+          "type": "object",
+          "properties": {
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "at"
+              ]
+            },
+            "headers": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "required": [
+            "params",
+            "query"
+          ],
+          "additionalProperties": false
+        },
+        "responses": {
+          "200": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/api/PersonMaskedGetResponseOK",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "properties": {
+                  "last-modified": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "created-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "updated-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "etag": {
+                    "type": "string"
+                  }
+                }
+              },
+              "body": {
+                "$ref": "/person/v1/schemas/definitions/PersonMaskedResponse"
+              }
+            },
+            "required": [
+              "body"
+            ],
+            "additionalProperties": false
+          },
+          "404": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/api/PersonMaskedGetResponseNotFound",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "default": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/api/PersonMaskedGetResponseDefault",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$ref": "/person/v1/schemas/definitions/Error"
+              }
+            },
+            "required": [
+              "body"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Ping": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/Ping",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "serverTime"
+      ],
+      "properties": {
+        "serverTime": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Current server time"
+        }
+      }
+    },
+    "DataEncryptionKeyId": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/DataEncryptionKeyId",
+      "type": "string",
+      "description": "Reference to encryption keys Person Service used to encrypt the Person object.\n\nUpdates must use the same dataEncryptionKeyId.\n",
+      "format": "uuid"
+    },
+    "DataEncryptionKeyResponse": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/DataEncryptionKeyResponse",
+      "type": "object",
+      "required": [
+        "encryptedDataEncryptionKeys",
+        "transmissionKey",
+        "createdOn",
+        "lastModified"
+      ],
+      "properties": {
+        "createdOn": {
+          "description": "Time data was first stored",
+          "type": "string",
+          "format": "date-time"
+        },
+        "lastModified": {
+          "description": "Time data was last modified",
+          "type": "string",
+          "format": "date-time"
+        },
+        "encryptedDataEncryptionKeys": {
+          "type": "array",
+          "items": {
+            "$ref": "/person/v1/schemas/definitions/EncryptedDataEncryptionKey"
+          }
+        },
+        "transmissionKey": {
+          "type": "string",
+          "description": "A PEM formatted public key to use when transmitting data to Person service.\nEncrypt the data encryption key used to encrypt data being sent using the transmissionKey.\n"
+        }
+      }
+    },
+    "DataEncryptionKeyRequest": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/DataEncryptionKeyRequest",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "publicKeys"
+      ],
+      "properties": {
+        "publicKeys": {
+          "type": "array",
+          "minItems": 1,
+          "description": "List of public keys in PEM format.\n\nAssociated private keys can be used to decrypt person data encrypted by Person Service.\n",
+          "items": {
+            "$ref": "/person/v1/schemas/definitions/PublicKey"
+          }
+        }
+      }
+    },
+    "PersonRequest": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/PersonRequest",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dataEncryptionKeyId",
+        "encryptedDataEncryptionKey",
+        "person"
+      ],
+      "properties": {
+        "dataEncryptionKeyId": {
+          "$ref": "/person/v1/schemas/definitions/DataEncryptionKeyId"
+        },
+        "encryptedDataEncryptionKey": {
+          "description": "Encrypted version of AES-256 DEK",
+          "type": "string"
+        },
+        "person": {
+          "$ref": "/person/v1/schemas/definitions/Person"
+        }
+      }
+    },
+    "PersonRecord": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/PersonRecord",
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Encrypted version of object stored with created on and last modified metadata.",
+      "required": [
+        "createdOn",
+        "updatedOn",
+        "person"
+      ],
+      "properties": {
+        "createdOn": {
+          "description": "Time data was first stored",
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedOn": {
+          "description": "Time data was last stored",
+          "type": "string",
+          "format": "date-time"
+        },
+        "lastModified": {
+          "description": "Time data was last stored (deprecated, use updatedOn)",
+          "deprecated": true,
+          "type": "string",
+          "format": "date-time"
+        },
+        "person": {
+          "$ref": "/person/v1/schemas/definitions/Person"
+        }
+      }
+    },
+    "PersonResponse": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/PersonResponse",
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Encrypted version of object stored and related ids and metadata. A encryptedDataEncryptionKey is included if\na publicKeyHash query parameter is supplied as part of request.\n",
+      "required": [
+        "dataEncryptionKeyId",
+        "storageKeyId",
+        "createdOn",
+        "updatedOn",
+        "person"
+      ],
+      "properties": {
+        "dataEncryptionKeyId": {
+          "$ref": "/person/v1/schemas/definitions/DataEncryptionKeyId"
+        },
+        "storageKeyId": {
+          "type": "string",
+          "description": "DEK's non-derived identifier to be used by Check Digit services only.\n"
+        },
+        "encryptedDataEncryptionKey": {
+          "description": "Encrypted DEK matching the publicKeyId sent in the request. Used to decrypt values in the Person object.\n",
+          "type": "string"
+        },
+        "createdOn": {
+          "description": "Time data was first stored",
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedOn": {
+          "description": "Time data was last stored",
+          "type": "string",
+          "format": "date-time"
+        },
+        "lastModified": {
+          "description": "Time data was last stored (deprecated, use updatedOn)",
+          "deprecated": true,
+          "type": "string",
+          "format": "date-time"
+        },
+        "person": {
+          "$ref": "/person/v1/schemas/definitions/Person"
+        }
+      }
+    },
+    "PersonMaskedResponse": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/PersonMaskedResponse",
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Encrypted version of object stored and related ids and metadata. A encryptedDataEncryptionKey is included if\na publicKeyHash query parameter is supplied as part of request.\n",
+      "required": [
+        "createdOn",
+        "updatedOn",
+        "person"
+      ],
+      "properties": {
+        "createdOn": {
+          "description": "Time data was first stored",
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedOn": {
+          "description": "Time data was last stored",
+          "type": "string",
+          "format": "date-time"
+        },
+        "person": {
+          "$ref": "/person/v1/schemas/definitions/PersonMasked"
+        }
+      }
+    },
+    "PhoneType": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/PhoneType",
+      "type": "string",
+      "description": "Type of phone number.",
+      "enum": [
+        "HOME",
+        "WORK",
+        "MOBILE",
+        "FAX",
+        "MAIN",
+        "OTHER"
+      ]
+    },
+    "PersonMasked": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/PersonMasked",
+      "type": "object",
+      "additionalProperties": false,
+      "description": "This object includes masked person data.\n",
+      "properties": {
+        "company": {
+          "type": "string",
+          "description": "Masked company name."
+        },
+        "firstName": {
+          "minLength": 1,
+          "type": "string",
+          "description": "Masked first name."
+        },
+        "middleName": {
+          "minLength": 1,
+          "type": "string",
+          "description": "Masked middle name."
+        },
+        "lastName": {
+          "minLength": 1,
+          "type": "string",
+          "description": "Masked last name."
+        },
+        "addresses": {
+          "type": "array",
+          "description": "Masked address information.",
+          "items": {
+            "$ref": "/person/v1/schemas/definitions/AddressMasked"
+          }
+        },
+        "phones": {
+          "type": "array",
+          "description": "Masked phone information.",
+          "items": {
+            "required": [
+              "number",
+              "type"
+            ],
+            "type": "object",
+            "properties": {
+              "type": {
+                "$ref": "/person/v1/schemas/definitions/PhoneType"
+              },
+              "number": {
+                "minLength": 1,
+                "type": "string",
+                "description": "Masked phone number."
+              }
+            }
+          }
+        },
+        "email": {
+          "minLength": 1,
+          "type": "string",
+          "description": "Masked email address."
+        },
+        "language": {
+          "minLength": 1,
+          "type": "string",
+          "description": "Unmasked language preference."
+        },
+        "timeZone": {
+          "minLength": 1,
+          "type": "string",
+          "description": "Unmasked time zone preference."
+        }
+      }
+    },
+    "EncryptedDataEncryptionKey": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/EncryptedDataEncryptionKey",
+      "type": "object",
+      "additionalProperties": false,
+      "description": "An object that includes an encrypted data encryption key and a hashed version of the public key used to encrypt it.\n",
+      "required": [
+        "publicKeyHash",
+        "encryptedDataEncryptionKey"
+      ],
+      "properties": {
+        "publicKeyHash": {
+          "$ref": "/person/v1/schemas/definitions/PublicKeyHash"
+        },
+        "encryptedDataEncryptionKey": {
+          "description": "Data encryption key encrypted with a public key.",
+          "type": "string"
+        }
+      }
+    },
+    "PublicKeyHash": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/PublicKeyHash",
+      "type": "string",
+      "description": "UUID derived using @checkdigit/hash",
+      "format": "uuid",
+      "example": "15a85f64-5717-4562-b3fc-2c963f66afa6"
+    },
+    "Person": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/Person",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "company": {
+          "minLength": 1,
+          "type": "string",
+          "description": "Encrypted company name using the AES algorithm"
+        },
+        "title": {
+          "minLength": 1,
+          "type": "string",
+          "description": "Encrypted title using the AES algorithm"
+        },
+        "firstName": {
+          "minLength": 1,
+          "type": "string",
+          "description": "Encrypted first name using the AES algorithm"
+        },
+        "middleName": {
+          "minLength": 1,
+          "type": "string",
+          "description": "Encrypted middle name using the AES algorithm"
+        },
+        "lastName": {
+          "minLength": 1,
+          "type": "string",
+          "description": "Encrypted last name using the AES algorithm"
+        },
+        "addresses": {
+          "type": "array",
+          "items": {
+            "$ref": "/person/v1/schemas/definitions/Address"
+          }
+        },
+        "phones": {
+          "type": "array",
+          "items": {
+            "$ref": "/person/v1/schemas/definitions/Phone"
+          }
+        },
+        "email": {
+          "minLength": 1,
+          "type": "string",
+          "description": "Encrypted email address using the AES algorithm"
+        },
+        "language": {
+          "minLength": 1,
+          "type": "string",
+          "description": "User's language preference"
+        },
+        "timeZone": {
+          "minLength": 1,
+          "type": "string",
+          "description": "User's timezone"
+        }
+      }
+    },
+    "History": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/History",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "updates"
+      ],
+      "properties": {
+        "dataEncryptionKeyId": {
+          "type": "string",
+          "description": "Reference to encryption keys Person Service used to encrypt the Person object.\n\nUpdates must use the same dataEncryptionKeyId.\n",
+          "format": "uuid"
+        },
+        "storageKeyId": {
+          "type": "string",
+          "description": "DEK's non-derived identifier to be used by Check Digit services only.\n"
+        },
+        "encryptedDataEncryptionKey": {
+          "description": "Encrypted DEK matching the publicKeyId sent in the request. Used to decrypt all the items in the list.\n",
+          "type": "string"
+        },
+        "updates": {
+          "type": "array",
+          "description": "A list of PersonRecord objects. Each object represents a change to data in the Person object.\nObjects are sorted by the lastModified date with the most recent object first.\n",
+          "items": {
+            "$ref": "/person/v1/schemas/definitions/PersonRecord"
+          }
+        }
+      }
+    },
+    "Address": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/Address",
+      "required": [
+        "country",
+        "streetLines",
+        "type"
+      ],
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Type of address",
+          "enum": [
+            "BILLING",
+            "SHIPPING",
+            "STATEMENTS",
+            "OTHER"
+          ]
+        },
+        "streetLines": {
+          "maxItems": 4,
+          "minItems": 1,
+          "type": "array",
+          "description": "Encrypted street lines using the AES algorithm",
+          "items": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Street line"
+          }
+        },
+        "city": {
+          "minLength": 1,
+          "type": "string",
+          "description": "City"
+        },
+        "region": {
+          "minLength": 1,
+          "type": "string",
+          "description": "Region, State or Province"
+        },
+        "postalCode": {
+          "minLength": 1,
+          "type": "string",
+          "description": "AES encrypted postal code. This value should contain only alphanumeric characters.\nIncluding non-alphanumeric characters will result in a 400 when sent as a request.\n"
+        },
+        "reportablePostalCode": {
+          "type": "string",
+          "description": "Postal code for reporting purposes."
+        },
+        "country": {
+          "$ref": "/person/v1/schemas/definitions/Country"
+        }
+      }
+    },
+    "AddressMasked": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/AddressMasked",
+      "type": "object",
+      "required": [
+        "country",
+        "streetLines",
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Type of address.",
+          "enum": [
+            "BILLING",
+            "SHIPPING",
+            "STATEMENTS",
+            "OTHER"
+          ]
+        },
+        "streetLines": {
+          "maxItems": 4,
+          "minItems": 1,
+          "type": "array",
+          "description": "Street lines with all non-numeric characters masked.",
+          "items": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Masked street line."
+          }
+        },
+        "city": {
+          "minLength": 1,
+          "type": "string",
+          "description": "Unmasked city."
+        },
+        "region": {
+          "minLength": 1,
+          "type": "string",
+          "description": "Unmasked region, state or province."
+        },
+        "country": {
+          "$ref": "/person/v1/schemas/definitions/Country"
+        },
+        "postalCodeLongHash": {
+          "minLength": 1,
+          "type": "string",
+          "description": "Long-form postal code hashed using @checkdigit/hash."
+        },
+        "postalCodeShortHash": {
+          "minLength": 1,
+          "type": "string",
+          "description": "Short-form postal code hashed using @checkdigit/hash."
+        }
+      }
+    },
+    "Phone": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/Phone",
+      "required": [
+        "number",
+        "type"
+      ],
+      "type": "object",
+      "properties": {
+        "type": {
+          "$ref": "/person/v1/schemas/definitions/PhoneType"
+        },
+        "number": {
+          "minLength": 1,
+          "type": "string",
+          "description": "Encrypted phone number using the AES algorithm"
+        },
+        "extension": {
+          "minLength": 1,
+          "type": "string",
+          "description": "Encrypted phone number extension using the AES algorithm"
+        }
+      }
+    },
+    "Error": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/Error",
+      "type": "object",
+      "properties": {
+        "message": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "code": {
+          "type": "string"
+        }
+      },
+      "description": "Error message"
+    },
+    "PublicKey": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/PublicKey",
+      "description": "RSA generated public key in PEM format",
+      "type": "string",
+      "example": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwm2sxmRdTF7ZIBA6+ngO\n8jOTCHmID0PpQB1q85+hrcLSfB1rWY9bzNNLabBo/ajDnA4Pcadq/x6gpg70qZcR\n9Wxm6TttKzBPZsxasGXgSTDqEi2KcYZgq1mL4qyxUvyIms7/llGy+W9b5huZaVcO\nxdT1tw/zctbOhb6S2t5vH+zkta/2ncUXjG7i8XdLsJ1qe4K1kYbA4KVkOMmAtw7O\n4STk0TZDD0YARdmrciorJjbIVt0Xj1CrYQ5QbDGrlfeXgrcZwX5f9wT2MnKlY5oZ\n5Wtb57oGtLkVf8g6vN/2jGtAmOmHK2hHwNd/+zUet5G/S5uwEli4RgMPP4pUoKgd\nGQIDAQAB\n-----END PUBLIC KEY-----\n"
+    },
+    "PublicKeyResponse": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/PublicKeyResponse",
+      "description": "This object contains the rsa generated public key for the Person Service. This public key must be used\nwhen transmitting encrypted data to Person Service APIs.\n",
+      "type": "object",
+      "required": [
+        "publicKey"
+      ],
+      "properties": {
+        "publicKey": {
+          "$ref": "/person/v1/schemas/definitions/PublicKey"
+        }
+      }
+    },
+    "Country": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/Country",
+      "type": "string",
+      "description": "Country ISO 3166-1 alpha-2 codes",
+      "enum": [
+        "AD",
+        "AE",
+        "AF",
+        "AG",
+        "AI",
+        "AL",
+        "AM",
+        "AO",
+        "AQ",
+        "AR",
+        "AS",
+        "AT",
+        "AU",
+        "AW",
+        "AX",
+        "AZ",
+        "BA",
+        "BB",
+        "BD",
+        "BE",
+        "BF",
+        "BG",
+        "BH",
+        "BI",
+        "BJ",
+        "BL",
+        "BM",
+        "BN",
+        "BO",
+        "BQ",
+        "BR",
+        "BS",
+        "BT",
+        "BV",
+        "BW",
+        "BY",
+        "BZ",
+        "CA",
+        "CC",
+        "CD",
+        "CF",
+        "CG",
+        "CH",
+        "CI",
+        "CK",
+        "CL",
+        "CM",
+        "CN",
+        "CO",
+        "CR",
+        "CU",
+        "CV",
+        "CW",
+        "CX",
+        "CY",
+        "CZ",
+        "DE",
+        "DJ",
+        "DK",
+        "DM",
+        "DO",
+        "DZ",
+        "EC",
+        "EE",
+        "EG",
+        "EH",
+        "ER",
+        "ES",
+        "ET",
+        "FI",
+        "FJ",
+        "FK",
+        "FM",
+        "FO",
+        "FR",
+        "GA",
+        "GB",
+        "GD",
+        "GE",
+        "GF",
+        "GG",
+        "GH",
+        "GI",
+        "GL",
+        "GM",
+        "GN",
+        "GP",
+        "GQ",
+        "GR",
+        "GS",
+        "GT",
+        "GU",
+        "GW",
+        "GY",
+        "HK",
+        "HM",
+        "HN",
+        "HR",
+        "HT",
+        "HU",
+        "ID",
+        "IE",
+        "IL",
+        "IM",
+        "IN",
+        "IO",
+        "IQ",
+        "IR",
+        "IS",
+        "IT",
+        "JE",
+        "JM",
+        "JO",
+        "JP",
+        "KE",
+        "KG",
+        "KH",
+        "KI",
+        "KM",
+        "KN",
+        "KP",
+        "KR",
+        "KW",
+        "KY",
+        "KZ",
+        "LA",
+        "LB",
+        "LC",
+        "LI",
+        "LK",
+        "LR",
+        "LS",
+        "LT",
+        "LU",
+        "LV",
+        "LY",
+        "MA",
+        "MC",
+        "MD",
+        "ME",
+        "MF",
+        "MG",
+        "MH",
+        "MK",
+        "ML",
+        "MM",
+        "MN",
+        "MO",
+        "MP",
+        "MQ",
+        "MR",
+        "MS",
+        "MT",
+        "MU",
+        "MV",
+        "MW",
+        "MX",
+        "MY",
+        "MZ",
+        "NA",
+        "NC",
+        "NE",
+        "NF",
+        "NG",
+        "NI",
+        "NL",
+        "NO",
+        "NP",
+        "NR",
+        "NU",
+        "NZ",
+        "OM",
+        "PA",
+        "PE",
+        "PF",
+        "PG",
+        "PH",
+        "PK",
+        "PL",
+        "PM",
+        "PN",
+        "PR",
+        "PS",
+        "PT",
+        "PW",
+        "PY",
+        "QA",
+        "RE",
+        "RO",
+        "RS",
+        "RU",
+        "RW",
+        "SA",
+        "SB",
+        "SC",
+        "SD",
+        "SE",
+        "SG",
+        "SH",
+        "SI",
+        "SJ",
+        "SK",
+        "SL",
+        "SM",
+        "SN",
+        "SO",
+        "SR",
+        "SS",
+        "ST",
+        "SV",
+        "SX",
+        "SY",
+        "SZ",
+        "TC",
+        "TD",
+        "TF",
+        "TG",
+        "TH",
+        "TJ",
+        "TK",
+        "TL",
+        "TM",
+        "TN",
+        "TO",
+        "TR",
+        "TT",
+        "TV",
+        "TW",
+        "TZ",
+        "UA",
+        "UG",
+        "UM",
+        "US",
+        "UY",
+        "UZ",
+        "VA",
+        "VC",
+        "VE",
+        "VG",
+        "VI",
+        "VN",
+        "VU",
+        "WF",
+        "WS",
+        "YE",
+        "YT",
+        "ZA",
+        "ZM",
+        "ZW"
+      ]
+    }
+  }
+}
