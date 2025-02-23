@@ -120,7 +120,7 @@ createTester().run(ruleId, rule, {
         {
           messageId: 'AthenaError',
           data: {
-            errorMessage: 'can\'t found column foo in tables: link',
+            errorMessage: "can't found column foo in tables: link",
           },
         },
       ],
@@ -192,7 +192,7 @@ flatten_attributes AS (
     json_extract_scalar(person, '$.lastName') AS lastName,
     json_extract_scalar(person, '$.email') AS email,
     json_extract(person, '$.language') AS language,
-    json_extract(person, '$.timeZone') AS timeZone
+    json_extract(person, '$.XtimeZone') AS timeZone
   FROM
     person_data
 ),
@@ -322,7 +322,7 @@ ORDER BY
         {
           messageId: 'AthenaError',
           data: {
-            errorMessage: 'property not found responseheaders - $.foo',
+            errorMessage: 'property not found person - $.XtimeZone',
           },
         },
       ],

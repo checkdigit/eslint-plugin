@@ -1,10 +1,18 @@
 import fs from 'node:fs';
+
 import { describe, it } from '@jest/globals';
 import { JSONPath } from 'jsonpath-plus';
+
 import { generateSchemas } from '../openapi/generate-schema';
+import { derefSchema } from '../openapi/deref-schema';
 
 describe('json.spec.ts', () => {
-  it('create schema', async () => {
+  it.skip('deref schema', async () => {
+    await derefSchema('src/api/v1/link-swagger.schema');
+    await derefSchema('src/api/v1/person-swagger.schema');
+  });
+
+  it.skip('create schema', async () => {
     await generateSchemas();
   });
 

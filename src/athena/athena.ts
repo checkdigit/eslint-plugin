@@ -140,7 +140,7 @@ function checkSelect(selectAST: With | Select, context: AthenaContext, withTable
     log('checking column', columnAST);
 
     const columnReferences = JSONPath<ColumnRefItem[]>({
-      json: columnAST as object,
+      json: columnAST as object /*?*/,
       path: "$..[?(@ && @.type === 'column_ref' && @.column)]",
     }); /*?*/
 
@@ -208,7 +208,7 @@ function checkSelect(selectAST: With | Select, context: AthenaContext, withTable
     assert.ok(resolvedColumn !== undefined);
     const [propertyAccessor] = JSONPath<string[]>({
       json: columnAST as object,
-      path: "$..[?(@ && @.type === 'function' && @.name && @.name.name && @.name.name[0] && @.name.name[0].value === 'json_extract_scalar')].args.value[1].value",
+      path: "$..[?(@ && @.type === 'function' && @.name && @.name.name && @.name.name[0] && (@.name.name[0].value === 'json_extract_scalar' || @.name.name[0].value === 'json_extract') )].args.value[1].value",
     }); /*?*/
     if (propertyAccessor === undefined) {
       log('no property accessor found, keep it as default type');
