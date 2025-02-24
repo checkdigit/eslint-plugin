@@ -32,7 +32,7 @@ import noEnum from './no-enum.ts';
 import noSideEffects from './no-side-effects.ts';
 import noRandomV4UUID from './no-random-v4-uuid.ts';
 import noTestImport from './no-test-import.ts';
-import noUtil from './no-util';
+import noUtil from './no-util.ts';
 import noUuid from './no-uuid.ts';
 import noWallabyComment from './no-wallaby-comment.ts';
 import objectLiteralResponse from './object-literal-response.ts';

@@ -7,7 +7,7 @@
  */
 
 import { RuleTester } from '@typescript-eslint/rule-tester';
-import rule, { ruleId } from './no-util';
+import rule, { ruleId } from './no-util.ts';
 
 const ruleTester = new RuleTester({
   languageOptions: {
@@ -44,6 +44,11 @@ ruleTester.run(ruleId, rule, {
       name: 'Valid case with test-utility.ts',
       code: `test`,
       filename: 'test-utility.ts',
+    },
+    {
+      name: 'Valid case with util.ts and comment with eslint',
+      code: `// eslint-disable-next-line...../no-util\n test`,
+      filename: 'util.ts',
     },
   ],
   invalid: [
