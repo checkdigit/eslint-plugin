@@ -51,4 +51,13 @@ describe('json.spec.ts', () => {
       path: "$.where..[?(@ !== null && @.type === 'binary_expr' && @.operator === '=' && @.left.type === 'function' && @.left.name.name[0].value && @.left.name.name[0].value === 'cardinality' && @.right.type === 'number' && @.left.args.value[0].type === 'function' && @.left.args.value[0].name.name[0].value === 'split' && @.left.args.value[0].args.value[0].type === 'column_ref' && @.left.args.value[0].args.value[0].column === 'url' && @.left.args.value[0].args.value[1].type === 'single_quote_string' && @.left.args.value[0].args.value[1].value === '/')].right.value",
     }); /*?*/
   });
+
+  it.skip('handle unnested json', () => {
+    const json = JSON.parse(fs.readFileSync('ast.json', 'utf-8'));
+    JSONPath({
+      json,
+      path: "$..from[?(@ && @.type === 'unnest')].as.args.value[0].column",
+    }); /*?*/
+  });
+
 });

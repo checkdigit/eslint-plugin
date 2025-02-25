@@ -80,15 +80,28 @@ createTester().run(ruleId, rule, {
       code: `\`SELECT TRY_CAST(url as JSON) FROM person\``,
     },
     {
-      name: 'CROSS JOIN UNNEST',
+      name: 'CROSS JOIN UNNEST - not referenced',
       // [TODO:] handle array item type extraction using schema dereferencing
-      code: `\`SELECT url, cast(responsebody as ARRAY<VARCHAR>) as linkages
+      code: `\`SELECT url, cast(json_extract(responsebody, '$.links') as ARRAY<VARCHAR>) as linkages
         FROM link
-          CROSS JOIN UNNEST(linkages) AS t (score)
+          CROSS JOIN UNNEST(linkages) AS t (linkage)
         WHERE
           cardinality(split(url, '/')) = 5
           AND method = 'GET'
           AND responsestatus = '200';
+        \``,
+    },
+    {
+      name: 'CROSS JOIN UNNEST - referenced',
+      // [TODO:] handle array item type extraction using schema dereferencing
+      code: `\`WITH unnested as (SELECT url, cast(json_extract(responsebody, '$.links') as ARRAY<MAP<VARCHAR,VARCHAR>>) as linkages
+        FROM link
+          CROSS JOIN UNNEST(linkages) AS t (linkage)
+        WHERE
+          cardinality(split(url, '/')) = 5
+          AND method = 'GET'
+          AND responsestatus = '200')
+        select json_extract(linkage, '$.subjectId') from unnested;
         \``,
     },
     {

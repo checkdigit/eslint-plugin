@@ -74,7 +74,7 @@ export function getErrorLocation(ast: object): string {
   return JSON.stringify(JSONPath({ json: ast, path: '$..loc' }), undefined, 2);
 }
 
-// eslint-disable-next-line sonarjs/cognitive-complexity
+// eslint-disable-next-line sonarjs/cognitive-complexity, max-lines-per-function
 function checkSelect(selectAST: With | Select, context: AthenaContext, withTableName?: string) {
   log('checking SELECT', selectAST);
 
@@ -248,6 +248,32 @@ function checkSelect(selectAST: With | Select, context: AthenaContext, withTable
     tableColumns[columnNameToUse] = extractedSchemas.map((extracedSchema) =>
       getColumn(columnNameToUse, extracedSchema, columnAST as object),
     );
+  }
+
+  // handle UNNEST columns
+  const unnestColumns = JSONPath<ColumnRefItem[]>({
+    json: selectAST,
+    path: "$..from[?(@ && @.type === 'unnest')]",
+  });
+  log('unnest columns', unnestColumns);
+  for (const unnestColumn of unnestColumns) {
+    const [unnestedColumnName] = JSONPath<string[]>({
+      json: unnestColumn,
+      path: '$.expr.column',
+    }); /*?*/
+    assert.ok(unnestedColumnName !== undefined);
+    const unnestedColumn = tableColumns[unnestedColumnName]; /*?*/
+    assert.ok(unnestedColumn !== undefined);
+    const unnestedColumnSchema = unnestedColumn[0]?.schema; /*?*/
+    assert.ok(unnestedColumnSchema?.type === 'array');
+    const [addedColumnName] = JSONPath<string[]>({
+      json: unnestColumn,
+      path: '$.as.args.value[0].column',
+    }); /*?*/
+    assert.ok(addedColumnName !== undefined);
+    tableColumns[addedColumnName] = [
+      getColumn(addedColumnName, unnestedColumnSchema.items as SchemaObject, unnestColumn),
+    ];
   }
 
   log('resolved columns', tableColumns);
