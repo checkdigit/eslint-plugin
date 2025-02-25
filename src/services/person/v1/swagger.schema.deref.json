@@ -30,9 +30,7 @@
                 "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/Ping",
                 "type": "object",
                 "additionalProperties": false,
-                "required": [
-                  "serverTime"
-                ],
+                "required": ["serverTime"],
                 "properties": {
                   "serverTime": {
                     "type": "string",
@@ -42,9 +40,7 @@
                 }
               }
             },
-            "required": [
-              "body"
-            ],
+            "required": ["body"],
             "additionalProperties": false
           },
           "default": {
@@ -72,9 +68,7 @@
                 "description": "Error message"
               }
             },
-            "required": [
-              "body"
-            ],
+            "required": ["body"],
             "additionalProperties": false
           }
         }
@@ -113,19 +107,14 @@
                     "format": "date-time"
                   }
                 },
-                "required": [
-                  "created-on",
-                  "updated-on"
-                ]
+                "required": ["created-on", "updated-on"]
               },
               "body": {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
                 "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/PublicKeyResponse",
                 "description": "This object contains the rsa generated public key for the Person Service. This public key must be used\nwhen transmitting encrypted data to Person Service APIs.\n",
                 "type": "object",
-                "required": [
-                  "publicKey"
-                ],
+                "required": ["publicKey"],
                 "properties": {
                   "publicKey": {
                     "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -137,10 +126,7 @@
                 }
               }
             },
-            "required": [
-              "headers",
-              "body"
-            ],
+            "required": ["headers", "body"],
             "additionalProperties": false
           },
           "default": {
@@ -168,9 +154,7 @@
                 "description": "Error message"
               }
             },
-            "required": [
-              "body"
-            ],
+            "required": ["body"],
             "additionalProperties": false
           }
         }
@@ -192,18 +176,14 @@
                   "format": "uuid"
                 }
               },
-              "required": [
-                "dataEncryptionKeyId"
-              ]
+              "required": ["dataEncryptionKeyId"]
             },
             "headers": {
               "type": "object",
               "additionalProperties": true
             }
           },
-          "required": [
-            "params"
-          ],
+          "required": ["params"],
           "additionalProperties": false
         },
         "responses": {
@@ -233,12 +213,7 @@
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
                 "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/DataEncryptionKeyResponse",
                 "type": "object",
-                "required": [
-                  "encryptedDataEncryptionKeys",
-                  "transmissionKey",
-                  "createdOn",
-                  "lastModified"
-                ],
+                "required": ["encryptedDataEncryptionKeys", "transmissionKey", "createdOn", "lastModified"],
                 "properties": {
                   "createdOn": {
                     "description": "Time data was first stored",
@@ -258,10 +233,7 @@
                       "type": "object",
                       "additionalProperties": false,
                       "description": "An object that includes an encrypted data encryption key and a hashed version of the public key used to encrypt it.\n",
-                      "required": [
-                        "publicKeyHash",
-                        "encryptedDataEncryptionKey"
-                      ],
+                      "required": ["publicKeyHash", "encryptedDataEncryptionKey"],
                       "properties": {
                         "publicKeyHash": {
                           "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -285,9 +257,7 @@
                 }
               }
             },
-            "required": [
-              "body"
-            ],
+            "required": ["body"],
             "additionalProperties": false
           },
           "404": {
@@ -328,9 +298,7 @@
                 "description": "Error message"
               }
             },
-            "required": [
-              "body"
-            ],
+            "required": ["body"],
             "additionalProperties": false
           }
         }
@@ -350,9 +318,7 @@
                   "format": "uuid"
                 }
               },
-              "required": [
-                "dataEncryptionKeyId"
-              ]
+              "required": ["dataEncryptionKeyId"]
             },
             "headers": {
               "type": "object",
@@ -363,9 +329,7 @@
               "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/DataEncryptionKeyRequest",
               "type": "object",
               "additionalProperties": false,
-              "required": [
-                "publicKeys"
-              ],
+              "required": ["publicKeys"],
               "properties": {
                 "publicKeys": {
                   "type": "array",
@@ -382,10 +346,7 @@
               }
             }
           },
-          "required": [
-            "params",
-            "body"
-          ],
+          "required": ["params", "body"],
           "additionalProperties": false
         },
         "responses": {
@@ -415,12 +376,7 @@
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
                 "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/DataEncryptionKeyResponse",
                 "type": "object",
-                "required": [
-                  "encryptedDataEncryptionKeys",
-                  "transmissionKey",
-                  "createdOn",
-                  "lastModified"
-                ],
+                "required": ["encryptedDataEncryptionKeys", "transmissionKey", "createdOn", "lastModified"],
                 "properties": {
                   "createdOn": {
                     "description": "Time data was first stored",
@@ -440,10 +396,7 @@
                       "type": "object",
                       "additionalProperties": false,
                       "description": "An object that includes an encrypted data encryption key and a hashed version of the public key used to encrypt it.\n",
-                      "required": [
-                        "publicKeyHash",
-                        "encryptedDataEncryptionKey"
-                      ],
+                      "required": ["publicKeyHash", "encryptedDataEncryptionKey"],
                       "properties": {
                         "publicKeyHash": {
                           "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -467,9 +420,7 @@
                 }
               }
             },
-            "required": [
-              "body"
-            ],
+            "required": ["body"],
             "additionalProperties": false
           },
           "default": {
@@ -497,9 +448,7 @@
                 "description": "Error message"
               }
             },
-            "required": [
-              "body"
-            ],
+            "required": ["body"],
             "additionalProperties": false
           }
         }
@@ -526,19 +475,14 @@
                   "example": "15a85f64-5717-4562-b3fc-2c963f66afa6"
                 }
               },
-              "required": [
-                "at"
-              ]
+              "required": ["at"]
             },
             "headers": {
               "type": "object",
               "additionalProperties": true
             }
           },
-          "required": [
-            "params",
-            "query"
-          ],
+          "required": ["params", "query"],
           "additionalProperties": false
         },
         "responses": {
@@ -573,13 +517,7 @@
                 "type": "object",
                 "additionalProperties": false,
                 "description": "Encrypted version of object stored and related ids and metadata. A encryptedDataEncryptionKey is included if\na publicKeyHash query parameter is supplied as part of request.\n",
-                "required": [
-                  "dataEncryptionKeyId",
-                  "storageKeyId",
-                  "createdOn",
-                  "updatedOn",
-                  "person"
-                ],
+                "required": ["dataEncryptionKeyId", "storageKeyId", "createdOn", "updatedOn", "person"],
                 "properties": {
                   "dataEncryptionKeyId": {
                     "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -648,22 +586,13 @@
                         "items": {
                           "$schema": "https://json-schema.org/draft/2020-12/schema",
                           "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/Address",
-                          "required": [
-                            "country",
-                            "streetLines",
-                            "type"
-                          ],
+                          "required": ["country", "streetLines", "type"],
                           "type": "object",
                           "properties": {
                             "type": {
                               "type": "string",
                               "description": "Type of address",
-                              "enum": [
-                                "BILLING",
-                                "SHIPPING",
-                                "STATEMENTS",
-                                "OTHER"
-                              ]
+                              "enum": ["BILLING", "SHIPPING", "STATEMENTS", "OTHER"]
                             },
                             "streetLines": {
                               "maxItems": 4,
@@ -960,10 +889,7 @@
                         "items": {
                           "$schema": "https://json-schema.org/draft/2020-12/schema",
                           "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/Phone",
-                          "required": [
-                            "number",
-                            "type"
-                          ],
+                          "required": ["number", "type"],
                           "type": "object",
                           "properties": {
                             "type": {
@@ -971,14 +897,7 @@
                               "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/PhoneType",
                               "type": "string",
                               "description": "Type of phone number.",
-                              "enum": [
-                                "HOME",
-                                "WORK",
-                                "MOBILE",
-                                "FAX",
-                                "MAIN",
-                                "OTHER"
-                              ]
+                              "enum": ["HOME", "WORK", "MOBILE", "FAX", "MAIN", "OTHER"]
                             },
                             "number": {
                               "minLength": 1,
@@ -1013,9 +932,7 @@
                 }
               }
             },
-            "required": [
-              "body"
-            ],
+            "required": ["body"],
             "additionalProperties": false
           },
           "404": {
@@ -1056,9 +973,7 @@
                 "description": "Error message"
               }
             },
-            "required": [
-              "body"
-            ],
+            "required": ["body"],
             "additionalProperties": false
           }
         }
@@ -1078,9 +993,7 @@
                   "format": "uuid"
                 }
               },
-              "required": [
-                "personId"
-              ]
+              "required": ["personId"]
             },
             "headers": {
               "type": "object",
@@ -1104,11 +1017,7 @@
               "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/PersonRequest",
               "type": "object",
               "additionalProperties": false,
-              "required": [
-                "dataEncryptionKeyId",
-                "encryptedDataEncryptionKey",
-                "person"
-              ],
+              "required": ["dataEncryptionKeyId", "encryptedDataEncryptionKey", "person"],
               "properties": {
                 "dataEncryptionKeyId": {
                   "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -1157,22 +1066,13 @@
                       "items": {
                         "$schema": "https://json-schema.org/draft/2020-12/schema",
                         "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/Address",
-                        "required": [
-                          "country",
-                          "streetLines",
-                          "type"
-                        ],
+                        "required": ["country", "streetLines", "type"],
                         "type": "object",
                         "properties": {
                           "type": {
                             "type": "string",
                             "description": "Type of address",
-                            "enum": [
-                              "BILLING",
-                              "SHIPPING",
-                              "STATEMENTS",
-                              "OTHER"
-                            ]
+                            "enum": ["BILLING", "SHIPPING", "STATEMENTS", "OTHER"]
                           },
                           "streetLines": {
                             "maxItems": 4,
@@ -1469,10 +1369,7 @@
                       "items": {
                         "$schema": "https://json-schema.org/draft/2020-12/schema",
                         "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/Phone",
-                        "required": [
-                          "number",
-                          "type"
-                        ],
+                        "required": ["number", "type"],
                         "type": "object",
                         "properties": {
                           "type": {
@@ -1480,14 +1377,7 @@
                             "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/PhoneType",
                             "type": "string",
                             "description": "Type of phone number.",
-                            "enum": [
-                              "HOME",
-                              "WORK",
-                              "MOBILE",
-                              "FAX",
-                              "MAIN",
-                              "OTHER"
-                            ]
+                            "enum": ["HOME", "WORK", "MOBILE", "FAX", "MAIN", "OTHER"]
                           },
                           "number": {
                             "minLength": 1,
@@ -1522,10 +1412,7 @@
               }
             }
           },
-          "required": [
-            "params",
-            "body"
-          ],
+          "required": ["params", "body"],
           "additionalProperties": false
         },
         "responses": {
@@ -1560,13 +1447,7 @@
                 "type": "object",
                 "additionalProperties": false,
                 "description": "Encrypted version of object stored and related ids and metadata. A encryptedDataEncryptionKey is included if\na publicKeyHash query parameter is supplied as part of request.\n",
-                "required": [
-                  "dataEncryptionKeyId",
-                  "storageKeyId",
-                  "createdOn",
-                  "updatedOn",
-                  "person"
-                ],
+                "required": ["dataEncryptionKeyId", "storageKeyId", "createdOn", "updatedOn", "person"],
                 "properties": {
                   "dataEncryptionKeyId": {
                     "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -1635,22 +1516,13 @@
                         "items": {
                           "$schema": "https://json-schema.org/draft/2020-12/schema",
                           "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/Address",
-                          "required": [
-                            "country",
-                            "streetLines",
-                            "type"
-                          ],
+                          "required": ["country", "streetLines", "type"],
                           "type": "object",
                           "properties": {
                             "type": {
                               "type": "string",
                               "description": "Type of address",
-                              "enum": [
-                                "BILLING",
-                                "SHIPPING",
-                                "STATEMENTS",
-                                "OTHER"
-                              ]
+                              "enum": ["BILLING", "SHIPPING", "STATEMENTS", "OTHER"]
                             },
                             "streetLines": {
                               "maxItems": 4,
@@ -1947,10 +1819,7 @@
                         "items": {
                           "$schema": "https://json-schema.org/draft/2020-12/schema",
                           "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/Phone",
-                          "required": [
-                            "number",
-                            "type"
-                          ],
+                          "required": ["number", "type"],
                           "type": "object",
                           "properties": {
                             "type": {
@@ -1958,14 +1827,7 @@
                               "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/PhoneType",
                               "type": "string",
                               "description": "Type of phone number.",
-                              "enum": [
-                                "HOME",
-                                "WORK",
-                                "MOBILE",
-                                "FAX",
-                                "MAIN",
-                                "OTHER"
-                              ]
+                              "enum": ["HOME", "WORK", "MOBILE", "FAX", "MAIN", "OTHER"]
                             },
                             "number": {
                               "minLength": 1,
@@ -2000,9 +1862,7 @@
                 }
               }
             },
-            "required": [
-              "body"
-            ],
+            "required": ["body"],
             "additionalProperties": false
           },
           "409": {
@@ -2056,9 +1916,7 @@
                 "description": "Error message"
               }
             },
-            "required": [
-              "body"
-            ],
+            "required": ["body"],
             "additionalProperties": false
           }
         }
@@ -2092,19 +1950,14 @@
                   "example": "15a85f64-5717-4562-b3fc-2c963f66afa6"
                 }
               },
-              "required": [
-                "toDate"
-              ]
+              "required": ["toDate"]
             },
             "headers": {
               "type": "object",
               "additionalProperties": true
             }
           },
-          "required": [
-            "params",
-            "query"
-          ],
+          "required": ["params", "query"],
           "additionalProperties": false
         },
         "responses": {
@@ -2122,9 +1975,7 @@
                 "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/History",
                 "type": "object",
                 "additionalProperties": false,
-                "required": [
-                  "updates"
-                ],
+                "required": ["updates"],
                 "properties": {
                   "dataEncryptionKeyId": {
                     "type": "string",
@@ -2148,11 +1999,7 @@
                       "type": "object",
                       "additionalProperties": false,
                       "description": "Encrypted version of object stored with created on and last modified metadata.",
-                      "required": [
-                        "createdOn",
-                        "updatedOn",
-                        "person"
-                      ],
+                      "required": ["createdOn", "updatedOn", "person"],
                       "properties": {
                         "createdOn": {
                           "description": "Time data was first stored",
@@ -2206,22 +2053,13 @@
                               "items": {
                                 "$schema": "https://json-schema.org/draft/2020-12/schema",
                                 "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/Address",
-                                "required": [
-                                  "country",
-                                  "streetLines",
-                                  "type"
-                                ],
+                                "required": ["country", "streetLines", "type"],
                                 "type": "object",
                                 "properties": {
                                   "type": {
                                     "type": "string",
                                     "description": "Type of address",
-                                    "enum": [
-                                      "BILLING",
-                                      "SHIPPING",
-                                      "STATEMENTS",
-                                      "OTHER"
-                                    ]
+                                    "enum": ["BILLING", "SHIPPING", "STATEMENTS", "OTHER"]
                                   },
                                   "streetLines": {
                                     "maxItems": 4,
@@ -2518,10 +2356,7 @@
                               "items": {
                                 "$schema": "https://json-schema.org/draft/2020-12/schema",
                                 "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/Phone",
-                                "required": [
-                                  "number",
-                                  "type"
-                                ],
+                                "required": ["number", "type"],
                                 "type": "object",
                                 "properties": {
                                   "type": {
@@ -2529,14 +2364,7 @@
                                     "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/PhoneType",
                                     "type": "string",
                                     "description": "Type of phone number.",
-                                    "enum": [
-                                      "HOME",
-                                      "WORK",
-                                      "MOBILE",
-                                      "FAX",
-                                      "MAIN",
-                                      "OTHER"
-                                    ]
+                                    "enum": ["HOME", "WORK", "MOBILE", "FAX", "MAIN", "OTHER"]
                                   },
                                   "number": {
                                     "minLength": 1,
@@ -2574,9 +2402,7 @@
                 }
               }
             },
-            "required": [
-              "body"
-            ],
+            "required": ["body"],
             "additionalProperties": false
           },
           "404": {
@@ -2617,9 +2443,7 @@
                 "description": "Error message"
               }
             },
-            "required": [
-              "body"
-            ],
+            "required": ["body"],
             "additionalProperties": false
           }
         }
@@ -2641,19 +2465,14 @@
                   "format": "date-time"
                 }
               },
-              "required": [
-                "at"
-              ]
+              "required": ["at"]
             },
             "headers": {
               "type": "object",
               "additionalProperties": true
             }
           },
-          "required": [
-            "params",
-            "query"
-          ],
+          "required": ["params", "query"],
           "additionalProperties": false
         },
         "responses": {
@@ -2688,11 +2507,7 @@
                 "type": "object",
                 "additionalProperties": false,
                 "description": "Encrypted version of object stored and related ids and metadata. A encryptedDataEncryptionKey is included if\na publicKeyHash query parameter is supplied as part of request.\n",
-                "required": [
-                  "createdOn",
-                  "updatedOn",
-                  "person"
-                ],
+                "required": ["createdOn", "updatedOn", "person"],
                 "properties": {
                   "createdOn": {
                     "description": "Time data was first stored",
@@ -2737,21 +2552,12 @@
                           "$schema": "https://json-schema.org/draft/2020-12/schema",
                           "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/AddressMasked",
                           "type": "object",
-                          "required": [
-                            "country",
-                            "streetLines",
-                            "type"
-                          ],
+                          "required": ["country", "streetLines", "type"],
                           "properties": {
                             "type": {
                               "type": "string",
                               "description": "Type of address.",
-                              "enum": [
-                                "BILLING",
-                                "SHIPPING",
-                                "STATEMENTS",
-                                "OTHER"
-                              ]
+                              "enum": ["BILLING", "SHIPPING", "STATEMENTS", "OTHER"]
                             },
                             "streetLines": {
                               "maxItems": 4,
@@ -3048,10 +2854,7 @@
                         "type": "array",
                         "description": "Masked phone information.",
                         "items": {
-                          "required": [
-                            "number",
-                            "type"
-                          ],
+                          "required": ["number", "type"],
                           "type": "object",
                           "properties": {
                             "type": {
@@ -3059,14 +2862,7 @@
                               "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/PhoneType",
                               "type": "string",
                               "description": "Type of phone number.",
-                              "enum": [
-                                "HOME",
-                                "WORK",
-                                "MOBILE",
-                                "FAX",
-                                "MAIN",
-                                "OTHER"
-                              ]
+                              "enum": ["HOME", "WORK", "MOBILE", "FAX", "MAIN", "OTHER"]
                             },
                             "number": {
                               "minLength": 1,
@@ -3096,9 +2892,7 @@
                 }
               }
             },
-            "required": [
-              "body"
-            ],
+            "required": ["body"],
             "additionalProperties": false
           },
           "404": {
@@ -3139,9 +2933,7 @@
                 "description": "Error message"
               }
             },
-            "required": [
-              "body"
-            ],
+            "required": ["body"],
             "additionalProperties": false
           }
         }
@@ -3154,9 +2946,7 @@
       "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/Ping",
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "serverTime"
-      ],
+      "required": ["serverTime"],
       "properties": {
         "serverTime": {
           "type": "string",
@@ -3176,12 +2966,7 @@
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/DataEncryptionKeyResponse",
       "type": "object",
-      "required": [
-        "encryptedDataEncryptionKeys",
-        "transmissionKey",
-        "createdOn",
-        "lastModified"
-      ],
+      "required": ["encryptedDataEncryptionKeys", "transmissionKey", "createdOn", "lastModified"],
       "properties": {
         "createdOn": {
           "description": "Time data was first stored",
@@ -3201,10 +2986,7 @@
             "type": "object",
             "additionalProperties": false,
             "description": "An object that includes an encrypted data encryption key and a hashed version of the public key used to encrypt it.\n",
-            "required": [
-              "publicKeyHash",
-              "encryptedDataEncryptionKey"
-            ],
+            "required": ["publicKeyHash", "encryptedDataEncryptionKey"],
             "properties": {
               "publicKeyHash": {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -3232,9 +3014,7 @@
       "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/DataEncryptionKeyRequest",
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "publicKeys"
-      ],
+      "required": ["publicKeys"],
       "properties": {
         "publicKeys": {
           "type": "array",
@@ -3255,11 +3035,7 @@
       "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/PersonRequest",
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "dataEncryptionKeyId",
-        "encryptedDataEncryptionKey",
-        "person"
-      ],
+      "required": ["dataEncryptionKeyId", "encryptedDataEncryptionKey", "person"],
       "properties": {
         "dataEncryptionKeyId": {
           "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -3308,22 +3084,13 @@
               "items": {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
                 "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/Address",
-                "required": [
-                  "country",
-                  "streetLines",
-                  "type"
-                ],
+                "required": ["country", "streetLines", "type"],
                 "type": "object",
                 "properties": {
                   "type": {
                     "type": "string",
                     "description": "Type of address",
-                    "enum": [
-                      "BILLING",
-                      "SHIPPING",
-                      "STATEMENTS",
-                      "OTHER"
-                    ]
+                    "enum": ["BILLING", "SHIPPING", "STATEMENTS", "OTHER"]
                   },
                   "streetLines": {
                     "maxItems": 4,
@@ -3620,10 +3387,7 @@
               "items": {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
                 "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/Phone",
-                "required": [
-                  "number",
-                  "type"
-                ],
+                "required": ["number", "type"],
                 "type": "object",
                 "properties": {
                   "type": {
@@ -3631,14 +3395,7 @@
                     "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/PhoneType",
                     "type": "string",
                     "description": "Type of phone number.",
-                    "enum": [
-                      "HOME",
-                      "WORK",
-                      "MOBILE",
-                      "FAX",
-                      "MAIN",
-                      "OTHER"
-                    ]
+                    "enum": ["HOME", "WORK", "MOBILE", "FAX", "MAIN", "OTHER"]
                   },
                   "number": {
                     "minLength": 1,
@@ -3678,11 +3435,7 @@
       "type": "object",
       "additionalProperties": false,
       "description": "Encrypted version of object stored with created on and last modified metadata.",
-      "required": [
-        "createdOn",
-        "updatedOn",
-        "person"
-      ],
+      "required": ["createdOn", "updatedOn", "person"],
       "properties": {
         "createdOn": {
           "description": "Time data was first stored",
@@ -3736,22 +3489,13 @@
               "items": {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
                 "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/Address",
-                "required": [
-                  "country",
-                  "streetLines",
-                  "type"
-                ],
+                "required": ["country", "streetLines", "type"],
                 "type": "object",
                 "properties": {
                   "type": {
                     "type": "string",
                     "description": "Type of address",
-                    "enum": [
-                      "BILLING",
-                      "SHIPPING",
-                      "STATEMENTS",
-                      "OTHER"
-                    ]
+                    "enum": ["BILLING", "SHIPPING", "STATEMENTS", "OTHER"]
                   },
                   "streetLines": {
                     "maxItems": 4,
@@ -4048,10 +3792,7 @@
               "items": {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
                 "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/Phone",
-                "required": [
-                  "number",
-                  "type"
-                ],
+                "required": ["number", "type"],
                 "type": "object",
                 "properties": {
                   "type": {
@@ -4059,14 +3800,7 @@
                     "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/PhoneType",
                     "type": "string",
                     "description": "Type of phone number.",
-                    "enum": [
-                      "HOME",
-                      "WORK",
-                      "MOBILE",
-                      "FAX",
-                      "MAIN",
-                      "OTHER"
-                    ]
+                    "enum": ["HOME", "WORK", "MOBILE", "FAX", "MAIN", "OTHER"]
                   },
                   "number": {
                     "minLength": 1,
@@ -4106,13 +3840,7 @@
       "type": "object",
       "additionalProperties": false,
       "description": "Encrypted version of object stored and related ids and metadata. A encryptedDataEncryptionKey is included if\na publicKeyHash query parameter is supplied as part of request.\n",
-      "required": [
-        "dataEncryptionKeyId",
-        "storageKeyId",
-        "createdOn",
-        "updatedOn",
-        "person"
-      ],
+      "required": ["dataEncryptionKeyId", "storageKeyId", "createdOn", "updatedOn", "person"],
       "properties": {
         "dataEncryptionKeyId": {
           "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -4181,22 +3909,13 @@
               "items": {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
                 "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/Address",
-                "required": [
-                  "country",
-                  "streetLines",
-                  "type"
-                ],
+                "required": ["country", "streetLines", "type"],
                 "type": "object",
                 "properties": {
                   "type": {
                     "type": "string",
                     "description": "Type of address",
-                    "enum": [
-                      "BILLING",
-                      "SHIPPING",
-                      "STATEMENTS",
-                      "OTHER"
-                    ]
+                    "enum": ["BILLING", "SHIPPING", "STATEMENTS", "OTHER"]
                   },
                   "streetLines": {
                     "maxItems": 4,
@@ -4493,10 +4212,7 @@
               "items": {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
                 "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/Phone",
-                "required": [
-                  "number",
-                  "type"
-                ],
+                "required": ["number", "type"],
                 "type": "object",
                 "properties": {
                   "type": {
@@ -4504,14 +4220,7 @@
                     "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/PhoneType",
                     "type": "string",
                     "description": "Type of phone number.",
-                    "enum": [
-                      "HOME",
-                      "WORK",
-                      "MOBILE",
-                      "FAX",
-                      "MAIN",
-                      "OTHER"
-                    ]
+                    "enum": ["HOME", "WORK", "MOBILE", "FAX", "MAIN", "OTHER"]
                   },
                   "number": {
                     "minLength": 1,
@@ -4551,11 +4260,7 @@
       "type": "object",
       "additionalProperties": false,
       "description": "Encrypted version of object stored and related ids and metadata. A encryptedDataEncryptionKey is included if\na publicKeyHash query parameter is supplied as part of request.\n",
-      "required": [
-        "createdOn",
-        "updatedOn",
-        "person"
-      ],
+      "required": ["createdOn", "updatedOn", "person"],
       "properties": {
         "createdOn": {
           "description": "Time data was first stored",
@@ -4600,21 +4305,12 @@
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
                 "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/AddressMasked",
                 "type": "object",
-                "required": [
-                  "country",
-                  "streetLines",
-                  "type"
-                ],
+                "required": ["country", "streetLines", "type"],
                 "properties": {
                   "type": {
                     "type": "string",
                     "description": "Type of address.",
-                    "enum": [
-                      "BILLING",
-                      "SHIPPING",
-                      "STATEMENTS",
-                      "OTHER"
-                    ]
+                    "enum": ["BILLING", "SHIPPING", "STATEMENTS", "OTHER"]
                   },
                   "streetLines": {
                     "maxItems": 4,
@@ -4911,10 +4607,7 @@
               "type": "array",
               "description": "Masked phone information.",
               "items": {
-                "required": [
-                  "number",
-                  "type"
-                ],
+                "required": ["number", "type"],
                 "type": "object",
                 "properties": {
                   "type": {
@@ -4922,14 +4615,7 @@
                     "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/PhoneType",
                     "type": "string",
                     "description": "Type of phone number.",
-                    "enum": [
-                      "HOME",
-                      "WORK",
-                      "MOBILE",
-                      "FAX",
-                      "MAIN",
-                      "OTHER"
-                    ]
+                    "enum": ["HOME", "WORK", "MOBILE", "FAX", "MAIN", "OTHER"]
                   },
                   "number": {
                     "minLength": 1,
@@ -4963,14 +4649,7 @@
       "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/PhoneType",
       "type": "string",
       "description": "Type of phone number.",
-      "enum": [
-        "HOME",
-        "WORK",
-        "MOBILE",
-        "FAX",
-        "MAIN",
-        "OTHER"
-      ]
+      "enum": ["HOME", "WORK", "MOBILE", "FAX", "MAIN", "OTHER"]
     },
     "PersonMasked": {
       "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -5005,21 +4684,12 @@
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/AddressMasked",
             "type": "object",
-            "required": [
-              "country",
-              "streetLines",
-              "type"
-            ],
+            "required": ["country", "streetLines", "type"],
             "properties": {
               "type": {
                 "type": "string",
                 "description": "Type of address.",
-                "enum": [
-                  "BILLING",
-                  "SHIPPING",
-                  "STATEMENTS",
-                  "OTHER"
-                ]
+                "enum": ["BILLING", "SHIPPING", "STATEMENTS", "OTHER"]
               },
               "streetLines": {
                 "maxItems": 4,
@@ -5316,10 +4986,7 @@
           "type": "array",
           "description": "Masked phone information.",
           "items": {
-            "required": [
-              "number",
-              "type"
-            ],
+            "required": ["number", "type"],
             "type": "object",
             "properties": {
               "type": {
@@ -5327,14 +4994,7 @@
                 "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/PhoneType",
                 "type": "string",
                 "description": "Type of phone number.",
-                "enum": [
-                  "HOME",
-                  "WORK",
-                  "MOBILE",
-                  "FAX",
-                  "MAIN",
-                  "OTHER"
-                ]
+                "enum": ["HOME", "WORK", "MOBILE", "FAX", "MAIN", "OTHER"]
               },
               "number": {
                 "minLength": 1,
@@ -5367,10 +5027,7 @@
       "type": "object",
       "additionalProperties": false,
       "description": "An object that includes an encrypted data encryption key and a hashed version of the public key used to encrypt it.\n",
-      "required": [
-        "publicKeyHash",
-        "encryptedDataEncryptionKey"
-      ],
+      "required": ["publicKeyHash", "encryptedDataEncryptionKey"],
       "properties": {
         "publicKeyHash": {
           "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -5430,22 +5087,13 @@
           "items": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/Address",
-            "required": [
-              "country",
-              "streetLines",
-              "type"
-            ],
+            "required": ["country", "streetLines", "type"],
             "type": "object",
             "properties": {
               "type": {
                 "type": "string",
                 "description": "Type of address",
-                "enum": [
-                  "BILLING",
-                  "SHIPPING",
-                  "STATEMENTS",
-                  "OTHER"
-                ]
+                "enum": ["BILLING", "SHIPPING", "STATEMENTS", "OTHER"]
               },
               "streetLines": {
                 "maxItems": 4,
@@ -5742,10 +5390,7 @@
           "items": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/Phone",
-            "required": [
-              "number",
-              "type"
-            ],
+            "required": ["number", "type"],
             "type": "object",
             "properties": {
               "type": {
@@ -5753,14 +5398,7 @@
                 "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/PhoneType",
                 "type": "string",
                 "description": "Type of phone number.",
-                "enum": [
-                  "HOME",
-                  "WORK",
-                  "MOBILE",
-                  "FAX",
-                  "MAIN",
-                  "OTHER"
-                ]
+                "enum": ["HOME", "WORK", "MOBILE", "FAX", "MAIN", "OTHER"]
               },
               "number": {
                 "minLength": 1,
@@ -5797,9 +5435,7 @@
       "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/History",
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "updates"
-      ],
+      "required": ["updates"],
       "properties": {
         "dataEncryptionKeyId": {
           "type": "string",
@@ -5823,11 +5459,7 @@
             "type": "object",
             "additionalProperties": false,
             "description": "Encrypted version of object stored with created on and last modified metadata.",
-            "required": [
-              "createdOn",
-              "updatedOn",
-              "person"
-            ],
+            "required": ["createdOn", "updatedOn", "person"],
             "properties": {
               "createdOn": {
                 "description": "Time data was first stored",
@@ -5881,22 +5513,13 @@
                     "items": {
                       "$schema": "https://json-schema.org/draft/2020-12/schema",
                       "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/Address",
-                      "required": [
-                        "country",
-                        "streetLines",
-                        "type"
-                      ],
+                      "required": ["country", "streetLines", "type"],
                       "type": "object",
                       "properties": {
                         "type": {
                           "type": "string",
                           "description": "Type of address",
-                          "enum": [
-                            "BILLING",
-                            "SHIPPING",
-                            "STATEMENTS",
-                            "OTHER"
-                          ]
+                          "enum": ["BILLING", "SHIPPING", "STATEMENTS", "OTHER"]
                         },
                         "streetLines": {
                           "maxItems": 4,
@@ -6193,10 +5816,7 @@
                     "items": {
                       "$schema": "https://json-schema.org/draft/2020-12/schema",
                       "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/Phone",
-                      "required": [
-                        "number",
-                        "type"
-                      ],
+                      "required": ["number", "type"],
                       "type": "object",
                       "properties": {
                         "type": {
@@ -6204,14 +5824,7 @@
                           "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/PhoneType",
                           "type": "string",
                           "description": "Type of phone number.",
-                          "enum": [
-                            "HOME",
-                            "WORK",
-                            "MOBILE",
-                            "FAX",
-                            "MAIN",
-                            "OTHER"
-                          ]
+                          "enum": ["HOME", "WORK", "MOBILE", "FAX", "MAIN", "OTHER"]
                         },
                         "number": {
                           "minLength": 1,
@@ -6251,22 +5864,13 @@
     "Address": {
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/Address",
-      "required": [
-        "country",
-        "streetLines",
-        "type"
-      ],
+      "required": ["country", "streetLines", "type"],
       "type": "object",
       "properties": {
         "type": {
           "type": "string",
           "description": "Type of address",
-          "enum": [
-            "BILLING",
-            "SHIPPING",
-            "STATEMENTS",
-            "OTHER"
-          ]
+          "enum": ["BILLING", "SHIPPING", "STATEMENTS", "OTHER"]
         },
         "streetLines": {
           "maxItems": 4,
@@ -6561,21 +6165,12 @@
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/AddressMasked",
       "type": "object",
-      "required": [
-        "country",
-        "streetLines",
-        "type"
-      ],
+      "required": ["country", "streetLines", "type"],
       "properties": {
         "type": {
           "type": "string",
           "description": "Type of address.",
-          "enum": [
-            "BILLING",
-            "SHIPPING",
-            "STATEMENTS",
-            "OTHER"
-          ]
+          "enum": ["BILLING", "SHIPPING", "STATEMENTS", "OTHER"]
         },
         "streetLines": {
           "maxItems": 4,
@@ -6870,10 +6465,7 @@
     "Phone": {
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/Phone",
-      "required": [
-        "number",
-        "type"
-      ],
+      "required": ["number", "type"],
       "type": "object",
       "properties": {
         "type": {
@@ -6881,14 +6473,7 @@
           "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/PhoneType",
           "type": "string",
           "description": "Type of phone number.",
-          "enum": [
-            "HOME",
-            "WORK",
-            "MOBILE",
-            "FAX",
-            "MAIN",
-            "OTHER"
-          ]
+          "enum": ["HOME", "WORK", "MOBILE", "FAX", "MAIN", "OTHER"]
         },
         "number": {
           "minLength": 1,
@@ -6929,9 +6514,7 @@
       "$id": "https://eslint-plugin.checkdigit/person/v1/schemas/definitions/PublicKeyResponse",
       "description": "This object contains the rsa generated public key for the Person Service. This public key must be used\nwhen transmitting encrypted data to Person Service APIs.\n",
       "type": "object",
-      "required": [
-        "publicKey"
-      ],
+      "required": ["publicKey"],
       "properties": {
         "publicKey": {
           "$schema": "https://json-schema.org/draft/2020-12/schema",

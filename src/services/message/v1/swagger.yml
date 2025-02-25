@@ -1,0 +1,2798 @@
+openapi: 3.0.0
+info:
+  title: Message
+  description: |
+
+    Records and retrieves messages.
+
+    © Check Digit LLC. 2019-2024
+  version: 1.41.0
+  contact:
+    name: Check Digit
+
+servers:
+  - url: /message/v1
+tags:
+  - name: Service Health
+  - name: API
+
+x-firehose-logged: false
+
+paths:
+  /ping:
+    get:
+      tags:
+        - Service Health
+      operationId: 'ping-get'
+      description: Test service connectivity
+      responses:
+        '200':
+          $ref: '#/components/responses/Ping'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+  /request:
+    get:
+      tags:
+        - API
+      operationId: 'request-query-get'
+      description: Obtains the request messages by card id.
+      parameters:
+        - $ref: '#/components/parameters/cardId'
+        - $ref: '#/components/parameters/toDate'
+        - $ref: '#/components/parameters/fromDate'
+      responses:
+        '200':
+          description: Request messages successfully obtained
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RequestResponse'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+  /picked-request:
+    get:
+      tags:
+        - API
+      operationId: 'picked-request-get'
+      summary: Obtains request messages, containing only the specified fields, by card id(s).
+      description: |
+        - The list of picked request messages in the response will be unsorted.
+        - The CREATED_ON field is mandatory to be supplied in the list of fields, any request submitted without it will result in a 400 Bad Request.
+      parameters:
+        - $ref: '#/components/parameters/cardId'
+        - $ref: '#/components/parameters/toDate'
+        - $ref: '#/components/parameters/fromDate'
+        - $ref: '#/components/parameters/requestFields'
+      responses:
+        '200':
+          description: Picked request messages successfully obtained
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PickedRequestResponse'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+  /request/{messageId}:
+    put:
+      tags:
+        - API
+      x-firehose-logged: true
+      operationId: 'request-put'
+      description: Stores a request message with the supplied messageId and data.
+      parameters:
+        - $ref: '#/components/parameters/messageId'
+        - $ref: '#/components/parameters/lastModified'
+        - $ref: '#/components/parameters/createdOn'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewRequest'
+      responses:
+        '204':
+          description: Message recorded successfully
+          content:
+            application/json:
+              schema: {}
+          headers:
+            Last-Modified:
+              $ref: '#/components/headers/Last-Modified'
+            Created-On:
+              $ref: '#/components/headers/Created-On'
+            Updated-On:
+              $ref: '#/components/headers/Updated-On'
+        '409':
+          description: Message already exists with different data
+          content:
+            application/json:
+              schema: {}
+        default:
+          $ref: '#/components/responses/ServerError'
+
+    get:
+      tags:
+        - API
+      operationId: 'request-get'
+      description: Retrieves a request message with the supplied messageId.
+      parameters:
+        - $ref: '#/components/parameters/messageId'
+        - $ref: '#/components/parameters/at'
+      responses:
+        '200':
+          description: Request message successfully retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Request'
+          headers:
+            Last-Modified:
+              $ref: '#/components/headers/Last-Modified'
+            Created-On:
+              $ref: '#/components/headers/Created-On'
+            Updated-On:
+              $ref: '#/components/headers/Updated-On'
+        '404':
+          description: Request message not found
+          content:
+            application/json:
+              schema: {}
+        default:
+          $ref: '#/components/responses/ServerError'
+
+  /response:
+    get:
+      tags:
+        - API
+      operationId: 'response-query-get'
+      description: Obtains the response messages by card id.
+      parameters:
+        - $ref: '#/components/parameters/cardId'
+        - $ref: '#/components/parameters/toDate'
+        - $ref: '#/components/parameters/fromDate'
+      responses:
+        '200':
+          description: Response messages successfully obtained
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseResponse'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+  /picked-response:
+    get:
+      tags:
+        - API
+      operationId: 'picked-response-get'
+      summary: Obtains response messages, containing only the specified fields, by card id(s).
+      description: |
+        - The list of picked response messages in the response will be unsorted.
+        - The CREATED_ON field is mandatory to be supplied in the list of fields, any request submitted without it will result in a 400 Bad Request.
+      parameters:
+        - $ref: '#/components/parameters/cardId'
+        - $ref: '#/components/parameters/toDate'
+        - $ref: '#/components/parameters/fromDate'
+        - $ref: '#/components/parameters/responseFields'
+      responses:
+        '200':
+          description: Picked response messages successfully obtained
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PickedResponseResponse'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+  /response/{messageId}:
+    put:
+      tags:
+        - API
+      x-firehose-logged: true
+      operationId: 'response-put'
+      description: |
+        Stores a request and response message with the supplied messageId and
+        data.
+      parameters:
+        - $ref: '#/components/parameters/messageId'
+        - $ref: '#/components/parameters/lastModified'
+        - $ref: '#/components/parameters/createdOn'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewResponse'
+      responses:
+        '204':
+          description: Message recorded successfully
+          content:
+            application/json:
+              schema: {}
+          headers:
+            Last-Modified:
+              $ref: '#/components/headers/Last-Modified'
+            Created-On:
+              $ref: '#/components/headers/Created-On'
+            Updated-On:
+              $ref: '#/components/headers/Updated-On'
+        '409':
+          description: Message already exists with different data
+          content:
+            application/json:
+              schema: {}
+        default:
+          $ref: '#/components/responses/ServerError'
+
+    get:
+      tags:
+        - API
+      operationId: 'response-get'
+      description: Retrieves a response message with the supplied messageId.
+      parameters:
+        - $ref: '#/components/parameters/messageId'
+        - $ref: '#/components/parameters/at'
+      responses:
+        '200':
+          description: Response message successfully retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+          headers:
+            Last-Modified:
+              $ref: '#/components/headers/Last-Modified'
+            Created-On:
+              $ref: '#/components/headers/Created-On'
+            Updated-On:
+              $ref: '#/components/headers/Updated-On'
+        '404':
+          description: Request message not found
+          content:
+            application/json:
+              schema: {}
+        default:
+          $ref: '#/components/responses/ServerError'
+
+components:
+  schemas:
+    Ping:
+      type: object
+      additionalProperties: false
+      required:
+        - serverTime
+      properties:
+        serverTime:
+          type: string
+          format: date-time
+          description: Current server time
+
+    ResponseResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - messages
+      properties:
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/Response'
+
+    RequestResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - messages
+      properties:
+        messages:
+          description: This list is unsorted.
+          type: array
+          items:
+            $ref: '#/components/schemas/Request'
+
+    PickedRequestResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - pickedMessages
+      properties:
+        pickedMessages:
+          type: array
+          items:
+            $ref: '#/components/schemas/PickedRequest'
+
+    PickedResponseResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - pickedMessages
+      properties:
+        pickedMessages:
+          type: array
+          items:
+            $ref: '#/components/schemas/PickedResponse'
+
+    Error:
+      type: object
+      additionalProperties: false
+      required:
+        - message
+      description: Error message
+      properties:
+        message:
+          type: string
+          minLength: 1
+        code:
+          type: string
+          minLength: 1
+
+    Amount:
+      type: object
+      additionalProperties: false
+      required:
+        - amount
+        - currency
+      properties:
+        amount:
+          type: string
+          minLength: 1
+        currency:
+          type: string
+          minLength: 1
+
+    SettlementConversion:
+      type: object
+      description: |
+        This object will only exist if the transaction currency differs from the settlement currency.
+      required:
+        - date
+        - factor
+        - factorDecimalPosition
+      properties:
+        date:
+          description: |
+            This value represents the year, month, and day the conversion rate was determined.
+          type: string
+          format: date
+        factor:
+          description: |
+            This value represents the multiplying factor used to convert the transaction amount to the settlement
+            amount. This value can be used to calculate the conversion rate:
+
+              conversion rate = conversion factor / (10 ^ factor decimal position)
+
+            or, to calculate the settlement amount:
+
+              settlement amount = (transaction amount * conversion factor) / (10 ^ factor decimal position)
+          type: string
+        factorDecimalPosition:
+          description: |
+            This number represents the position the decimal point should be placed, starting from right. This can be
+            used to calculate the conversion rate:
+
+              conversion rate = conversion factor / (10 ^ factor decimal position)
+
+            or, to calculate the settlement amount:
+
+              settlement amount = (transaction amount * conversion factor) / (10 ^ factor decimal position)
+          type: number
+
+    MessageType:
+      type: string
+      description: >-
+        General message type for the message. A preauthorization will typically
+        result in a financial clearing message.
+      enum:
+        - PREAUTHORIZATION
+        - FINANCIAL
+        - ADMINISTRATIVE
+        - REVERSAL
+
+    MessageUsage:
+      type: string
+      description: >-
+        Message Usage of the network transaction. A request will result in a
+        response and an advice will result in an advice response. Advice
+        messages cannot be declined.
+      enum:
+        - REQUEST
+        - RESPONSE
+        - ADVICE
+        - ADVICE RESPONSE
+
+    Category:
+      type: string
+      description: Category of the network transaction.
+      enum:
+        - SIGNATURE
+        - PIN
+        - PINLESS
+        - ATM
+        - OTC
+        - AFD
+        - QUASICASH
+        - SCRIP
+        - BALANCE INQUIRY
+        - ACCOUNT INQUIRY
+        - FUNDS TRANSFER
+        - BILL PAYMENT
+        - ADJUSTMENT
+        - RETURN
+        - LOAD
+        - UNLOAD
+        - ACTIVATION
+        - ACTIVATION AND LOAD
+        - DEACTIVATION
+        - DEACTIVATION AND UNLOAD
+        - TOKENIZATION
+        - REQUEST ACTIVATION METHODS
+        - DELIVER ACTIVATION CODE
+        - NOTIFY TOKEN ACTIVATED
+        - NOTIFY TOKEN UPDATED
+        - NOTIFY SUSPICIOUS EVENTS
+        - UNSUPPORTED
+
+    DebitCredit:
+      type: string
+      description: Debit or Credit flag for the network transaction
+      enum:
+        - DEBIT
+        - CREDIT
+        - NEITHER
+
+    Categorization:
+      type: object
+      additionalProperties: false
+      required:
+        - messageType
+        - messageUsage
+        - category
+        - debitCredit
+      properties:
+        messageType:
+          $ref: '#/components/schemas/MessageType'
+        messageUsage:
+          $ref: '#/components/schemas/MessageUsage'
+        category:
+          $ref: '#/components/schemas/Category'
+        debitCredit:
+          $ref: '#/components/schemas/DebitCredit'
+
+    AccountType:
+      type: string
+      enum:
+        - NOT PROVIDED
+        - UNSPECIFIED
+        - SAVINGS
+        - CHECKING
+        - CREDIT
+        - INVESTMENT
+        - UNIVERSAL
+        - OTHER
+
+    Accounts:
+      type: object
+      additionalProperties: false
+      required:
+        - from
+        - to
+      properties:
+        from:
+          $ref: '#/components/schemas/AccountType'
+        to:
+          $ref: '#/components/schemas/AccountType'
+
+    PinCapabilities:
+      type: string
+      enum:
+        - NOT PROVIDED
+        - UNSPECIFIED
+        - PIN ENTRY CAPABILITY
+        - NO PIN ENTRY CAPABILITY
+        - PIN PAD INOPERATIVE
+        - PIN ENTRY CAPABILITY BUT OUT OF SERVICE
+        - PIN VERIFIED BY TERMINAL DEVICE
+
+    PanEntryMethod:
+      type: string
+      enum:
+        - NOT PROVIDED
+        - UNSPECIFIED
+        - MANUAL
+        - MAGNETIC STRIPE
+        - BAR CODE
+        - OCR
+        - INTEGRATED CIRCUIT CARD
+        - MANUAL KEY ENTERED
+        - CONTACTLESS EMV RULES
+        - CHIP CARD UNABLE MANUAL ENTRY
+        - CHIP CARD UNABLE MAGNETIC STRIPE
+        - ELECTRONIC COMMERCE
+        - PAN AUTO ENTRY VIA SERVER
+        - FULL MAGNETIC STRIPE
+        - CONTACTLESS MAG STRIPE RULES
+        - INTEGRATED CIRCUIT CARD CVV UNRELIABLE
+        - STORED VALUE PREREGISTERED CHECKOUT
+        - ON FILE
+        - SECURE ENTRY
+
+    PosConditionCode:
+      type: string
+      enum:
+        - NOT PROVIDED
+        - NORMAL
+        - CUSTOMER NOT PRESENT
+        - CUSTOMER NOT PRESENT RECURRING PAYMENT
+        - CUSTOMER PRESENT CARD NOT PRESENT
+        - CUSTOMER IDENTITY VERIFIED
+        - UNATTENDED TERMINAL ABLE TO RETAIN CARD
+        - UNATTENDED TERMINAL NOT ABLE TO RETAIN CARD
+        - MERCHANT SUSPICIOUS
+        - SUSPECTED FRAUD
+        - SECURITY ALERT
+        - NON SECURE ECOMMERCE
+        - SECURE ECOMMERCE WITH CARDHOLDER CERTIFICATE
+        - SECURE ECOMMERCE WITHOUT CARDHOLDER CERTIFICATE
+        - CHANNEL ENCRYPTED ECOMMERCE
+        - SECURE ECOMMERCE CONTAINING A DIGITAL SIGNATURE
+        - INTERNET PIN DEBIT
+        - PREAUTHORIZED REQUEST
+        - DEFERRED BILLING
+        - MAIL OR TELEPHONE ORDER
+        - TELEPHONE DEVICE REQUEST
+        - ELECTRONIC CARD REGISTER INTERFACE
+        - CUSTOMER TERMINAL
+        - ADMINISTRATION TERMINAL
+        - CVV VERIFIED AND VALID
+        - CVV VERIFIED AND INVALID
+
+    TerminalType:
+      type: string
+      enum:
+        - POINT OF SALE TERMINAL
+        - ATM
+        - HOME TERMINAL
+        - ELECTRONIC CASH REGISTER
+        - DIAL TERMINAL
+        - TRAVELERS CHECK MACHINE
+        - AUTOMATED FUEL DEVICE
+        - SCRIP MACHINE
+        - COUPON MACHINE
+        - TICKET MACHINE
+        - POINT OF BANKING TERMINAL
+        - TELLER
+        - FRANCHISE TELLER
+        - PERSONAL BANKING
+        - PUBLIC UTILITY
+        - VENDING
+        - SELF SERVICE
+        - AUTHORIZATION
+        - PAYMENT
+        - VRU
+        - SMART PHONE
+        - INTERACTIVE TELEVISION
+        - PERSONAL DIGITAL ASSISTANT
+        - SCREEN PHONE
+        - ELECTRONIC COMMERCE
+        - MICR TERMINAL AT POINT OF SALE
+        - NOT PROVIDED
+
+    CardholderPresence:
+      type: string
+      enum:
+        - CUSTOMER PRESENT
+        - CUSTOMER NOT PRESENT
+        - NOT PROVIDED
+
+    CardPresence:
+      type: string
+      enum:
+        - CARD PRESENT
+        - CARD NOT PRESENT
+        - NOT PROVIDED
+
+    Merchant:
+      type: object
+      additionalProperties: false
+      required:
+        - type
+        - name
+        - terminalTransactionDate
+        - terminalSequenceNumber
+        - terminalIdentification
+        - identificationCode
+        - address
+        - city
+        - stateProvince
+        - country
+        - allowsPartialApproval
+        - panEntryMethod
+        - pinCapabilities
+        - posConditionCode
+      properties:
+        type:
+          type: string
+          minLength: 1
+        name:
+          type: string
+          minLength: 1
+        terminalTransactionDate:
+          type: string
+          minLength: 1
+        terminalSequenceNumber:
+          type: number
+        terminalIdentification:
+          type: string
+          minLength: 1
+        identificationCode:
+          type: string
+          minLength: 1
+        address:
+          type: string
+          minLength: 1
+        city:
+          type: string
+          minLength: 1
+        stateProvince:
+          type: string
+          minLength: 1
+        county:
+          type: string
+          minLength: 1
+        postalCode:
+          type: string
+          minLength: 1
+        country:
+          type: string
+          minLength: 1
+        allowsPartialApproval:
+          type: boolean
+        panEntryMethod:
+          $ref: '#/components/schemas/PanEntryMethod'
+        pinCapabilities:
+          $ref: '#/components/schemas/PinCapabilities'
+        posConditionCode:
+          $ref: '#/components/schemas/PosConditionCode'
+        cardholderPresence:
+          $ref: '#/components/schemas/CardholderPresence'
+        cardPresence:
+          $ref: '#/components/schemas/CardPresence'
+        terminalType:
+          $ref: '#/components/schemas/TerminalType'
+
+    Acquirer:
+      type: object
+      additionalProperties: false
+      required:
+        - identificationCode
+      properties:
+        identificationCode:
+          type: string
+          minLength: 1
+        clearingIdentificationCode:
+          description: |
+            This string represents the Acquiring Institution Identifier (also known as, AcquirerICA). This value
+            may be included with clearing messages.
+          type: string
+          minLength: 1
+        countryCode:
+          type: string
+          minLength: 1
+
+    LifeCycleIndicator:
+      type: string
+      enum:
+        - CALENDAR DAY
+        - HOURS
+        - MINUTES
+
+    AuthorizationLifeCycle:
+      type: object
+      additionalProperties: false
+      description: >-
+        Optional data indicating that the acquirer or network has specified how
+        long the funds should be held if approved.
+      required:
+        - lifeCycleIndicator
+        - actualInterval
+      properties:
+        lifeCycleIndicator:
+          $ref: '#/components/schemas/LifeCycleIndicator'
+        actualInterval:
+          type: number
+
+    ReplacementAmounts:
+      type: object
+      additionalProperties: false
+      description: >-
+        All of these values are not required because we need to differentiate
+        between a replacement amount of zero and no replacement amount at all.
+      required:
+        - transactionAmount
+        - transactionFeeAmount
+        - settlementAmount
+        - settlementFeeAmount
+        - feeDetails
+      properties:
+        transactionAmount:
+          $ref: '#/components/schemas/Amount'
+        transactionFeeAmount:
+          description: |
+            Fee amount applied by the network or acquirer in the merchant's currency.
+          allOf:
+            - $ref: '#/components/schemas/Amount'
+        settlementAmount:
+          $ref: '#/components/schemas/Amount'
+        settlementFeeAmount:
+          description: |
+            Fee amount applied by the network or acquirer in the BIN currency.
+          allOf:
+            - $ref: '#/components/schemas/Amount'
+        feeDetails:
+          type: array
+          description: Details about the fees that went into the transaction and settlement fee amounts
+          items:
+            $ref: '#/components/schemas/Fee'
+
+    EncryptedKey:
+      type: object
+      additionalProperties: false
+      description: >-
+        Encrypted DEKs, paired with public key Id they were encrypted with.
+        All encrypted data in MessageRequest will be encrypted with same AES generated key.
+        The key will be encrypted with multiple public keys, one for each of the services that can decrypt it.
+      required:
+        - publicKeyHash
+        - encryptedDataEncryptionKey
+      properties:
+        publicKeyHash:
+          description: Public key id in uuid format
+          type: string
+          format: uuid
+        encryptedDataEncryptionKey:
+          type: string
+          description: RSA encrypted random AES-256 key
+          minLength: 1
+
+    Interchange:
+      type: object
+      additionalProperties: false
+      properties:
+        acquirerGroupIdentifier:
+          type: string
+          minLength: 1
+        issuerGroupIdentifier:
+          type: string
+          minLength: 1
+        interchangeAmount:
+          $ref: '#/components/schemas/Amount'
+
+    AddressVerificationData:
+      type: object
+      additionalProperties: false
+      description: >-
+        Neither are required as only one may be supplied and there's no
+        guarantee as to which one.
+      properties:
+        streetAddress:
+          type: string
+          minLength: 1
+        postalCode:
+          type: string
+          minLength: 1
+
+    ToleranceType:
+      type: string
+      description: The type of tolerance that should be applied if applicable
+      enum:
+        - FIXED
+        - PERCENTAGE
+        - NONE
+
+    Tolerance:
+      type: object
+      additionalProperties: false
+      description: Minimum expected tolerance as defined by the network
+      required:
+        - type
+      properties:
+        type:
+          $ref: '#/components/schemas/ToleranceType'
+        value:
+          type: string
+          minLength: 1
+
+    IssuerNetwork:
+      type: string
+      description: The network that we received the message on.
+      enum:
+        - MASTERCARD
+        - MDES
+        - MNGS
+        - STAR
+        - VISA
+
+    AcquirerNetwork:
+      type: string
+      description: The network on which the message was acquired.
+      enum:
+        - ALLPOINT
+        - CIRRUS
+        - DEBIT MASTERCARD
+        - CREDIT MASTERCARD
+        - DISCOVER
+        - INTERLINK
+        - MAESTRO
+        - OTHER
+        - PLUS
+        - PULSE
+        - STAR
+        - STAR POS
+        - VISA
+        - APPLE PAY
+        - GOOGLE PAY
+        - SAMSUNG PAY
+        - MDES FOR MERCHANTS
+        - CLICK TO PAY
+
+    ResponseCode:
+      type: string
+      enum:
+        - APPROVED
+        - REFER TO ISSUER
+        - REFER TO ISSUER SPECIAL CONDITION
+        - INVALID MERCHANT
+        - PICKUP
+        - DO NOT HONOR
+        - SYSTEM ERROR
+        - PICKUP CARD
+        - HONOR WITH ID
+        - REQUEST IN PROGRESS
+        - PARTIAL APPROVAL
+        - INVALID TRANSACTION
+        - INVALID AMOUNT
+        - CARD NOT FOUND
+        - REENTER TRANSACTION
+        - INVALID RESPONSE
+        - UNACCEPTABLE TRANSACTION FEE
+        - FILE UPDATE NOT SUPPORTED
+        - UNABLE TO LOCATE RECORD
+        - DUPLICATE FILE UPDATE
+        - FILE UPDATE EDIT ERROR
+        - FILE UPDATE FILE LOCKED
+        - FILE UPDATE FAILED
+        - FORMAT ERROR
+        - NO CREDIT ACCOUNT
+        - REQUESTED FUNCTION NOT SUPPORTED
+        - LOST CARD CAPTURE
+        - NO UNIVERSAL ACCOUNT
+        - STOLEN CARD CAPTURE
+        - NO INVESTMENT ACCOUNT
+        - INSUFFICIENT FUNDS
+        - NO CHECKING ACCOUNT
+        - NO SAVINGS ACCOUNT
+        - EXPIRED CARD
+        - INCORRECT PIN
+        - NO CARD RECORD
+        - TRANSACTION NOT PERMITTED TO CARDHOLDER
+        - TRANSACTION NOT PERMITTED TO TERMINAL
+        - SUSPECTED FRAUD
+        - EXCEEDS WITHDRAWAL LIMIT
+        - RESTRICTED CARD
+        - SECURITY VIOLATION
+        - EXCEEDS WITHDRAWAL FREQUENCY LIMIT
+        - HARD CAPTURE
+        - LATE RESPONSE
+        - PIN TRIES EXCEEDED
+        - KEY SYNC ERROR
+        - CARDHOLDER NOT ELIGIBLE FOR POS
+        - ISSUER NOT AVAILABLE
+        - DUPLICATE
+        - INFORMATION NOT ON FILE
+        - CARD VERIFICATION FAILURE
+        - CUTOFF IN PROGRESS
+        - ISSUER INOPERATIVE
+        - TRANSACTION CANNOT COMPLETE LAW VIOLATION
+        - DUPLICATE TRANSMISSION
+        - RECONCILE ERROR
+        - SYSTEM MALFUNCTION
+        - CARD VERIFICATION2 FAILURE
+        - CARD VERIFICATION3 FAILURE
+        - EXPIRATION DATE MISMATCH
+        - INACTIVE CARD
+        - ITEM SUSPECTED FOR STOP PAY
+        - ACCOUNT CLOSED
+        - INELIGIBLE ACCOUNT
+        - ITEM SUBMITTED MORE THAN TWO TIMES
+        - NO ACCT ON FILE
+        - UNABLE TO LOCATE
+        - GENERAL DENIAL
+        - SPECIAL CONDITIONS
+        - PIN REQUIRED
+        - PAN TRANSFORMATION ERROR
+        - RISK BLOCK
+        - INVALID ARQC
+        - REQUIRE ADDITIONAL AUTHENTICATION
+        - OTHER
+
+    AdviceResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - adviceOriginator
+        - adviceReason
+        - reversalOriginator
+        - reversalReason
+      description: Data received from the original authorization response.
+      properties:
+        adviceOriginator:
+          $ref: '#/components/schemas/Originator'
+        adviceReason:
+          $ref: '#/components/schemas/AdviceReason'
+        reversalOriginator:
+          $ref: '#/components/schemas/Originator'
+        reversalReason:
+          $ref: '#/components/schemas/ReversalReason'
+        authorizationIdResponse:
+          type: string
+          minLength: 1
+        responseCode:
+          $ref: '#/components/schemas/ResponseCode'
+
+    Originator:
+      type: string
+      enum:
+        - NOT APPLICABLE
+        - CARD ACCEPTOR
+        - ACQUIRER
+        - INTERMEDIATE FACILITY
+        - CUSTOMER
+        - SWITCH
+        - UNKNOWN
+
+    AdviceReason:
+      type: string
+      enum:
+        - NOT APPLICABLE
+        - NOT AN ADVICE
+        - TIMED OUT REQUEST
+        - ISSUER NOT AVAILABLE
+        - ISSUER SIGNED OFF
+        - WITHIN BUSINESS AGREEMENT
+        - KEY NOT ESTABLISHED
+        - ISSUER REQUESTED STANDIN
+        - OTHER
+        - UNKNOWN
+
+    ReversalReason:
+      type: string
+      enum:
+        - NOT APPLICABLE
+        - ISSUER NOT AVAILABLE
+        - ISSUER SIGNED OFF
+        - WITHIN BUSINESS AGREEMENT
+        - TERMINAL PROCESSOR ERROR
+        - SYSTEM TIMEOUT
+        - TERMINAL DISPENSE ERROR
+        - TERMINAL COMMUNICATION ERROR
+        - TERMINAL ERROR
+        - LATE RESPONSE
+        - CUSTOMER CANCELLATION
+        - SUSPECTED FRAUD
+        - CHIP
+        - PARTIAL
+        - EDIT ERROR
+        - REVISED HOLD AMOUNT
+        - UNKNOWN
+
+    AddressVerificationResult:
+      type: string
+      enum:
+        - ADDRESS MATCH ONLY
+        - POSTAL CODE MATCH ONLY
+        - FULL POSTAL CODE MATCH ONLY
+        - ADDRESS AND POSTAL CODE MATCH
+        - ADDRESS AND FULL POSTAL CODE MATCH
+        - NO MATCH
+        - UNAVAILABLE
+        - NOT PROVIDED
+
+    ApplicationTransactionCounterValidationResult:
+      type: string
+      enum:
+        - VALID
+        - OUT OF RANGE
+        - DUPLICATE
+        - NOT VALIDATED
+        - BYPASSED
+        - NOT PROVIDED
+
+    SuppliedCardExpirationDate:
+      type: string
+      pattern: '([0-9][0-9])(0[1-9]|1[0-2])'
+      format: YYMM
+      description: |
+        A manually provided card expiration date, such as when entering card information into an online payment form. The date is assumed to be the last millisecond of the month.
+      minLength: 4
+      maxLength: 4
+
+    TrackDataResult:
+      type: string
+      enum:
+        - VALID
+        - MISMATCHED
+        - NOT PROVIDED
+
+    PinValidationResult:
+      type: string
+      enum:
+        - VALID
+        - INVALID
+        - INVALID KEY
+        - UNAVAILABLE
+        - NOT PROVIDED
+
+    VerificationValueResult:
+      type: string
+      enum:
+        - VALID
+        - INVALID
+        - UNAVAILABLE
+        - NOT PROVIDED
+
+    ArqcVerificationResult:
+      type: string
+      enum:
+        - VALID
+        - INVALID
+        - UNAVAILABLE
+        - NOT PROVIDED
+
+    EMV3DSAuthenticationResult:
+      type: string
+      enum:
+        - AUTHENTICATED BY ISSUER
+        - AUTHENTICATED BY NETWORK
+        - UNAUTHENTICATED
+        - UNAVAILABLE
+        - UNKNOWN
+        - NOT PROVIDED
+
+    IIASData:
+      type: object
+      additionalProperties: false
+      required:
+        - merchantId
+        - verificationResult
+        - healthCareAmount
+        - prescriptionAmount
+        - visionAmount
+      properties:
+        merchantId:
+          description: >-
+            IIAS specific merchant ID which is different from the merchant name
+            or card acceptor identification code
+          type: string
+          minLength: 1
+        verificationResult:
+          description: Results of the IIAS verification
+          type: string
+          enum:
+            - UNVERIFIED
+            - VERIFIED
+            - 90PERCENT
+            - NONCERTIFIED
+        healthCareAmount:
+          $ref: '#/components/schemas/Amount'
+        prescriptionAmount:
+          $ref: '#/components/schemas/Amount'
+        visionAmount:
+          $ref: '#/components/schemas/Amount'
+
+    Token:
+      required:
+        - tokenId
+        - status
+      properties:
+        tokenId:
+          type: string
+          maxLength: 64
+          description: A unique Id assigned to a token.
+        status:
+          $ref: '#/components/schemas/TokenStatus'
+        tokenExpiration:
+          type: string
+          maxLength: 4
+          description: The expiration date of the Token PAN given in MMYY format.
+
+    TokenStatus:
+      type: string
+      description: The current status of token.
+      enum:
+        - INACTIVE # Token has not yet been activated
+        - ACTIVE # Active and ready
+        - SUSPENDED # Suspended and unable to be used
+        - DEACTIVATED # Permanently deactivated
+        - UNKNOWN
+
+    TokenNotificationReasonCode:
+      type: string
+      description: The reason code for why the notification is being sent. This applies to all tokens in the Tokens array.
+      enum:
+        - STATUS UPDATE
+        - REDIGITIZATION COMPLETE
+        - DELETED FROM CONSUMER APP # The token may still be active.
+
+    TokenNotificationData:
+      description: Contains all information about tokens.
+      properties:
+        tokens:
+          type: array
+          description: Contains the Tokens which were updated.
+          items:
+            $ref: '#/components/schemas/Token'
+        reasonCode:
+          $ref: '#/components/schemas/TokenNotificationReasonCode'
+        activationCodeExpiration:
+          type: string
+          format: date-time
+          description: The DateTime when the Activation Code is no longer valid.
+        numberOfActivationAttempts:
+          type: number
+          description: The number of times an Activation Code was received to activate the token.
+        numberOfActiveTokens:
+          type: number
+          description: The number of active tokens. Value might be differ from the number of tokens provided in the "tokens" property as this represents all active tokens, not just the ones whose status is being updated. Tokens that have been deleted from the wallet are excluded from the count.
+        tokenAuthentication:
+          type: string
+          description: The indication on whether the given tokens have been authenticated.
+          enum:
+            - AUTHENTICATED
+            - NOT AUTHENTICATED
+            - NOT PROVIDED
+        tokenAssuranceLevel:
+          type: number
+          description: A number that allows the token issuer to indicate the confidence level of the token on whether it belongs to the cardholder it claims to be associated with. Will only be present if tokenAuthentication = AUTHENTICATED
+        suspiciousEvent:
+          description: The event for why the notification is being sent.
+          required:
+            - reason
+          properties:
+            reason:
+              type: string
+              description: |
+                The reason why a suspiciousEvent is provided.
+
+                REPLENISH - There were suspicious ATC values reporting during Replenish.
+              enum:
+                - REPLENISH
+                - OTHER
+              example: 'REPLENISH'
+
+    ActivationTextPhoneNumber:
+      required:
+        - type
+        - value
+      description: Text message to cardholder's mobile phone number. Value will be the cardholders's masked mobile phone number.
+      properties:
+        type:
+          type: string
+          enum:
+            - TEXT
+        value:
+          type: string
+          minLength: 1
+
+    ActivationEmailAccountHolder:
+      required:
+        - type
+        - value
+      description: Email to cardholder's email address. Value will be the cardholder's masked email address.
+      properties:
+        type:
+          type: string
+          enum:
+            - EMAIL
+        value:
+          type: string
+          minLength: 1
+          maxLength: 64
+
+    ActivationCallAutomatedNumber:
+      required:
+        - type
+        - value
+      description: Cardholder-initiated call to automated call center phone number. Value will be the phone number for the cardholder to call.
+      properties:
+        type:
+          type: string
+          enum:
+            - AUTOMATED NUMBER
+        value:
+          type: string
+          minLength: 1
+
+    ActivationCallCustomerSupport:
+      required:
+        - type
+        - value
+      description: Cardholder-initiated call to customer support call center phone number. Value will be the phone number for the cardholder to call.
+      properties:
+        type:
+          type: string
+          enum:
+            - SUPPORT NUMBER
+        value:
+          type: string
+          minLength: 1
+
+    ActivationVisitWebsite:
+      required:
+        - type
+        - value
+      description: Cardholder to visit a website. Value will be the website URL
+      properties:
+        type:
+          type: string
+          enum:
+            - WEBSITE
+        value:
+          type: string
+          maxLength: 64
+
+    ActivationVisitMobileApp:
+      required:
+        - type
+        - value
+      description: Cardholder to use a specific mobile app to activate token. Value will be replaced by a formatted string
+      properties:
+        type:
+          type: string
+          enum:
+            - APP
+        value:
+          type: string
+          maxLength: 64
+
+    ActivationCallCardHolderNumber:
+      required:
+        - type
+        - value
+      description: Issuer-initiated voice call to cardholder's phone. Value will be the cardholder's masked voice call phone number
+      properties:
+        type:
+          type: string
+          enum:
+            - CARDHOLDER NUMBER
+        value:
+          type: string
+          minLength: 1
+
+    ActivationMethod:
+      oneOf:
+        - $ref: '#/components/schemas/ActivationTextPhoneNumber'
+        - $ref: '#/components/schemas/ActivationEmailAccountHolder'
+        - $ref: '#/components/schemas/ActivationCallAutomatedNumber'
+        - $ref: '#/components/schemas/ActivationCallCustomerSupport'
+        - $ref: '#/components/schemas/ActivationVisitWebsite'
+        - $ref: '#/components/schemas/ActivationVisitMobileApp'
+        - $ref: '#/components/schemas/ActivationCallCardHolderNumber'
+
+    RecommendationReason:
+      type: string
+      enum:
+        - ACCOUNT TOO NEW SINCE LAUNCH
+        - ACCOUNT TOO NEW
+        - ACCOUNT CARD TOO NEW
+        - ACCOUNT RECENTLY CHANGED
+        - SUSPICIOUS ACTIVITY
+        - INACTIVE ACCOUNT
+        - HAS SUSPENDED TOKENS
+        - DEVICE RECENTLY LOST
+        - TOO MANY RECENT ATTEMPTS
+        - TOO MANY RECENT TOKENS
+        - TOO MANY DIFFERENT CARDHOLDERS
+        - LOW DEVICE SCORE
+        - LOW ACCOUNT SCORE
+        - OUTSIDE HOME TERRITORY
+        - UNABLE TO ASSESS
+        - HIGH RISK
+        - LOW PHONE NUMBER SCORE
+        - LONG ACCOUNT TENURE
+        - GOOD ACTIVITY HISTORY
+        - ADDITIONAL DEVICE
+        - SOFTWARE UPDATE
+        - OTHER
+      example: 'ACCOUNT TOO NEW'
+
+    RecommendedDecision:
+      type: string
+      description: The decision recommended by the Wallet Provider.
+      enum:
+        - APPROVED
+        - DECLINED
+        - REQUIRE ADDITIONAL AUTHENTICATION
+      example: 'APPROVED'
+
+    WalletProviderScore:
+      type: string
+      description: Score given by the Wallet Provider on their confidence level of a particular property. Value always between 1 and 5.
+      enum:
+        - SCORE 1
+        - SCORE 2
+        - SCORE 3
+        - SCORE 4
+        - SCORE 5
+        - NOT PROVIDED
+      example: SCORE 4
+
+    WalletProviderDecisioning:
+      required:
+        - recommendedDecision
+        - deviceScore
+        - accountScore
+        - phoneNumberScore
+        - recommendationReasons
+      properties:
+        recommendedDecision:
+          $ref: '#/components/schemas/RecommendedDecision'
+        deviceScore:
+          $ref: '#/components/schemas/WalletProviderScore'
+        accountScore:
+          $ref: '#/components/schemas/WalletProviderScore'
+        phoneNumberScore:
+          $ref: '#/components/schemas/WalletProviderScore'
+        recommendationReasons:
+          type: array
+          description: Reasons provided to the Wallet Provider on how the recommended decision was reached.
+          minLength: 0
+          items:
+            $ref: '#/components/schemas/RecommendationReason'
+
+    TokenizationData:
+      description: All relevant data relevant primarily the process of tokenization.
+      properties:
+        activationCode:
+          type: string
+          minLength: 1
+          maxLength: 32
+          description: The Activation Code to be distributed for tokenization.
+        tokenId:
+          type: string
+          maxLength: 64
+          description: A unique id assigned by the party that initiated the tokenization.
+        tokenType:
+          type: string
+          description: The type of token requested for this tokenization.
+          enum:
+            - EMBEDDED SECURE ELEMENT
+            - CLOUD
+            - STATIC
+        tokenRequestorId:
+          type: string
+          minLength: 11
+          maxLength: 11
+          description: The Id of the party that requested the tokenization.
+        activationMethod:
+          $ref: '#/components/schemas/ActivationMethod'
+        walletProviderDecisioning:
+          $ref: '#/components/schemas/WalletProviderDecisioning'
+
+    ChipData:
+      type: object
+      additionalProperties: false
+      required:
+        - applicationId
+        - applicationTransactionCounter
+        - amountAuthorized
+        - amountOther
+      properties:
+        applicationId:
+          description: Application identifier that was used on the chip
+          type: string
+          minLength: 1
+        applicationTransactionCounter:
+          description: Application transaction counter generated by the chip
+          type: string
+          minLength: 1
+        amountAuthorized:
+          $ref: '#/components/schemas/Amount'
+        amountOther:
+          $ref: '#/components/schemas/Amount'
+
+    FeeType:
+      type: string
+      enum:
+        - CONVENIENCE
+        - TRANSACTION
+        - CURRENCY CONVERSION ASSESSMENT
+        - ISSUER CURRENCY CONVERSION ASSESSMENT
+        - SURCHARGE
+        - OPTIONAL ISSUER
+        - PROCESSING
+        - FOREIGN EXCHANGE
+
+    FeeApplication:
+      type: string
+      description: >
+        Indicates whether the fee should be applied to a cardholder's account (SETTLE) or recorded for information
+        purposes only (MEMO). Examples of MEMO fees are currency conversion fees (already in the settlement amount) and
+        interchange fees.
+      enum:
+        - MEMO
+        - SETTLE
+
+    Fee:
+      type: object
+      additionalProperties: false
+      required:
+        - type
+        - application
+        - transaction
+        - settlement
+      properties:
+        type:
+          $ref: '#/components/schemas/FeeType'
+        application:
+          $ref: '#/components/schemas/FeeApplication'
+        transaction:
+          $ref: '#/components/schemas/Amount'
+        settlement:
+          $ref: '#/components/schemas/Amount'
+
+    File:
+      type: object
+      additionalProperties: false
+      required:
+        - fileIdentifier
+        - fileDescription
+        - recordIdentifier
+        - fileDateTime
+      properties:
+        fileIdentifier:
+          type: string
+          minLength: 1
+          description: A unique identifier for the file in which this message exists. Often will be the name of the file.
+        fileDescription:
+          type: string
+          minLength: 1
+          description: A description of the file whose usage depends on the type of file that was processed.
+        recordIdentifier:
+          type: string
+          minLength: 1
+          description: A unique identifier for this message in the processed file. Often this will be the record number.
+        fileDateTime:
+          type: string
+          minLength: 1
+          format: date-time
+          description: A timestamp associated with the whole file not the individual message.
+
+    NewRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - messageId
+        - cardId
+        - receivedDateTime
+        - categorization
+        - accounts
+        - transactionAmount
+        - transactionFeeAmount
+        - settlementAmount
+        - settlementFeeAmount
+        - cashBackAmount
+        - feeDetails
+        - transmissionDateTime
+        - systemTraceAuditNumber
+        - retrievalReferenceNumber
+        - settlementDate
+        - captureDate
+        - encryptedKeys
+        - merchant
+        - acquirer
+        - network
+        - acquirerNetwork
+        - incremental
+        - lastClearing
+        - recurring
+        - minimumTolerance
+        - track1DataResult
+        - track2DataResult
+        - pinValidationResult
+        - verificationValueValidationResult
+        - verificationValue2ValidationResult
+        - verificationValue3ValidationResult
+        - dynamicVerificationValueValidationResult
+        - arqcValidationResult
+      description: Message data that is being processed
+      properties:
+        messageId:
+          type: string
+          minLength: 1
+        cardId:
+          type: string
+          minLength: 1
+        tokenId:
+          type: string
+          minLength: 1
+        issuerLifecycleId:
+          description: |
+            This value is defined by the issuer to uniquely identify a transaction through its lifecycle.
+          type: string
+        matchedMessageId:
+          type: string
+          minLength: 1
+          description: Set to the message id of any matching message
+        receivedDateTime:
+          type: string
+          minLength: 1
+          format: date-time
+          description: Datetime message was received from the network
+        categorization:
+          $ref: '#/components/schemas/Categorization'
+        accounts:
+          $ref: '#/components/schemas/Accounts'
+        transactionAmount:
+          $ref: '#/components/schemas/Amount'
+        transactionFeeAmount:
+          description: |
+            Fee amount applied by the network or acquirer in the merchant's currency.
+          allOf:
+            - $ref: '#/components/schemas/Amount'
+        settlementAmount:
+          $ref: '#/components/schemas/Amount'
+        settlementFeeAmount:
+          description: |
+            Fee amount applied by the network or acquirer in the BIN currency.
+          allOf:
+            - $ref: '#/components/schemas/Amount'
+        cashBackAmount:
+          $ref: '#/components/schemas/Amount'
+        feeDetails:
+          type: array
+          description: Details about the fees that went into the transaction and settlement fee amounts
+          items:
+            $ref: '#/components/schemas/Fee'
+        settlementConversion:
+          $ref: '#/components/schemas/SettlementConversion'
+        transmissionDateTime:
+          type: string
+          minLength: 1
+          format: date-time
+          description: Network Transaction received Date and Time.
+        systemTraceAuditNumber:
+          type: number
+        acquirerLifecycleId:
+          description: |
+            This value is defined by the acquirer to uniquely identify a transaction through its lifecycle.
+          type: string
+        retrievalReferenceNumber:
+          type: string
+        acquirerReferenceData:
+          description: |
+            This value is a numeric string of data supplied by the acquirer in an acquirer-originated message.
+          type: string
+        settlementDate:
+          type: string
+          minLength: 1
+          format: date
+        captureDate:
+          type: string
+          minLength: 1
+          format: date
+        encryptedKeys:
+          description: An array of encrypted AES keys that will be decrypted using the appropriate private key
+          minLength: 0
+          type: array
+          items:
+            $ref: '#/components/schemas/EncryptedKey'
+        merchant:
+          $ref: '#/components/schemas/Merchant'
+        acquirer:
+          $ref: '#/components/schemas/Acquirer'
+        authorizationLifeCycle:
+          $ref: '#/components/schemas/AuthorizationLifeCycle'
+        replacementAmounts:
+          $ref: '#/components/schemas/ReplacementAmounts'
+        network:
+          $ref: '#/components/schemas/IssuerNetwork'
+        acquirerNetwork:
+          $ref: '#/components/schemas/AcquirerNetwork'
+        interchange:
+          $ref: '#/components/schemas/Interchange'
+        file:
+          $ref: '#/components/schemas/File'
+        addressVerificationData:
+          $ref: '#/components/schemas/AddressVerificationData'
+        incremental:
+          description: >-
+            Indicator whether this has been identified by the acquirer as an
+            incremental authorization or not.
+          type: boolean
+        lastClearing:
+          description: >-
+            Indicator whether this has been identified by the acquirer as
+            the last clearing in a sequence or not.
+          type: boolean
+        recurring:
+          description: >-
+            Indicator whether this has been identified by the acquirer as a
+            recurring transaction or not.
+          type: boolean
+        iiasData:
+          $ref: '#/components/schemas/IIASData'
+        minimumTolerance:
+          $ref: '#/components/schemas/Tolerance'
+        tokenization:
+          $ref: '#/components/schemas/TokenizationData'
+        tokenNotification:
+          $ref: '#/components/schemas/TokenNotificationData'
+        chipData:
+          $ref: '#/components/schemas/ChipData'
+        emv3DSecureData:
+          $ref: '#/components/schemas/EMV3DSecureData'
+        adviceResponse:
+          $ref: '#/components/schemas/AdviceResponse'
+        suppliedCardExpirationDate:
+          $ref: '#/components/schemas/SuppliedCardExpirationDate'
+        track1DataResult:
+          $ref: '#/components/schemas/TrackDataResult'
+        track2DataResult:
+          $ref: '#/components/schemas/TrackDataResult'
+        pinValidationResult:
+          $ref: '#/components/schemas/PinValidationResult'
+        verificationValueValidationResult:
+          $ref: '#/components/schemas/VerificationValueResult'
+        verificationValue2ValidationResult:
+          $ref: '#/components/schemas/VerificationValueResult'
+        verificationValue3ValidationResult:
+          $ref: '#/components/schemas/VerificationValueResult'
+        dynamicVerificationValueValidationResult:
+          $ref: '#/components/schemas/VerificationValueResult'
+        arqcValidationResult:
+          $ref: '#/components/schemas/ArqcVerificationResult'
+        emv3DSAuthenticationResult:
+          $ref: '#/components/schemas/EMV3DSAuthenticationResult'
+
+    EMV3DSecureData:
+      description: |
+        EMV 3-D Secure is a messaging protocol that enables consumers to authenticate themselves with their card issuer
+        when making card-not-present (CNP) e-commerce purchases. The additional security layer helps prevent unauthorized CNP
+        transactions and protects the merchant from exposure to CNP fraud.
+      oneOf:
+        - $ref: '#/components/schemas/EMV3DSecureMastercard'
+
+    EMV3DSecureMastercard:
+      type: object
+      required:
+        - network
+        - securityProtocol
+        - cardholderAuthentication
+        - ucafCollectionIndicator
+        - programProtocolIndicator
+        - cardholderAuthenticationFormat
+      properties:
+        network:
+          type: string
+          description: |
+            This value indicates the network used for the transaction. This value also serves as the discriminator
+            for the EMV3DSecureData object.
+          enum:
+            - MASTERCARD
+        securityProtocol:
+          type: string
+          enum:
+            - CHANNEL
+            - UNKNOWN
+            - NOT PROVIDED
+        cardholderAuthentication:
+          type: string
+          enum:
+            - CARDHOLDER CERTIFICATE NOT USED
+            - MASTERPASS
+            - TOKENIZED
+            - UNKNOWN
+            - NOT PROVIDED
+        ucafCollectionIndicator:
+          type: string
+          description: |
+            This data describes the merchant support and issuer expectations 
+            regarding the Universal Cardholder Authentication Field (UCAF) and
+            whether Account Holder Authentication Value (AAV) data is present and authenticated.
+          enum:
+            - NOT SUPPORTED
+            - UCAF MUST BE PRESENT
+            - UCAF MUST BE PRESENT AND AAV AUTHENTICATED
+            - AAV PRESENT
+            - ISSUER RISK BASED DECISIONING
+            - MERCHANT RISK BASED DECISIONING
+            - PARTIAL SHIPMENT OR RECURRING PAYMENT
+            - UNKNOWN
+            - NOT PROVIDED
+        programProtocolIndicator:
+          type: string
+          enum:
+            - EMV 3-D SECURE VERSION 2.1
+            - EMV 3-D SECURE VERSION 2.2
+            - EMV 3-D SECURE VERSION 2.3
+            - EMV 3-D SECURE VERSION 2.4
+            - EMV 3-D SECURE VERSION 2.5
+            - EMV 3-D SECURE VERSION 2.6
+            - EMV 3-D SECURE VERSION 2.7
+            - EMV 3-D SECURE VERSION 2.8
+            - EMV 3-D SECURE VERSION 2.9
+            - UNKNOWN
+            - NOT PROVIDED
+        cardholderAuthenticationFormat:
+          type: string
+          enum:
+            - SECURE CODE
+            - SECURE CODE FOR AAV
+            - UNKNOWN
+            - NOT PROVIDED
+        universalCardholderAuthenticationField:
+          type: string
+          description: |
+            The Universal Cardholder Authentication Field (UCAF) is a data element that is used to convey
+            cardholder authentication data from the merchant to the issuer.
+
+    Request:
+      type: object
+      additionalProperties: false
+      required:
+        - messageId
+        - cardId
+        - receivedDateTime
+        - categorization
+        - accounts
+        - transactionAmount
+        - transactionFeeAmount
+        - settlementAmount
+        - settlementFeeAmount
+        - cashBackAmount
+        - feeDetails
+        - transmissionDateTime
+        - systemTraceAuditNumber
+        - retrievalReferenceNumber
+        - settlementDate
+        - captureDate
+        - encryptedKeys
+        - merchant
+        - acquirer
+        - network
+        - acquirerNetwork
+        - incremental
+        - lastClearing
+        - recurring
+        - minimumTolerance
+        - track1DataResult
+        - track2DataResult
+        - pinValidationResult
+        - verificationValueValidationResult
+        - verificationValue2ValidationResult
+        - verificationValue3ValidationResult
+        - dynamicVerificationValueValidationResult
+        - arqcValidationResult
+        - createdOn
+      description: Message data that is being processed
+      properties:
+        messageId:
+          type: string
+          minLength: 1
+        cardId:
+          type: string
+          minLength: 1
+        tokenId:
+          type: string
+          minLength: 1
+        issuerLifecycleId:
+          description: |
+            This value is defined by the issuer to uniquely identify a transaction through its lifecycle.
+          type: string
+        matchedMessageId:
+          type: string
+          minLength: 1
+          description: Set to the message id of any matching message
+        receivedDateTime:
+          type: string
+          minLength: 1
+          format: date-time
+          description: Datetime message was received from the network
+        categorization:
+          $ref: '#/components/schemas/Categorization'
+        accounts:
+          $ref: '#/components/schemas/Accounts'
+        transactionAmount:
+          $ref: '#/components/schemas/Amount'
+        transactionFeeAmount:
+          description: |
+            Fee amount applied by the network or acquirer in the merchant's currency.
+          allOf:
+            - $ref: '#/components/schemas/Amount'
+        settlementAmount:
+          $ref: '#/components/schemas/Amount'
+        settlementFeeAmount:
+          description: |
+            Fee amount applied by the network or acquirer in the BIN currency.
+          allOf:
+            - $ref: '#/components/schemas/Amount'
+        cashBackAmount:
+          $ref: '#/components/schemas/Amount'
+        feeDetails:
+          type: array
+          description: Details about the fees that went into the transaction and settlement fee amounts
+          items:
+            $ref: '#/components/schemas/Fee'
+        settlementConversion:
+          $ref: '#/components/schemas/SettlementConversion'
+        transmissionDateTime:
+          type: string
+          minLength: 1
+          format: date-time
+          description: Network Transaction received Date and Time.
+        systemTraceAuditNumber:
+          type: number
+        acquirerLifecycleId:
+          description: |
+            This value is defined by the acquirer to uniquely identify a transaction through its lifecycle.
+          type: string
+        retrievalReferenceNumber:
+          type: string
+        acquirerReferenceData:
+          description: |
+            This value is a numeric string of data supplied by the acquirer in an acquirer-originated message.
+          type: string
+        settlementDate:
+          type: string
+          minLength: 1
+        captureDate:
+          type: string
+          minLength: 1
+        encryptedKeys:
+          description: An array of encrypted AES keys that will be decrypted using the appropriate private key
+          minLength: 0
+          type: array
+          items:
+            $ref: '#/components/schemas/EncryptedKey'
+        merchant:
+          $ref: '#/components/schemas/Merchant'
+        acquirer:
+          $ref: '#/components/schemas/Acquirer'
+        authorizationLifeCycle:
+          $ref: '#/components/schemas/AuthorizationLifeCycle'
+        replacementAmounts:
+          $ref: '#/components/schemas/ReplacementAmounts'
+        network:
+          $ref: '#/components/schemas/IssuerNetwork'
+        acquirerNetwork:
+          $ref: '#/components/schemas/AcquirerNetwork'
+        interchange:
+          $ref: '#/components/schemas/Interchange'
+        file:
+          $ref: '#/components/schemas/File'
+        addressVerificationData:
+          $ref: '#/components/schemas/AddressVerificationData'
+        incremental:
+          description: >-
+            Indicator whether this has been identified by the acquirer as an
+            incremental authorization or not.
+          type: boolean
+        lastClearing:
+          description: >-
+            Indicator whether this has been identified by the acquirer as
+            the last clearing in a sequence or not.
+          type: boolean
+        recurring:
+          description: >-
+            Indicator whether this has been identified by the acquirer as a
+            recurring transaction or not.
+          type: boolean
+        iiasData:
+          $ref: '#/components/schemas/IIASData'
+        minimumTolerance:
+          $ref: '#/components/schemas/Tolerance'
+        tokenization:
+          $ref: '#/components/schemas/TokenizationData'
+        tokenNotification:
+          $ref: '#/components/schemas/TokenNotificationData'
+        chipData:
+          $ref: '#/components/schemas/ChipData'
+        emv3DSecureData:
+          $ref: '#/components/schemas/EMV3DSecureData'
+        adviceResponse:
+          $ref: '#/components/schemas/AdviceResponse'
+        suppliedCardExpirationDate:
+          $ref: '#/components/schemas/SuppliedCardExpirationDate'
+        track1DataResult:
+          $ref: '#/components/schemas/TrackDataResult'
+        track2DataResult:
+          $ref: '#/components/schemas/TrackDataResult'
+        pinValidationResult:
+          $ref: '#/components/schemas/PinValidationResult'
+        verificationValueValidationResult:
+          $ref: '#/components/schemas/VerificationValueResult'
+        verificationValue2ValidationResult:
+          $ref: '#/components/schemas/VerificationValueResult'
+        verificationValue3ValidationResult:
+          $ref: '#/components/schemas/VerificationValueResult'
+        dynamicVerificationValueValidationResult:
+          $ref: '#/components/schemas/VerificationValueResult'
+        arqcValidationResult:
+          $ref: '#/components/schemas/ArqcVerificationResult'
+        emv3DSAuthenticationResult:
+          $ref: '#/components/schemas/EMV3DSAuthenticationResult'
+        createdOn:
+          type: string
+          format: date-time
+          description: Message record creation date/time
+
+    PickedRequest:
+      type: object
+      additionalProperties: false
+      description: Picked Message data that is being processed
+      required:
+        - createdOn
+      properties:
+        cardId:
+          type: string
+          minLength: 1
+        messageId:
+          type: string
+          minLength: 1
+        matchedMessageId:
+          type: string
+          minLength: 1
+          description: Set to the message id of any matching message
+        receivedDateTime:
+          type: string
+          minLength: 1
+          format: date-time
+          description: Datetime message was received from the network
+        categorization:
+          $ref: '#/components/schemas/Categorization'
+        settlementAmount:
+          $ref: '#/components/schemas/Amount'
+        adviceResponse:
+          $ref: '#/components/schemas/AdviceResponse'
+        createdOn:
+          type: string
+          format: date-time
+          description: Message record creation date/time
+
+    TagResult:
+      type: object
+      additionalProperties: false
+      description: The tag that matches and any maximum amount usable for the tag
+      required:
+        - tag
+        - maxAmount
+      properties:
+        tag:
+          type: string
+          description: Applicable tag for the classification
+          minLength: 1
+        maxAmount:
+          type: string
+          description: Maximum amount that is applicable for the tag
+          minLength: 1
+
+    DeclineReasonsEnum:
+      type: string
+      enum:
+        - TRANSACTION CATEGORY NOT ALLOWED
+        - INTERNATIONAL TRANSACTIONS NOT ALLOWED
+        - RESTRICTED COUNTRY
+        - RESTRICTED MERCHANT TYPE
+        - RESTRICTED MERCHANT
+        - INVALID PIN
+        - PIN BLOCK ERROR
+        - PIN VALIDATION UNAVAILABLE
+        - INVALID VERIFICATION VALUE
+        - INVALID VERIFICATION VALUE2
+        - INVALID VERIFICATION VALUE3
+        - INVALID DYNAMIC VERIFICATION VALUE
+        - INVALID ATC
+        - INVALID ARQC
+        - NO CVN SUPPLIED
+        - VERIFICATION VALUE VALIDATION UNAVAILABLE
+        - VERIFICATION VALUE2 VALIDATION UNAVAILABLE
+        - VERIFICATION VALUE3 VALIDATION UNAVAILABLE
+        - DYNAMIC VERIFICATION VALUE VALIDATION UNAVAILABLE
+        - ARQC VALIDATION UNAVAILABLE
+        - CARD NOT FOUND
+        - CARD NOT CURRENT
+        - EXPIRED CARD
+        - BLOCKED CARD
+        - LOCKED CARD
+        - INACTIVE CARD
+        - INVALID CARD DATA
+        - UNSUPPORTED OPERATION
+        - INSUFFICIENT FUNDS
+        - AMOUNT LIMIT EXCEEDED
+        - COUNT LIMIT EXCEEDED
+        - MINIMUM AMOUNT REQUIRED
+        - PIN RETRY LIMIT EXCEEDED
+        - BUSINESS RULES
+        - SUSPECTED FRAUD
+        - INVALID ACCOUNT SELECTED
+        - INVALID MESSAGE DATA
+        - STOP RECURRING
+        - GENERAL DECLINE
+        - INCORRECT ACTIVATION CODE
+        - INCORRECT ACTIVATION CODE RETRIES EXCEEDED
+        - EXPIRED ACTIVATION CODE
+        - REQUIRE ADDITIONAL AUTHENTICATION
+        - WALLET RECOMMENDED DECLINE
+        - INTERNAL SERVICE ERROR
+        - TRANSIENT RETRYABLE ERROR
+        - CONFIGURATION LOCK
+
+    AccountUsage:
+      type: object
+      additionalProperties: false
+      required:
+        - accountId
+        - debitCredit
+        - amount
+      properties:
+        accountId:
+          type: string
+          minLength: 1
+        debitCredit:
+          $ref: '#/components/schemas/DebitCredit'
+        amount:
+          type: string
+          minLength: 1
+
+    CurrencyAlphabeticCode:
+      type: string
+      description: Currency codes
+      enum:
+        - AED
+        - AFN
+        - ALL
+        - AMD
+        - ANG
+        - AOA
+        - ARS
+        - AUD
+        - AWG
+        - AZN
+        - BAM
+        - BBD
+        - BDT
+        - BGN
+        - BHD
+        - BIF
+        - BMD
+        - BND
+        - BOB
+        - BOV
+        - BRL
+        - BSD
+        - BTN
+        - BWP
+        - BYN
+        - BZD
+        - CAD
+        - CDF
+        - CHE
+        - CHF
+        - CHW
+        - CLF
+        - CLP
+        - CNY
+        - COP
+        - COU
+        - CRC
+        - CUC
+        - CUP
+        - CVE
+        - CZK
+        - DJF
+        - DKK
+        - DOP
+        - DZD
+        - EGP
+        - ERN
+        - ETB
+        - EUR
+        - FJD
+        - FKP
+        - GBP
+        - GEL
+        - GHS
+        - GIP
+        - GMD
+        - GNF
+        - GTQ
+        - GYD
+        - HKD
+        - HNL
+        - HRK
+        - HTG
+        - HUF
+        - IDR
+        - ILS
+        - INR
+        - IQD
+        - IRR
+        - ISK
+        - JMD
+        - JOD
+        - JPY
+        - KES
+        - KGS
+        - KHR
+        - KMF
+        - KPW
+        - KRW
+        - KWD
+        - KYD
+        - KZT
+        - LAK
+        - LBP
+        - LKR
+        - LRD
+        - LSL
+        - LYD
+        - MAD
+        - MDL
+        - MGA
+        - MKD
+        - MMK
+        - MNT
+        - MOP
+        - MRU
+        - MUR
+        - MVR
+        - MWK
+        - MXN
+        - MXV
+        - MYR
+        - MZN
+        - NAD
+        - NGN
+        - NIO
+        - NOK
+        - NPR
+        - NZD
+        - OMR
+        - PAB
+        - PEN
+        - PGK
+        - PHP
+        - PKR
+        - PLN
+        - PYG
+        - QAR
+        - RON
+        - RSD
+        - RUB
+        - RWF
+        - SAR
+        - SBD
+        - SCR
+        - SDG
+        - SEK
+        - SGD
+        - SHP
+        - SLL
+        - SOS
+        - SRD
+        - SSP
+        - STN
+        - SVC
+        - SYP
+        - SZL
+        - THB
+        - TJS
+        - TMT
+        - TND
+        - TOP
+        - TRY
+        - TTD
+        - TWD
+        - TZS
+        - UAH
+        - UGX
+        - USD
+        - USN
+        - UYI
+        - UYU
+        - UYW
+        - UZS
+        - VES
+        - VND
+        - VUV
+        - WST
+        - XAF
+        - XAG
+        - XAU
+        - XBA
+        - XBB
+        - XBC
+        - XBD
+        - XCD
+        - XDR
+        - XOF
+        - XPD
+        - XPF
+        - XPT
+        - XSU
+        - XTS
+        - XUA
+        - XXX
+        - YER
+        - ZAR
+        - ZMW
+        - ZWL
+
+    Rate:
+      type: object
+      description: |
+        - The currency conversion rate information.
+          To calculate the conversion rate:
+
+            conversion rate = factor / (10 ^ factor decimal position)
+
+          or, to calculate the target currency amount given a source currency amount:
+
+            target currency amount = (source currency amount * conversion factor) / (10 ^ factor decimal position)
+      additionalProperties: false
+      required:
+        - factor
+        - factorDecimalPosition
+        - effectiveOn
+      properties:
+        factor:
+          description: |
+            This value represents the multiplying factor used to convert a source currency amount to a target currency
+            amount. This value can be used to calculate the conversion rate.
+          type: string
+          pattern: '^\d+$'
+          minLength: 1
+        factorDecimalPosition:
+          description: |
+            This number represents the position the decimal point should be placed, starting from the right. This can be
+            used to calculate the conversion rate.
+          type: integer
+          minimum: 0
+          maximum: 15
+        effectiveOn:
+          type: string
+          description: The date time that the conversion rate went into effect.
+          format: date-time
+
+    AdditionalCurrencyConversionRate:
+      type: object
+      description: |
+        Contains the conversion rate from the settlement currency to a target currency that was in effect when processing this message.
+        The value can be obtained in one of four ways and will be represented by the conversionSource field.
+      additionalProperties: false
+      required:
+        - rate
+        - conversionSource
+        - targetCurrency
+      properties:
+        rate:
+          $ref: '#/components/schemas/Rate'
+        conversionSource:
+          type: string
+          description: |
+            - NONE
+              - The target currency matches the settlement currency.
+              - The rate will be 1.0
+              - example scenario: Settlement Currency = USD, Target Currency = USD, Transaction Currency = EUR
+            - NETWORK
+              - The target currency matches the message's transaction currency.
+              - The rate will be the inverse of the settlementConversion data provided by the network.
+              - example scenario: Settlement Currency = USD, Target Currency = EUR, Transaction Currency = EUR
+            - INTERNAL
+              - The target currency does not match the settlement or transaction currency and a settlement to target currency conversion rate is defined within the Rate service at the time of the transaction.
+              - The rate will be the settlement to target currency rate retrieved from the rate service at the time of the transaction.
+              - example scenario: Settlement Currency = USD, Target Currency = EUR, Transaction Currency = GBP, Rate from USD -> EUR is defined within the Rate service at the time of the transaction
+            - NOT FOUND
+              - The target currency does not match the settlement or transaction currency and no settlement to target currency rate is defined within the Rate service at the time of the transaction.
+              - The rate will be 0.0
+              - example scenario: Settlement Currency = USD, Target Currency = EUR, Transaction Currency = GBP, Rate from USD -> EUR is NOT defined within the Rate service at the time of the transaction
+            - NOT APPLICABLE
+              - The incoming message's settlement amount is 0
+              - The rate will be 0.0
+              - example scenarios: tokenization messages, balance inquiries, 0 value transactions
+          enum:
+            - NONE
+            - NETWORK
+            - INTERNAL
+            - NOT FOUND
+            - NOT APPLICABLE
+        targetCurrency:
+          $ref: '#/components/schemas/CurrencyAlphabeticCode'
+
+    NewResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - messageId
+        - cardId
+        - responseCode
+        - declineReasons
+        - capture
+        - requestedAmount
+        - requestedTolerance
+        - requestedFee
+        - requestedTotal
+        - requestedCashBack
+        - approvedAmount
+        - approvedTolerance
+        - approvedFee
+        - approvedTotal
+        - approvedCashBack
+        - pendingAmount
+        - pendingTolerance
+        - pendingFee
+        - pendingTotal
+        - completedAmount
+        - completedTolerance
+        - completedFee
+        - completedTotal
+        - pendingAccounts
+        - completedAccounts
+        - tags
+        - addressVerificationResult
+        - applicationTransactionCounterValidationResult
+        - processedBy
+      properties:
+        messageId:
+          type: string
+          minLength: 1
+        cardId:
+          type: string
+          minLength: 1
+        authorizationIdResponse:
+          type: string
+          minLength: 1
+        responseCode:
+          $ref: '#/components/schemas/ResponseCode'
+        declineReasons:
+          type: array
+          description: Network Transaction decline reasons
+          items:
+            $ref: '#/components/schemas/DeclineReasonsEnum'
+        capture:
+          type: boolean
+        requestedAmount:
+          $ref: '#/components/schemas/Amount'
+        requestedTolerance:
+          $ref: '#/components/schemas/Amount'
+        requestedFee:
+          description: |
+            Fee amount applied by the processor. This value does not include fees applied by
+            the network or acquirer. Those fees are included in requestedAmount and approvedAmount.
+          allOf:
+            - $ref: '#/components/schemas/Amount'
+        requestedTotal:
+          $ref: '#/components/schemas/Amount'
+        requestedCashBack:
+          $ref: '#/components/schemas/Amount'
+        approvedAmount:
+          $ref: '#/components/schemas/Amount'
+        approvedTolerance:
+          $ref: '#/components/schemas/Amount'
+        approvedFee:
+          description: |
+            Fee amount applied by the processor. This value does not include fees applied by
+            the network or acquirer. Those fees are included in requestedAmount and approvedAmount.
+          allOf:
+            - $ref: '#/components/schemas/Amount'
+        approvedTotal:
+          $ref: '#/components/schemas/Amount'
+        approvedCashBack:
+          $ref: '#/components/schemas/Amount'
+        pendingAmount:
+          $ref: '#/components/schemas/Amount'
+        pendingTolerance:
+          $ref: '#/components/schemas/Amount'
+        pendingFee:
+          $ref: '#/components/schemas/Amount'
+        pendingTotal:
+          $ref: '#/components/schemas/Amount'
+        completedAmount:
+          $ref: '#/components/schemas/Amount'
+        completedTolerance:
+          $ref: '#/components/schemas/Amount'
+        completedFee:
+          $ref: '#/components/schemas/Amount'
+        completedTotal:
+          $ref: '#/components/schemas/Amount'
+        availableBalance:
+          $ref: '#/components/schemas/Amount'
+        addressVerificationResult:
+          $ref: '#/components/schemas/AddressVerificationResult'
+        applicationTransactionCounterValidationResult:
+          $ref: '#/components/schemas/ApplicationTransactionCounterValidationResult'
+        entryId:
+          type: string
+          minLength: 1
+        pendingAccounts:
+          type: array
+          description: Accounts where there are still funds pending
+          items:
+            $ref: '#/components/schemas/AccountUsage'
+        completedAccounts:
+          type: array
+          description: Accounts where the funds have completed
+          items:
+            $ref: '#/components/schemas/AccountUsage'
+        holdExpirationDateTime:
+          type: string
+          minLength: 1
+          format: date-time
+        tags:
+          type: array
+          description: List of tags
+          items:
+            $ref: '#/components/schemas/TagResult'
+        tokenization:
+          type: object
+          properties:
+            activationMethods:
+              type: array
+              minLength: 0
+              description: The activation methods to be used for this tokenization. Returning an empty array will mean that no aditional activation methods are required to tokenize, with the except of any pre-configured with the party responsible for initializing the tokenization.
+              items:
+                $ref: '#/components/schemas/ActivationMethod'
+        processedBy:
+          type: string
+          minLength: 1
+          description: The name of the service that provided the approval or decline
+        proprietaryAuxiliaryData:
+          type: object
+          description: If present, this object will contain proprietary auxiliary data
+        additionalCurrencyConversionRates:
+          type: array
+          minLength: 0
+          description: Additional currency conversion rates that can be used to convert the settlement currency to some other currency
+          items:
+            $ref: '#/components/schemas/AdditionalCurrencyConversionRate'
+
+    Response:
+      type: object
+      additionalProperties: false
+      required:
+        - messageId
+        - cardId
+        - responseCode
+        - declineReasons
+        - capture
+        - requestedAmount
+        - requestedTolerance
+        - requestedFee
+        - requestedTotal
+        - requestedCashBack
+        - approvedAmount
+        - approvedTolerance
+        - approvedFee
+        - approvedTotal
+        - approvedCashBack
+        - pendingAmount
+        - pendingTolerance
+        - pendingFee
+        - pendingTotal
+        - completedAmount
+        - completedTolerance
+        - completedFee
+        - completedTotal
+        - pendingAccounts
+        - completedAccounts
+        - tags
+        - addressVerificationResult
+        - applicationTransactionCounterValidationResult
+        - processedBy
+        - createdOn
+      properties:
+        messageId:
+          type: string
+          minLength: 1
+        cardId:
+          type: string
+          minLength: 1
+        authorizationIdResponse:
+          type: string
+          minLength: 1
+        responseCode:
+          $ref: '#/components/schemas/ResponseCode'
+        declineReasons:
+          type: array
+          description: Network Transaction decline reasons
+          items:
+            $ref: '#/components/schemas/DeclineReasonsEnum'
+        capture:
+          type: boolean
+        requestedAmount:
+          $ref: '#/components/schemas/Amount'
+        requestedTolerance:
+          $ref: '#/components/schemas/Amount'
+        requestedFee:
+          description: |
+            Fee amount applied by the processor. This value does not include fees applied by
+            the network or acquirer. Those fees are included in requestedAmount and approvedAmount.
+          allOf:
+            - $ref: '#/components/schemas/Amount'
+        requestedTotal:
+          $ref: '#/components/schemas/Amount'
+        requestedCashBack:
+          $ref: '#/components/schemas/Amount'
+        approvedAmount:
+          $ref: '#/components/schemas/Amount'
+        approvedTolerance:
+          $ref: '#/components/schemas/Amount'
+        approvedFee:
+          description: |
+            Fee amount applied by the processor. This value does not include fees applied by
+            the network or acquirer. Those fees are included in requestedAmount and approvedAmount.
+          allOf:
+            - $ref: '#/components/schemas/Amount'
+        approvedTotal:
+          $ref: '#/components/schemas/Amount'
+        approvedCashBack:
+          $ref: '#/components/schemas/Amount'
+        pendingAmount:
+          $ref: '#/components/schemas/Amount'
+        pendingTolerance:
+          $ref: '#/components/schemas/Amount'
+        pendingFee:
+          $ref: '#/components/schemas/Amount'
+        pendingTotal:
+          $ref: '#/components/schemas/Amount'
+        completedAmount:
+          $ref: '#/components/schemas/Amount'
+        completedTolerance:
+          $ref: '#/components/schemas/Amount'
+        completedFee:
+          $ref: '#/components/schemas/Amount'
+        completedTotal:
+          $ref: '#/components/schemas/Amount'
+        availableBalance:
+          $ref: '#/components/schemas/Amount'
+        addressVerificationResult:
+          $ref: '#/components/schemas/AddressVerificationResult'
+        applicationTransactionCounterValidationResult:
+          $ref: '#/components/schemas/ApplicationTransactionCounterValidationResult'
+        entryId:
+          type: string
+          minLength: 1
+        pendingAccounts:
+          type: array
+          description: Accounts where there are still funds pending
+          items:
+            $ref: '#/components/schemas/AccountUsage'
+        completedAccounts:
+          type: array
+          description: Accounts where the funds have completed
+          items:
+            $ref: '#/components/schemas/AccountUsage'
+        holdExpirationDateTime:
+          type: string
+          minLength: 1
+          format: date-time
+        tags:
+          type: array
+          description: List of tags
+          items:
+            $ref: '#/components/schemas/TagResult'
+        tokenization:
+          type: object
+          properties:
+            activationMethods:
+              type: array
+              minLength: 0
+              description: The activation methods to be used for this tokenization. Returning an empty array will mean that no aditional activation methods are required to tokenize, with the except of any pre-configured with the party responsible for initializing the tokenization.
+              items:
+                $ref: '#/components/schemas/ActivationMethod'
+        processedBy:
+          type: string
+          minLength: 1
+          description: The name of the service that provided the approval or decline
+        createdOn:
+          type: string
+          format: date-time
+          description: Message record creation date/time
+        proprietaryAuxiliaryData:
+          type: object
+          description: If present, this object will contain proprietary auxiliary data
+        additionalCurrencyConversionRates:
+          type: array
+          minLength: 0
+          description: Additional currency conversion rates used to convert the settlement currency to some other currency
+          items:
+            $ref: '#/components/schemas/AdditionalCurrencyConversionRate'
+
+    PickedResponse:
+      type: object
+      additionalProperties: false
+      description: Picked response message data
+      required:
+        - createdOn
+      properties:
+        messageId:
+          type: string
+          minLength: 1
+        declineReasons:
+          type: array
+          description: Network Transaction decline reasons
+          items:
+            $ref: '#/components/schemas/DeclineReasonsEnum'
+        approvedTotal:
+          $ref: '#/components/schemas/Amount'
+        holdExpirationDateTime:
+          type: string
+          minLength: 1
+          format: date-time
+        createdOn:
+          type: string
+          format: date-time
+          description: Message record creation date/time
+        proprietaryAuxiliaryData:
+          type: object
+          description: If present, this object will contain proprietary auxiliary data
+        additionalCurrencyConversionRates:
+          type: array
+          minLength: 0
+          description: Additional currency conversion rates used to convert the settlement currency to some other currency
+          items:
+            $ref: '#/components/schemas/AdditionalCurrencyConversionRate'
+
+    RequestField:
+      type: string
+      enum:
+        - CARD_ID
+        - ADVICE_RESPONSE
+        - CATEGORIZATION
+        - CREATED_ON
+        - MATCHED_MESSAGE_ID
+        - MESSAGE_ID
+        - RECEIVED_DATE_TIME
+        - SETTLEMENT_AMOUNT
+
+    ResponseField:
+      type: string
+      enum:
+        - APPROVED_TOTAL
+        - CREATED_ON
+        - DECLINE_REASONS
+        - HOLD_EXPIRATION_DATE_TIME
+        - MESSAGE_ID
+        - PROPRIETARY_AUXILIARY_DATA
+        - ADDITIONAL_CURRENCY_CONVERSION_RATES
+
+  parameters:
+    messageId:
+      in: path
+      name: messageId
+      description: Unique identifier for a message
+      required: true
+      schema:
+        type: string
+
+    at:
+      in: query
+      name: at
+      description: >-
+        Identifies at what point in time the data should be returned. Must not
+        be in the future.
+      required: true
+      schema:
+        type: string
+        format: date-time
+
+    cardId:
+      in: query
+      name: cardId
+      description: Unique identifier for an account
+      required: true
+      schema:
+        type: array
+        minItems: 1
+        items:
+          type: string
+
+    toDate:
+      in: query
+      name: toDate
+      description: >-
+        Return entries created before this time. Must be at least 1 second in
+        the past.
+      required: true
+      schema:
+        type: string
+        format: date-time
+
+    fromDate:
+      in: query
+      name: fromDate
+      description: >-
+        Return entries created at or after this time. Must be at least 1 second
+        in the past.
+      schema:
+        type: string
+        format: date-time
+
+    lastModified:
+      name: Last-Modified
+      in: header
+      description: Last-Modified header
+      required: false
+      schema:
+        type: string
+        format: date-time
+
+    createdOn:
+      name: Created-On
+      in: header
+      description: CreatedOn-header
+      required: false
+      schema:
+        type: string
+        format: date-time
+
+    responseFields:
+      in: query
+      name: fields
+      description: The message response fields to return
+      required: true
+      schema:
+        type: array
+        minItems: 1
+        items:
+          $ref: '#/components/schemas/ResponseField'
+
+    requestFields:
+      in: query
+      name: fields
+      description: The message request fields to return
+      required: true
+      schema:
+        type: array
+        minItems: 1
+        items:
+          $ref: '#/components/schemas/RequestField'
+
+  responses:
+    Ping:
+      description: ping successful response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Ping'
+
+    ServerError:
+      description: Server Error response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  headers:
+    Last-Modified:
+      description: Date and time at which the record was last modified
+      required: true
+      schema:
+        type: string
+        format: date-time
+
+    Created-On:
+      description: CreatedOn timestamp for the newly created record
+      required: true
+      schema:
+        type: string
+        format: date-time
+
+    Updated-On:
+      description: UpdatedOn timestamp for the existing record
+      required: true
+      schema:
+        type: string
+        format: date-time

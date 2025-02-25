@@ -1,0 +1,3558 @@
+{
+  "apis": {
+    "/message/v2/ping": {
+      "get": {
+        "request": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/api/PingGetRequestContext",
+          "type": "object",
+          "properties": {
+            "headers": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "responses": {
+          "200": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/api/PingGetResponseOK",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$ref": "/message/v2/schemas/definitions/Ping"
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          },
+          "default": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/api/PingGetResponseDefault",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$ref": "/message/v2/schemas/definitions/Error"
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "/message/v2/request": {
+      "get": {
+        "request": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/api/RequestQueryGetRequestContext",
+          "type": "object",
+          "properties": {
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "cardIds": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "$ref": "/message/v2/schemas/definitions/CardId"
+                  }
+                },
+                "toDate": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "fromDate": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": ["cardIds", "toDate"]
+            },
+            "headers": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "required": ["query"],
+          "additionalProperties": false
+        },
+        "responses": {
+          "200": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/api/RequestQueryGetResponseOK",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$ref": "/message/v2/schemas/definitions/Requests"
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          },
+          "default": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/api/RequestQueryGetResponseDefault",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$ref": "/message/v2/schemas/definitions/Error"
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "/message/v2/picked-request": {
+      "get": {
+        "request": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/api/PickedRequestGetRequestContext",
+          "type": "object",
+          "properties": {
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "cardIds": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "$ref": "/message/v2/schemas/definitions/CardId"
+                  }
+                },
+                "toDate": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "fromDate": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "fields": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "$ref": "/message/v2/schemas/definitions/RequestField"
+                  }
+                }
+              },
+              "required": ["cardIds", "toDate", "fields"]
+            },
+            "headers": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "required": ["query"],
+          "additionalProperties": false
+        },
+        "responses": {
+          "200": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/api/PickedRequestGetResponseOK",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$ref": "/message/v2/schemas/definitions/PickedRequests"
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          },
+          "default": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/api/PickedRequestGetResponseDefault",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$ref": "/message/v2/schemas/definitions/Error"
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "/message/v2/request/:messageId": {
+      "get": {
+        "request": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/api/RequestGetRequestContext",
+          "type": "object",
+          "properties": {
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": ["at"]
+            },
+            "headers": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "required": ["params", "query"],
+          "additionalProperties": false
+        },
+        "responses": {
+          "200": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/api/RequestGetResponseOK",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "properties": {
+                  "created-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "updated-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                },
+                "required": ["created-on", "updated-on"]
+              },
+              "body": {
+                "$ref": "/message/v2/schemas/definitions/Request"
+              }
+            },
+            "required": ["headers", "body"],
+            "additionalProperties": false
+          },
+          "404": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/api/RequestGetResponseNotFound",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "default": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/api/RequestGetResponseDefault",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$ref": "/message/v2/schemas/definitions/Error"
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "put": {
+        "request": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/api/RequestPutRequestContext",
+          "type": "object",
+          "properties": {
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "messageId": {
+                  "$ref": "/message/v2/schemas/definitions/MessageId"
+                }
+              },
+              "required": ["messageId"]
+            },
+            "headers": {
+              "type": "object",
+              "additionalProperties": true,
+              "properties": {
+                "created-on": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": ["Created-On"]
+            },
+            "body": {
+              "$ref": "/message/v2/schemas/definitions/NewRequest"
+            }
+          },
+          "required": ["params", "headers", "body"],
+          "additionalProperties": false
+        },
+        "responses": {
+          "204": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/api/RequestPutResponseNoContent",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "properties": {
+                  "created-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "updated-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                },
+                "required": ["created-on", "updated-on"]
+              }
+            },
+            "required": ["headers"],
+            "additionalProperties": false
+          },
+          "409": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/api/RequestPutResponseConflict",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "default": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/api/RequestPutResponseDefault",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$ref": "/message/v2/schemas/definitions/Error"
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "/message/v2/response": {
+      "get": {
+        "request": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/api/ResponseQueryGetRequestContext",
+          "type": "object",
+          "properties": {
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "cardIds": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "$ref": "/message/v2/schemas/definitions/CardId"
+                  }
+                },
+                "toDate": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "fromDate": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": ["cardIds", "toDate"]
+            },
+            "headers": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "required": ["query"],
+          "additionalProperties": false
+        },
+        "responses": {
+          "200": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/api/ResponseQueryGetResponseOK",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$ref": "/message/v2/schemas/definitions/Responses"
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          },
+          "default": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/api/ResponseQueryGetResponseDefault",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$ref": "/message/v2/schemas/definitions/Error"
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "/message/v2/picked-response": {
+      "get": {
+        "request": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/api/PickedResponseGetRequestContext",
+          "type": "object",
+          "properties": {
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "cardIds": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "$ref": "/message/v2/schemas/definitions/CardId"
+                  }
+                },
+                "toDate": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "fromDate": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "fields": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "$ref": "/message/v2/schemas/definitions/ResponseField"
+                  }
+                }
+              },
+              "required": ["cardIds", "toDate", "fields"]
+            },
+            "headers": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "required": ["query"],
+          "additionalProperties": false
+        },
+        "responses": {
+          "200": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/api/PickedResponseGetResponseOK",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$ref": "/message/v2/schemas/definitions/PickedResponses"
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          },
+          "default": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/api/PickedResponseGetResponseDefault",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$ref": "/message/v2/schemas/definitions/Error"
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "/message/v2/response/:messageId": {
+      "get": {
+        "request": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/api/ResponseGetRequestContext",
+          "type": "object",
+          "properties": {
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": ["at"]
+            },
+            "headers": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "required": ["params", "query"],
+          "additionalProperties": false
+        },
+        "responses": {
+          "200": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/api/ResponseGetResponseOK",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "properties": {
+                  "created-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "updated-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                },
+                "required": ["created-on", "updated-on"]
+              },
+              "body": {
+                "$ref": "/message/v2/schemas/definitions/Response"
+              }
+            },
+            "required": ["headers", "body"],
+            "additionalProperties": false
+          },
+          "404": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/api/ResponseGetResponseNotFound",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "default": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/api/ResponseGetResponseDefault",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$ref": "/message/v2/schemas/definitions/Error"
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "put": {
+        "request": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/api/ResponsePutRequestContext",
+          "type": "object",
+          "properties": {
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "messageId": {
+                  "$ref": "/message/v2/schemas/definitions/MessageId"
+                }
+              },
+              "required": ["messageId"]
+            },
+            "headers": {
+              "type": "object",
+              "additionalProperties": true,
+              "properties": {
+                "created-on": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": ["Created-On"]
+            },
+            "body": {
+              "$ref": "/message/v2/schemas/definitions/NewResponse"
+            }
+          },
+          "required": ["params", "headers", "body"],
+          "additionalProperties": false
+        },
+        "responses": {
+          "204": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/api/ResponsePutResponseNoContent",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "properties": {
+                  "created-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "updated-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                },
+                "required": ["created-on", "updated-on"]
+              }
+            },
+            "required": ["headers"],
+            "additionalProperties": false
+          },
+          "409": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/api/ResponsePutResponseConflict",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "default": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/api/ResponsePutResponseDefault",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$ref": "/message/v2/schemas/definitions/Error"
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Ping": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/Ping",
+      "type": "object",
+      "description": "The current server time.",
+      "additionalProperties": false,
+      "required": ["serverTime"],
+      "properties": {
+        "serverTime": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "Responses": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/Responses",
+      "type": "object",
+      "additionalProperties": false,
+      "description": "An object containing a list of Response objects.\n",
+      "required": ["messages"],
+      "properties": {
+        "messages": {
+          "type": "array",
+          "items": {
+            "$ref": "/message/v2/schemas/definitions/Response"
+          }
+        }
+      }
+    },
+    "Requests": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/Requests",
+      "type": "object",
+      "additionalProperties": false,
+      "description": "An object containing a list of Request objects.\n",
+      "required": ["messages"],
+      "properties": {
+        "messages": {
+          "type": "array",
+          "items": {
+            "$ref": "/message/v2/schemas/definitions/Request"
+          }
+        }
+      }
+    },
+    "PickedRequests": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/PickedRequests",
+      "type": "object",
+      "additionalProperties": false,
+      "description": "An object containing a list of PickedRequest objects.\n",
+      "required": ["pickedMessages"],
+      "properties": {
+        "pickedMessages": {
+          "type": "array",
+          "items": {
+            "$ref": "/message/v2/schemas/definitions/PickedRequest"
+          }
+        }
+      }
+    },
+    "PickedResponses": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/PickedResponses",
+      "type": "object",
+      "additionalProperties": false,
+      "description": "An object containing a list of PickedResponse objects.\n",
+      "required": ["pickedMessages"],
+      "properties": {
+        "pickedMessages": {
+          "type": "array",
+          "items": {
+            "$ref": "/message/v2/schemas/definitions/PickedResponse"
+          }
+        }
+      }
+    },
+    "Error": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/Error",
+      "type": "object",
+      "additionalProperties": false,
+      "description": "An object containing an error message.\n",
+      "required": ["message"],
+      "properties": {
+        "message": {
+          "type": "string"
+        },
+        "code": {
+          "type": "string"
+        }
+      }
+    },
+    "Amount": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/Amount",
+      "type": "object",
+      "additionalProperties": false,
+      "description": "An amount of money in the smallest monetary unit of the specified currency.\n",
+      "required": ["amount", "currency"],
+      "properties": {
+        "amount": {
+          "type": "string",
+          "pattern": "^[0-9]+$",
+          "description": "The amount of money in the smallest monetary unit of the specified currency."
+        },
+        "currency": {
+          "$ref": "/message/v2/schemas/definitions/CurrencyAlphabeticCode"
+        }
+      }
+    },
+    "SettlementConversion": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/SettlementConversion",
+      "type": "object",
+      "description": "The rate sent by the network used to convert the transaction amount to the settlement amount.\n\nOnly present if the transaction currency differs from the settlement currency.\n\nTo calculate the conversion rate, use the following formula:\n\n  conversion rate = factor / (10 ^ factorDecimalPosition)\n",
+      "required": ["date", "factor", "factorDecimalPosition"],
+      "properties": {
+        "date": {
+          "description": "The year, month, and day the conversion rate was determined.\n",
+          "type": "string",
+          "format": "date"
+        },
+        "factor": {
+          "description": "The multiplying factor used to convert the transaction amount to the settlement\namount.\n",
+          "type": "string"
+        },
+        "factorDecimalPosition": {
+          "description": "The position the decimal point should be placed, starting from the right.\n",
+          "type": "number"
+        }
+      }
+    },
+    "MessageType": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/MessageType",
+      "type": "string",
+      "description": "The type of message received from the network.\n",
+      "enum": ["PREAUTHORIZATION", "FINANCIAL", "ADMINISTRATIVE", "REVERSAL"]
+    },
+    "MessageUsage": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/MessageUsage",
+      "type": "string",
+      "description": "The expected use of the message received from the network. \n\nA REQUEST is a message that can be declined, while and ADVICE cannot. RESPONSE and ADVICE RESPONSE are the \nresponses to REQUEST and ADVICE messages, respectively.\n",
+      "enum": ["REQUEST", "RESPONSE", "ADVICE", "ADVICE RESPONSE"]
+    },
+    "Category": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/Category",
+      "type": "string",
+      "description": "The category of message received from the network.",
+      "enum": [
+        "GOODS AND SERVICE",
+        "QUASICASH",
+        "SCRIP",
+        "ATM",
+        "OTC",
+        "AFD",
+        "BALANCE INQUIRY",
+        "ACCOUNT INQUIRY",
+        "FUNDS TRANSFER",
+        "BILL PAYMENT",
+        "ADJUSTMENT",
+        "RETURN",
+        "LOAD",
+        "UNLOAD",
+        "ACTIVATION",
+        "ACTIVATION AND LOAD",
+        "DEACTIVATION",
+        "DEACTIVATION AND UNLOAD",
+        "TOKENIZATION",
+        "REQUEST ACTIVATION METHODS",
+        "DELIVER ACTIVATION CODE",
+        "NOTIFY TOKEN ACTIVATED",
+        "NOTIFY TOKEN UPDATED",
+        "NOTIFY SUSPICIOUS EVENTS",
+        "UNSUPPORTED"
+      ]
+    },
+    "DebitCreditNeither": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/DebitCreditNeither",
+      "type": "string",
+      "description": "The Request object's intended effect on the account balance.\n\nFor example, Balance Inquiries with no fees have no effect on the balance.\n",
+      "enum": ["DEBIT", "CREDIT", "NEITHER"]
+    },
+    "DebitCredit": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/DebitCredit",
+      "type": "string",
+      "enum": ["DEBIT", "CREDIT"]
+    },
+    "Categorization": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/Categorization",
+      "type": "object",
+      "additionalProperties": false,
+      "description": "The categorization of the message received from the network.\n",
+      "required": ["messageType", "messageUsage", "category", "debitCredit"],
+      "properties": {
+        "messageType": {
+          "$ref": "/message/v2/schemas/definitions/MessageType"
+        },
+        "messageUsage": {
+          "$ref": "/message/v2/schemas/definitions/MessageUsage"
+        },
+        "category": {
+          "$ref": "/message/v2/schemas/definitions/Category"
+        },
+        "debitCredit": {
+          "$ref": "/message/v2/schemas/definitions/DebitCreditNeither"
+        }
+      }
+    },
+    "AccountType": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/AccountType",
+      "type": "string",
+      "enum": ["NOT PROVIDED", "UNSPECIFIED", "SAVINGS", "CHECKING", "CREDIT", "INVESTMENT", "UNIVERSAL", "OTHER"]
+    },
+    "Accounts": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/Accounts",
+      "type": "object",
+      "description": "Used when transferring funds between accounts. \n\nFor example, messages from ATMs that support multiple accounts may utilize this object.\n",
+      "additionalProperties": false,
+      "required": ["from", "to"],
+      "properties": {
+        "from": {
+          "$ref": "/message/v2/schemas/definitions/AccountType"
+        },
+        "to": {
+          "$ref": "/message/v2/schemas/definitions/AccountType"
+        }
+      }
+    },
+    "PinCapabilities": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/PinCapabilities",
+      "type": "string",
+      "description": "The terminal's ability to accept a PIN.\n",
+      "enum": [
+        "NOT PROVIDED",
+        "UNSPECIFIED",
+        "PIN ENTRY CAPABILITY",
+        "NO PIN ENTRY CAPABILITY",
+        "PIN PAD INOPERATIVE",
+        "PIN ENTRY CAPABILITY BUT OUT OF SERVICE",
+        "PIN VERIFIED BY TERMINAL DEVICE"
+      ]
+    },
+    "PanEntryMethod": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/PanEntryMethod",
+      "type": "string",
+      "description": "The method used to enter the PAN.\n",
+      "enum": [
+        "NOT PROVIDED",
+        "UNSPECIFIED",
+        "MANUAL",
+        "MAGNETIC STRIPE",
+        "BAR CODE",
+        "OCR",
+        "INTEGRATED CIRCUIT CARD",
+        "MANUAL KEY ENTERED",
+        "CONTACTLESS EMV RULES",
+        "CHIP CARD UNABLE MANUAL ENTRY",
+        "CHIP CARD UNABLE MAGNETIC STRIPE",
+        "ELECTRONIC COMMERCE",
+        "PAN AUTO ENTRY VIA SERVER",
+        "FULL MAGNETIC STRIPE",
+        "CONTACTLESS MAG STRIPE RULES",
+        "INTEGRATED CIRCUIT CARD CVV UNRELIABLE",
+        "STORED VALUE PREREGISTERED CHECKOUT",
+        "ON FILE",
+        "SECURE ENTRY"
+      ]
+    },
+    "TerminalType": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/TerminalType",
+      "type": "string",
+      "description": "The type of terminal used to initiate the transaction.\n",
+      "enum": [
+        "POINT OF SALE TERMINAL",
+        "ATM",
+        "HOME TERMINAL",
+        "ELECTRONIC CASH REGISTER",
+        "DIAL TERMINAL",
+        "TRAVELERS CHECK MACHINE",
+        "AUTOMATED FUEL DEVICE",
+        "SCRIP MACHINE",
+        "COUPON MACHINE",
+        "TICKET MACHINE",
+        "POINT OF BANKING TERMINAL",
+        "TELLER",
+        "FRANCHISE TELLER",
+        "PERSONAL BANKING",
+        "PUBLIC UTILITY",
+        "VENDING",
+        "SELF SERVICE",
+        "AUTHORIZATION",
+        "PAYMENT",
+        "VRU",
+        "SMART PHONE",
+        "INTERACTIVE TELEVISION",
+        "PERSONAL DIGITAL ASSISTANT",
+        "SCREEN PHONE",
+        "ELECTRONIC COMMERCE",
+        "MICR TERMINAL AT POINT OF SALE",
+        "NOT PROVIDED"
+      ]
+    },
+    "CardholderPresence": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/CardholderPresence",
+      "type": "string",
+      "description": "The presence of the cardholder during the transaction.\n",
+      "enum": ["CUSTOMER PRESENT", "CUSTOMER NOT PRESENT", "NOT PROVIDED"]
+    },
+    "CardPresence": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/CardPresence",
+      "type": "string",
+      "description": "The presence of the card during the transaction.\n",
+      "enum": ["CARD PRESENT", "CARD NOT PRESENT", "NOT PROVIDED"]
+    },
+    "Merchant": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/Merchant",
+      "type": "object",
+      "description": "Information about the merchant and terminal where the transaction took place.\n",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "name",
+        "terminalTransactionDateTime",
+        "terminalSequenceNumber",
+        "terminalIdentification",
+        "identificationCode",
+        "address",
+        "city",
+        "stateProvince",
+        "country",
+        "allowsPartialApproval",
+        "panEntryMethod",
+        "pinCapabilities",
+        "cardholderPresence",
+        "cardPresence",
+        "terminalType",
+        "terminalOperation",
+        "terminalLocation",
+        "cardRetentionCapability",
+        "transactionStatus",
+        "securityCondition"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "The Merchant Category Code (MCC) - a four digit number identifying the kind of merchant \ninvolved in the transaction, e.g. grocery store, airline, hotel.\n"
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the merchant or business."
+        },
+        "terminalTransactionDateTime": {
+          "type": "string",
+          "description": "The UTC datetime of the transaction according to the terminal's clock.",
+          "format": "date-time"
+        },
+        "terminalSequenceNumber": {
+          "type": "number",
+          "description": "A counter or identifier used by the terminal to track the transactions it processes."
+        },
+        "terminalIdentification": {
+          "type": "string",
+          "description": "Identifier for a terminal at the card acceptor's location."
+        },
+        "identificationCode": {
+          "type": "string",
+          "description": "Identifier for the specific merchant accepting payment."
+        },
+        "address": {
+          "type": "string",
+          "description": "The merchant's street address."
+        },
+        "city": {
+          "type": "string",
+          "description": "The merchant's city address."
+        },
+        "stateProvince": {
+          "type": "string",
+          "description": "The merchant's state or province address."
+        },
+        "county": {
+          "type": "string",
+          "description": "The merchant's county address."
+        },
+        "postalCode": {
+          "type": "string",
+          "description": "The merchant's postal code."
+        },
+        "country": {
+          "type": "string",
+          "description": "The merchant's country."
+        },
+        "allowsPartialApproval": {
+          "type": "boolean",
+          "description": "Has the value 'true' if the merchant accepts partial approvals. Otherwise, the value is 'false'.\n"
+        },
+        "panEntryMethod": {
+          "$ref": "/message/v2/schemas/definitions/PanEntryMethod"
+        },
+        "pinCapabilities": {
+          "$ref": "/message/v2/schemas/definitions/PinCapabilities"
+        },
+        "cardholderPresence": {
+          "$ref": "/message/v2/schemas/definitions/CardholderPresence"
+        },
+        "cardPresence": {
+          "$ref": "/message/v2/schemas/definitions/CardPresence"
+        },
+        "terminalType": {
+          "$ref": "/message/v2/schemas/definitions/TerminalType"
+        },
+        "terminalOperation": {
+          "type": "string",
+          "description": "The entity operating the terminal.\n",
+          "enum": ["CUSTOMER", "CARD ACCEPTOR", "ADMINISTRATIVE", "UNKNOWN", "NOT PROVIDED"]
+        },
+        "terminalLocation": {
+          "type": "string",
+          "description": "The location of the terminal.\n",
+          "enum": ["ON PREMISE", "OFF PREMISE", "UNKNOWN", "NOT PROVIDED"]
+        },
+        "cardRetentionCapability": {
+          "type": "string",
+          "description": "The terminal's ability to retain the card.\n",
+          "enum": ["ABLE TO RETAIN CARD", "UNABLE TO RETAIN CARD", "UNKNOWN", "NOT PROVIDED"]
+        },
+        "transactionStatus": {
+          "type": "string",
+          "description": "The status of the transaction.\n",
+          "enum": [
+            "ORIGINAL PRESENTMENT",
+            "FIRST PRESENTMENT",
+            "SECOND PRESENTMENT",
+            "THIRD PRESENTMENT",
+            "PREVIOUSLY AUTHORIZED OR DEFERRED AUTHORIZATION",
+            "RESUBMISSION",
+            "CARD VALIDATION OR ACCOUNT STATUS INQUIRY",
+            "UNKNOWN",
+            "NOT PROVIDED"
+          ]
+        },
+        "securityCondition": {
+          "type": "string",
+          "description": "The security condition of the transaction.\n",
+          "enum": [
+            "NO CONCERN",
+            "SUSPECTED FRAUD",
+            "IDENTIFICATION VERIFIED",
+            "ECOMMERCE WITH DIGITAL SIGNATURE",
+            "ECOMMERCE",
+            "SECURE ELECTRONIC TRANSACTION WITH CARDHOLDER CERTIFICATE",
+            "SECURE ELECTRONIC TRANSACTION WITHOUT CARDHOLDER CERTIFICATE",
+            "ECOMMERCE WITH CHANNEL ENCRYPTED",
+            "INTERNET PINNED DEBIT TRANSACTION",
+            "SECURE REMOTE COMMERCE DISCOVER CLICK TO PAY",
+            "UNKNOWN",
+            "NOT PROVIDED"
+          ]
+        }
+      }
+    },
+    "Acquirer": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/Acquirer",
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Information about the acquirer involved in the transaction.\n",
+      "required": ["identificationCode", "country"],
+      "properties": {
+        "identificationCode": {
+          "type": "string",
+          "description": "Uniquely identifies the acquirer.\n"
+        },
+        "clearingIdentificationCode": {
+          "description": "Unvalidated data that may help identify the acquirer. It's optionally included by the acquirer in clearing messages.\n",
+          "type": "string"
+        },
+        "country": {
+          "type": "string",
+          "description": "The country in which the acquirer is located.\n"
+        }
+      }
+    },
+    "LifeCycleIndicator": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/LifeCycleIndicator",
+      "type": "string",
+      "description": "The type of time interval in effect for the message.\n",
+      "enum": ["CALENDAR DAY", "HOURS", "MINUTES"]
+    },
+    "AuthorizationLifeCycle": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/AuthorizationLifeCycle",
+      "type": "object",
+      "additionalProperties": false,
+      "description": "The length of time the acquirer is requesting the issuer to hold the funds.\n",
+      "required": ["lifeCycleIndicator", "actualInterval"],
+      "properties": {
+        "lifeCycleIndicator": {
+          "$ref": "/message/v2/schemas/definitions/LifeCycleIndicator"
+        },
+        "actualInterval": {
+          "type": "number",
+          "description": "The number of time intervals in effect for the message.\n"
+        }
+      }
+    },
+    "ReplacementAmounts": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/ReplacementAmounts",
+      "type": "object",
+      "additionalProperties": false,
+      "description": "The actual transaction, settlement, and fee amounts when they differ from the original\napproved amounts.\n",
+      "required": [
+        "transactionAmount",
+        "transactionFeeAmount",
+        "settlementAmount",
+        "settlementFeeAmount",
+        "feeDetails"
+      ],
+      "properties": {
+        "transactionAmount": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "transactionFeeAmount": {
+          "description": "The fee amount applied by the network or acquirer in the merchant's currency.\n",
+          "allOf": [
+            {
+              "$ref": "/message/v2/schemas/definitions/Amount"
+            }
+          ]
+        },
+        "settlementAmount": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "settlementFeeAmount": {
+          "description": "The fee amount applied by the network or acquirer in the BIN currency.\n",
+          "allOf": [
+            {
+              "$ref": "/message/v2/schemas/definitions/Amount"
+            }
+          ]
+        },
+        "feeDetails": {
+          "type": "array",
+          "description": "Details about the transaction and settlement fee amounts.\n",
+          "items": {
+            "$ref": "/message/v2/schemas/definitions/Fee"
+          }
+        }
+      }
+    },
+    "EncryptedKey": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/EncryptedKey",
+      "type": "object",
+      "additionalProperties": false,
+      "description": "An encrypted data encryption key paired with a hashed version of the public key used to encrypt.\n",
+      "required": ["publicKeyHash", "encryptedDataEncryptionKey"],
+      "properties": {
+        "publicKeyHash": {
+          "description": "The public key used to encrypt the encryptedDataEncryptionKey hashed using checkdigit/hash.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "encryptedDataEncryptionKey": {
+          "type": "string",
+          "description": "RSA encrypted random AES-256 key."
+        }
+      }
+    },
+    "AddressVerificationData": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/AddressVerificationData",
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Data supplied to be used by the Address Verification Service. \n\nNeither streetAddress, nor postalCode are required as only one may be supplied and there's no\nguarantee as to which one.\n",
+      "properties": {
+        "streetAddress": {
+          "type": "string",
+          "description": "Street address supplied by the cardholder for verification."
+        },
+        "postalCode": {
+          "type": "string",
+          "description": "Postal code supplied by the cardholder for verification."
+        }
+      }
+    },
+    "ToleranceType": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/ToleranceType",
+      "type": "string",
+      "description": "The type of tolerance to be applied, if applicable.",
+      "enum": ["FIXED", "PERCENTAGE", "NONE"]
+    },
+    "Tolerance": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/Tolerance",
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Minimum expected tolerance as defined by the network.",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "$ref": "/message/v2/schemas/definitions/ToleranceType"
+        },
+        "value": {
+          "type": "string",
+          "description": "The amount of the type of tolerance to be applied."
+        }
+      }
+    },
+    "IssuerNetwork": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/IssuerNetwork",
+      "type": "string",
+      "description": "The network on which we received the message.",
+      "enum": ["MASTERCARD", "MDES", "MNGS", "STAR", "VISA"]
+    },
+    "AcquirerNetwork": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/AcquirerNetwork",
+      "type": "string",
+      "description": "The network on which the message was acquired.",
+      "enum": [
+        "ALLPOINT",
+        "CIRRUS",
+        "DEBIT MASTERCARD",
+        "CREDIT MASTERCARD",
+        "DISCOVER",
+        "INTERLINK",
+        "MAESTRO",
+        "OTHER",
+        "PLUS",
+        "PULSE",
+        "STAR",
+        "STAR POS",
+        "VISA",
+        "APPLE PAY",
+        "GOOGLE PAY",
+        "SAMSUNG PAY",
+        "MDES FOR MERCHANTS",
+        "CLICK TO PAY"
+      ]
+    },
+    "ResponseCode": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/ResponseCode",
+      "type": "string",
+      "description": "The message processing result.",
+      "enum": [
+        "APPROVED",
+        "REFER TO ISSUER",
+        "REFER TO ISSUER SPECIAL CONDITION",
+        "INVALID MERCHANT",
+        "PICKUP",
+        "DO NOT HONOR",
+        "SYSTEM ERROR",
+        "PICKUP CARD SPECIAL CONDITION",
+        "HONOR WITH ID",
+        "REQUEST IN PROGRESS",
+        "PARTIAL APPROVAL",
+        "INVALID TRANSACTION",
+        "INVALID AMOUNT",
+        "CARD NOT FOUND",
+        "REENTER TRANSACTION",
+        "INVALID RESPONSE",
+        "UNACCEPTABLE TRANSACTION FEE",
+        "FILE UPDATE NOT SUPPORTED",
+        "UNABLE TO LOCATE RECORD",
+        "DUPLICATE FILE UPDATE",
+        "FILE UPDATE EDIT ERROR",
+        "FILE UPDATE FILE LOCKED",
+        "FILE UPDATE FAILED",
+        "FORMAT ERROR",
+        "NO CREDIT ACCOUNT",
+        "REQUESTED FUNCTION NOT SUPPORTED",
+        "LOST CARD CAPTURE",
+        "NO UNIVERSAL ACCOUNT",
+        "STOLEN CARD CAPTURE",
+        "NO INVESTMENT ACCOUNT",
+        "INSUFFICIENT FUNDS",
+        "NO CHECKING ACCOUNT",
+        "NO SAVINGS ACCOUNT",
+        "EXPIRED CARD",
+        "INCORRECT PIN",
+        "NO CARD RECORD",
+        "TRANSACTION NOT PERMITTED TO CARDHOLDER",
+        "TRANSACTION NOT PERMITTED TO TERMINAL",
+        "SUSPECTED FRAUD",
+        "EXCEEDS WITHDRAWAL LIMIT",
+        "RESTRICTED CARD",
+        "SECURITY VIOLATION",
+        "EXCEEDS WITHDRAWAL FREQUENCY LIMIT",
+        "HARD CAPTURE",
+        "LATE RESPONSE",
+        "PIN TRIES EXCEEDED",
+        "KEY SYNC ERROR",
+        "CARDHOLDER NOT ELIGIBLE FOR POS",
+        "ISSUER NOT AVAILABLE",
+        "DUPLICATE",
+        "INFORMATION NOT ON FILE",
+        "CARD VERIFICATION FAILURE",
+        "CUTOFF IN PROGRESS",
+        "ISSUER INOPERATIVE",
+        "TRANSACTION CANNOT COMPLETE LAW VIOLATION",
+        "DUPLICATE TRANSMISSION",
+        "RECONCILE ERROR",
+        "SYSTEM MALFUNCTION",
+        "CARD VERIFICATION2 FAILURE",
+        "CARD VERIFICATION3 FAILURE",
+        "EXPIRATION DATE MISMATCH",
+        "INACTIVE CARD",
+        "ITEM SUSPECTED FOR STOP PAY",
+        "ACCOUNT CLOSED",
+        "INELIGIBLE ACCOUNT",
+        "ITEM SUBMITTED MORE THAN TWO TIMES",
+        "NO ACCT ON FILE",
+        "UNABLE TO LOCATE",
+        "GENERAL DENIAL",
+        "SPECIAL CONDITIONS",
+        "PIN REQUIRED",
+        "PAN TRANSFORMATION ERROR",
+        "RISK BLOCK",
+        "INVALID ARQC",
+        "REQUIRE ADDITIONAL AUTHENTICATION",
+        "OTHER"
+      ]
+    },
+    "AdviceResponse": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/AdviceResponse",
+      "type": "object",
+      "description": "Additional information about the advice, reversal, or both.",
+      "additionalProperties": false,
+      "required": ["adviceOriginator", "adviceReason", "reversalOriginator", "reversalReason"],
+      "properties": {
+        "adviceOriginator": {
+          "$ref": "/message/v2/schemas/definitions/Originator"
+        },
+        "adviceReason": {
+          "$ref": "/message/v2/schemas/definitions/AdviceReason"
+        },
+        "reversalOriginator": {
+          "$ref": "/message/v2/schemas/definitions/Originator"
+        },
+        "reversalReason": {
+          "$ref": "/message/v2/schemas/definitions/ReversalReason"
+        },
+        "authorizationIdResponse": {
+          "type": "string",
+          "description": "Used to identify the message being corrected. This corresponds to the authorizationIdResponse in the \nResponse of the message being correcting.\n"
+        },
+        "responseCode": {
+          "$ref": "/message/v2/schemas/definitions/ResponseCode"
+        }
+      }
+    },
+    "Originator": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/Originator",
+      "type": "string",
+      "description": "The party that initiated the advice or reversal.",
+      "enum": ["NOT APPLICABLE", "CARD ACCEPTOR", "ACQUIRER", "INTERMEDIATE FACILITY", "CUSTOMER", "SWITCH", "UNKNOWN"]
+    },
+    "AdviceReason": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/AdviceReason",
+      "type": "string",
+      "description": "THe reason for the advice according to the advice originator.",
+      "enum": [
+        "NOT APPLICABLE",
+        "NOT AN ADVICE",
+        "TIMED OUT REQUEST",
+        "ISSUER NOT AVAILABLE",
+        "ISSUER SIGNED OFF",
+        "WITHIN BUSINESS AGREEMENT",
+        "KEY NOT ESTABLISHED",
+        "ISSUER REQUESTED STANDIN",
+        "OTHER",
+        "UNKNOWN"
+      ]
+    },
+    "ReversalReason": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/ReversalReason",
+      "type": "string",
+      "description": "The reason for the reversal according to the reversal originator.",
+      "enum": [
+        "NOT APPLICABLE",
+        "ISSUER NOT AVAILABLE",
+        "ISSUER SIGNED OFF",
+        "WITHIN BUSINESS AGREEMENT",
+        "TERMINAL PROCESSOR ERROR",
+        "SYSTEM TIMEOUT",
+        "TERMINAL DISPENSE ERROR",
+        "TERMINAL COMMUNICATION ERROR",
+        "TERMINAL ERROR",
+        "LATE RESPONSE",
+        "CUSTOMER CANCELLATION",
+        "SUSPECTED FRAUD",
+        "CHIP",
+        "PARTIAL",
+        "EDIT ERROR",
+        "REVISED HOLD AMOUNT",
+        "UNKNOWN"
+      ]
+    },
+    "AddressVerificationResult": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/AddressVerificationResult",
+      "type": "string",
+      "description": "The result of the supplied addressVerificationData being checked against the Address Verification System.\n",
+      "enum": [
+        "ADDRESS MATCH ONLY",
+        "POSTAL CODE MATCH ONLY",
+        "FULL POSTAL CODE MATCH ONLY",
+        "ADDRESS AND POSTAL CODE MATCH",
+        "ADDRESS AND FULL POSTAL CODE MATCH",
+        "NO MATCH",
+        "UNAVAILABLE",
+        "NOT PROVIDED"
+      ]
+    },
+    "ApplicationTransactionCounterValidationResult": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/ApplicationTransactionCounterValidationResult",
+      "type": "string",
+      "description": "The result of validating the applicationTransactionCounter value found in the card's chip data.",
+      "enum": ["VALID", "OUT OF RANGE", "DUPLICATE", "NOT VALIDATED", "BYPASSED", "NOT PROVIDED"]
+    },
+    "SuppliedCardExpirationDate": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/SuppliedCardExpirationDate",
+      "type": "string",
+      "pattern": "([0-9][0-9])(0[1-9]|1[0-2])",
+      "description": "Card expiration date either supplied manually, such as when entering card information into an online payment \nform, or found in the card's track 1 data. The date is assumed to be the last millisecond of the month. Format\nis YYMM.\n",
+      "example": "9912"
+    },
+    "TrackValidationResult": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/TrackValidationResult",
+      "type": "string",
+      "description": "The validity of the card's track data used in the transaction.\n\nVALID - The track data is valid and matches the card.\nINVALID - The track data format is invalid.\nMISMATCH - The track data does not match the card.\n",
+      "enum": ["VALID", "INVALID", "MISMATCH", "NOT PROVIDED"]
+    },
+    "PINValidationResult": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/PINValidationResult",
+      "type": "string",
+      "description": "The validity of the supplied PIN.",
+      "enum": ["VALID", "INVALID", "INVALID KEY", "UNAVAILABLE", "NOT PROVIDED"]
+    },
+    "VerificationValueResult": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/VerificationValueResult",
+      "type": "string",
+      "description": "The validity of the supplied verification value.",
+      "enum": ["VALID", "INVALID", "UNAVAILABLE", "NOT PROVIDED"]
+    },
+    "ARQCValidationResult": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/ARQCValidationResult",
+      "type": "string",
+      "description": "The validity of the supplied ARQC (Authorization Request Cryptogram).",
+      "enum": ["VALID", "INVALID", "UNAVAILABLE", "NOT PROVIDED"]
+    },
+    "EMV3DSecureAuthenticationResult": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/EMV3DSecureAuthenticationResult",
+      "type": "string",
+      "enum": [
+        "AUTHENTICATED BY ISSUER",
+        "AUTHENTICATED BY NETWORK",
+        "UNAUTHENTICATED",
+        "UNAVAILABLE",
+        "UNKNOWN",
+        "NOT PROVIDED"
+      ]
+    },
+    "IIASData": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/IIASData",
+      "type": "object",
+      "description": "Data received from merchants using an IIAS (Inventory Information Approval System).\nAn IIAS is used by merchants to identify which items are eligible healthcare expenses under FSA (Flexible Spending Account) or HSA (Health Savings Account) rules.",
+      "additionalProperties": false,
+      "required": ["merchantId", "verificationResult", "healthCareAmount", "prescriptionAmount", "visionAmount"],
+      "properties": {
+        "merchantId": {
+          "type": "string",
+          "description": "IIAS specific merchant id which is different from the merchant name or card acceptor identification code.\n"
+        },
+        "verificationResult": {
+          "type": "string",
+          "description": "The merchant IIAS validation result.\n\nHas the value 'UNVERIFIED' if the merchant did not perform an IIAS validation, the value 'VERIFIED' if the \nmerchant did verify with IIAS and is valid, the value '90PERCENT' if the merchant is exempt, and the value\nNONCERTIFIED if the merchant submitted IIAS data but was unable to validate their certification status.\n",
+          "enum": ["UNVERIFIED", "VERIFIED", "90PERCENT", "NONCERTIFIED"]
+        },
+        "healthCareAmount": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "prescriptionAmount": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "visionAmount": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        }
+      }
+    },
+    "Token": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/Token",
+      "required": ["tokenId", "status"],
+      "properties": {
+        "tokenId": {
+          "type": "string",
+          "maxLength": 64,
+          "description": "Uniquely identifies the token."
+        },
+        "status": {
+          "$ref": "/message/v2/schemas/definitions/TokenStatus"
+        },
+        "tokenExpiration": {
+          "type": "string",
+          "description": "The date the token expires.",
+          "pattern": "([0-9][0-9])(0[1-9]|1[0-2])",
+          "example": "9912"
+        }
+      }
+    },
+    "TokenStatus": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/TokenStatus",
+      "type": "string",
+      "description": "The current status of token.\n\nINACTIVE - Token has not yet been activated.\nACTIVE - Active and ready.\nSUSPENDED - Suspended and unable to be used.\nDEACTIVATED - Permanently deactivated.\n",
+      "enum": ["INACTIVE", "ACTIVE", "SUSPENDED", "DEACTIVATED", "UNKNOWN"]
+    },
+    "TokenNotificationReasonCode": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/TokenNotificationReasonCode",
+      "type": "string",
+      "description": "The reason for the notification.\n\nTokens 'DELETED FROM CONSUMER APP' may still be active.\n",
+      "enum": ["STATUS UPDATE", "REDIGITIZATION COMPLETE", "DELETED FROM CONSUMER APP"]
+    },
+    "TokenNotificationData": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/TokenNotificationData",
+      "description": "The data provided in a token notification. The notification may apply to multiple\ntokens.\n",
+      "properties": {
+        "tokens": {
+          "type": "array",
+          "description": "Tokens affected by the notification.",
+          "items": {
+            "$ref": "/message/v2/schemas/definitions/Token"
+          }
+        },
+        "reasonCode": {
+          "$ref": "/message/v2/schemas/definitions/TokenNotificationReasonCode"
+        },
+        "activationCodeExpirationDateTime": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The UTC datetime the activation code expires."
+        },
+        "numberOfActivationAttempts": {
+          "type": "number",
+          "description": "The number of times an activationCode was sent in order to activate a token.\n"
+        },
+        "numberOfActiveTokens": {
+          "type": "number",
+          "description": "The number of active tokens.\n\nThe value might differ from the number of tokens listed in the 'tokens' property of the notification, as \nthis represents all tokens not just the ones being updated. Tokens that have been deleted from the wallet \nare excluded from the count.\n"
+        },
+        "tokenAuthentication": {
+          "type": "string",
+          "description": "Indicates the given tokens have been authenticated.",
+          "enum": ["AUTHENTICATED", "NOT AUTHENTICATED", "NOT PROVIDED"]
+        },
+        "tokenAssuranceLevel": {
+          "type": "number",
+          "description": "A number that allows the token issuer to indicate the confidence level of the token on whether it belongs \nto the cardholder it claims to be associated with. \n\nWill only be present if tokenAuthentication = AUTHENTICATED\n"
+        },
+        "suspiciousEvent": {
+          "description": "The event for why the notification is being sent.",
+          "required": ["reason"],
+          "properties": {
+            "reason": {
+              "type": "string",
+              "description": "The reason why a suspiciousEvent is provided.\n\nREPLENISH - There were suspicious ATC values reporting during Replenish.\n",
+              "enum": ["REPLENISH", "OTHER"],
+              "example": "REPLENISH"
+            }
+          }
+        }
+      }
+    },
+    "ActivationTextPhoneNumber": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/ActivationTextPhoneNumber",
+      "required": ["type", "value"],
+      "description": "Denotes an activation method using the cardholder's mobile phone number. Value is masked.",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["TEXT"]
+        },
+        "value": {
+          "type": "string"
+        }
+      }
+    },
+    "ActivationEmailAccountHolder": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/ActivationEmailAccountHolder",
+      "required": ["type", "value"],
+      "description": "Denotes an activation method using the cardholder's email address. Value is masked.",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["EMAIL"]
+        },
+        "value": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        }
+      }
+    },
+    "ActivationCallAutomatedNumber": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/ActivationCallAutomatedNumber",
+      "required": ["type", "value"],
+      "description": "Denotes an activation method requiring the cardholder to call to an automated call center phone number. \nValue will be the phone number for the cardholder to call.\n",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["AUTOMATED NUMBER"]
+        },
+        "value": {
+          "type": "string"
+        }
+      }
+    },
+    "ActivationCallCustomerSupport": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/ActivationCallCustomerSupport",
+      "required": ["type", "value"],
+      "description": "Denotes an activation method requiring the cardholder to call to a customer support call center phone number. \nValue will be the phone number for the cardholder to call.\n",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["SUPPORT NUMBER"]
+        },
+        "value": {
+          "type": "string"
+        }
+      }
+    },
+    "ActivationVisitWebsite": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/ActivationVisitWebsite",
+      "required": ["type", "value"],
+      "description": "Denotes an activation method requiring the cardholder to visit a website. \nValue will be a URL.\n",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["WEBSITE"]
+        },
+        "value": {
+          "type": "string",
+          "maxLength": 64
+        }
+      }
+    },
+    "ActivationVisitMobileApp": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/ActivationVisitMobileApp",
+      "required": ["type", "value"],
+      "description": "Denotes an activation method requiring the cardholder to use a specific mobile app to activate token. \nValue will be replaced by a formatted string.\n",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["APP"]
+        },
+        "value": {
+          "type": "string",
+          "maxLength": 64
+        }
+      }
+    },
+    "ActivationCallCardHolderNumber": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/ActivationCallCardHolderNumber",
+      "required": ["type", "value"],
+      "description": "Denotes an activation method using an issuer-initiated voice call to the cardholder's phone. \nValue will be the cardholder's masked phone number used for voice calls.\n",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["CARDHOLDER NUMBER"]
+        },
+        "value": {
+          "type": "string"
+        }
+      }
+    },
+    "ActivationMethod": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/ActivationMethod",
+      "oneOf": [
+        {
+          "$ref": "/message/v2/schemas/definitions/ActivationTextPhoneNumber"
+        },
+        {
+          "$ref": "/message/v2/schemas/definitions/ActivationEmailAccountHolder"
+        },
+        {
+          "$ref": "/message/v2/schemas/definitions/ActivationCallAutomatedNumber"
+        },
+        {
+          "$ref": "/message/v2/schemas/definitions/ActivationCallCustomerSupport"
+        },
+        {
+          "$ref": "/message/v2/schemas/definitions/ActivationVisitWebsite"
+        },
+        {
+          "$ref": "/message/v2/schemas/definitions/ActivationVisitMobileApp"
+        },
+        {
+          "$ref": "/message/v2/schemas/definitions/ActivationCallCardHolderNumber"
+        }
+      ]
+    },
+    "RecommendationReason": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/RecommendationReason",
+      "type": "string",
+      "description": "The reason for the Wallet Provider's recommended decision.",
+      "enum": [
+        "ACCOUNT TOO NEW SINCE LAUNCH",
+        "ACCOUNT TOO NEW",
+        "ACCOUNT CARD TOO NEW",
+        "ACCOUNT RECENTLY CHANGED",
+        "SUSPICIOUS ACTIVITY",
+        "INACTIVE ACCOUNT",
+        "HAS SUSPENDED TOKENS",
+        "DEVICE RECENTLY LOST",
+        "TOO MANY RECENT ATTEMPTS",
+        "TOO MANY RECENT TOKENS",
+        "TOO MANY DIFFERENT CARDHOLDERS",
+        "LOW DEVICE SCORE",
+        "LOW ACCOUNT SCORE",
+        "OUTSIDE HOME TERRITORY",
+        "UNABLE TO ASSESS",
+        "HIGH RISK",
+        "LOW PHONE NUMBER SCORE",
+        "LONG ACCOUNT TENURE",
+        "GOOD ACTIVITY HISTORY",
+        "ADDITIONAL DEVICE",
+        "SOFTWARE UPDATE",
+        "OTHER"
+      ],
+      "example": "ACCOUNT TOO NEW"
+    },
+    "RecommendedDecision": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/RecommendedDecision",
+      "type": "string",
+      "description": "The decision recommended by the Wallet Provider.",
+      "enum": ["APPROVED", "DECLINED", "REQUIRE ADDITIONAL AUTHENTICATION"],
+      "example": "APPROVED"
+    },
+    "WalletProviderScore": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/WalletProviderScore",
+      "type": "string",
+      "description": "Score given by the Wallet Provider on their confidence level of a particular property.\n",
+      "enum": ["SCORE 1", "SCORE 2", "SCORE 3", "SCORE 4", "SCORE 5", "NOT PROVIDED"],
+      "example": "SCORE 4"
+    },
+    "WalletProviderDecisioning": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/WalletProviderDecisioning",
+      "type": "object",
+      "description": "The scores and reasons leading to the recommended decision.\n",
+      "required": ["recommendedDecision", "deviceScore", "accountScore", "phoneNumberScore", "recommendationReasons"],
+      "properties": {
+        "recommendedDecision": {
+          "$ref": "/message/v2/schemas/definitions/RecommendedDecision"
+        },
+        "deviceScore": {
+          "$ref": "/message/v2/schemas/definitions/WalletProviderScore"
+        },
+        "accountScore": {
+          "$ref": "/message/v2/schemas/definitions/WalletProviderScore"
+        },
+        "phoneNumberScore": {
+          "$ref": "/message/v2/schemas/definitions/WalletProviderScore"
+        },
+        "recommendationReasons": {
+          "type": "array",
+          "description": "Reasons provided to the Wallet Provider on how the recommended decision was reached.",
+          "minLength": 0,
+          "items": {
+            "$ref": "/message/v2/schemas/definitions/RecommendationReason"
+          }
+        }
+      }
+    },
+    "TokenizationData": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/TokenizationData",
+      "description": "Data relevant to the process of a tokenization.",
+      "properties": {
+        "activationCode": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 32,
+          "description": "The Activation Code to be distributed for tokenization."
+        },
+        "tokenId": {
+          "type": "string",
+          "maxLength": 64,
+          "description": "A unique id assigned by the party that initiated the tokenization."
+        },
+        "tokenType": {
+          "type": "string",
+          "description": "The type of token requested for this tokenization.",
+          "enum": ["EMBEDDED SECURE ELEMENT", "CLOUD", "STATIC"]
+        },
+        "tokenRequestorId": {
+          "type": "string",
+          "minLength": 11,
+          "maxLength": 11,
+          "description": "Identifier for the party that requested the tokenization."
+        },
+        "activationMethod": {
+          "$ref": "/message/v2/schemas/definitions/ActivationMethod"
+        },
+        "walletProviderDecisioning": {
+          "$ref": "/message/v2/schemas/definitions/WalletProviderDecisioning"
+        }
+      }
+    },
+    "EMVChipData": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/EMVChipData",
+      "type": "object",
+      "description": "Data generated between the card's EMV chip and the terminal used in the transaction.",
+      "additionalProperties": false,
+      "required": ["applicationId", "applicationTransactionCounter", "amountAuthorized", "amountOther"],
+      "properties": {
+        "applicationId": {
+          "description": "Identifier for the application used between the terminal and chip for generating chip data.",
+          "type": "string"
+        },
+        "applicationTransactionCounter": {
+          "description": "Application Transaction Counter (ATC) generated by the chip.",
+          "type": "string"
+        },
+        "amountAuthorized": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "amountOther": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        }
+      }
+    },
+    "FeeType": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/FeeType",
+      "type": "string",
+      "description": "The type of fee being applied to the transaction.",
+      "enum": [
+        "CONVENIENCE",
+        "TRANSACTION",
+        "CURRENCY CONVERSION ASSESSMENT",
+        "ISSUER CURRENCY CONVERSION ASSESSMENT",
+        "SURCHARGE",
+        "OPTIONAL ISSUER",
+        "PROCESSING",
+        "FOREIGN EXCHANGE"
+      ]
+    },
+    "FeeApplication": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/FeeApplication",
+      "type": "string",
+      "description": "Indicates whether the fee should be applied to a cardholder's account (SETTLE) or recorded for information\npurposes only (MEMO). Examples of MEMO fees are currency conversion fees (already in the settlement amount) and\ninterchange fees.\n",
+      "enum": ["MEMO", "SETTLE"]
+    },
+    "Fee": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/Fee",
+      "type": "object",
+      "description": "Details about the fees applied to the transaction and settlement amounts.",
+      "additionalProperties": false,
+      "required": ["type", "application", "transaction", "settlement"],
+      "properties": {
+        "type": {
+          "$ref": "/message/v2/schemas/definitions/FeeType"
+        },
+        "application": {
+          "$ref": "/message/v2/schemas/definitions/FeeApplication"
+        },
+        "transaction": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "settlement": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        }
+      }
+    },
+    "File": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/File",
+      "type": "object",
+      "description": "Information about the file in which the message exists.\n\nThis may be used to change the status of a card.\n",
+      "additionalProperties": false,
+      "required": ["fileIdentifier", "fileDescription", "recordIdentifier", "fileDateTime"],
+      "properties": {
+        "fileIdentifier": {
+          "type": "string",
+          "description": "A unique identifier for the file in which this message exists. Often will be the name of the file."
+        },
+        "fileDescription": {
+          "type": "string",
+          "description": "A description of the file whose usage depends on the type of file that was processed."
+        },
+        "recordIdentifier": {
+          "type": "string",
+          "description": "A unique identifier for this message in the processed file. Often this will be the record number."
+        },
+        "fileDateTime": {
+          "type": "string",
+          "format": "date-time",
+          "description": "A timestamp associated with the whole file not the individual message."
+        }
+      }
+    },
+    "TransmissionDateTime": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/TransmissionDateTime",
+      "type": "string",
+      "format": "date-time",
+      "description": "The UTC datetime the original ISO8583 message entered into the network's system. \nTime is set by the initiator of the message.\n"
+    },
+    "SystemTraceAuditNumber": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/SystemTraceAuditNumber",
+      "type": "string",
+      "description": "A numeric identifier assigned by the system that initiated the message to help identify the transaction.\nThis is usually set by the merchant's Point of Sale (POS) or acquiring bank's system and so is useful for \nrelating messages within a batch or session. It is not globally unique.\n"
+    },
+    "TransactionId": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/TransactionId",
+      "type": "string",
+      "description": "A unique identifier that relates messages to a single transaction as defined by the network.\n\nNote: A return is considered a distinct transaction from the original purchase.\n"
+    },
+    "TransactionGroupId": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/TransactionGroupId",
+      "type": "string",
+      "description": "A unique identifier that relates transactions together. For example, a purchase and a return may\nbe grouped by this identifier.\n"
+    },
+    "NewRequest": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/NewRequest",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "messageId",
+        "transactionId",
+        "transactionGroupId",
+        "cardId",
+        "receivedDateTime",
+        "categorization",
+        "accounts",
+        "transactionAmount",
+        "transactionFeeAmount",
+        "settlementAmount",
+        "settlementFeeAmount",
+        "settlementConversion",
+        "cashBackAmount",
+        "feeDetails",
+        "transmissionDateTime",
+        "systemTraceAuditNumber",
+        "retrievalReferenceNumber",
+        "settlementDate",
+        "captureDate",
+        "encryptedKeys",
+        "merchant",
+        "acquirer",
+        "network",
+        "acquirerNetwork",
+        "incremental",
+        "lastClearing",
+        "recurring",
+        "minimumTolerance",
+        "suppliedCardExpirationDate",
+        "track1ValidationResult",
+        "track2ValidationResult",
+        "pinValidationResult",
+        "verificationValueValidationResult",
+        "verificationValue2ValidationResult",
+        "verificationValue3ValidationResult",
+        "dynamicVerificationValueValidationResult",
+        "arqcValidationResult",
+        "emv3DSecureAuthenticationResult"
+      ],
+      "description": "The incoming message request data received from the network to be processed.",
+      "properties": {
+        "messageId": {
+          "$ref": "/message/v2/schemas/definitions/MessageId"
+        },
+        "cardId": {
+          "$ref": "/message/v2/schemas/definitions/CardId"
+        },
+        "tokenId": {
+          "$ref": "/message/v2/schemas/definitions/TokenId"
+        },
+        "transactionId": {
+          "$ref": "/message/v2/schemas/definitions/TransactionId"
+        },
+        "transactionGroupId": {
+          "$ref": "/message/v2/schemas/definitions/TransactionGroupId"
+        },
+        "matchedMessageId": {
+          "$ref": "/message/v2/schemas/definitions/MatchedMessageId"
+        },
+        "receivedDateTime": {
+          "$ref": "/message/v2/schemas/definitions/ReceivedDateTime"
+        },
+        "categorization": {
+          "$ref": "/message/v2/schemas/definitions/Categorization"
+        },
+        "accounts": {
+          "$ref": "/message/v2/schemas/definitions/Accounts"
+        },
+        "transactionAmount": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "transactionFeeAmount": {
+          "description": "Fee amount applied by the network or acquirer in the merchant's currency.\n",
+          "allOf": [
+            {
+              "$ref": "/message/v2/schemas/definitions/Amount"
+            }
+          ]
+        },
+        "settlementAmount": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "settlementFeeAmount": {
+          "description": "Fee amount applied by the network or acquirer in the BIN currency.\n",
+          "allOf": [
+            {
+              "$ref": "/message/v2/schemas/definitions/Amount"
+            }
+          ]
+        },
+        "cashBackAmount": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "feeDetails": {
+          "type": "array",
+          "description": "Details about the fees that went into the transaction and settlement fee amounts",
+          "items": {
+            "$ref": "/message/v2/schemas/definitions/Fee"
+          }
+        },
+        "settlementConversion": {
+          "$ref": "/message/v2/schemas/definitions/SettlementConversion"
+        },
+        "transmissionDateTime": {
+          "$ref": "/message/v2/schemas/definitions/TransmissionDateTime"
+        },
+        "systemTraceAuditNumber": {
+          "$ref": "/message/v2/schemas/definitions/SystemTraceAuditNumber"
+        },
+        "acquirerLifecycleId": {
+          "description": "This value is defined by the acquirer to uniquely identify a transaction through its lifecycle.\n",
+          "type": "string"
+        },
+        "retrievalReferenceNumber": {
+          "type": "string"
+        },
+        "acquirerReferenceData": {
+          "description": "This value is a numeric string of data supplied by the acquirer in an acquirer-originated message.\n",
+          "type": "string"
+        },
+        "settlementDate": {
+          "type": "string",
+          "description": "The date the funds are expected to be transferred between issuer and acquirer. \n\nThis is not guaranteed.\n",
+          "format": "date",
+          "example": "2020-01-01"
+        },
+        "captureDate": {
+          "type": "string",
+          "description": "The date the transaction was processed by the acquirer.\n",
+          "format": "date",
+          "example": "2020-01-01"
+        },
+        "encryptedKeys": {
+          "description": "A list of encrypted data encryption keys.\n\nAll encrypted data in MessageRequest will be encrypted with same AES generated key.\nThe key will be encrypted with multiple public keys, one for each of the RSA key pairs that can decrypt it.\n",
+          "minLength": 0,
+          "type": "array",
+          "items": {
+            "$ref": "/message/v2/schemas/definitions/EncryptedKey"
+          }
+        },
+        "merchant": {
+          "$ref": "/message/v2/schemas/definitions/Merchant"
+        },
+        "acquirer": {
+          "$ref": "/message/v2/schemas/definitions/Acquirer"
+        },
+        "authorizationLifeCycle": {
+          "$ref": "/message/v2/schemas/definitions/AuthorizationLifeCycle"
+        },
+        "replacementAmounts": {
+          "$ref": "/message/v2/schemas/definitions/ReplacementAmounts"
+        },
+        "network": {
+          "$ref": "/message/v2/schemas/definitions/IssuerNetwork"
+        },
+        "acquirerNetwork": {
+          "$ref": "/message/v2/schemas/definitions/AcquirerNetwork"
+        },
+        "file": {
+          "$ref": "/message/v2/schemas/definitions/File"
+        },
+        "addressVerificationData": {
+          "$ref": "/message/v2/schemas/definitions/AddressVerificationData"
+        },
+        "incremental": {
+          "description": "Indicator whether this has been identified by the acquirer as an\nincremental authorization or not.\n",
+          "type": "boolean"
+        },
+        "lastClearing": {
+          "description": "Indicator whether this has been identified by the acquirer as\nthe last clearing in a sequence or not.\n",
+          "type": "boolean"
+        },
+        "recurring": {
+          "description": "Indicator whether this has been identified by the acquirer as a\nrecurring transaction or not.\n",
+          "type": "boolean"
+        },
+        "iiasData": {
+          "$ref": "/message/v2/schemas/definitions/IIASData"
+        },
+        "minimumTolerance": {
+          "$ref": "/message/v2/schemas/definitions/Tolerance"
+        },
+        "tokenization": {
+          "$ref": "/message/v2/schemas/definitions/TokenizationData"
+        },
+        "tokenNotification": {
+          "$ref": "/message/v2/schemas/definitions/TokenNotificationData"
+        },
+        "emvChipData": {
+          "$ref": "/message/v2/schemas/definitions/EMVChipData"
+        },
+        "emv3DSecureData": {
+          "$ref": "/message/v2/schemas/definitions/EMV3DSecureData"
+        },
+        "adviceResponse": {
+          "$ref": "/message/v2/schemas/definitions/AdviceResponse"
+        },
+        "suppliedCardExpirationDate": {
+          "$ref": "/message/v2/schemas/definitions/SuppliedCardExpirationDate"
+        },
+        "track1ValidationResult": {
+          "$ref": "/message/v2/schemas/definitions/TrackValidationResult"
+        },
+        "track2ValidationResult": {
+          "$ref": "/message/v2/schemas/definitions/TrackValidationResult"
+        },
+        "pinValidationResult": {
+          "$ref": "/message/v2/schemas/definitions/PINValidationResult"
+        },
+        "verificationValueValidationResult": {
+          "description": "Corresponds to the CVC (Mastercard), CVV (Visa), or 5CSC (Amex) found in the track data and only supplied \nin card swipe transactions.\n",
+          "allOf": [
+            {
+              "$ref": "/message/v2/schemas/definitions/VerificationValueResult"
+            }
+          ]
+        },
+        "verificationValue2ValidationResult": {
+          "description": "Corresponds to the CVC2 (Mastercard), CVV2 (Visa), or 4CSC (Amex) found on the back of the card for \nMastercard and Visa, and on the front of the card for Amex. \nIt is most often supplied in online transactions.\n",
+          "allOf": [
+            {
+              "$ref": "/message/v2/schemas/definitions/VerificationValueResult"
+            }
+          ]
+        },
+        "verificationValue3ValidationResult": {
+          "description": "Corresponds to the 3CSC (Amex) found on the back of the card and is only used for Amex transactions.\n",
+          "allOf": [
+            {
+              "$ref": "/message/v2/schemas/definitions/VerificationValueResult"
+            }
+          ]
+        },
+        "dynamicVerificationValueValidationResult": {
+          "$ref": "/message/v2/schemas/definitions/VerificationValueResult"
+        },
+        "arqcValidationResult": {
+          "$ref": "/message/v2/schemas/definitions/ARQCValidationResult"
+        },
+        "emv3DSecureAuthenticationResult": {
+          "$ref": "/message/v2/schemas/definitions/EMV3DSecureAuthenticationResult"
+        }
+      }
+    },
+    "EMV3DSecureData": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/EMV3DSecureData",
+      "description": "EMV 3-D Secure is a messaging protocol that enables consumers to authenticate themselves with their card issuer\nwhen making card-not-present (CNP) e-commerce purchases. The additional security layer helps prevent unauthorized CNP\ntransactions and protects the merchant from exposure to CNP fraud.\n",
+      "oneOf": [
+        {
+          "$ref": "/message/v2/schemas/definitions/EMV3DSecureMastercard"
+        }
+      ]
+    },
+    "EMV3DSecureMastercard": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/EMV3DSecureMastercard",
+      "type": "object",
+      "required": [
+        "network",
+        "securityProtocol",
+        "cardholderAuthentication",
+        "ucafCollectionIndicator",
+        "programProtocolIndicator",
+        "cardholderAuthenticationFormat"
+      ],
+      "properties": {
+        "network": {
+          "type": "string",
+          "description": "This value indicates the network used for the transaction. This value also serves as the discriminator\nfor the EMV3DSecureData object.\n",
+          "enum": ["MASTERCARD"]
+        },
+        "securityProtocol": {
+          "type": "string",
+          "enum": ["CHANNEL", "UNKNOWN", "NOT PROVIDED"]
+        },
+        "cardholderAuthentication": {
+          "type": "string",
+          "enum": ["CARDHOLDER CERTIFICATE NOT USED", "MASTERPASS", "TOKENIZED", "UNKNOWN", "NOT PROVIDED"]
+        },
+        "ucafCollectionIndicator": {
+          "type": "string",
+          "description": "This data describes the merchant support and issuer expectations \nregarding the Universal Cardholder Authentication Field (UCAF) and\nwhether Account Holder Authentication Value (AAV) data is present and authenticated.\n\n- NOT SUPPORTED may either indicate the merchant is not an Identity Check merchant, or the merchant is not \n  an Identity Check merchant but UCAF data is present within the authorization. Chargeback rights \n  exist in both cases.\n- UCAF MUST BE PRESENT indicates the merchant participates in Identity Check, but authentication was not \n  completed. No chargeback rights exist for fraud.\n- UCAF MUST BE PRESENT AND AAV AUTHENTICATED indicates the merchant participates in Identity Check and was\n  properly authenticated. No chargeback rights exist for fraud.\n- AAV PRESENT indicates the merchant participates in a program that exempts the merchant from using \n  Identity Check for certain low-risk transactions. Chargeback rights exist.\n- ISSUER RISK BASED DECISIONING indicates the issuer has their own risk-based decisioning enabled to \n  determine whether to authorize payment. No chargeback rights exist for fraud.\n- MERCHANT RISK BASED DECISIONING indicates the merchant has their own risk-based decisioning enabled to \n  determine whether to accept payment. Chargeback rights exist.\n- PARTIAL SHIPMENT OR RECURRING PAYMENT indicates the merchant participates in Identity Check and was \n  properly authenticated for a partial shipment or recurring payment. Refer to the UCAF or the \n  original authorization to determine whether chargeback rights exist.\n",
+          "enum": [
+            "NOT SUPPORTED",
+            "UCAF MUST BE PRESENT",
+            "UCAF MUST BE PRESENT AND AAV AUTHENTICATED",
+            "AAV PRESENT",
+            "ISSUER RISK BASED DECISIONING",
+            "MERCHANT RISK BASED DECISIONING",
+            "PARTIAL SHIPMENT OR RECURRING PAYMENT",
+            "UNKNOWN",
+            "NOT PROVIDED"
+          ]
+        },
+        "programProtocolIndicator": {
+          "type": "string",
+          "enum": [
+            "EMV 3-D SECURE VERSION 2.1",
+            "EMV 3-D SECURE VERSION 2.2",
+            "EMV 3-D SECURE VERSION 2.3",
+            "EMV 3-D SECURE VERSION 2.4",
+            "EMV 3-D SECURE VERSION 2.5",
+            "EMV 3-D SECURE VERSION 2.6",
+            "EMV 3-D SECURE VERSION 2.7",
+            "EMV 3-D SECURE VERSION 2.8",
+            "EMV 3-D SECURE VERSION 2.9",
+            "UNKNOWN",
+            "NOT PROVIDED"
+          ]
+        },
+        "cardholderAuthenticationFormat": {
+          "type": "string",
+          "enum": ["SECURE CODE", "SECURE CODE FOR AAV", "UNKNOWN", "NOT PROVIDED"]
+        },
+        "universalCardholderAuthenticationField": {
+          "type": "string",
+          "description": "The Universal Cardholder Authentication Field (UCAF) is a data element that is used to convey\ncardholder authentication data from the merchant to the issuer.\n"
+        }
+      }
+    },
+    "MessageId": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/MessageId",
+      "description": "Uniquely identifies a message stored in the platform.\n\nA message's request and response are stored and retrieved separately using this identifier.\n",
+      "type": "string"
+    },
+    "MatchedMessageId": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/MatchedMessageId",
+      "description": "A previously processed message possibly related to this message as determined by the matching algorithm.\n",
+      "allOf": [
+        {
+          "$ref": "/message/v2/schemas/definitions/MessageId"
+        }
+      ]
+    },
+    "CardId": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/CardId",
+      "description": "Uniquely identifies a payment card stored in the platform.\n",
+      "type": "string"
+    },
+    "TokenId": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/TokenId",
+      "description": "Uniquely identifies a token stored in the platform.\n\nA token is a unique, secure replacement for a primary account number (PAN) used in digital payment transactions (e.g. transactions made using Apple Pay).\n",
+      "type": "string"
+    },
+    "ReceivedDateTime": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/ReceivedDateTime",
+      "type": "string",
+      "format": "date-time",
+      "description": "The UTC datetime the message was received from the network by the platform."
+    },
+    "CreatedOn": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/CreatedOn",
+      "type": "string",
+      "format": "date-time",
+      "description": "The UTC datetime the message was created in the platform."
+    },
+    "Request": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/Request",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "messageId",
+        "cardId",
+        "transactionId",
+        "transactionGroupId",
+        "receivedDateTime",
+        "categorization",
+        "accounts",
+        "transactionAmount",
+        "transactionFeeAmount",
+        "settlementAmount",
+        "settlementFeeAmount",
+        "settlementConversion",
+        "cashBackAmount",
+        "feeDetails",
+        "transmissionDateTime",
+        "systemTraceAuditNumber",
+        "retrievalReferenceNumber",
+        "settlementDate",
+        "captureDate",
+        "encryptedKeys",
+        "merchant",
+        "acquirer",
+        "network",
+        "acquirerNetwork",
+        "incremental",
+        "lastClearing",
+        "recurring",
+        "minimumTolerance",
+        "track1ValidationResult",
+        "track2ValidationResult",
+        "pinValidationResult",
+        "suppliedCardExpirationDate",
+        "verificationValueValidationResult",
+        "verificationValue2ValidationResult",
+        "verificationValue3ValidationResult",
+        "dynamicVerificationValueValidationResult",
+        "arqcValidationResult",
+        "emv3DSecureAuthenticationResult",
+        "createdOn"
+      ],
+      "description": "The stored request data received from the network to be processed.",
+      "properties": {
+        "messageId": {
+          "$ref": "/message/v2/schemas/definitions/MessageId"
+        },
+        "cardId": {
+          "$ref": "/message/v2/schemas/definitions/CardId"
+        },
+        "tokenId": {
+          "$ref": "/message/v2/schemas/definitions/TokenId"
+        },
+        "transactionId": {
+          "$ref": "/message/v2/schemas/definitions/TransactionId"
+        },
+        "transactionGroupId": {
+          "$ref": "/message/v2/schemas/definitions/TransactionGroupId"
+        },
+        "matchedMessageId": {
+          "$ref": "/message/v2/schemas/definitions/MatchedMessageId"
+        },
+        "receivedDateTime": {
+          "$ref": "/message/v2/schemas/definitions/ReceivedDateTime"
+        },
+        "categorization": {
+          "$ref": "/message/v2/schemas/definitions/Categorization"
+        },
+        "accounts": {
+          "$ref": "/message/v2/schemas/definitions/Accounts"
+        },
+        "transactionAmount": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "transactionFeeAmount": {
+          "description": "Fee amount applied by the network or acquirer in the merchant's currency.\n",
+          "allOf": [
+            {
+              "$ref": "/message/v2/schemas/definitions/Amount"
+            }
+          ]
+        },
+        "settlementAmount": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "settlementFeeAmount": {
+          "description": "Fee amount applied by the network or acquirer in the BIN currency.\n",
+          "allOf": [
+            {
+              "$ref": "/message/v2/schemas/definitions/Amount"
+            }
+          ]
+        },
+        "cashBackAmount": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "feeDetails": {
+          "type": "array",
+          "description": "Details about the fees that went into the transaction and settlement fee amounts",
+          "items": {
+            "$ref": "/message/v2/schemas/definitions/Fee"
+          }
+        },
+        "settlementConversion": {
+          "$ref": "/message/v2/schemas/definitions/SettlementConversion"
+        },
+        "transmissionDateTime": {
+          "$ref": "/message/v2/schemas/definitions/TransmissionDateTime"
+        },
+        "systemTraceAuditNumber": {
+          "$ref": "/message/v2/schemas/definitions/SystemTraceAuditNumber"
+        },
+        "acquirerLifecycleId": {
+          "description": "Defined by the acquirer to identify a transaction through its lifecycle.\n",
+          "type": "string"
+        },
+        "retrievalReferenceNumber": {
+          "type": "string",
+          "description": "A numeric identifier typically generated by the acquirer to uniquely identify a transaction on a given day.\n"
+        },
+        "acquirerReferenceData": {
+          "description": "This value is a numeric string of data supplied by the acquirer in an acquirer-originated message.\n",
+          "type": "string"
+        },
+        "settlementDate": {
+          "type": "string",
+          "description": "The date the funds are expected to be transferred between issuer and acquirer. \n\nThis is not guaranteed.\n",
+          "format": "date",
+          "example": "2020-01-01"
+        },
+        "captureDate": {
+          "type": "string",
+          "description": "The date the transaction was processed by the acquirer.\n",
+          "format": "date",
+          "example": "2020-01-01"
+        },
+        "encryptedKeys": {
+          "description": "An array of encrypted AES keys that can be decrypted using the appropriate private key.",
+          "minLength": 0,
+          "type": "array",
+          "items": {
+            "$ref": "/message/v2/schemas/definitions/EncryptedKey"
+          }
+        },
+        "merchant": {
+          "$ref": "/message/v2/schemas/definitions/Merchant"
+        },
+        "acquirer": {
+          "$ref": "/message/v2/schemas/definitions/Acquirer"
+        },
+        "authorizationLifeCycle": {
+          "$ref": "/message/v2/schemas/definitions/AuthorizationLifeCycle"
+        },
+        "replacementAmounts": {
+          "$ref": "/message/v2/schemas/definitions/ReplacementAmounts"
+        },
+        "network": {
+          "$ref": "/message/v2/schemas/definitions/IssuerNetwork"
+        },
+        "acquirerNetwork": {
+          "$ref": "/message/v2/schemas/definitions/AcquirerNetwork"
+        },
+        "file": {
+          "$ref": "/message/v2/schemas/definitions/File"
+        },
+        "addressVerificationData": {
+          "$ref": "/message/v2/schemas/definitions/AddressVerificationData"
+        },
+        "incremental": {
+          "description": "Has the value 'true' if the acquirer identified the authorization as an incremental, otherwise the value\nis 'false'.\n",
+          "type": "boolean"
+        },
+        "lastClearing": {
+          "description": "Has the value 'true' if the acquirer identified the message as the last clearing in a sequence, otherwise\nthe value is 'false'.\n",
+          "type": "boolean"
+        },
+        "recurring": {
+          "description": "Has the value 'true' if the acquirer identified the message as part of a recurring transaction, otherwise\nthe value is 'false'.\n",
+          "type": "boolean"
+        },
+        "iiasData": {
+          "$ref": "/message/v2/schemas/definitions/IIASData"
+        },
+        "minimumTolerance": {
+          "$ref": "/message/v2/schemas/definitions/Tolerance"
+        },
+        "tokenization": {
+          "$ref": "/message/v2/schemas/definitions/TokenizationData"
+        },
+        "tokenNotification": {
+          "$ref": "/message/v2/schemas/definitions/TokenNotificationData"
+        },
+        "emvChipData": {
+          "$ref": "/message/v2/schemas/definitions/EMVChipData"
+        },
+        "emv3DSecureData": {
+          "$ref": "/message/v2/schemas/definitions/EMV3DSecureData"
+        },
+        "adviceResponse": {
+          "$ref": "/message/v2/schemas/definitions/AdviceResponse"
+        },
+        "suppliedCardExpirationDate": {
+          "$ref": "/message/v2/schemas/definitions/SuppliedCardExpirationDate"
+        },
+        "track1ValidationResult": {
+          "$ref": "/message/v2/schemas/definitions/TrackValidationResult"
+        },
+        "track2ValidationResult": {
+          "$ref": "/message/v2/schemas/definitions/TrackValidationResult"
+        },
+        "pinValidationResult": {
+          "$ref": "/message/v2/schemas/definitions/PINValidationResult"
+        },
+        "verificationValueValidationResult": {
+          "$ref": "/message/v2/schemas/definitions/VerificationValueResult"
+        },
+        "verificationValue2ValidationResult": {
+          "$ref": "/message/v2/schemas/definitions/VerificationValueResult"
+        },
+        "verificationValue3ValidationResult": {
+          "$ref": "/message/v2/schemas/definitions/VerificationValueResult"
+        },
+        "dynamicVerificationValueValidationResult": {
+          "$ref": "/message/v2/schemas/definitions/VerificationValueResult"
+        },
+        "arqcValidationResult": {
+          "$ref": "/message/v2/schemas/definitions/ARQCValidationResult"
+        },
+        "emv3DSecureAuthenticationResult": {
+          "$ref": "/message/v2/schemas/definitions/EMV3DSecureAuthenticationResult"
+        },
+        "createdOn": {
+          "$ref": "/message/v2/schemas/definitions/CreatedOn"
+        }
+      }
+    },
+    "PickedRequest": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/PickedRequest",
+      "type": "object",
+      "additionalProperties": false,
+      "description": "A PickedRequest object contains a subset of fields from a Request object. \n\nA PickedRequest object may be preferred to minimize the amount of data retrieved and the time taken to \ntransmit and process the response.\n",
+      "required": ["createdOn"],
+      "properties": {
+        "cardId": {
+          "$ref": "/message/v2/schemas/definitions/CardId"
+        },
+        "messageId": {
+          "$ref": "/message/v2/schemas/definitions/MessageId"
+        },
+        "matchedMessageId": {
+          "$ref": "/message/v2/schemas/definitions/MatchedMessageId"
+        },
+        "receivedDateTime": {
+          "$ref": "/message/v2/schemas/definitions/ReceivedDateTime"
+        },
+        "categorization": {
+          "$ref": "/message/v2/schemas/definitions/Categorization"
+        },
+        "settlementAmount": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "adviceResponse": {
+          "$ref": "/message/v2/schemas/definitions/AdviceResponse"
+        },
+        "createdOn": {
+          "$ref": "/message/v2/schemas/definitions/CreatedOn"
+        }
+      }
+    },
+    "Tag": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/Tag",
+      "type": "object",
+      "additionalProperties": false,
+      "description": "A Tag object contains categorizing information that can be used to classify a transaction and determine max\nspend amounts for a given tag.\n",
+      "required": ["tag", "maxAmount"],
+      "properties": {
+        "tag": {
+          "type": "string",
+          "description": "The tag name."
+        },
+        "maxAmount": {
+          "type": "string",
+          "description": "Maximum amount that can be approved for the tag."
+        }
+      }
+    },
+    "DeclineReasonsEnum": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/DeclineReasonsEnum",
+      "type": "string",
+      "description": "The reason for the decline.",
+      "enum": [
+        "TRANSACTION CATEGORY NOT ALLOWED",
+        "INTERNATIONAL TRANSACTIONS NOT ALLOWED",
+        "RESTRICTED COUNTRY",
+        "RESTRICTED MERCHANT TYPE",
+        "RESTRICTED MERCHANT",
+        "INVALID PIN",
+        "PIN BLOCK ERROR",
+        "PIN VALIDATION UNAVAILABLE",
+        "INVALID VERIFICATION VALUE",
+        "INVALID VERIFICATION VALUE2",
+        "INVALID VERIFICATION VALUE3",
+        "INVALID DYNAMIC VERIFICATION VALUE",
+        "INVALID ATC",
+        "INVALID ARQC",
+        "NO CVN SUPPLIED",
+        "VERIFICATION VALUE VALIDATION UNAVAILABLE",
+        "VERIFICATION VALUE2 VALIDATION UNAVAILABLE",
+        "VERIFICATION VALUE3 VALIDATION UNAVAILABLE",
+        "DYNAMIC VERIFICATION VALUE VALIDATION UNAVAILABLE",
+        "ARQC VALIDATION UNAVAILABLE",
+        "CARD NOT FOUND",
+        "CARD NOT CURRENT",
+        "EXPIRED CARD",
+        "BLOCKED CARD",
+        "LOCKED CARD",
+        "INACTIVE CARD",
+        "INVALID CARD DATA",
+        "UNSUPPORTED OPERATION",
+        "INSUFFICIENT FUNDS",
+        "AMOUNT LIMIT EXCEEDED",
+        "COUNT LIMIT EXCEEDED",
+        "MINIMUM AMOUNT REQUIRED",
+        "PIN RETRY LIMIT EXCEEDED",
+        "BUSINESS RULES",
+        "SUSPECTED FRAUD",
+        "INVALID ACCOUNT SELECTED",
+        "INVALID MESSAGE DATA",
+        "STOP RECURRING",
+        "GENERAL DECLINE",
+        "INCORRECT ACTIVATION CODE",
+        "INCORRECT ACTIVATION CODE RETRIES EXCEEDED",
+        "EXPIRED ACTIVATION CODE",
+        "REQUIRE ADDITIONAL AUTHENTICATION",
+        "WALLET RECOMMENDED DECLINE",
+        "INTERNAL SERVICE ERROR",
+        "TRANSIENT RETRYABLE ERROR",
+        "CONFIGURATION LOCK"
+      ]
+    },
+    "HoldExpirationDateTime": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/HoldExpirationDateTime",
+      "type": "string",
+      "description": "The UTC datetime the hold on funds will expire.",
+      "format": "date-time"
+    },
+    "ProprietaryAuxiliaryData": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/ProprietaryAuxiliaryData",
+      "type": "object",
+      "description": "An object containing client specific data."
+    },
+    "AccountUsage": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/AccountUsage",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["accountId", "debitCredit", "amount"],
+      "properties": {
+        "accountId": {
+          "type": "string",
+          "description": "Uniquely identifies the account to which the amount and debit or credit were applied."
+        },
+        "debitCredit": {
+          "$ref": "/message/v2/schemas/definitions/DebitCredit"
+        },
+        "amount": {
+          "type": "string"
+        }
+      }
+    },
+    "CurrencyAlphabeticCode": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/CurrencyAlphabeticCode",
+      "type": "string",
+      "description": "The alphabetic code that represents the currency.\n",
+      "enum": [
+        "AED",
+        "AFN",
+        "ALL",
+        "AMD",
+        "ANG",
+        "AOA",
+        "ARS",
+        "AUD",
+        "AWG",
+        "AZN",
+        "BAM",
+        "BBD",
+        "BDT",
+        "BGN",
+        "BHD",
+        "BIF",
+        "BMD",
+        "BND",
+        "BOB",
+        "BOV",
+        "BRL",
+        "BSD",
+        "BTN",
+        "BWP",
+        "BYN",
+        "BZD",
+        "CAD",
+        "CDF",
+        "CHE",
+        "CHF",
+        "CHW",
+        "CLF",
+        "CLP",
+        "CNY",
+        "COP",
+        "COU",
+        "CRC",
+        "CUC",
+        "CUP",
+        "CVE",
+        "CZK",
+        "DJF",
+        "DKK",
+        "DOP",
+        "DZD",
+        "EGP",
+        "ERN",
+        "ETB",
+        "EUR",
+        "FJD",
+        "FKP",
+        "GBP",
+        "GEL",
+        "GHS",
+        "GIP",
+        "GMD",
+        "GNF",
+        "GTQ",
+        "GYD",
+        "HKD",
+        "HNL",
+        "HRK",
+        "HTG",
+        "HUF",
+        "IDR",
+        "ILS",
+        "INR",
+        "IQD",
+        "IRR",
+        "ISK",
+        "JMD",
+        "JOD",
+        "JPY",
+        "KES",
+        "KGS",
+        "KHR",
+        "KMF",
+        "KPW",
+        "KRW",
+        "KWD",
+        "KYD",
+        "KZT",
+        "LAK",
+        "LBP",
+        "LKR",
+        "LRD",
+        "LSL",
+        "LYD",
+        "MAD",
+        "MDL",
+        "MGA",
+        "MKD",
+        "MMK",
+        "MNT",
+        "MOP",
+        "MRU",
+        "MUR",
+        "MVR",
+        "MWK",
+        "MXN",
+        "MXV",
+        "MYR",
+        "MZN",
+        "NAD",
+        "NGN",
+        "NIO",
+        "NOK",
+        "NPR",
+        "NZD",
+        "OMR",
+        "PAB",
+        "PEN",
+        "PGK",
+        "PHP",
+        "PKR",
+        "PLN",
+        "PYG",
+        "QAR",
+        "RON",
+        "RSD",
+        "RUB",
+        "RWF",
+        "SAR",
+        "SBD",
+        "SCR",
+        "SDG",
+        "SEK",
+        "SGD",
+        "SHP",
+        "SLL",
+        "SOS",
+        "SRD",
+        "SSP",
+        "STN",
+        "SVC",
+        "SYP",
+        "SZL",
+        "THB",
+        "TJS",
+        "TMT",
+        "TND",
+        "TOP",
+        "TRY",
+        "TTD",
+        "TWD",
+        "TZS",
+        "UAH",
+        "UGX",
+        "USD",
+        "USN",
+        "UYI",
+        "UYU",
+        "UYW",
+        "UZS",
+        "VES",
+        "VND",
+        "VUV",
+        "WST",
+        "XAF",
+        "XAG",
+        "XAU",
+        "XBA",
+        "XBB",
+        "XBC",
+        "XBD",
+        "XCD",
+        "XDR",
+        "XOF",
+        "XPD",
+        "XPF",
+        "XPT",
+        "XSU",
+        "XTS",
+        "XUA",
+        "XXX",
+        "YER",
+        "ZAR",
+        "ZMW",
+        "ZWL"
+      ]
+    },
+    "Rate": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/Rate",
+      "type": "object",
+      "description": "The currency conversion rate information.\n  \nTo calculate the conversion rate, use the following formula:\n\n    conversion rate = factor / (10 ^ factorDecimalPosition)\n",
+      "additionalProperties": false,
+      "required": ["factor", "factorDecimalPosition", "effectiveOn"],
+      "properties": {
+        "factor": {
+          "description": "The multiplying factor used to convert the transaction amount to the settlement\namount.\n",
+          "type": "string"
+        },
+        "factorDecimalPosition": {
+          "description": "The position the decimal point should be placed, starting from the right.\n",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 15
+        },
+        "effectiveOn": {
+          "type": "string",
+          "description": "The UTC datetime the conversion rate went into effect.",
+          "format": "date-time"
+        }
+      }
+    },
+    "AdditionalCurrencyConversionRate": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/AdditionalCurrencyConversionRate",
+      "type": "object",
+      "description": "Contains the conversion rate from the settlement currency to a target currency that was in effect when processing this message.\nThe value can be obtained in one of four ways and will be represented by the conversionSource field.\n",
+      "additionalProperties": false,
+      "required": ["rate", "conversionSource", "targetCurrency"],
+      "properties": {
+        "rate": {
+          "$ref": "/message/v2/schemas/definitions/Rate"
+        },
+        "conversionSource": {
+          "type": "string",
+          "description": "- NONE\n  - The target currency matches the settlement currency.\n  - The rate will be 1.0\n  - example scenario: Settlement Currency = USD, Target Currency = USD, Transaction Currency = EUR\n- NETWORK\n  - The target currency matches the message's transaction currency.\n  - The rate will be the inverse of the settlementConversion data provided by the network.\n  - example scenario: Settlement Currency = USD, Target Currency = EUR, Transaction Currency = EUR\n- INTERNAL\n  - The target currency does not match the settlement or transaction currency and a settlement to target currency conversion rate is defined within the Rate service at the time of the transaction.\n  - The rate will be the settlement to target currency rate retrieved from the rate service at the time of the transaction.\n  - example scenario: Settlement Currency = USD, Target Currency = EUR, Transaction Currency = GBP, Rate from USD -> EUR is defined within the Rate service at the time of the transaction\n- NOT FOUND\n  - The target currency does not match the settlement or transaction currency and no settlement to target currency rate is defined within the Rate service at the time of the transaction.\n  - The rate will be 0.0\n  - example scenario: Settlement Currency = USD, Target Currency = EUR, Transaction Currency = GBP, Rate from USD -> EUR is NOT defined within the Rate service at the time of the transaction\n- NOT APPLICABLE\n  - The incoming message's settlement amount is 0\n  - The rate will be 0.0\n  - example scenarios: tokenization messages, balance inquiries, 0 value transactions\n",
+          "enum": ["NONE", "NETWORK", "INTERNAL", "NOT FOUND", "NOT APPLICABLE"]
+        },
+        "targetCurrency": {
+          "$ref": "/message/v2/schemas/definitions/CurrencyAlphabeticCode"
+        }
+      }
+    },
+    "DeclineReasons": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/DeclineReasons",
+      "type": "array",
+      "description": "Reason the authorization was declined. These are internal reasons that are more detailed than what is\nprovided to the network.\n",
+      "items": {
+        "$ref": "/message/v2/schemas/definitions/DeclineReasonsEnum"
+      }
+    },
+    "NewResponse": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/NewResponse",
+      "type": "object",
+      "description": "The outgoing message response data to be sent back to the network.",
+      "additionalProperties": false,
+      "required": [
+        "messageId",
+        "cardId",
+        "responseCode",
+        "declineReasons",
+        "capture",
+        "requestedAmount",
+        "requestedTolerance",
+        "requestedFee",
+        "requestedTotal",
+        "requestedCashBack",
+        "messageApprovedAmount",
+        "messageApprovedTolerance",
+        "messageApprovedFee",
+        "messageApprovedTotal",
+        "approvedAmount",
+        "approvedTolerance",
+        "approvedFee",
+        "approvedTotal",
+        "approvedCashBack",
+        "pendingAmount",
+        "pendingTolerance",
+        "pendingFee",
+        "pendingTotal",
+        "completedAmount",
+        "completedTolerance",
+        "completedFee",
+        "completedTotal",
+        "pendingAccounts",
+        "completedAccounts",
+        "tags",
+        "addressVerificationResult",
+        "applicationTransactionCounterValidationResult",
+        "processedBy"
+      ],
+      "properties": {
+        "messageId": {
+          "$ref": "/message/v2/schemas/definitions/MessageId"
+        },
+        "cardId": {
+          "$ref": "/message/v2/schemas/definitions/CardId"
+        },
+        "authorizationIdResponse": {
+          "type": "string",
+          "description": "An identifier generated by the authorizing party used to help identify\nthe authorization. This is often provided to the cardholder on their transaction receipt.\n"
+        },
+        "responseCode": {
+          "$ref": "/message/v2/schemas/definitions/ResponseCode"
+        },
+        "declineReasons": {
+          "$ref": "/message/v2/schemas/definitions/DeclineReasons"
+        },
+        "capture": {
+          "type": "boolean",
+          "description": "Has the value 'true' if the card should be captured by the merchant and the merchant states they are\ncapable of capturing the card. Otherwise, the value is false.\n"
+        },
+        "requestedAmount": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "requestedTolerance": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "requestedFee": {
+          "description": "Fee amount applied by the processor. This value does not include fees applied by\nthe network or acquirer. Those fees are included in requestedAmount and approvedAmount.\n",
+          "allOf": [
+            {
+              "$ref": "/message/v2/schemas/definitions/Amount"
+            }
+          ]
+        },
+        "requestedTotal": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "requestedCashBack": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "messageApprovedAmount": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "messageApprovedTolerance": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "messageApprovedFee": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "messageApprovedTotal": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "approvedAmount": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "approvedTolerance": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "approvedFee": {
+          "description": "Fee amount applied by the processor. This value does not include fees applied by\nthe network or acquirer. Those fees are included in requestedAmount and approvedAmount.\n",
+          "allOf": [
+            {
+              "$ref": "/message/v2/schemas/definitions/Amount"
+            }
+          ]
+        },
+        "approvedTotal": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "approvedCashBack": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "pendingAmount": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "pendingTolerance": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "pendingFee": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "pendingTotal": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "completedAmount": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "completedTolerance": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "completedFee": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "completedTotal": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "availableBalance": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "addressVerificationResult": {
+          "$ref": "/message/v2/schemas/definitions/AddressVerificationResult"
+        },
+        "applicationTransactionCounterValidationResult": {
+          "$ref": "/message/v2/schemas/definitions/ApplicationTransactionCounterValidationResult"
+        },
+        "entryId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "pendingAccounts": {
+          "type": "array",
+          "description": "Accounts where there are still funds pending",
+          "items": {
+            "$ref": "/message/v2/schemas/definitions/AccountUsage"
+          }
+        },
+        "completedAccounts": {
+          "type": "array",
+          "description": "Accounts where the funds have completed",
+          "items": {
+            "$ref": "/message/v2/schemas/definitions/AccountUsage"
+          }
+        },
+        "holdExpirationDateTime": {
+          "$ref": "/message/v2/schemas/definitions/HoldExpirationDateTime"
+        },
+        "tags": {
+          "type": "array",
+          "description": "A list of Tag objects.",
+          "items": {
+            "$ref": "/message/v2/schemas/definitions/Tag"
+          }
+        },
+        "tokenization": {
+          "type": "object",
+          "properties": {
+            "activationMethods": {
+              "type": "array",
+              "minLength": 0,
+              "description": "The activation methods to be used for this tokenization. Returning an empty array will mean \nthat no additional activation methods are required to tokenize, with the except of any pre-configured \nwith the party responsible for initializing the tokenization.\n",
+              "items": {
+                "$ref": "/message/v2/schemas/definitions/ActivationMethod"
+              }
+            }
+          }
+        },
+        "processedBy": {
+          "type": "string",
+          "description": "The name of the service that provided the approval or decline."
+        },
+        "proprietaryAuxiliaryData": {
+          "$ref": "/message/v2/schemas/definitions/ProprietaryAuxiliaryData"
+        },
+        "additionalCurrencyConversionRates": {
+          "type": "array",
+          "minLength": 0,
+          "description": "Additional currency conversion rates used to convert the settlement currency to another currency.",
+          "items": {
+            "$ref": "/message/v2/schemas/definitions/AdditionalCurrencyConversionRate"
+          }
+        }
+      }
+    },
+    "Response": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/Response",
+      "type": "object",
+      "description": "The stored response data to be sent back to the network.",
+      "additionalProperties": false,
+      "required": [
+        "messageId",
+        "cardId",
+        "responseCode",
+        "declineReasons",
+        "capture",
+        "requestedAmount",
+        "requestedTolerance",
+        "requestedFee",
+        "requestedTotal",
+        "requestedCashBack",
+        "messageApprovedAmount",
+        "messageApprovedTolerance",
+        "messageApprovedFee",
+        "messageApprovedTotal",
+        "approvedAmount",
+        "approvedTolerance",
+        "approvedFee",
+        "approvedTotal",
+        "approvedCashBack",
+        "pendingAmount",
+        "pendingTolerance",
+        "pendingFee",
+        "pendingTotal",
+        "completedAmount",
+        "completedTolerance",
+        "completedFee",
+        "completedTotal",
+        "pendingAccounts",
+        "completedAccounts",
+        "tags",
+        "addressVerificationResult",
+        "applicationTransactionCounterValidationResult",
+        "processedBy",
+        "createdOn"
+      ],
+      "properties": {
+        "messageId": {
+          "$ref": "/message/v2/schemas/definitions/MessageId"
+        },
+        "cardId": {
+          "$ref": "/message/v2/schemas/definitions/CardId"
+        },
+        "authorizationIdResponse": {
+          "type": "string",
+          "description": "An identifier generated by the authorizing party - i.e. the Check Digit platform - used to help identify\nthe authorization.\n"
+        },
+        "responseCode": {
+          "$ref": "/message/v2/schemas/definitions/ResponseCode"
+        },
+        "declineReasons": {
+          "$ref": "/message/v2/schemas/definitions/DeclineReasons"
+        },
+        "capture": {
+          "type": "boolean",
+          "description": "Has the value 'true' if the card should be captured by the merchant. Otherwise, the value is false.\n"
+        },
+        "requestedAmount": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "requestedTolerance": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "requestedFee": {
+          "description": "Fee amount applied by the processor. This value does not include fees applied by\nthe network or acquirer. Those fees are included in requestedAmount and approvedAmount.\n",
+          "allOf": [
+            {
+              "$ref": "/message/v2/schemas/definitions/Amount"
+            }
+          ]
+        },
+        "requestedTotal": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "requestedCashBack": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "messageApprovedAmount": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "messageApprovedTolerance": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "messageApprovedFee": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "messageApprovedTotal": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "approvedAmount": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "approvedTolerance": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "approvedFee": {
+          "description": "Fee amount applied by the processor. This value does not include fees applied by\nthe network or acquirer. Those fees are included in requestedAmount and approvedAmount.\n",
+          "allOf": [
+            {
+              "$ref": "/message/v2/schemas/definitions/Amount"
+            }
+          ]
+        },
+        "approvedTotal": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "approvedCashBack": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "pendingAmount": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "pendingTolerance": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "pendingFee": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "pendingTotal": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "completedAmount": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "completedTolerance": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "completedFee": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "completedTotal": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "availableBalance": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "addressVerificationResult": {
+          "$ref": "/message/v2/schemas/definitions/AddressVerificationResult"
+        },
+        "applicationTransactionCounterValidationResult": {
+          "$ref": "/message/v2/schemas/definitions/ApplicationTransactionCounterValidationResult"
+        },
+        "entryId": {
+          "type": "string",
+          "description": "The unique identifier for the ledger entry created during processing.\n"
+        },
+        "pendingAccounts": {
+          "type": "array",
+          "description": "A list of AccountUsage objects for accounts where funds are pending.",
+          "items": {
+            "$ref": "/message/v2/schemas/definitions/AccountUsage"
+          }
+        },
+        "completedAccounts": {
+          "type": "array",
+          "description": "A list of AccountUsage objects for accounts where funds have completed.",
+          "items": {
+            "$ref": "/message/v2/schemas/definitions/AccountUsage"
+          }
+        },
+        "holdExpirationDateTime": {
+          "$ref": "/message/v2/schemas/definitions/HoldExpirationDateTime"
+        },
+        "tags": {
+          "type": "array",
+          "description": "A list of Tag objects.",
+          "items": {
+            "$ref": "/message/v2/schemas/definitions/Tag"
+          }
+        },
+        "tokenization": {
+          "type": "object",
+          "properties": {
+            "activationMethods": {
+              "type": "array",
+              "minLength": 0,
+              "description": "The activation methods to be used for this tokenization.\n\nReturning an empty array will mean that no additional activation methods are required to tokenize, with \nthe exception of any pre-configured methods with the party responsible for initializing the \ntokenization.\n",
+              "items": {
+                "$ref": "/message/v2/schemas/definitions/ActivationMethod"
+              }
+            }
+          }
+        },
+        "processedBy": {
+          "type": "string",
+          "description": "The name of the service that provided the approval or decline."
+        },
+        "createdOn": {
+          "$ref": "/message/v2/schemas/definitions/CreatedOn"
+        },
+        "proprietaryAuxiliaryData": {
+          "$ref": "/message/v2/schemas/definitions/ProprietaryAuxiliaryData"
+        },
+        "additionalCurrencyConversionRates": {
+          "type": "array",
+          "minLength": 0,
+          "description": "Additional currency conversion rates used to convert the settlement currency to another currency.",
+          "items": {
+            "$ref": "/message/v2/schemas/definitions/AdditionalCurrencyConversionRate"
+          }
+        }
+      }
+    },
+    "PickedResponse": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/PickedResponse",
+      "type": "object",
+      "additionalProperties": false,
+      "description": "A PickedResponse object contains a subset of fields from a Response object. \nA PickedResponse object may be preferred to minimize the amount of data retrieved and the time taken to \ntransmit and process the response.\n",
+      "required": ["createdOn"],
+      "properties": {
+        "messageId": {
+          "$ref": "/message/v2/schemas/definitions/MessageId"
+        },
+        "declineReasons": {
+          "$ref": "/message/v2/schemas/definitions/DeclineReasons"
+        },
+        "approvedTotal": {
+          "$ref": "/message/v2/schemas/definitions/Amount"
+        },
+        "holdExpirationDateTime": {
+          "$ref": "/message/v2/schemas/definitions/HoldExpirationDateTime"
+        },
+        "createdOn": {
+          "$ref": "/message/v2/schemas/definitions/CreatedOn"
+        },
+        "proprietaryAuxiliaryData": {
+          "$ref": "/message/v2/schemas/definitions/ProprietaryAuxiliaryData"
+        },
+        "additionalCurrencyConversionRates": {
+          "type": "array",
+          "minLength": 0,
+          "description": "Additional currency conversion rates used to convert the settlement currency to another currency.",
+          "items": {
+            "$ref": "/message/v2/schemas/definitions/AdditionalCurrencyConversionRate"
+          }
+        }
+      }
+    },
+    "RequestField": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/RequestField",
+      "type": "string",
+      "description": "The message request fields to return.",
+      "enum": [
+        "CARD_ID",
+        "ADVICE_RESPONSE",
+        "CATEGORIZATION",
+        "MATCHED_MESSAGE_ID",
+        "MESSAGE_ID",
+        "RECEIVED_DATE_TIME",
+        "SETTLEMENT_AMOUNT"
+      ]
+    },
+    "ResponseField": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/message/v2/schemas/definitions/ResponseField",
+      "type": "string",
+      "description": "The message response fields to return.",
+      "enum": [
+        "APPROVED_TOTAL",
+        "DECLINE_REASONS",
+        "HOLD_EXPIRATION_DATE_TIME",
+        "MESSAGE_ID",
+        "PROPRIETARY_AUXILIARY_DATA",
+        "ADDITIONAL_CURRENCY_CONVERSION_RATES"
+      ]
+    }
+  }
+}

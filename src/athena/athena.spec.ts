@@ -326,7 +326,1055 @@ ORDER BY
           },
         },
       ],
-      only: true,
+    },
+    {
+      name: 'issuer - authorization',
+      code: `\`
+WITH parameters AS (
+  SELECT
+    '' AS p_from,
+    '' AS p_to
+    /* example:
+     '2021-07-01T00:00:00.000Z' AS p_from,
+     '2022-07-01T00:00:00.000Z' AS p_to
+     */
+),
+request_message AS (
+  SELECT
+    DISTINCT requestbody AS message
+  FROM
+    message
+  WHERE
+    method = 'PUT'
+    AND responsestatus = '204'
+    AND json_extract_scalar(requestbody, '$.responseCode') IS NULL
+    AND json_extract_scalar(requestbody, '$.categorization.messageType') = 'PREAUTHORIZATION'
+    AND json_extract_scalar(requestbody, '$.categorization.messageUsage') <> 'ADVICE'
+),
+response_message AS (
+  SELECT
+    DISTINCT requestbody AS message,
+    json_extract_scalar(responseheaders, '$["created-on"]') AS responseMessageCreatedOn
+  FROM
+    message,
+    parameters
+  WHERE
+    method = 'PUT'
+    AND responsestatus = '204'
+    AND json_extract_scalar(requestbody, '$.responseCode') IS NOT NULL
+    AND json_array_length(json_extract(requestbody, '$.declineReasons')) = 0
+    AND json_extract_scalar(requestbody, '$.approvedTotal.amount') <> '0'
+    AND json_extract_scalar(requestbody, '$.entryId') IS NOT NULL
+    AND json_extract_scalar(responseheaders, '$["created-on"]') >= p_from
+    AND json_extract_scalar(responseheaders, '$["created-on"]') < p_to
+),
+card AS (
+  SELECT
+    DISTINCT split(url, '/') [ 5 ] AS cardId,
+    json_extract(responsebody, '$.card') AS card
+  FROM
+    "payment-card",
+    parameters
+  WHERE
+    method = 'PUT'
+    AND responsestatus = '200'
+    AND split(url, '/') [ 3 ] = 'v1'
+    AND (
+      (
+        split(url, '/') [ 4 ] = 'card'
+        AND cardinality(split(url, '/')) = 5
+      )
+      OR (
+        split(url, '/') [ 4 ] = 'card'
+        AND split(url, '/') [ 6 ] = 'number'
+        AND cardinality(split(url, '/')) = 6
+      )
+    )
+    AND json_extract_scalar(responseheaders, '$["created-on"]') < p_to
+  UNION ALL
+  SELECT
+    DISTINCT split(url, '/') [ 7 ] AS cardId,
+    json_extract(responsebody, '$.card') AS card
+  FROM
+    "payment-card",
+    parameters
+  WHERE
+    method = 'PUT'
+    AND responsestatus = '200'
+    AND split(url, '/') [ 3 ] = 'v2'
+    AND (
+      (
+        split(url, '/') [ 6 ] = 'card'
+        AND cardinality(split(url, '/')) = 7
+      )
+      OR (
+        split(url, '/') [ 6 ] = 'card'
+        AND split(url, '/') [ 8 ] = 'number'
+        AND cardinality(split(url, '/')) = 8
+      )
+    )
+    AND json_extract_scalar(responseheaders, '$["created-on"]') < p_to
+),
+joined_data AS (
+  SELECT
+    req.message AS request,
+    res.message AS response,
+    cd.card AS card,
+    res.responseMessageCreatedOn AS responseMessageCreatedOn
+  FROM
+    request_message AS req
+    JOIN response_message AS res ON json_extract_scalar(res.message, '$.messageId') = json_extract_scalar(req.message, '$.messageId')
+    JOIN card AS cd ON cd.cardId = json_extract_scalar(res.message, '$.cardId')
+),
+flatten_attributes AS (
+  SELECT
+    COALESCE(
+      json_extract(request, '$.messageId'),
+      CAST('""' AS JSON)
+    ) AS messageId,
+    COALESCE(
+      json_extract(response, '$.entryId'),
+      CAST('""' AS JSON)
+    ) AS entryId,
+    COALESCE(
+      json_extract(response, '$.cardId'),
+      CAST('""' AS JSON)
+    ) AS cardId,
+    COALESCE(json_extract(card, '$.bin'), CAST('""' AS JSON)) AS bin,
+    COALESCE(
+      json_extract(request, '$.transmissionDateTime'),
+      CAST('""' AS JSON)
+    ) AS transmissionDateTime,
+    COALESCE(
+      json_extract(request, '$.network'),
+      CAST('""' AS JSON)
+    ) AS network,
+    COALESCE(
+      json_extract(request, '$.acquirerNetwork'),
+      CAST('""' AS JSON)
+    ) AS acquirerNetwork,
+    COALESCE(
+      json_extract(response, '$.authorizationIdResponse'),
+      CAST('""' AS JSON)
+    ) AS authorizationIdResponse,
+    COALESCE(
+      json_extract(request, '$.categorization.messageType'),
+      CAST('""' AS JSON)
+    ) AS categorizationMessageType,
+    COALESCE(
+      json_extract(request, '$.categorization.messageUsage'),
+      CAST('""' AS JSON)
+    ) AS categorizationMessageUsage,
+    COALESCE(
+      json_extract(request, '$.categorization.category'),
+      CAST('""' AS JSON)
+    ) AS categorizationCategory,
+    COALESCE(
+      json_extract(request, '$.categorization.debitCredit'),
+      CAST('""' AS JSON)
+    ) AS categorizationDebitCredit,
+    COALESCE(
+      json_extract(request, '$.merchant.type'),
+      CAST('""' AS JSON)
+    ) AS merchantType,
+    COALESCE(
+      json_extract(request, '$.merchant.name'),
+      CAST('""' AS JSON)
+    ) AS merchantName,
+    COALESCE(
+      json_extract(request, '$.merchant.terminalIdentification'),
+      CAST('""' AS JSON)
+    ) AS merchantTerminalIdentification,
+    COALESCE(
+      json_extract(request, '$.acquirer.identificationCode'),
+      CAST('""' AS JSON)
+    ) AS acquirerIdentificationCode,
+    COALESCE(
+      json_extract(request, '$.merchant.address'),
+      CAST('""' AS JSON)
+    ) AS merchantAddress,
+    COALESCE(
+      json_extract(request, '$.merchant.city'),
+      CAST('""' AS JSON)
+    ) AS merchantCity,
+    COALESCE(
+      json_extract(request, '$.merchant.stateProvince'),
+      CAST('""' AS JSON)
+    ) AS merchantStateProvince,
+    COALESCE(
+      json_extract(request, '$.merchant.country'),
+      CAST('""' AS JSON)
+    ) AS merchantCountry,
+    COALESCE(
+      json_extract(response, '$.approvedTotal.amount'),
+      CAST('""' AS JSON)
+    ) AS approvedAmount,
+    COALESCE(
+      json_extract(response, '$.approvedTotal.Xcurrency'),
+      CAST('""' AS JSON)
+    ) AS approvedAmountCurrency,
+    CAST('"teampay-prod"' as JSON) as source,
+    CAST('"choice-prod"' as JSON) as destination,
+    responseMessageCreatedOn
+  FROM
+    joined_data
+)
+SELECT
+  CAST(
+    MAP(
+      ARRAY [ 'source',
+      'destination',
+      'messageId',
+      'entryId',
+      'cardId',
+      'bin',
+      'transactionDate',
+      'network',
+      'acquirerNetwork',
+      'authCode',
+      'categorization',
+      'merchant',
+      'cardAcceptor',
+      'approvedAmount' ],
+      ARRAY [ source,
+      destination,
+      messageId,
+      entryId,
+      cardId,
+      bin,
+      transmissionDateTime,
+      network,
+      acquirerNetwork,
+      authorizationIdResponse,
+      CAST(
+        MAP(
+          ARRAY [ 'messageType',
+          'messageUsage',
+          'category',
+          'debitCredit' ],
+          ARRAY [ categorizationMessageType,
+          categorizationMessageUsage,
+          categorizationCategory,
+          categorizationDebitCredit ]
+        ) AS JSON
+      ),
+      CAST(
+        MAP(
+          ARRAY [ 'type',
+          'name' ],
+          ARRAY [ merchantType,
+          merchantName ]
+        ) AS JSON
+      ),
+      CAST(
+        MAP(
+          ARRAY [ 'terminalIdentification',
+          'identificationCode',
+          'address',
+          'city',
+          'stateProvince',
+          'country' ],
+          ARRAY [ merchantTerminalIdentification,
+          acquirerIdentificationCode,
+          merchantAddress,
+          merchantCity,
+          merchantStateProvince,
+          merchantCountry ]
+        ) AS JSON
+      ),
+      CAST(
+        MAP(
+          ARRAY [ 'amount',
+          'currency' ],
+          ARRAY [ approvedAmount,
+          approvedAmountCurrency ]
+        ) AS JSON
+      ) ]
+    ) AS JSON
+  ) AS AuthorizationReport,
+  responseMessageCreatedOn
+FROM
+  flatten_attributes
+ORDER BY
+  responseMessageCreatedOn\``,
+      errors: [
+        {
+          messageId: 'AthenaError',
+          data: {
+            errorMessage: 'property not found response - $.approvedTotal.Xcurrency',
+          },
+        },
+      ],
+    },
+    {
+      name: 'issuer - transaction',
+      code: `\`
+WITH parameters AS (
+  SELECT
+    '' AS p_from,
+    '' AS p_to
+    /* example:
+     '2021-07-01T00:00:00.000Z' AS p_from,
+     '2022-07-01T00:00:00.000Z' AS p_to
+     */
+),
+request_message AS (
+  SELECT
+    DISTINCT requestbody AS message
+  FROM
+    message
+  WHERE
+    method = 'PUT'
+    AND responsestatus = '204'
+    AND json_extract_scalar(requestbody, '$.responseCode') IS NULL
+),
+response_message AS (
+  SELECT
+    DISTINCT requestbody AS message,
+    json_extract_scalar(responseheaders, '$["created-on"]') AS responseMessageCreatedOn
+  FROM
+    message,
+    parameters
+  WHERE
+    method = 'PUT'
+    AND responsestatus = '204'
+    AND json_extract_scalar(requestbody, '$.responseCode') IS NOT NULL
+    AND json_array_length(json_extract(requestbody, '$.declineReasons')) = 0
+    AND json_extract_scalar(requestbody, '$.completedTotal.amount') <> '0'
+    AND json_extract_scalar(requestbody, '$.approvedTotal.amount') <> '0'
+    AND json_extract_scalar(requestbody, '$.entryId') IS NOT NULL
+    AND json_extract_scalar(responseheaders, '$["created-on"]') >= p_from
+    AND json_extract_scalar(responseheaders, '$["created-on"]') < p_to
+),
+card AS (
+  SELECT
+    DISTINCT split(url, '/') [ 5 ] AS cardId,
+    json_extract(responsebody, '$.card') AS card
+  FROM
+    "payment-card",
+    parameters
+  WHERE
+    method = 'PUT'
+    AND responsestatus = '200'
+    AND split(url, '/') [ 3 ] = 'v1'
+    AND (
+      (
+        split(url, '/') [ 4 ] = 'card'
+        AND cardinality(split(url, '/')) = 5
+      )
+      OR (
+        split(url, '/') [ 4 ] = 'card'
+        AND split(url, '/') [ 6 ] = 'number'
+        AND cardinality(split(url, '/')) = 6
+      )
+    )
+    AND json_extract_scalar(responseheaders, '$["created-on"]') < p_to
+  UNION ALL
+  SELECT
+    DISTINCT split(url, '/') [ 7 ] AS cardId,
+    json_extract(responsebody, '$.card') AS card
+  FROM
+    "payment-card",
+    parameters
+  WHERE
+    method = 'PUT'
+    AND responsestatus = '200'
+    AND split(url, '/') [ 3 ] = 'v2'
+    AND (
+      (
+        split(url, '/') [ 6 ] = 'card'
+        AND cardinality(split(url, '/')) = 7
+      )
+      OR (
+        split(url, '/') [ 6 ] = 'card'
+        AND split(url, '/') [ 8 ] = 'number'
+        AND cardinality(split(url, '/')) = 8
+      )
+    )
+    AND json_extract_scalar(responseheaders, '$["created-on"]') < p_to
+),
+joined_data AS (
+  SELECT
+    req.message AS request,
+    res.message AS response,
+    cd.card AS card,
+    res.responseMessageCreatedOn AS responseMessageCreatedOn
+  FROM
+    request_message AS req
+    JOIN response_message AS res ON json_extract_scalar(res.message, '$.messageId') = json_extract_scalar(req.message, '$.messageId')
+    JOIN card AS cd ON cd.cardId = json_extract_scalar(res.message, '$.cardId')
+),
+flatten_attributes AS (
+  SELECT
+    COALESCE(
+      json_extract(request, '$.messageId'),
+      CAST('""' AS JSON)
+    ) AS messageId,
+    COALESCE(
+      json_extract(request, '$.matchedMessageId'),
+      CAST('""' AS JSON)
+    ) AS matchedMessageId,
+    COALESCE(
+      json_extract(response, '$.entryId'),
+      CAST('""' AS JSON)
+    ) AS entryId,
+    COALESCE(
+      json_extract(response, '$.cardId'),
+      CAST('""' AS JSON)
+    ) AS cardId,
+    COALESCE(json_extract(card, '$.bin'), CAST('""' AS JSON)) AS bin,
+    COALESCE(
+      json_extract(request, '$.transmissionDateTime'),
+      CAST('""' AS JSON)
+    ) AS transmissionDateTime,
+    COALESCE(
+      json_extract(request, '$.network'),
+      CAST('""' AS JSON)
+    ) AS network,
+    COALESCE(
+      json_extract(request, '$.acquirerNetwork'),
+      CAST('""' AS JSON)
+    ) AS acquirerNetwork,
+    COALESCE(
+      json_extract(response, '$.authorizationIdResponse'),
+      CAST('""' AS JSON)
+    ) AS authorizationIdResponse,
+    COALESCE(
+      json_extract(request, '$.categorization.messageType'),
+      CAST('""' AS JSON)
+    ) AS categorizationMessageType,
+    COALESCE(
+      json_extract(request, '$.categorization.messageUsage'),
+      CAST('""' AS JSON)
+    ) AS categorizationMessageUsage,
+    COALESCE(
+      json_extract(request, '$.categorization.category'),
+      CAST('""' AS JSON)
+    ) AS categorizationCategory,
+    COALESCE(
+      json_extract(request, '$.categorization.debitCredit'),
+      CAST('""' AS JSON)
+    ) AS categorizationDebitCredit,
+    COALESCE(
+      json_extract(request, '$.merchant.type'),
+      CAST('""' AS JSON)
+    ) AS merchantType,
+    COALESCE(
+      json_extract(request, '$.merchant.name'),
+      CAST('""' AS JSON)
+    ) AS merchantName,
+    COALESCE(
+      json_extract(request, '$.merchant.terminalIdentification'),
+      CAST('""' AS JSON)
+    ) AS merchantTerminalIdentification,
+    COALESCE(
+      json_extract(request, '$.acquirer.identificationCode'),
+      CAST('""' AS JSON)
+    ) AS acquirerIdentificationCode,
+    COALESCE(
+      json_extract(request, '$.merchant.address'),
+      CAST('""' AS JSON)
+    ) AS merchantAddress,
+    COALESCE(
+      json_extract(request, '$.merchant.city'),
+      CAST('""' AS JSON)
+    ) AS merchantCity,
+    COALESCE(
+      json_extract(request, '$.merchant.stateProvince'),
+      CAST('""' AS JSON)
+    ) AS merchantStateProvince,
+    COALESCE(
+      json_extract(request, '$.merchant.country'),
+      CAST('""' AS JSON)
+    ) AS merchantCountry,
+    COALESCE(
+      json_extract(response, '$.approvedTotal.amount'),
+      CAST('""' AS JSON)
+    ) AS approvedAmount,
+    COALESCE(
+      json_extract(response, '$.approvedTotal.Xcurrency'),
+      CAST('""' AS JSON)
+    ) AS approvedAmountCurrency,
+    CAST('"teampay-prod"' as JSON) as source,
+    CAST('"choice-prod"' as JSON) as destination,
+    responseMessageCreatedOn
+  FROM
+    joined_data
+)
+SELECT
+  CAST(
+    MAP(
+      ARRAY [ 'source',
+      'destination',
+      'messageId',
+      'matchedMessageId',
+      'entryId',
+      'cardId',
+      'bin',
+      'transactionDate',
+      'network',
+      'acquirerNetwork',
+      'authCode',
+      'categorization',
+      'merchant',
+      'cardAcceptor',
+      'approvedAmount' ],
+      ARRAY [ source,
+      destination,
+      messageId,
+      matchedMessageId,
+      entryId,
+      cardId,
+      bin,
+      transmissionDateTime,
+      network,
+      acquirerNetwork,
+      authorizationIdResponse,
+      CAST(
+        MAP(
+          ARRAY [ 'messageType',
+          'messageUsage',
+          'category',
+          'debitCredit' ],
+          ARRAY [ categorizationMessageType,
+          categorizationMessageUsage,
+          categorizationCategory,
+          categorizationDebitCredit ]
+        ) AS JSON
+      ),
+      CAST(
+        MAP(
+          ARRAY [ 'type',
+          'name' ],
+          ARRAY [ merchantType,
+          merchantName ]
+        ) AS JSON
+      ),
+      CAST(
+        MAP(
+          ARRAY [ 'terminalIdentification',
+          'identificationCode',
+          'address',
+          'city',
+          'stateProvince',
+          'country' ],
+          ARRAY [ merchantTerminalIdentification,
+          acquirerIdentificationCode,
+          merchantAddress,
+          merchantCity,
+          merchantStateProvince,
+          merchantCountry ]
+        ) AS JSON
+      ),
+      CAST(
+        MAP(
+          ARRAY [ 'amount',
+          'currency' ],
+          ARRAY [ approvedAmount,
+          approvedAmountCurrency ]
+        ) AS JSON
+      ) ]
+    ) AS JSON
+  ) AS TransactionReport,
+  responseMessageCreatedOn
+FROM
+  flatten_attributes
+ORDER BY
+  responseMessageCreatedOn
+\``,
+      errors: [
+        {
+          messageId: 'AthenaError',
+          data: {
+            errorMessage: 'property not found response - $.approvedTotal.Xcurrency',
+          },
+        },
+      ],
+    },
+    {
+      name: 'issuer - card',
+      code: `\`WITH parameters AS (
+  SELECT
+    '' AS p_from,
+    '' AS p_to
+    /* example:
+     '2021-07-01T00:00:00.000Z' AS p_from,
+     '2022-07-01T00:00:00.000Z' AS p_to
+     */
+),
+card_creation AS (
+  SELECT
+    split(url, '/') [ 5 ] AS cardId,
+    json_extract(responsebody, '$.card') AS card,
+    json_extract_scalar(responsebody, '$.storageKeyId') AS keyId,
+    json_extract_scalar(responseheaders, '$["created-on"]') AS createdOn,
+    json_extract_scalar(responseheaders, '$["updated-on"]') AS updatedOn
+  FROM
+    "payment-card"
+  WHERE
+    method = 'PUT'
+    AND responsestatus = '200'
+    AND split(url, '/') [ 3 ] = 'v1'
+    AND (
+      (
+        split(url, '/') [ 4 ] = 'card'
+        AND cardinality(split(url, '/')) = 5
+      )
+      OR (
+        split(url, '/') [ 4 ] = 'card'
+        AND split(url, '/') [ 6 ] = 'number'
+        AND cardinality(split(url, '/')) = 6
+      )
+    )
+  UNION ALL
+  SELECT
+    split(url, '/') [ 7 ] AS cardId,
+    json_extract(responsebody, '$.card') AS card,
+    json_extract_scalar(responsebody, '$.storageKeyId') AS keyId,
+    json_extract_scalar(responseheaders, '$["created-on"]') AS createdOn,
+    json_extract_scalar(responseheaders, '$["updated-on"]') AS updatedOn
+  FROM
+    "payment-card"
+  WHERE
+    method = 'PUT'
+    AND responsestatus = '200'
+    AND split(url, '/') [ 3 ] = 'v2'
+    AND (
+      (
+        split(url, '/') [ 6 ] = 'card'
+        AND cardinality(split(url, '/')) = 7
+      )
+      OR (
+        split(url, '/') [ 6 ] = 'card'
+        AND split(url, '/') [ 8 ] = 'number'
+        AND cardinality(split(url, '/')) = 8
+      )
+    )
+),
+card_update AS (
+  SELECT
+    split(url, '/') [ 5 ] AS cardId,
+    split(url, '/') [ 6 ] AS fieldKey,
+    split(url, '/') [ 7 ] AS fieldValue,
+    json_extract_scalar(responseheaders, '$["updated-on"]') AS updatedOn
+  FROM
+    "payment-card"
+  WHERE
+    method = 'PUT'
+    AND responsestatus = '204'
+    AND split(url, '/') [ 3 ] = 'v1'
+    AND split(url, '/') [ 4 ] = 'card'
+    AND cardinality(split(url, '/')) = 7
+  UNION ALL
+  SELECT
+    split(url, '/') [ 7 ] AS cardId,
+    split(url, '/') [ 8 ] AS fieldKey,
+    split(url, '/') [ 9 ] AS fieldValue,
+    json_extract_scalar(responseheaders, '$["updated-on"]') AS updatedOn
+  FROM
+    "payment-card"
+  WHERE
+    method = 'PUT'
+    AND responsestatus = '204'
+    AND split(url, '/') [ 3 ] = 'v2'
+    AND split(url, '/') [ 6 ] = 'card'
+    AND cardinality(split(url, '/')) = 9
+),
+matching_cards AS (
+  SELECT
+    cardId || '|' || updatedOn AS cardIdAndUpdatedOn
+  FROM
+    card_creation,
+    parameters
+  WHERE
+    updatedOn >= p_from
+    AND updatedOn < p_to
+  UNION ALL
+  SELECT
+    cardId || '|' || updatedOn AS cardIdAndUpdatedOn
+  FROM
+    card_update,
+    parameters
+  WHERE
+    updatedOn >= p_from
+    AND updatedOn < p_to
+),
+combined_card_history AS (
+  SELECT
+    cardId,
+    createdOn,
+    updatedOn,
+    keyId,
+    json_extract_scalar(card, '$.expirationDate') AS expirationDate,
+    json_extract_scalar(card, '$.serviceCode') AS serviceCode,
+    json_extract_scalar(card, '$.sequenceNumber') AS sequenceNumber,
+    json_extract_scalar(card, '$.last4') AS last4,
+    json_extract_scalar(card, '$.bin') AS bin,
+    updatedOn || '|' || json_extract_scalar(card, '$.active') AS active,
+    updatedOn || '|' || json_extract_scalar(card, '$.block') AS block,
+    updatedOn || '|' || json_extract_scalar(card, '$.lock') AS lock,
+    updatedOn || '|' || json_extract_scalar(card, '$.state') AS state,
+    updatedOn || '|' || json_extract_scalar(card, '$.capture') AS capture
+  FROM
+    card_creation
+  UNION ALL
+  SELECT
+    cardId,
+    '' AS createdOn,
+    updatedOn,
+    '' AS keyId,
+    '' AS expirationDate,
+    '' AS sequenceNumber,
+    '' AS last4,
+    '' AS bin,
+    '' AS serviceCode,
+    IF(
+      fieldKey = 'active',
+      updatedOn || '|' || fieldValue,
+      '1|1'
+    ) AS active,
+    IF(
+      fieldKey = 'block',
+      updatedOn || '|' || fieldValue,
+      '1|1'
+    ) AS block,
+    IF(fieldKey = 'lock', updatedOn || '|' || fieldValue, '1|1') AS lock,
+    IF(
+      fieldKey = 'state',
+      updatedOn || '|' || fieldValue,
+      '1|1'
+    ) AS state,
+    IF(
+      fieldKey = 'capture',
+      updatedOn || '|' || fieldValue,
+      '1|1'
+    ) AS capture
+  FROM
+    card_update
+),
+merged_card_data AS (
+  SELECT
+    split(m.cardIdAndUpdatedOn, '|') [ 1 ] AS cardId,
+    split(m.cardIdAndUpdatedOn, '|') [ 2 ] AS updatedOn,
+    MAX(h.createdOn) AS createdOn,
+    MAX(h.keyId) AS keyId,
+    MAX(h.expirationDate) AS expirationDate,
+    MAX(h.serviceCode) AS serviceCode,
+    MAX(h.sequenceNumber) AS sequenceNumber,
+    MAX(h.last4) AS last4,
+    MAX(h.bin) AS bin,
+    split(MAX(h.active), '|') [ 2 ] AS active,
+    split(MAX(h.block), '|') [ 2 ] AS block,
+    split(MAX(h.lock), '|') [ 2 ] AS lock,
+    split(MAX(h.state), '|') [ 2 ] AS state,
+    split(MAX(h.capture), '|') [ 2 ] AS capture
+  FROM
+    matching_cards m,
+    combined_card_history h
+  WHERE
+    h.cardId = split(m.cardIdAndUpdatedOn, '|') [ 1 ]
+    AND h.updatedOn <= split(m.cardIdAndUpdatedOn, '|') [ 2 ]
+  GROUP BY
+    m.cardIdAndUpdatedOn
+),
+link_data AS (
+  SELECT
+    DISTINCT split(link.url, '/') [ 5 ] AS cardId,
+    split(link.url, '/') [ 7 ] AS personId
+  FROM
+    link
+  WHERE
+    method = 'PUT'
+    AND responsestatus = '204'
+    AND split(link.url, '/') [ 6 ] = 'card.hasProfile'
+),
+joined_data AS (
+  SELECT
+    card.cardId AS cardId,
+    card.expirationDate AS expirationDate,
+    card.state AS state,
+    card.active AS active,
+    card.block AS block,
+    card.createdOn AS createdOn,
+    card.serviceCode AS serviceCode,
+    card.lock AS lock,
+    card.capture AS capture,
+    card.sequenceNumber AS sequenceNumber,
+    card.last4 AS last4,
+    card.bin AS bin,
+    card.updatedOn AS updatedOn,
+    link.XpersonId AS personId,
+    'teampay-prod' AS source,
+    'choice-prod' AS destination
+  FROM
+    parameters, merged_card_data AS card
+    LEFT OUTER JOIN link_data AS link ON card.cardId = link.cardId
+  WHERE
+    card.updatedOn >= p_from
+)
+SELECT
+  CAST(
+    MAP(
+      ARRAY [ 'source',
+      'destination',
+      'cardId',
+      'expirationDate',
+      'state',
+      'active',
+      'block',
+      'createdOn',
+      'serviceCode',
+      'lock',
+      'capture',
+      'sequenceNumber',
+      'last4',
+      'bin',
+      'updatedOn',
+      'personId' ],
+      ARRAY [ source,
+      destination,
+      cardId,
+      expirationDate,
+      state,
+      active,
+      block,
+      createdOn,
+      serviceCode,
+      lock,
+      capture,
+      sequenceNumber,
+      last4,
+      bin,
+      updatedOn,
+      personId ]
+    ) AS JSON
+  ) AS CardReport,
+  updatedOn
+FROM
+  joined_data
+ORDER BY
+  updatedOn\``,
+      errors: [
+        {
+          messageId: 'AthenaError',
+          data: {
+            errorMessage: `can't found column XpersonId in tables: parameters,merged_card_data,link_data`,
+          },
+        },
+      ],
+    },
+    {
+      name: 'issuer - interchange',
+      code: `\`WITH parameters AS (
+  SELECT
+    '' AS p_from,
+    '' AS p_to,
+    '' AS p_source
+),
+mastercard_data AS (
+  SELECT 
+    DISTINCT 
+    CAST(p.p_source AS JSON) AS Network,
+    json_extract(i.requestbody, '$.file.fileDateTime') AS SourceDate,
+    json_extract(i.requestbody, '$.file.fileIdentifier') AS SourceIdentifier,
+    json_extract(i.requestbody, '$.file.recordIdentifier') AS RecordIdentifier,
+    json_extract(i.requestbody, '$.matchedMessageId') AS MatchedMessageId,
+    json_extract(i.requestbody, '$.transmissionDateTime') AS TransmissionDateTime,
+    json_extract(i.requestbody, '$.cardId') AS CardId,
+    json_extract(i.requestbody, '$.categorization.category') AS Category,
+    json_extract(i.requestbody, '$.categorization.debitCredit') AS SettlementDebitCredit,
+    json_extract(i.requestbody, '$.settlementAmount.amount') AS SettlementAmount,
+    json_extract(i.requestbody, '$.settlementAmount.currency') AS SettlementCurrency,
+    json_extract(i.requestbody, '$.merchant.type') AS MerchantType,
+    json_extract(i.requestbody, '$.merchant.panEntryMethod') AS PanEntryMethod,
+    json_extract(i.requestbody, '$.isCrossBorder') AS IsCrossBorder,
+    json_extract(i.requestbody, '$.interchangeFeeAmount.amount') AS InterchangeFeeAmount,
+    json_extract(i.requestbody, '$.interchangeFeeAmount.currency') AS InterchangeFeeCurrency,
+    json_extract(i.requestbody, '$.interchangeFeeAmountExtended.amount') AS InterchangeFeeExtendedAmount,
+    json_extract(i.requestbody, '$.interchangeFeeAmountExtended.currency') AS InterchangeFeeExtendedCurrency,
+    CAST(CAST(json_extract(i.requestbody, '$.interchangeFeeAmountExtended.XamountDecimalPosition') as int) as JSON) AS InterchangeFeeExtendedDecimalPosition,
+    json_extract(i.requestbody, '$.interchangeDebitCredit') AS InterchangeFeeDebitCredit,
+    if(json_extract_scalar(i.requestbody, '$.categorization.debitCredit') = 'DEBIT', cast(json_extract_scalar(i.requestbody, '$.settlementAmount.amount') as bigint), 0) as DebitSettlementAmountValue,
+    if(json_extract_scalar(i.requestbody, '$.categorization.debitCredit') = 'CREDIT', cast(json_extract_scalar(i.requestbody, '$.settlementAmount.amount') as bigint), 0) as CreditSettlementAmountValue,
+    if(json_extract_scalar(i.requestbody, '$.categorization.debitCredit') = 'DEBIT', cast(json_extract_scalar(i.requestbody, '$.settlementAmount.amount') as bigint) * -1, cast(json_extract_scalar(i.requestbody, '$.settlementAmount.amount') as bigint)) as SettlementAmountValue,
+    if(json_extract_scalar(i.requestbody, '$.interchangeDebitCredit') = 'DEBIT', cast(json_extract_scalar(i.requestbody, '$.interchangeFeeAmount.amount') as bigint) * -1, cast(json_extract_scalar(i.requestbody, '$.interchangeFeeAmount.amount') as bigint)) as InterchangeAmountValue,
+    CAST('teampay-prod' AS JSON) AS source,
+    CAST('choice-prod' AS JSON) AS destination
+  FROM 
+    interchange AS i,
+    parameters AS p
+  WHERE 
+    json_extract_scalar(i.requestbody, '$.file.fileDescription') = if(p.p_source = 'CREDIT MASTERCARD', 'CHKDX001', 'interchange')
+    AND i.responsestatus = '204'
+    AND json_extract_scalar(i.requestbody, '$.file.fileDateTime') >= p.p_from
+    AND json_extract_scalar(i.requestbody, '$.file.fileDateTime') < p.p_to
+),
+matched_json_records AS (
+SELECT
+  CAST(
+    MAP(
+      ARRAY [ 
+        'source', 
+        'destination', 
+        'network', 
+        'interchangeSource', 
+        'matchedMessageId', 
+        'transmissionDateTime', 
+        'cardId', 
+        'categorization', 
+        'settlementAmount', 
+        'merchant', 
+        'isCrossBorder', 
+        'interchangeFeeAmount', 
+        'interchangeFeeAmountExtended', 
+        'interchangeDebitCredit',
+        'recordType'
+      ],
+      ARRAY [ 
+        source,
+        destination,
+        Network,
+        CAST(
+          MAP(
+            ARRAY [ 'sourceDateTime', 'sourceIdentifier', 'recordIdentifier' ],
+            ARRAY [ SourceDate, SourceIdentifier, RecordIdentifier ]
+          )
+        AS JSON),
+        MatchedMessageId,
+        TransmissionDateTime,
+        CardId,
+        CAST(
+          MAP(
+            ARRAY [ 'category', 'debitCredit' ],
+            ARRAY [ Category, SettlementDebitCredit ]
+          )
+        AS JSON),
+        CAST(
+          MAP(
+            ARRAY [ 'amount', 'currency' ],
+            ARRAY [ SettlementAmount, SettlementCurrency ]
+          )
+        AS JSON),
+        CAST(
+          MAP(
+            ARRAY [ 'type', 'panEntryMethod' ],
+            ARRAY [ MerchantType, PanEntryMethod ]
+          )
+        AS JSON),
+        CAST(CAST(IsCrossBorder AS BOOLEAN) AS JSON),
+        CAST(
+          MAP(
+            ARRAY [ 'amount', 'currency' ],
+            ARRAY [ InterchangeFeeAmount, InterchangeFeeCurrency ]
+          )
+        AS JSON),
+        CAST(
+          MAP(
+            ARRAY [ 'amount', 'amountDecimalPosition', 'currency' ],
+            ARRAY [ InterchangeFeeExtendedAmount, InterchangeFeeExtendedDecimalPosition, InterchangeFeeExtendedCurrency ]
+          )
+        AS JSON),
+        InterchangeFeeDebitCredit,
+        CAST('ISSUER INTERCHANGE RECORD' AS JSON)
+      ]
+    ) AS JSON
+  ) AS InterchangeReport
+FROM
+  mastercard_data
+WHERE
+  MatchedMessageId IS NOT NULL
+),
+unmatched_json_records AS (
+SELECT
+  CAST(
+    MAP(
+      ARRAY [ 
+        'source', 
+        'destination', 
+        'network', 
+        'interchangeSource', 
+        'transmissionDateTime', 
+        'cardId', 
+        'categorization', 
+        'settlementAmount', 
+        'merchant', 
+        'isCrossBorder', 
+        'interchangeFeeAmount', 
+        'interchangeFeeAmountExtended', 
+        'interchangeDebitCredit',
+        'recordType'
+      ],
+      ARRAY [ 
+        source,
+        destination,
+        Network,
+        CAST(
+          MAP(
+            ARRAY [ 'sourceDateTime', 'sourceIdentifier', 'recordIdentifier' ],
+            ARRAY [ SourceDate, SourceIdentifier, RecordIdentifier ]
+          )
+        AS JSON),
+        TransmissionDateTime,
+        CardId,
+        CAST(
+          MAP(
+            ARRAY [ 'category', 'debitCredit' ],
+            ARRAY [ Category, SettlementDebitCredit ]
+          )
+        AS JSON),
+        CAST(
+          MAP(
+            ARRAY [ 'amount', 'currency' ],
+            ARRAY [ SettlementAmount, SettlementCurrency ]
+          )
+        AS JSON),
+        CAST(
+          MAP(
+            ARRAY [ 'type', 'panEntryMethod' ],
+            ARRAY [ MerchantType, PanEntryMethod ]
+          )
+        AS JSON),
+        CAST(CAST(IsCrossBorder AS BOOLEAN) AS JSON),
+        CAST(
+          MAP(
+            ARRAY [ 'amount', 'currency' ],
+            ARRAY [ InterchangeFeeAmount, InterchangeFeeCurrency ]
+          )
+        AS JSON),
+        CAST(
+          MAP(
+            ARRAY [ 'amount', 'amountDecimalPosition', 'currency' ],
+            ARRAY [ InterchangeFeeExtendedAmount, InterchangeFeeExtendedDecimalPosition, InterchangeFeeExtendedCurrency ]
+          )
+        AS JSON),
+        InterchangeFeeDebitCredit,
+        CAST('ISSUER INTERCHANGE RECORD' AS JSON)
+      ]
+    ) AS JSON
+  ) AS InterchangeReport
+FROM
+  mastercard_data
+WHERE
+  MatchedMessageId IS NULL
+)
+SELECT
+  InterchangeReport
+FROM
+  matched_json_records
+UNION ALL
+SELECT
+  InterchangeReport
+FROM
+  unmatched_json_records
+\``,
+      errors: [
+        {
+          messageId: 'AthenaError',
+          data: {
+            errorMessage: 'property not found requestbody - $.interchangeFeeAmountExtended.XamountDecimalPosition',
+          },
+        },
+      ],
     },
   ],
 });

@@ -1,0 +1,1149 @@
+openapi: 3.0.0
+info:
+  title: Payment Card
+  version: 2.4.0
+  contact:
+    name: Check Digit
+  description: |
+    ## Description
+    Securely create and obtain cards by id or card number.
+
+    ## Other features
+    - Update active, state, block, lock, and capture statuses
+    - Retrieve card record by hashed card number
+    - Retrieve card history
+    - Update user defined PIN (by updating pin-offset)
+    - Retrieve card number decryptable by a caller not involved in card creation
+
+     © Check Digit LLC. 2021-2024
+
+servers:
+  - url: /payment-card/v2
+
+tags:
+  - name: Service Health
+  - name: API
+
+x-firehose-logged: false
+
+paths:
+  /ping:
+    get:
+      operationId: 'ping-get'
+      tags:
+        - Service Health
+      description: Tests the availability of the service and returns the current server time
+      responses:
+        '200':
+          $ref: '#/components/responses/Ping'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+  /tenant/{tenantId}/public-key:
+    get:
+      operationId: 'public-key-get'
+      tags:
+        - API
+      description: Retrieves Payment Card Service's rsa public key. This key is used to securely transmit data to Payment Card Service APIs.
+      parameters:
+        - $ref: '#/components/parameters/tenantId'
+      responses:
+        '200':
+          $ref: '#/components/responses/PublicKeyResponse'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+  /tenant/{tenantId}/data-encryption-key/{dataEncryptionKeyId}:
+    get:
+      operationId: 'data-encryption-key-get'
+      tags:
+        - API
+      description: |
+        Retrieves data encryption keys. Data encryption keys are RSA encrypted and paired with a hashed version of
+        the public key used to encrypt them.
+      parameters:
+        - $ref: '#/components/parameters/tenantId'
+        - $ref: '#/components/parameters/dataEncryptionKeyId'
+      responses:
+        '200':
+          $ref: '#/components/responses/DataEncryptionKeyResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/ServerError'
+    put:
+      x-firehose-logged: true
+      operationId: 'data-encryption-key-put'
+      tags:
+        - API
+      description: |
+        Creates data encryption keys used by Payment Card service to encrypt the Card object. The dataEncryptionKeyId is included
+        in the NewCardRequest when creating a Payment Card object.
+
+        Data encryption keys can be reused when creating new Payment Card objects. This is particularly useful for batch
+        operations.
+      parameters:
+        - $ref: '#/components/parameters/tenantId'
+        - $ref: '#/components/parameters/dataEncryptionKeyId'
+      requestBody:
+        $ref: '#/components/requestBodies/DataEncryptionKeyRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/DataEncryptionKeyResponse'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+  /tenant/{tenantId}/card:
+    get:
+      operationId: 'card-query'
+      tags:
+        - API
+      description: |
+        Retrieves cards by card number. Card number must be hashed using @checkdigit/hash.
+      parameters:
+        - $ref: '#/components/parameters/tenantId'
+        - $ref: '#/components/parameters/cardNumberHash'
+        - $ref: '#/components/parameters/at'
+      responses:
+        '200':
+          $ref: '#/components/responses/Query'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+  /tenant/{tenantId}/card/{cardId}:
+    get:
+      tags:
+        - API
+      operationId: 'card-get'
+      description: Retrieves a card by id.
+      parameters:
+        - $ref: '#/components/parameters/tenantId'
+        - $ref: '#/components/parameters/cardId'
+        - $ref: '#/components/parameters/at'
+        - $ref: '#/components/parameters/publicKeyHashQuery'
+      responses:
+        '200':
+          $ref: '#/components/responses/CardResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/ServerError'
+    put:
+      x-firehose-logged: true
+      tags:
+        - API
+      operationId: 'card-put'
+      description: Creates a new card.
+      parameters:
+        - $ref: '#/components/parameters/tenantId'
+        - $ref: '#/components/parameters/cardId'
+        - $ref: '#/components/parameters/createdOn'
+      requestBody:
+        $ref: '#/components/requestBodies/NewCardRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/CardResponse'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '412':
+          $ref: '#/components/responses/PreconditionFailed'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+  /tenant/{tenantId}/card/{cardId}/number:
+    put:
+      x-firehose-logged: true
+      tags:
+        - API
+      operationId: 'card-number-put'
+      description: Creates new card with a card number
+      parameters:
+        - $ref: '#/components/parameters/tenantId'
+        - $ref: '#/components/parameters/cardId'
+        - $ref: '#/components/parameters/createdOn'
+      requestBody:
+        $ref: '#/components/requestBodies/NewCardRequestWithCardNumber'
+      responses:
+        '200':
+          $ref: '#/components/responses/CardResponse'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '412':
+          $ref: '#/components/responses/PreconditionFailed'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+  /tenant/{tenantId}/card/{cardId}/active/{activeStatus}:
+    put:
+      x-firehose-logged: true
+      tags:
+        - API
+      operationId: 'card-active-put'
+      description: Updates active status
+      parameters:
+        - $ref: '#/components/parameters/tenantId'
+        - $ref: '#/components/parameters/cardId'
+        - $ref: '#/components/parameters/activeStatus'
+        - $ref: '#/components/parameters/createdOn'
+        - $ref: '#/components/parameters/ifMatch'
+      responses:
+        '204':
+          $ref: '#/components/responses/NoContent'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '412':
+          $ref: '#/components/responses/PreconditionFailed'
+        '422':
+          $ref: '#/components/responses/UnprocessableContent'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+  /tenant/{tenantId}/card/{cardId}/block/{blockStatus}:
+    put:
+      x-firehose-logged: true
+      tags:
+        - API
+      operationId: 'card-block-put'
+      description: Updates block status
+      parameters:
+        - $ref: '#/components/parameters/tenantId'
+        - $ref: '#/components/parameters/cardId'
+        - $ref: '#/components/parameters/blockStatus'
+        - $ref: '#/components/parameters/createdOn'
+        - $ref: '#/components/parameters/ifMatch'
+      responses:
+        '204':
+          $ref: '#/components/responses/NoContent'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '412':
+          $ref: '#/components/responses/PreconditionFailed'
+        '422':
+          $ref: '#/components/responses/UnprocessableContent'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+  /tenant/{tenantId}/card/{cardId}/capture/{captureStatus}:
+    put:
+      x-firehose-logged: true
+      tags:
+        - API
+      operationId: 'card-capture-put'
+      description: Updates capture status
+      parameters:
+        - $ref: '#/components/parameters/tenantId'
+        - $ref: '#/components/parameters/cardId'
+        - $ref: '#/components/parameters/captureStatus'
+        - $ref: '#/components/parameters/createdOn'
+        - $ref: '#/components/parameters/ifMatch'
+      responses:
+        '204':
+          $ref: '#/components/responses/NoContent'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '412':
+          $ref: '#/components/responses/PreconditionFailed'
+        '422':
+          $ref: '#/components/responses/UnprocessableContent'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+  /tenant/{tenantId}/card/{cardId}/history:
+    get:
+      tags:
+        - API
+      operationId: 'card-history-get'
+      description: Obtains card history by id
+      parameters:
+        - $ref: '#/components/parameters/tenantId'
+        - $ref: '#/components/parameters/cardId'
+        - $ref: '#/components/parameters/fromDate'
+        - $ref: '#/components/parameters/toDate'
+        - $ref: '#/components/parameters/publicKeyHashQuery'
+      responses:
+        '200':
+          $ref: '#/components/responses/History'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+  /tenant/{tenantId}/card/{cardId}/lock/{lockStatus}:
+    put:
+      x-firehose-logged: true
+      tags:
+        - API
+      operationId: 'card-lock-put'
+      description: Updates lock status
+      parameters:
+        - $ref: '#/components/parameters/tenantId'
+        - $ref: '#/components/parameters/cardId'
+        - $ref: '#/components/parameters/lockStatus'
+        - $ref: '#/components/parameters/createdOn'
+        - $ref: '#/components/parameters/ifMatch'
+      responses:
+        '204':
+          $ref: '#/components/responses/NoContent'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '412':
+          $ref: '#/components/responses/PreconditionFailed'
+        '422':
+          $ref: '#/components/responses/UnprocessableContent'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+  /tenant/{tenantId}/card/{cardId}/pin-offset:
+    put:
+      x-firehose-logged: true
+      tags:
+        - API
+      operationId: 'card-pin-offset-put'
+      description: Updates pin-offset using a one-time use pin-offset-key
+      parameters:
+        - $ref: '#/components/parameters/tenantId'
+        - $ref: '#/components/parameters/cardId'
+        - $ref: '#/components/parameters/createdOn'
+        - $ref: '#/components/parameters/ifMatch'
+      requestBody:
+        $ref: '#/components/requestBodies/PinOffsetRequest'
+      responses:
+        '204':
+          $ref: '#/components/responses/NoContent'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '412':
+          $ref: '#/components/responses/PreconditionFailed'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+  /tenant/{tenantId}/card/{cardId}/state/{stateStatus}:
+    put:
+      x-firehose-logged: true
+      tags:
+        - API
+      operationId: 'card-state-put'
+      description: Updates state status
+      parameters:
+        - $ref: '#/components/parameters/tenantId'
+        - $ref: '#/components/parameters/cardId'
+        - $ref: '#/components/parameters/stateStatus'
+        - $ref: '#/components/parameters/createdOn'
+        - $ref: '#/components/parameters/ifMatch'
+      responses:
+        '204':
+          $ref: '#/components/responses/NoContent'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '412':
+          $ref: '#/components/responses/PreconditionFailed'
+        '422':
+          $ref: '#/components/responses/UnprocessableContent'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+  /tenant/{tenantId}/card-number/{cardId}/key/{publicKeyHashPath}:
+    put:
+      tags:
+        - API
+      operationId: 'card-number-key-put'
+      description: |
+        Obtains an encrypted card number decryptable by caller's private key.
+      parameters:
+        - $ref: '#/components/parameters/tenantId'
+        - $ref: '#/components/parameters/cardId'
+        - $ref: '#/components/parameters/publicKeyHashPath'
+      requestBody:
+        $ref: '#/components/requestBodies/CardNumberRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/EncryptedCardNumber'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+  /tenant/{tenantId}/pin-offset-key/{pinOffsetKeyId}:
+    put:
+      x-firehose-logged: true
+      tags:
+        - API
+      operationId: 'pin-offset-key-put'
+      description: Creates a one-time use transmission key to transmit the user defined pin during pin changes
+      parameters:
+        - $ref: '#/components/parameters/tenantId'
+        - $ref: '#/components/parameters/pinOffsetKeyId'
+      responses:
+        '200':
+          $ref: '#/components/responses/PinOffsetKey'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+components:
+  schemas:
+    ActiveStatus:
+      description: The active/inactive status for the card
+      type: string
+      enum:
+        - INACTIVE
+        - ACTIVE
+
+    Bin:
+      type: string
+      pattern: '^\d+$'
+      description: Bank Identification Number
+      minLength: 6
+      maxLength: 8
+
+    BlockStatus:
+      type: string
+      description: Whether the card is open or blocked for various reasons
+      enum:
+        - OPEN
+        - BLOCKED LOST OR STOLEN
+        - BLOCKED NO FRAUD
+        - BLOCKED WITH FRAUD
+
+    Card:
+      type: object
+      additionalProperties: false
+      required:
+        - bin
+        - last4
+        - expirationDate
+        - cardNumber
+        - serviceCode
+        - pinOffset
+        - sequenceNumber
+        - state
+        - active
+        - block
+        - lock
+        - capture
+      properties:
+        bin:
+          $ref: '#/components/schemas/Bin'
+        last4:
+          type: string
+          pattern: '^\d+$'
+          description: Last four digits of the card number
+          minLength: 4
+          maxLength: 4
+        expirationDate:
+          $ref: '#/components/schemas/ExpirationDate'
+        cardNumber:
+          type: string
+          description: Encrypted card number (PAN)
+        serviceCode:
+          type: string
+          pattern: '^\d+$'
+          description: Service code for the card
+          minLength: 3
+          maxLength: 3
+        pinOffset:
+          type: string
+          description: Pin offset for the card. Cards created using the Payment Card V1 API will return an encrypted pin offset.
+        sequenceNumber:
+          type: integer
+          description: Used to differentiate issuing the same card and expiration date on multiple plastics
+        state:
+          $ref: '#/components/schemas/StateStatus'
+        active:
+          $ref: '#/components/schemas/ActiveStatus'
+        block:
+          $ref: '#/components/schemas/BlockStatus'
+        lock:
+          $ref: '#/components/schemas/LockStatus'
+        capture:
+          type: boolean
+          description: Whether the card should be captured at next use
+        pinId:
+          type: string
+          description: Identifier for the PIN (Personal Identification Number) used for this card.
+
+    CardUpdate:
+      type: object
+      additionalProperties: false
+      required:
+        - card
+        - updatedOn
+        - createdOn
+      properties:
+        card:
+          $ref: '#/components/schemas/Card'
+        updatedOn:
+          type: string
+          description: Time data was last updated
+          format: date-time
+        createdOn:
+          description: Time encrypted data was first stored
+          type: string
+          format: date-time
+
+    CardResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - dataEncryptionKeyId
+        - storageKeyId
+        - card
+      properties:
+        dataEncryptionKeyId:
+          $ref: '#/components/schemas/DataEncryptionKeyId'
+        storageKeyId:
+          $ref: '#/components/schemas/StorageKeyId'
+        encryptedDataEncryptionKey:
+          description: |
+            Encrypted DEK matching the publicKeyHash sent in the request. Used to decrypt values in the Card object.
+          type: string
+        card:
+          $ref: '#/components/schemas/Card'
+
+    CardQueryResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - dataEncryptionKeyId
+        - storageKeyId
+        - cardId
+        - card
+        - updatedOn
+        - createdOn
+      properties:
+        dataEncryptionKeyId:
+          $ref: '#/components/schemas/DataEncryptionKeyId'
+        storageKeyId:
+          $ref: '#/components/schemas/StorageKeyId'
+        encryptedDataEncryptionKey:
+          description: |
+            Encrypted DEK matching the publicKeyHash sent in the request. Used to decrypt values in the Card object.
+          type: string
+        cardId:
+          $ref: '#/components/schemas/CardId'
+        card:
+          $ref: '#/components/schemas/Card'
+        updatedOn:
+          type: string
+          description: Time data was last updated
+          format: date-time
+        createdOn:
+          description: Time encrypted data was first stored
+          type: string
+          format: date-time
+
+    CardId:
+      type: string
+      description: Card identifier
+      format: uuid
+
+    Query:
+      description: Response from querying /card by cardNumberHash
+      type: object
+      required:
+        - cards
+      properties:
+        cards:
+          type: array
+          minItems: 0
+          items:
+            $ref: '#/components/schemas/CardQueryResponse'
+
+    CardNumberRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - publicKey
+      properties:
+        publicKey:
+          $ref: '#/components/schemas/PublicKey'
+
+    EncryptedCardNumber:
+      type: object
+      additionalProperties: false
+      required:
+        - encryptedDataEncryptionKey
+        - cardNumber
+      properties:
+        encryptedDataEncryptionKey:
+          description: RSA encrypted data encryption key used to AES encrypt cardNumber.
+          type: string
+        cardNumber:
+          type: string
+          description: AES-256 encrypted card number
+
+    Error:
+      type: object
+      additionalProperties: false
+      description: Server error message
+      properties:
+        message:
+          type: string
+        code:
+          type: string
+
+    ExpirationDate:
+      type: string
+      pattern: '([0-9][0-9])(0[1-9]|1[0-2])'
+      format: YYMM
+      description: Expiration date for the card and will be assumed to be the last millisecond of the month
+      minLength: 4
+      maxLength: 4
+
+    DataEncryptionKeyId:
+      type: string
+      description: |
+        Reference to encryption keys Payment Card Service will use to encrypt the Card object.
+      format: uuid
+
+    DataEncryptionKeyRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - publicKeys
+      properties:
+        publicKeys:
+          type: array
+          minItems: 1
+          description: |
+            List of public keys in PEM format.
+
+            Associated private keys can be used to decrypt card data encrypted by Payment Card Service.
+          items:
+            $ref: '#/components/schemas/PublicKey'
+
+    DataEncryptionKeyResponse:
+      type: object
+      required:
+        - encryptedDataEncryptionKeys
+        - createdOn
+      properties:
+        createdOn:
+          description: Time data was first stored
+          type: string
+          format: date-time
+        encryptedDataEncryptionKeys:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            description: |
+              An object that includes an encrypted data encryption key and a hashed version of the public key used to encrypt it.
+              The publicKeyHash string is derived using @checkdigit/hash and the caller's public key included in DataEncryptionKeyRequest.
+            required:
+              - publicKeyHash
+              - encryptedDataEncryptionKey
+            properties:
+              publicKeyHash:
+                $ref: '#/components/schemas/Hash'
+              encryptedDataEncryptionKey:
+                type: string
+                description: RSA encrypted data encryption key used to AES sensitive data in the Card object.
+
+    History:
+      description: |
+        The History object represents the updates to a Card object over time.
+      type: object
+      required:
+        - updates
+      properties:
+        dataEncryptionKeyId:
+          type: string
+          description: |
+            Reference to encryption keys Payment Card Service used to encrypt the Card object.
+          format: uuid
+        storageKeyId:
+          type: string
+          description: |
+            DEK's non-derived identifier to be used by Check Digit services only.
+        encryptedDataEncryptionKey:
+          description: |
+            RSA encrypted data encryption key used to decrypt AES encrypted values in Card objects.
+          type: string
+        updates:
+          type: array
+          minItems: 0
+          items:
+            $ref: '#/components/schemas/CardUpdate'
+
+    LockStatus:
+      type: string
+      description: |
+        A cardholder initiated status. A locked card will fail authorization. Locked cards can be unlocked.
+
+        A cardholder may choose to lock a card while temporarily misplaced.
+      enum:
+        - LOCKED
+        - UNLOCKED
+
+    Ping:
+      type: object
+      additionalProperties: false
+      required:
+        - serverTime
+      properties:
+        serverTime:
+          type: string
+          format: date-time
+          description: Current server time
+          example: '1970-01-01T00:00:00.000Z'
+
+    PinOffsetKey:
+      type: object
+      additionalProperties: false
+      required:
+        - transmissionKey
+      properties:
+        transmissionKey:
+          description: A PEM formatted public key to be used to RSA encrypt a data encryption key.
+          type: string
+
+    PinOffsetKeyId:
+      type: string
+      format: uuid
+      description: Identifier for the PinOffsetKey used to encrypt the data encryption key.
+
+    PinOffsetRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - encryptedDataEncryptionKey
+        - pinOffsetKeyId
+        - encryptedUserDefinedPin
+      properties:
+        pinOffsetKeyId:
+          $ref: '#/components/schemas/PinOffsetKeyId'
+        encryptedDataEncryptionKey:
+          description: A RSA encrypted (using transmissionKey) data encryption key that encrypted the encryptedUserDefinedPin.
+          type: string
+        encryptedUserDefinedPin:
+          type: string
+          description: |
+            User Defined PIN encrypted with an AES generated data encryption key. This is the PIN to be used for new
+            offset calculation. (plaintext pin has minLength = 4, maxLength = 12)
+
+    Hash:
+      type: string
+      format: uuid
+      example: '15a85f64-5717-4562-b3fc-2c963f66afa6'
+      description: UUID derived using @checkdigit/hash
+
+    NewCard:
+      type: object
+      additionalProperties: false
+      required:
+        - bin
+        - expirationDate
+        - serviceCode
+        - sequenceNumber
+        - state
+        - active
+        - block
+        - lock
+      properties:
+        bin:
+          $ref: '#/components/schemas/Bin'
+        expirationDate:
+          $ref: '#/components/schemas/ExpirationDate'
+        serviceCode:
+          type: string
+          pattern: '^\d+$'
+          description: |
+            Used to set general guidelines for how the card can be used, e.g. domestic only or international, online authorizations only, etc.
+          minLength: 3
+          maxLength: 3
+        sequenceNumber:
+          type: integer
+          description: Used to differentiate issuing the same card and expiration date on multiple plastics.
+          minimum: 0
+          maximum: 10
+        state:
+          $ref: '#/components/schemas/StateStatus'
+        active:
+          $ref: '#/components/schemas/ActiveStatus'
+        block:
+          $ref: '#/components/schemas/BlockStatus'
+        lock:
+          $ref: '#/components/schemas/LockStatus'
+
+    NewCardRequest:
+      type: object
+      required:
+        - dataEncryptionKeyId
+        - cardNumberLength
+        - newCard
+      additionalProperties: false
+      properties:
+        dataEncryptionKeyId:
+          $ref: '#/components/schemas/DataEncryptionKeyId'
+        cardNumberLength:
+          type: integer
+          description: Desired number of digits in the card number.
+          minimum: 15
+          maximum: 19
+        newCard:
+          $ref: '#/components/schemas/NewCard'
+
+    NewCardRequestWithCardNumber:
+      type: object
+      required:
+        - encryptedCardNumber
+        - encryptedDataEncryptionKey
+        - dataEncryptionKeyId
+        - newCard
+      properties:
+        encryptedCardNumber:
+          description: The card number must be encrypted with an AES generated secret key, i.e. data encryption key (DEK). That DEK must be RSA encrypted with the PublicKey returned by this service's GET /public-key operation. The encrypted DEK must be included in this request object as the encryptedDataEncryptionKey.
+          type: string
+        encryptedDataEncryptionKey:
+          description: RSA encrypted data encryption key used to AES encrypt encryptedCardNumber
+          type: string
+        dataEncryptionKeyId:
+          $ref: '#/components/schemas/DataEncryptionKeyId'
+        newCard:
+          $ref: '#/components/schemas/NewCard'
+      additionalProperties: false
+
+    PublicKey:
+      description: Public key in PEM format
+      type: string
+      example: |
+        -----BEGIN PUBLIC KEY-----
+        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwm2sxmRdTF7ZIBA6+ngO
+        8jOTCHmID0PpQB1q85+hrcLSfB1rWY9bzNNLabBo/ajDnA4Pcadq/x6gpg70qZcR
+        9Wxm6TttKzBPZsxasGXgSTDqEi2KcYZgq1mL4qyxUvyIms7/llGy+W9b5huZaVcO
+        xdT1tw/zctbOhb6S2t5vH+zkta/2ncUXjG7i8XdLsJ1qe4K1kYbA4KVkOMmAtw7O
+        4STk0TZDD0YARdmrciorJjbIVt0Xj1CrYQ5QbDGrlfeXgrcZwX5f9wT2MnKlY5oZ
+        5Wtb57oGtLkVf8g6vN/2jGtAmOmHK2hHwNd/+zUet5G/S5uwEli4RgMPP4pUoKgd
+        GQIDAQAB
+        -----END PUBLIC KEY-----
+
+    PublicKeyResponse:
+      description: |
+        This object contains the rsa generated public key for the Payment Card Service. This public key must be used
+        when transmitting encrypted data to Payment Card Service APIs.
+      type: object
+      required:
+        - publicKey
+      properties:
+        publicKey:
+          $ref: '#/components/schemas/PublicKey'
+
+    StateStatus:
+      description: The current state of the card
+      type: string
+      enum:
+        - CURRENT
+        - REISSUED
+        - RETIRED
+        - FORCED
+
+    StorageKeyId:
+      type: string
+      description: |
+        DEK's non-derived identifier to be used by Check Digit services only.
+
+  parameters:
+    tenantId:
+      in: path
+      name: tenantId
+      description: Specifies tenant of Sentinel service
+      required: true
+      schema:
+        type: string
+
+    activeStatus:
+      name: activeStatus
+      in: path
+      description: Updated active status of the card
+      required: true
+      schema:
+        $ref: '#/components/schemas/ActiveStatus'
+
+    at:
+      name: at
+      in: query
+      description: Return data as it was at this time.  Must be at least 1 second in the past.
+      example: '1970-01-01T00:00:00.000Z'
+      required: true
+      schema:
+        type: string
+        format: date-time
+
+    blockStatus:
+      name: blockStatus
+      in: path
+      description: Updated block status of the card
+      required: true
+      schema:
+        $ref: '#/components/schemas/BlockStatus'
+
+    captureStatus:
+      name: captureStatus
+      in: path
+      description: Updated capture status of the card
+      required: true
+      schema:
+        type: boolean
+
+    cardId:
+      name: cardId
+      in: path
+      description: An id unique to each card in uuid format
+      required: true
+      schema:
+        $ref: '#/components/schemas/CardId'
+
+    cardNumberHash:
+      name: cardNumberHash
+      in: query
+      description: UUID derived from a card number (PAN) using @checkdigit/hash
+      required: true
+      schema:
+        $ref: '#/components/schemas/Hash'
+
+    createdOn:
+      name: Created-On
+      in: header
+      description: |
+        Created-On header, establishes createdOn, and updatedOn values for the created data.
+      example: '1970-01-01T00:00:00.000Z'
+      required: false
+      schema:
+        type: string
+        format: date-time
+
+    fromDate:
+      name: fromDate
+      in: query
+      description: Return data created on or after this date
+      example: '1970-01-01T00:00:00.000Z'
+      schema:
+        type: string
+        format: date-time
+
+    ifMatch:
+      name: If-Match
+      in: header
+      description: If-Match header
+      required: true
+      schema:
+        type: string
+
+    dataEncryptionKeyId:
+      in: path
+      name: dataEncryptionKeyId
+      description: Parameter used to represent a DEK
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    lockStatus:
+      name: lockStatus
+      in: path
+      description: Updated lock status of the card
+      required: true
+      schema:
+        $ref: '#/components/schemas/LockStatus'
+
+    pinOffsetKeyId:
+      name: pinOffsetKeyId
+      in: path
+      description: A unique id associated with a one time use encryption key
+      required: true
+      schema:
+        $ref: '#/components/schemas/PinOffsetKeyId'
+
+    publicKeyHashPath:
+      name: publicKeyHashPath
+      in: path
+      description: UUID derived from a PEM formatted Public Key using @checkdigit/hash
+      required: true
+      schema:
+        $ref: '#/components/schemas/Hash'
+
+    publicKeyHashQuery:
+      name: publicKeyHashQuery
+      in: query
+      description: UUID derived from a PEM formatted Public Key using @checkdigit/hash
+      required: false
+      schema:
+        $ref: '#/components/schemas/Hash'
+
+    stateStatus:
+      name: stateStatus
+      in: path
+      description: Updated state status of the card
+      required: true
+      schema:
+        $ref: '#/components/schemas/StateStatus'
+
+    toDate:
+      name: toDate
+      in: query
+      description: Return data created before this date.  Must be at least 1 second in the past.
+      example: '1970-01-01T00:00:00.000Z'
+      required: true
+      schema:
+        type: string
+        format: date-time
+
+  requestBodies:
+    CardNumberRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CardNumberRequest'
+
+    DataEncryptionKeyRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DataEncryptionKeyRequest'
+
+    NewCardRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NewCardRequest'
+
+    NewCardRequestWithCardNumber:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NewCardRequestWithCardNumber'
+
+    PinOffsetRequest:
+      description: Encrypted user defined PIN
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PinOffsetRequest'
+
+  responses:
+    CardResponse:
+      description: Card retrieved
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CardResponse'
+      headers:
+        Created-On:
+          $ref: '#/components/headers/Created-On'
+        Updated-On:
+          $ref: '#/components/headers/Updated-On'
+        ETag:
+          $ref: '#/components/headers/ETag'
+
+    Query:
+      description: Response from querying /card by cardNumberHash
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Query'
+
+    Conflict:
+      description: Record exists but with different data
+
+    EncryptedCardNumber:
+      description: Encrypted card information retrieved
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/EncryptedCardNumber'
+
+    DataEncryptionKeyResponse:
+      description: Set of public keys request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DataEncryptionKeyResponse'
+      headers:
+        Created-On:
+          $ref: '#/components/headers/Created-On'
+        Updated-On:
+          $ref: '#/components/headers/Updated-On'
+
+    History:
+      description: Response from
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/History'
+
+    Ping:
+      description: Successful Ping response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Ping'
+
+    PinOffsetKey:
+      description: Response from creating or requesting a key to encrypt a user defined pin
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PinOffsetKey'
+
+    PublicKeyResponse:
+      description: Public Key response.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PublicKeyResponse'
+      headers:
+        Created-On:
+          $ref: '#/components/headers/Created-On'
+        Updated-On:
+          $ref: '#/components/headers/Updated-On'
+
+    PreconditionFailed:
+      description: Precondition failed
+
+    NotFound:
+      description: Not found
+
+    UnprocessableContent:
+      description: Unprocessable Content
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    NoContent:
+      description: Success/No Content
+      headers:
+        Created-On:
+          $ref: '#/components/headers/Created-On'
+        Updated-On:
+          $ref: '#/components/headers/Updated-On'
+        ETag:
+          $ref: '#/components/headers/ETag'
+
+    ServerError:
+      description: Server Error response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  headers:
+    ETag:
+      description: Version information for record
+      schema:
+        type: string
+
+    Created-On:
+      description: CreatedOn timestamp for the newly created record
+      schema:
+        type: string
+        format: date-time
+
+    Updated-On:
+      description: UpdatedOn timestamp for the existing record
+      schema:
+        type: string
+        format: date-time

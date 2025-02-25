@@ -8,12 +8,12 @@ import { derefSchema } from '../openapi/deref-schema';
 
 describe('json.spec.ts', () => {
   it.skip('deref schema', async () => {
-    await derefSchema('src/api/v1/link-swagger.schema');
     await derefSchema('src/api/v1/person-swagger.schema');
   });
 
   it.skip('create schema', async () => {
     await generateSchemas();
+    await derefSchema('src/api/v1/swagger.schema');
   });
 
   it.skip('should work', () => {

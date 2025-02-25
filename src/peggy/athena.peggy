@@ -2580,6 +2580,7 @@ KW_INT      = "INT"i      !ident_start { return 'INT'; }
 KW_ZEROFILL = "ZEROFILL"i !ident_start { return 'ZEROFILL'; }
 KW_INTEGER  = "INTEGER"i  !ident_start { return 'INTEGER'; }
 KW_JSON     = "JSON"i     !ident_start { return 'JSON'; }
+KW_BOOLEAN     = "BOOLEAN"i     !ident_start { return 'BOOLEAN'; }
 KW_MAP     = "MAP"i     !ident_start { return 'MAP'; }
 KW_SMALLINT = "SMALLINT"i !ident_start { return 'SMALLINT'; }
 KW_TINYINT  = "TINYINT"i  !ident_start { return 'TINYINT'; }
@@ -2882,6 +2883,7 @@ data_type_item
   / numeric_type
   / datetime_type
   / json_type
+  / boolean_type
   / map_type
   / text_type
 
@@ -2957,6 +2959,9 @@ datetime_type
 
 json_type
   = t:KW_JSON { return { dataType: t }; }
+
+boolean_type
+  = t:KW_BOOLEAN { return { dataType: t }; }
 
 text_type
   = t:(KW_TINYTEXT / KW_TEXT / KW_MEDIUMTEXT / KW_LONGTEXT) { return { dataType: t }}

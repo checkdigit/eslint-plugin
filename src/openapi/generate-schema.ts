@@ -8,7 +8,7 @@ import { getReasonPhrase } from 'http-status-codes';
 import pointer from 'json-pointer';
 import jsYaml from 'js-yaml';
 import type { OpenAPIV3_1 as v31 } from 'openapi-types';
-import type { AnySchemaObject } from 'ajv/dist/2020';
+import type { SchemaObject } from 'ajv/dist/2020';
 
 export const commandName = 'generate-schema';
 const log = debug('openapi-cli:generate-schema');
@@ -41,13 +41,13 @@ export interface ApiOperation {
 }
 
 export interface OperationSchemas {
-  request: AnySchemaObject;
-  responses: Record<string, AnySchemaObject>;
+  request: SchemaObject;
+  responses: Record<string, SchemaObject>;
 }
 
 export interface ApiSchemas {
   apis: Record<string, Record<string, OperationSchemas>>;
-  definitions?: Record<string, AnySchemaObject>;
+  definitions?: Record<string, SchemaObject>;
 }
 
 function isRequestBodyAllowed(method: string): boolean {
@@ -319,6 +319,7 @@ async function generateEndpointSchemas(
 ): Promise<void> {
   const swaggerFile = `${root}/${endpoint}/swagger.yml`;
   const documentContents = await fs.readFile(swaggerFile, 'utf8');
+  // eslint-disable-next-line import/no-named-as-default-member
   const document = (await jsYaml.load(documentContents)) as v31.Document;
   if (!document.paths) {
     return undefined;

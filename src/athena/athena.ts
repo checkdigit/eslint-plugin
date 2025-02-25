@@ -6,14 +6,14 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
+// import fs from 'node:fs';
 import { strict as assert } from 'node:assert';
-import fs from 'node:fs';
 
 import debug from 'debug';
 import { JSONPath } from 'jsonpath-plus';
 import { ESLintUtils } from '@typescript-eslint/utils';
 import type { OpenAPIV3_1 as v3 } from 'openapi-types';
-import type { AnySchemaObject } from 'ajv/dist/2020';
+import type { SchemaObject } from 'ajv/dist/2020';
 
 import { parse } from '../peggy/athena-peggy';
 import type { ApiSchemas } from '../openapi/generate-schema';
@@ -21,11 +21,11 @@ import type { AST, BaseFrom, Column, ColumnRefItem, Select, With } from './types
 import { matchApi, type MatchedOperation } from './api-matcher';
 import { locateApi } from './api-locator';
 
-const SCHEMA_STRING: AnySchemaObject = {
+const SCHEMA_STRING: SchemaObject = {
   type: 'string',
 };
 
-const SCHEMA_OBJECT: AnySchemaObject = {
+const SCHEMA_OBJECT: SchemaObject = {
   type: 'object',
 };
 
@@ -44,13 +44,13 @@ interface ResolvedColumn {
 interface Table {
   ast: unknown;
   name: string;
-  apiOperation?: MatchedOperation;
-  columns: Record<string, ResolvedColumn>;
+  apiOperation?: MatchedOperation[];
+  columns: Record<string, ResolvedColumn[]>;
 }
 
 export interface AthenaContext {
   apiSchemas: Record<string, ApiSchemas[]>;
-  tables: Record<string, Table>;
+  tables: Record<string, Table[]>;
 }
 
 function getColumn(name: string, schema: v3.SchemaObject, ast?: object): ResolvedColumn {
@@ -79,13 +79,13 @@ function checkSelect(selectAST: With | Select, context: AthenaContext, withTable
   log('checking SELECT', selectAST);
 
   // get all tables in the select statement
-  const tableASTs = JSONPath<BaseFrom[]>({ json: selectAST, path: '$.from..[?(@ && @.table)]' });
+  const tableASTs = JSONPath<BaseFrom[]>({ json: selectAST, path: '$.from..[?(@ && @.table && !@.column)]' });
   log('table ASTs', tableASTs);
   const allTableNames = tableASTs.map((tableAST) => tableAST.table); /*?*/
 
   const tableAliases: Record<string, string> = {};
 
-  const allResolvedTables = [];
+  const allResolvedTables: Record<string, Table[]> = {};
   for (const tableAST of tableASTs) {
     const tableName = tableAST.table; /*?*/
     const tableAlias = tableAST.as; /*?*/
@@ -94,93 +94,91 @@ function checkSelect(selectAST: With | Select, context: AthenaContext, withTable
     }
     if (context.tables[tableName] !== undefined) {
       log('table already processed', tableName);
-      allResolvedTables.push(context.tables[tableName]);
+      allResolvedTables[tableName] = context.tables[tableName];
       continue;
     }
 
-    log('processing table', tableName);
-    log('getting api schema for table', tableName);
-    let apiSchemas = context.apiSchemas[tableName];
+    // if the table is not processed yet, it has to be an service table
+    const serviceName = tableName;
+    let apiSchemas = context.apiSchemas[serviceName];
     if (apiSchemas === undefined) {
+      log('getting api schema for table', serviceName);
       // assuming that the api schema is the same for all tables with the same name
-      apiSchemas = locateApi(tableName);
-      context.apiSchemas[tableName] = apiSchemas;
+      apiSchemas = locateApi(serviceName);
+      context.apiSchemas[serviceName] = apiSchemas;
     }
 
+    // [TODO:] do we alert if the multiple api endpoints are matched? it could be a valid use case, but also might be sth the sql should narrow down
     const tableSchemas = matchApi(selectAST, tableAST, apiSchemas);
     log('table schemas', tableSchemas);
 
-    context.tables[tableName] = {
-      ast: tableAST,
-      name: tableName,
-      ...(tableSchemas === undefined ? {} : { apiOperation: tableSchemas }),
-      columns: {
-        method: getColumn('method', SCHEMA_STRING),
-        started: getColumn('started', SCHEMA_STRING),
-        ended: getColumn('ended', SCHEMA_STRING),
-        url: getColumn('url', SCHEMA_STRING),
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
-        requestbody: getColumn('requestbody', tableSchemas?.request['properties']?.body ?? SCHEMA_OBJECT),
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
-        requestheaders: getColumn('requestheaders', tableSchemas?.request['properties']?.headers ?? SCHEMA_OBJECT),
-        responsestatus: getColumn('responsestatus', SCHEMA_STRING),
-        responsemessage: getColumn('responsemessage', SCHEMA_STRING),
-        responsetype: getColumn('responsetype', SCHEMA_STRING),
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
-        responsebody: getColumn('responsebody', tableSchemas?.response['properties']?.body ?? SCHEMA_OBJECT),
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
-        responseheaders: getColumn('responseheaders', tableSchemas?.response['properties']?.headers ?? SCHEMA_OBJECT),
-      },
-    };
-    allResolvedTables.push(context.tables[tableName]);
+    allResolvedTables[tableName] =
+      tableSchemas?.map((tableSchema) => ({
+        ast: tableAST,
+        name: tableName,
+        apiOperation: tableSchemas,
+        columns: {
+          method: [getColumn('method', SCHEMA_STRING)],
+          started: [getColumn('started', SCHEMA_STRING)],
+          ended: [getColumn('ended', SCHEMA_STRING)],
+          url: [getColumn('url', SCHEMA_STRING)],
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+          requestbody: [getColumn('requestbody', tableSchema.request['properties']?.body ?? SCHEMA_OBJECT)],
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+          requestheaders: [getColumn('requestheaders', tableSchema.request['properties']?.headers ?? SCHEMA_OBJECT)],
+          responsestatus: [getColumn('responsestatus', SCHEMA_STRING)],
+          responsemessage: [getColumn('responsemessage', SCHEMA_STRING)],
+          responsetype: [getColumn('responsetype', SCHEMA_STRING)],
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+          responsebody: [getColumn('responsebody', tableSchema.response['properties']?.body ?? SCHEMA_OBJECT)],
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+          responseheaders: [getColumn('responseheaders', tableSchema.response['properties']?.headers ?? SCHEMA_OBJECT)],
+        },
+      })) ?? [];
   }
 
-  const columns: Record<string, ResolvedColumn> = {};
+  const tableColumns: Record<string, ResolvedColumn[]> = {};
   for (const [index, columnAST] of selectAST.columns?.entries() ?? []) {
     log('checking column', columnAST);
+    const columnAlias = (columnAST as Column).as as null | string; /*?*/
+    const indexedColumnName = `_col${String(index)}`;
 
     const columnReferences = JSONPath<ColumnRefItem[]>({
       json: columnAST as object /*?*/,
       path: "$..[?(@ && @.type === 'column_ref' && @.column)]",
     }); /*?*/
 
-    const columnAlias = (columnAST as Column).as as null | string; /*?*/
-    let columnNameToUse = columnAlias ?? `_col${String(index)}`; /*?*/
-    log('column name to use', columnNameToUse);
-
-    if (columnReferences.length === 0) {
-      log('no column references found, keep it as default type');
-      columns[columnNameToUse] = getColumn(columnNameToUse, SCHEMA_STRING, columnAST as object);
-      continue;
-    }
-    const columnKeys = new Set(
-      columnReferences.map((column) => `${column.table ?? '<default>'}/${column.column as string}`),
-    ); /*?*/
-
-    if (columnKeys.size > 1) {
-      log('multiple table/column references used in column, defaulting it as default type');
-      columns[columnNameToUse] = getColumn(columnNameToUse, SCHEMA_STRING, columnAST as object);
+    if (columnReferences.length !== 1) {
+      const columnNameToUse = columnAlias ?? indexedColumnName; /*?*/
+      if (columnReferences.length === 0) {
+        log('no column references found, keep it as default type');
+      } else if (columnReferences.length > 1) {
+        log('multiple table/column references used in column, defaulting it as default type');
+      }
+      tableColumns[columnNameToUse] = [getColumn(columnNameToUse, SCHEMA_STRING, columnAST as object)];
       continue;
     }
 
-    const [tableReferenceName, columnReferenceName] = columnKeys.values().next().value?.split('/') as [
-      string,
-      string,
-    ]; /*?*/
+    const columnReference = columnReferences[0]; /*?*/
+    assert.ok(columnReference !== undefined);
+
+    const tableReferenceName = columnReference.table ?? undefined;
+    const columnReferenceName = columnReference.column as string; /*?*/
 
     const referencedTables =
-      tableReferenceName !== '<default>'
-        ? [context.tables[tableAliases[tableReferenceName] ?? tableReferenceName]].filter(
-            (table): table is Table => table !== undefined,
-          )
-        : allResolvedTables; /*?*/
+      tableReferenceName !== undefined
+        ? (allResolvedTables[tableAliases[tableReferenceName] ?? tableReferenceName] ?? [])
+        : Object.values(allResolvedTables).flat(); //.filter((table): table is Table => table !== undefined); /*?*/ // why do we need this filter? shouldn't it be filtered earlier?
+    // [TODO:] handle repeated tables
+    log('referenced tables', referencedTables);
     assert.ok(referencedTables.length > 0);
 
     if (columnReferenceName === '*') {
       log('column reference is *, so adding all columns from table');
       for (const table of referencedTables) {
-        for (const [columnName, column] of Object.entries(table.columns)) {
-          columns[columnName] = column;
+        // [TODO:] if multiple endpoints match with the same service table, we need to report conflict
+        for (const [columnName, columns] of Object.entries(table.columns)) {
+          tableColumns[columnName] = columns;
         }
       }
       continue;
@@ -190,50 +188,84 @@ function checkSelect(selectAST: With | Select, context: AthenaContext, withTable
       json: columnAST as object,
       path: "$..[?(@ && @.type === 'function')]",
     }); /*?*/
-    if (functionsUsedInColumn.length === 0) {
-      columnNameToUse = columnReferenceName; /*?*/
-    }
+    const columnNameToUse =
+      columnAlias ?? (functionsUsedInColumn.length === 0 ? columnReferenceName : indexedColumnName); /*?*/
+    log('column name to use', columnNameToUse);
 
-    const resolvedColumns = referencedTables.map((table) => table.columns[columnReferenceName]).filter(Boolean); /*?*/
+    const resolvedColumns = referencedTables
+      .flatMap((table) => {
+        log('resolving column', columnReferenceName, table);
+        return table.columns[columnReferenceName]; /*?*/
+      })
+      .filter((column): column is ResolvedColumn => column !== undefined); /*?*/
     if (resolvedColumns.length === 0) {
       throw new AthenaError(
         ATHENA_ERROR,
         `can't found column ${columnReferenceName} in tables: ${allTableNames.toString()}`,
       );
     } else if (resolvedColumns.length > 1) {
-      throw new AthenaError(ATHENA_ERROR, `column exists in multiple referenced tables ${allTableNames.toString()}`);
+      // [TODO:] maybe we should allow this, for now we just delay it until property access happens
+      // throw new AthenaError(ATHENA_ERROR, `column exists in multiple referenced tables ${allTableNames.toString()}`);
     }
 
-    const resolvedColumn = resolvedColumns[0]; /*?*/
-    assert.ok(resolvedColumn !== undefined);
     const [propertyAccessor] = JSONPath<string[]>({
       json: columnAST as object,
       path: "$..[?(@ && @.type === 'function' && @.name && @.name.name && @.name.name[0] && (@.name.name[0].value === 'json_extract_scalar' || @.name.name[0].value === 'json_extract') )].args.value[1].value",
     }); /*?*/
     if (propertyAccessor === undefined) {
       log('no property accessor found, keep it as default type');
-      columns[columnNameToUse] = getColumn(columnNameToUse, resolvedColumn.schema, columnAST as object);
+      tableColumns[columnNameToUse] = resolvedColumns.map((column) =>
+        getColumn(columnNameToUse, column.schema, columnAST as object),
+      );
       continue;
     }
 
-    const [propertySchema] = JSONPath<AnySchemaObject[]>({
-      json: resolvedColumn.schema,
-      path: `$.properties.${propertyAccessor}`,
-    }); /*?*/
-    if (propertySchema === undefined) {
+    log('property accessor', propertyAccessor);
+    // [TODO:] note that double-dot is used to access properties in case additional layer of schema definition syntax is used in between, e.g. allOf, etc.
+    // eslint-disable-next-line prefer-named-capture-group
+    const adjustedPropertyAccessor = `$.${propertyAccessor.substring(1).replace(/(\.|\[)/gu, '..properties$1')}`;
+    log('adjusted property accessor', adjustedPropertyAccessor);
+
+    log('resolved columns', resolvedColumns);
+    const extractedSchemas = resolvedColumns
+      .flatMap((column) =>
+        JSONPath<SchemaObject[]>({
+          json: column.schema,
+          path: adjustedPropertyAccessor,
+        }),
+      )
+      .filter(Boolean); /*?*/
+    if (extractedSchemas.length === 0) {
       throw new AthenaError(ATHENA_ERROR, `property not found ${columnReferenceName} - ${propertyAccessor}`);
     }
-    columns[columnNameToUse] = getColumn(columnNameToUse, propertySchema, columnAST as object);
+    // [TODO:] handle potential conflicting schemas
+    // if (new Set(extractedSchemas.map((schema) => JSON.stringify(schema))).size > 1) {
+    //   throw new AthenaError(
+    //     ATHENA_ERROR,
+    //     `conflicting property schemas found ${columnReferenceName} - ${propertyAccessor} : ${extractedSchemas.map((schema) => JSON.stringify(schema)).join(', ')}`,
+    //   );
+    // }
+    tableColumns[columnNameToUse] = extractedSchemas.map((extracedSchema) =>
+      getColumn(columnNameToUse, extracedSchema, columnAST as object),
+    );
   }
 
-  log('resolved columns', columns);
+  log('resolved columns', tableColumns);
+  log(
+    'resolved columns schemas',
+    Object.entries(tableColumns).map(([name, columns]) =>
+      columns.map((column) => `${name}: ${(column.schema as SchemaObject).$id ?? JSON.stringify(column.schema)}`),
+    ),
+  );
 
   if (withTableName !== undefined) {
-    context.tables[withTableName] = {
-      ast: selectAST,
-      name: withTableName,
-      columns,
-    };
+    context.tables[withTableName] = [
+      {
+        ast: selectAST,
+        name: withTableName,
+        columns: tableColumns,
+      },
+    ];
   }
 }
 
@@ -277,7 +309,7 @@ const rule: ESLintUtils.RuleModule<typeof SYNTEXT_ERROR | typeof ATHENA_ERROR> =
         try {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           ({ ast } = parse(sql, { includeLocations: true }));
-          fs.writeFileSync('ast.json', JSON.stringify(ast, undefined, 2));
+          // fs.writeFileSync('ast.json', JSON.stringify(ast, undefined, 2));
         } catch (error) {
           context.report({
             node: sqlNode,

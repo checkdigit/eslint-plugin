@@ -1,10 +1,8 @@
 // athena/api-matcher.ts
 
-import { strict as assert } from 'node:assert';
-
 import debug from 'debug';
 import { JSONPath } from 'jsonpath-plus';
-import type { AnySchemaObject } from 'ajv/dist/2020';
+import type { SchemaObject } from 'ajv/dist/2020';
 
 import type { ApiSchemas, OperationSchemas } from '../openapi/generate-schema';
 
@@ -19,8 +17,8 @@ export interface OperationToMatch {
 export interface MatchedOperation {
   path: string;
   method: string;
-  request: AnySchemaObject;
-  response: AnySchemaObject;
+  request: SchemaObject;
+  response: SchemaObject;
 }
 
 type Matcher = (path: string, method: string) => boolean;
@@ -50,7 +48,7 @@ function getPathPartMatcher(selectAST: object, _tableAST: object): Matcher | und
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     return (path: string, _method: string) => {
       const parts = path.split('/'); /*?*/
-      const part = parts[pathPartIndex-1]; //athena index is larger than js index by one /*?*/
+      const part = parts[pathPartIndex - 1]; //athena index is larger than js index by one /*?*/
       log(`checking path part`, { path, pathPartIndex, part, pathPartMatch });
       return part?.startsWith(':') === true
         ? true // ignore path part if it presents a dynamic input parameter
@@ -108,7 +106,11 @@ function getResponseStatusToMatch(selectAST: object, _tableAST: object): string 
 }
 
 // [TODO:] match only relevent table in case multiple tables are joined
-export function matchApi(selectAST: object, tableAST: object, apiSchemas: ApiSchemas[]): MatchedOperation | undefined {
+export function matchApi(
+  selectAST: object,
+  tableAST: object,
+  apiSchemas: ApiSchemas[],
+): MatchedOperation[] | undefined {
   const schemaMatchers: Matcher[] = [
     getVersionMatcher(selectAST, tableAST),
     getPathMatchers(selectAST, tableAST),
@@ -136,25 +138,32 @@ export function matchApi(selectAST: object, tableAST: object, apiSchemas: ApiSch
   if (matchedOperationSchemas.length === 0) {
     log('no matched operation schema');
     throw new Error('no matched operation schema');
-  } else if (matchedOperationSchemas.length > 1) {
-    log('multiple matched operation schemas', matchedOperationSchemas);
-    return undefined;
   }
 
-  const operation = matchedOperationSchemas[0];
-  assert.ok(operation !== undefined);
-
   const matchedResponseStatus = getResponseStatusToMatch(selectAST, tableAST);
-  assert.ok(matchedResponseStatus !== undefined);
+  // [TODO:] should we allow multiple response status?
+  // assert.ok(matchedResponseStatus !== undefined);
   log('matchedResponseStatus', matchedResponseStatus);
 
-  const responseSchema = operation.operationSchemas.responses[matchedResponseStatus];
-  assert.ok(responseSchema !== undefined);
-
-  return {
-    path: operation.path,
-    method: operation.method,
-    request: operation.operationSchemas.request,
-    response: responseSchema,
-  };
+  const matchedApis = matchedOperationSchemas
+    .flatMap((operation) =>
+      Object.entries(operation.operationSchemas.responses).map(([responseCode, responseSchema]) => {
+        const matchedResponseSchema =
+          matchedResponseStatus === undefined || responseCode === matchedResponseStatus ? responseSchema : undefined;
+        return matchedResponseSchema === undefined
+          ? undefined
+          : {
+              path: operation.path,
+              method: operation.method,
+              request: operation.operationSchemas.request,
+              response: matchedResponseSchema,
+            };
+      }),
+    )
+    .filter((api) => api !== undefined);
+  if (matchedApis.length === 0) {
+    log('no api satisfy both request and response matchers');
+    throw new Error('no matched api');
+  }
+  return matchedApis;
 }

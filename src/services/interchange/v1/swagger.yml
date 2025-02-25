@@ -1,0 +1,414 @@
+openapi: 3.0.0
+info:
+  title: Interchange Service
+  version: 1.6.0
+  description: |
+
+    Interchange is a service that allows the caller to store data about interchange fees applied to transactions across
+    all networks.
+
+    © Check Digit LLC. 2022
+
+  contact:
+    name: Check Digit LLC.
+
+servers:
+  - url: /interchange/v1
+
+tags:
+  - name: Service Health
+  - name: API
+
+x-firehose-logged: false
+
+paths:
+  /ping:
+    get:
+      operationId: 'ping-get'
+      tags:
+        - Service Health
+      description: |
+        Returns the current server time. This operation is useful for testing a service's availability.
+      responses:
+        '200':
+          $ref: '#/components/responses/Ping'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+  /interchange/{interchangeId}:
+    put:
+      tags:
+        - API
+      operationId: 'interchange-put'
+      description: Stores interchange data.
+      x-firehose-logged: true
+      parameters:
+        - $ref: '#/components/parameters/interchangeId'
+        - $ref: '#/components/parameters/createdOn'
+      requestBody:
+        $ref: '#/components/requestBodies/Interchange'
+      responses:
+        '204':
+          description: Interchange recorded successfully
+          headers:
+            Created-On:
+              $ref: '#/components/headers/Created-On'
+            Updated-On:
+              $ref: '#/components/headers/Updated-On'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+components:
+  schemas:
+    Ping:
+      type: object
+      additionalProperties: false
+      required:
+        - serverTime
+      properties:
+        serverTime:
+          type: string
+          format: date-time
+          description: Current server time
+
+    Error:
+      type: object
+      additionalProperties: false
+      properties:
+        message:
+          type: string
+        code:
+          type: string
+          minLength: 1
+          enum:
+            - CREATED ON TOO FAR IN FUTURE
+
+    Interchange:
+      type: object
+      additionalProperties: false
+      description: Data that describes an interchange record.
+      required:
+        - file
+        - cardId
+        - transmissionDateTime
+        - categorization
+        - adviceResponse
+        - merchant
+        - settlementAmount
+        - isCrossBorder
+        - interchangeFeeAmount
+        - interchangeDebitCredit
+        - interchangeFeeAmountExtended
+      properties:
+        file:
+          type: object
+          additionalProperties: false
+          required:
+            - fileIdentifier
+            - fileDescription
+            - recordIdentifier
+            - fileDateTime
+          properties:
+            fileIdentifier:
+              type: string
+              minLength: 1
+              description: A unique identifier for the file in which this message exists. Often will be the name of the file.
+            fileDescription:
+              type: string
+              minLength: 1
+              description: A description of the file whose usage depends on the type of file that was processed.
+            recordIdentifier:
+              type: string
+              minLength: 1
+              description: A unique identifier for this message in the processed file. Often this will be the record number.
+            fileDateTime:
+              type: string
+              minLength: 1
+              format: date-time
+              description: A timestamp associated with the whole file not the individual message.
+        matchedMessageId:
+          description: |
+            Identifies the Check Digit Message Service message the interchange data applies to.
+          type: string
+        cardId:
+          description: Identifies the card involved in the transaction.
+          type: string
+        transmissionDateTime:
+          description: The transmission date-time in UTC ISO format.
+          type: string
+          format: date-time
+        referenceNumber:
+          description: A unique ID assigned by network to a transaction. This could be Banknet reference number for MC DMS, Retrieval Reference Number, or a Transaction ID for Visa transactions. This field is undefined if not present in the file from network or in case of offline authorizations. When present, it is used as one of the fields to match the original transaction
+          type: string
+        categorization:
+          type: object
+          additionalProperties: false
+          required:
+            - debitCredit
+            - category
+          properties:
+            debitCredit:
+              type: string
+              description: Indicates whether the transaction was a debit or credit to the receiver.
+              enum:
+                - DEBIT
+                - CREDIT
+                - NEITHER
+            category:
+              description: Describes the effect of a transaction on a customer account.
+              type: string
+              enum:
+                - SIGNATURE
+                - PIN
+                - PINLESS
+                - ATM
+                - OTC
+                - AFD
+                - QUASICASH
+                - SCRIP
+                - BALANCE INQUIRY
+                - ACCOUNT INQUIRY
+                - FUNDS TRANSFER
+                - BILL PAYMENT
+                - ADJUSTMENT
+                - RETURN
+                - LOAD
+                - UNLOAD
+                - ACTIVATION
+                - ACTIVATION AND LOAD
+                - DEACTIVATION
+                - DEACTIVATION AND UNLOAD
+                - TOKENIZATION
+                - REQUEST ACTIVATION METHODS
+                - DELIVER ACTIVATION CODE
+                - NOTIFY TOKEN ACTIVATED
+                - NOTIFY TOKEN UPDATED
+                - NOTIFY SUSPICIOUS EVENTS
+                - UNSUPPORTED
+        systemTraceAuditNumber:
+          description: A number assigned by the message initiator to uniquely identify a transaction. This field is undefined if not present in the file from network or in case of offline authorizations. When present, it is used as one of the fields ot match the original transaction
+          type: number
+        merchant:
+          description: Contains information about the merchant and the method by which the transaction was accepted.
+          type: object
+          additionalProperties: false
+          required:
+            - type
+            - panEntryMethod
+          properties:
+            type:
+              description: Also known as MCC. Classifies the type of business applicable to card acceptor.
+              type: string
+            panEntryMethod:
+              description: (Aka. POS Entry Mode) Indicates method by which the PAN was entered into the system.
+              type: string
+              enum:
+                - NOT PROVIDED
+                - UNSPECIFIED
+                - MANUAL
+                - MAGNETIC STRIPE
+                - BAR CODE
+                - OCR
+                - INTEGRATED CIRCUIT CARD
+                - MANUAL KEY ENTERED
+                - CONTACTLESS EMV RULES
+                - CHIP CARD UNABLE MANUAL ENTRY
+                - CHIP CARD UNABLE MAGNETIC STRIPE
+                - ELECTRONIC COMMERCE
+                - PAN AUTO ENTRY VIA SERVER
+                - FULL MAGNETIC STRIPE
+                - CONTACTLESS MAG STRIPE RULES
+                - INTEGRATED CIRCUIT CARD CVV UNRELIABLE
+                - STORED VALUE PREREGISTERED CHECKOUT
+                - ON FILE
+                - SECURE ENTRY
+            strategicMerchant:
+              description: Indicates if the transaction originated from a strategic merchant.
+              type: boolean
+        adviceResponse:
+          additionalProperties: false
+          required:
+            - responseCode
+          properties:
+            authorizationIdResponse:
+              description: A value created by the authorizer to indicate approval and used to match to messages in the same transaction lifecycle.
+              type: string
+            responseCode:
+              description: A code that defines the disposition of the message.
+              type: string
+              enum:
+                - APPROVED
+                - REFER TO ISSUER
+                - REFER TO ISSUER SPECIAL CONDITION
+                - INVALID MERCHANT
+                - PICKUP
+                - DO NOT HONOR
+                - SYSTEM ERROR
+                - PICKUP CARD
+                - HONOR WITH ID
+                - REQUEST IN PROGRESS
+                - PARTIAL APPROVAL
+                - INVALID TRANSACTION
+                - INVALID AMOUNT
+                - CARD NOT FOUND
+                - REENTER TRANSACTION
+                - INVALID RESPONSE
+                - UNACCEPTABLE TRANSACTION FEE
+                - FILE UPDATE NOT SUPPORTED
+                - UNABLE TO LOCATE RECORD
+                - DUPLICATE FILE UPDATE
+                - FILE UPDATE EDIT ERROR
+                - FILE UPDATE FILE LOCKED
+                - FILE UPDATE FAILED
+                - FORMAT ERROR
+                - NO CREDIT ACCOUNT
+                - REQUESTED FUNCTION NOT SUPPORTED
+                - LOST CARD CAPTURE
+                - NO UNIVERSAL ACCOUNT
+                - STOLEN CARD CAPTURE
+                - NO INVESTMENT ACCOUNT
+                - INSUFFICIENT FUNDS
+                - NO CHECKING ACCOUNT
+                - NO SAVINGS ACCOUNT
+                - EXPIRED CARD
+                - INCORRECT PIN
+                - NO CARD RECORD
+                - TRANSACTION NOT PERMITTED TO CARDHOLDER
+                - TRANSACTION NOT PERMITTED TO TERMINAL
+                - SUSPECTED FRAUD
+                - EXCEEDS WITHDRAWAL LIMIT
+                - RESTRICTED CARD
+                - SECURITY VIOLATION
+                - EXCEEDS WITHDRAWAL FREQUENCY LIMIT
+                - HARD CAPTURE
+                - LATE RESPONSE
+                - PIN TRIES EXCEEDED
+                - KEY SYNC ERROR
+                - CARDHOLDER NOT ELIGIBLE FOR POS
+                - ISSUER NOT AVAILABLE
+                - DUPLICATE
+                - INFORMATION NOT ON FILE
+                - CARD VERIFICATION FAILURE
+                - CUTOFF IN PROGRESS
+                - ISSUER INOPERATIVE
+                - TRANSACTION CANNOT COMPLETE LAW VIOLATION
+                - DUPLICATE TRANSMISSION
+                - RECONCILE ERROR
+                - SYSTEM MALFUNCTION
+                - CARD VERIFICATION2 FAILURE
+                - CARD VERIFICATION3 FAILURE
+                - EXPIRATION DATE MISMATCH
+                - INACTIVE CARD
+                - ITEM SUSPECTED FOR STOP PAY
+                - ACCOUNT CLOSED
+                - INELIGIBLE ACCOUNT
+                - ITEM SUBMITTED MORE THAN TWO TIMES
+                - NO ACCT ON FILE
+                - UNABLE TO LOCATE
+                - GENERAL DENIAL
+                - SPECIAL CONDITIONS
+                - PIN REQUIRED
+                - PAN TRANSFORMATION ERROR
+                - RISK BLOCK
+                - INVALID ARQC
+                - REQUIRE ADDITIONAL AUTHENTICATION
+                - OTHER
+        settlementAmount:
+          description: The amount and currency of the transaction incurring the interchange fee.
+          allOf:
+            - $ref: '#/components/schemas/Amount'
+        isCrossBorder:
+          description: Identifies whether the transaction is a cross-border transaction for the message receiver.
+          type: boolean
+        issuerInterchangeGroupId:
+          description: Indicates the network interchange program applied to the transaction. This is used to determine the interchange rate and editing rules applied to the transaction.
+        interchangeFeeAmount:
+          description: The amount and currency of the interchange fee incurred for the transaction.
+          allOf:
+            - $ref: '#/components/schemas/Amount'
+        interchangeDebitCredit:
+          description: Indicates whether the fee is a debit or credit to the receiver.
+          type: string
+          enum:
+            - DEBIT
+            - CREDIT
+        interchangeFeeAmountExtended:
+          type: object
+          description: The amount and currency of the interchange fee incurred for the transaction in a format that allows for up to 6 decimal points of precision.
+          required:
+            - amountDecimalPosition
+            - amount
+            - currency
+          properties:
+            amountDecimalPosition:
+              description: This number represents the position the decimal point should be placed, starting from right.
+              type: number
+            amount:
+              type: string
+            currency:
+              type: string
+
+    Amount:
+      type: object
+      additionalProperties: false
+      required:
+        - amount
+        - currency
+      properties:
+        amount:
+          type: string
+        currency:
+          type: string
+
+  parameters:
+    interchangeId:
+      in: path
+      name: interchangeId
+      description: Unique identifier for an interchange record.
+      required: true
+      schema:
+        type: string
+
+    createdOn:
+      name: Created-On
+      in: header
+      description: CreatedOn-header
+      required: true
+      schema:
+        type: string
+        format: date-time
+
+  requestBodies:
+    Interchange:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Interchange'
+
+  responses:
+    Ping:
+      description: A successful response.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Ping'
+
+    ServerError:
+      description: An error response.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  headers:
+    Created-On:
+      description: Indicates the date-time the record was stored.
+      schema:
+        type: string
+        format: date-time
+
+    Updated-On:
+      description: Indicates the date-time the record was last changed. This date will be the same as the created-on for immutable records.
+      schema:
+        type: string
+        format: date-time
