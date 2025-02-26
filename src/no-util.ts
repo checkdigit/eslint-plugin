@@ -10,6 +10,7 @@ import { ESLintUtils } from '@typescript-eslint/utils';
 
 export const ruleId = 'no-util';
 const NO_UTIL = 'NO_UTIL';
+const DISABLE_NEXT_LINE = 'eslint-disable-next-line';
 
 const createRule = ESLintUtils.RuleCreator((name) => name);
 
@@ -28,15 +29,20 @@ const rule: ESLintUtils.RuleModule<typeof NO_UTIL> = createRule({
   defaultOptions: [],
   create(context) {
     return {
-      Program(node) {
+      Program() {
         const filename = context.filename;
         const utilRegex = /(?:^|[-_/])util(?=[-_./]|$)/iu;
         if (utilRegex.test(filename)) {
-          context.report({
-            messageId: NO_UTIL,
-            data: { filename },
-            node,
-          });
+          const filePathComment = context.sourceCode
+            .getAllComments()
+            .find((comment) => !comment.value.includes(DISABLE_NEXT_LINE));
+          if (filePathComment !== undefined) {
+            context.report({
+              messageId: NO_UTIL,
+              data: { filename },
+              node: filePathComment,
+            });
+          }
         }
       },
     };
