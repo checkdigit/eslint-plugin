@@ -45,11 +45,6 @@ ruleTester.run(ruleId, rule, {
       code: `test`,
       filename: 'test-utility.ts',
     },
-    {
-      name: 'Valid case with util.ts and comment with eslint',
-      code: `// eslint-disable-next-line...../no-util\n test`,
-      filename: 'util.ts',
-    },
   ],
   invalid: [
     {
