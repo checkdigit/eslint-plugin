@@ -258,16 +258,23 @@ function checkSelect(selectAST: With | Select, context: AthenaContext, withTable
       // throw new AthenaError(ATHENA_ERROR, `column exists in multiple referenced tables ${allTableNames.toString()}`);
     }
 
-    const [propertyAccessor] = JSONPath<string[]>({
+    let [propertyAccessor] = JSONPath<string[]>({
       json: columnAST as object,
       path: "$..[?(@ && @.type === 'function' && @.name && @.name.name && @.name.name[0] && (@.name.name[0].value === 'json_extract_scalar' || @.name.name[0].value === 'json_extract') )].args.value[1].value",
     }); /*?*/
     if (propertyAccessor === undefined) {
-      log('no property accessor found, keep it as default type');
-      tableColumns[columnNameToUse] = resolvedColumns.map((column) =>
-        getColumn(columnNameToUse, column.schema, columnAST as object),
-      );
-      continue;
+      const [jsonStylePropertyAccessor] = JSONPath<string[]>({
+        json: columnAST as object,
+        path: "$..[?(@ && @.type === 'column_ref' && @.array_index)].array_index[0].index.value",
+      }); /*?*/
+      if (jsonStylePropertyAccessor === undefined) {
+        log('no property accessor found, keep it as default type');
+        tableColumns[columnNameToUse] = resolvedColumns.map((column) =>
+          getColumn(columnNameToUse, column.schema, columnAST as object),
+        );
+        continue;
+      }
+      propertyAccessor = `$["${jsonStylePropertyAccessor}"]`;
     }
 
     log('property accessor', propertyAccessor);

@@ -188,6 +188,37 @@ createTester().run(ruleId, rule, {
       ],
     },
     {
+      name: 'invalid direct MAP style property access',
+      code: `\`
+        WITH unique_entries as (
+          select
+            cast(
+              json_extract(requestbody, '$.postings') as array(map(varchar, varchar))
+            ) as postings
+          from
+            ledger
+          where
+            method = 'PUT'
+            and responsestatus = '204'
+            and cardinality(split(url, '/')) = 5
+            and split(url, '/') [ 4 ] = 'entry'
+        )
+        select
+          posting [ 'XaccountId' ] as postingAccountId
+        from
+          unique_entries
+          cross join unnest(postings) as t(posting)
+      \``,
+      errors: [
+        {
+          messageId: 'AthenaError',
+          data: {
+            errorMessage: 'property not found posting - $["XaccountId"]',
+          },
+        },
+      ],
+    },
+    {
       name: 'issuer - customer',
       code: `\`WITH parameters AS (
   SELECT
@@ -1474,7 +1505,7 @@ unique_entries as (
     distinct split(url, '/') [ 5 ] as entryId,
     json_extract_scalar(responseheaders, '$["created-on"]') as entryCreatedOn,
     cast(
-      json_extract(requestbody, '$.Xpostings') as array(map(varchar, varchar))
+      json_extract(requestbody, '$.postings') as array(map(varchar, varchar))
     ) as postings
   from
     ledger
@@ -1506,7 +1537,7 @@ flattened_postings as (
     coalesce(posting [ 'createdOn' ], entryCreatedOn) as postingCreatedOn,
     posting [ 'type' ] as postingType,
     posting [ 'amount' ] as postingAmount,
-    posting [ 'currency' ] as postingCurrency
+    posting [ 'Xcurrency' ] as postingCurrency
   from
     parameters,
     unique_entries
@@ -1631,7 +1662,7 @@ order by
         {
           messageId: 'AthenaError',
           data: {
-            errorMessage: 'property not found requestbody - $.Xpostings',
+            errorMessage: 'property not found posting - $["Xcurrency"]',
           },
         },
       ],
