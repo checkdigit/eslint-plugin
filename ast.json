@@ -1,256 +1,190 @@
-[
-  {
-    "with": [
-      {
+{
+  "with": null,
+  "type": "select",
+  "options": null,
+  "distinct": null,
+  "columns": [
+    {
+      "type": "expr",
+      "expr": {
+        "type": "function",
         "name": {
-          "type": "default",
-          "value": "unnested"
+          "name": [
+            {
+              "type": "default",
+              "value": "json_extract_scalar"
+            }
+          ]
         },
-        "stmt": {
-          "tableList": ["select::null::link"],
-          "columnList": [
-            "select::null::url",
-            "select::null::responsebody",
-            "select::null::linkages",
-            "select::null::linkage",
-            "select::null::method",
-            "select::null::responsestatus"
-          ],
-          "ast": {
-            "with": null,
-            "type": "select",
-            "options": null,
-            "distinct": null,
-            "columns": [
+        "args": {
+          "type": "expr_list",
+          "value": [
+            {
+              "type": "column_ref",
+              "table": null,
+              "column": "responseheaders",
+              "collate": null
+            },
+            {
+              "type": "single_quote_string",
+              "value": "$[\"created-on\"]"
+            }
+          ]
+        },
+        "over": null,
+        "loc": {
+          "start": {
+            "offset": 15,
+            "line": 2,
+            "column": 9
+          },
+          "end": {
+            "offset": 71,
+            "line": 2,
+            "column": 65
+          }
+        }
+      },
+      "as": "linkChangedOn"
+    }
+  ],
+  "from": [
+    {
+      "db": null,
+      "table": "link",
+      "as": null
+    }
+  ],
+  "where": {
+    "type": "binary_expr",
+    "operator": "AND",
+    "left": {
+      "type": "binary_expr",
+      "operator": "AND",
+      "left": {
+        "type": "binary_expr",
+        "operator": "=",
+        "left": {
+          "type": "function",
+          "name": {
+            "name": [
               {
-                "type": "expr",
-                "expr": {
-                  "type": "column_ref",
-                  "table": null,
-                  "column": "url",
-                  "collate": null
-                },
-                "as": null
-              },
+                "type": "default",
+                "value": "cardinality"
+              }
+            ]
+          },
+          "args": {
+            "type": "expr_list",
+            "value": [
               {
-                "type": "expr",
-                "expr": {
-                  "type": "cast",
-                  "keyword": "cast",
-                  "expr": {
-                    "type": "column_ref",
-                    "table": null,
-                    "column": "responsebody",
-                    "collate": null
-                  },
-                  "symbol": "as",
-                  "target": [
+                "type": "function",
+                "name": {
+                  "name": [
                     {
-                      "dataType": "ARRAY",
-                      "angle_brackets": true,
-                      "expr": {
-                        "type": "expr_list",
-                        "value": [
-                          {
-                            "type": "datatype",
-                            "dataType": "VARCHAR"
-                          }
-                        ]
-                      }
+                      "type": "default",
+                      "value": "split"
                     }
                   ]
                 },
-                "as": "linkages"
-              }
-            ],
-            "from": [
-              {
-                "db": null,
-                "table": "link",
-                "as": null
-              },
-              {
-                "type": "unnest",
-                "expr": {
-                  "type": "column_ref",
-                  "table": null,
-                  "column": "linkages",
-                  "collate": null
-                },
-                "parentheses": true,
-                "as": {
-                  "type": "function",
-                  "name": {
-                    "name": [
-                      {
-                        "type": "default",
-                        "value": "t"
-                      }
-                    ]
-                  },
-                  "args": {
-                    "type": "expr_list",
-                    "value": [
-                      {
-                        "type": "column_ref",
-                        "table": null,
-                        "column": "linkage",
-                        "collate": null
-                      }
-                    ]
-                  },
-                  "over": null,
-                  "loc": {
-                    "start": {
-                      "offset": 138,
-                      "line": 3,
-                      "column": 42
+                "args": {
+                  "type": "expr_list",
+                  "value": [
+                    {
+                      "type": "column_ref",
+                      "table": null,
+                      "column": "url",
+                      "collate": null
                     },
-                    "end": {
-                      "offset": 158,
-                      "line": 4,
-                      "column": 9
+                    {
+                      "type": "single_quote_string",
+                      "value": "/"
                     }
-                  }
+                  ]
                 },
-                "with_offset": null,
-                "join": "CROSS JOIN",
-                "on": null
-              }
-            ],
-            "where": {
-              "type": "binary_expr",
-              "operator": "AND",
-              "left": {
-                "type": "binary_expr",
-                "operator": "AND",
-                "left": {
-                  "type": "binary_expr",
-                  "operator": "=",
-                  "left": {
-                    "type": "function",
-                    "name": {
-                      "name": [
-                        {
-                          "type": "default",
-                          "value": "cardinality"
-                        }
-                      ]
-                    },
-                    "args": {
-                      "type": "expr_list",
-                      "value": [
-                        {
-                          "type": "function",
-                          "name": {
-                            "name": [
-                              {
-                                "type": "default",
-                                "value": "split"
-                              }
-                            ]
-                          },
-                          "args": {
-                            "type": "expr_list",
-                            "value": [
-                              {
-                                "type": "column_ref",
-                                "table": null,
-                                "column": "url",
-                                "collate": null
-                              },
-                              {
-                                "type": "single_quote_string",
-                                "value": "/"
-                              }
-                            ]
-                          },
-                          "over": null,
-                          "loc": {
-                            "start": {
-                              "offset": 186,
-                              "line": 5,
-                              "column": 23
-                            },
-                            "end": {
-                              "offset": 201,
-                              "line": 5,
-                              "column": 38
-                            }
-                          }
-                        }
-                      ]
-                    },
-                    "over": null,
-                    "loc": {
-                      "start": {
-                        "offset": 174,
-                        "line": 5,
-                        "column": 11
-                      },
-                      "end": {
-                        "offset": 203,
-                        "line": 5,
-                        "column": 40
-                      }
-                    }
+                "over": null,
+                "loc": {
+                  "start": {
+                    "offset": 144,
+                    "line": 6,
+                    "column": 21
                   },
-                  "right": {
-                    "type": "number",
-                    "value": 5
-                  }
-                },
-                "right": {
-                  "type": "binary_expr",
-                  "operator": "=",
-                  "left": {
-                    "type": "column_ref",
-                    "table": null,
-                    "column": "method",
-                    "collate": null
-                  },
-                  "right": {
-                    "type": "single_quote_string",
-                    "value": "GET"
+                  "end": {
+                    "offset": 159,
+                    "line": 6,
+                    "column": 36
                   }
                 }
-              },
-              "right": {
-                "type": "binary_expr",
-                "operator": "=",
-                "left": {
-                  "type": "column_ref",
-                  "table": null,
-                  "column": "responsestatus",
-                  "collate": null
-                },
-                "right": {
-                  "type": "single_quote_string",
-                  "value": "200"
-                }
               }
+            ]
+          },
+          "over": null,
+          "loc": {
+            "start": {
+              "offset": 132,
+              "line": 6,
+              "column": 9
             },
-            "groupby": null,
-            "having": null,
-            "orderby": null,
-            "limit": null,
-            "loc": {
-              "start": {
-                "offset": 18,
-                "line": 1,
-                "column": 19
-              },
-              "end": {
-                "offset": 272,
-                "line": 7,
-                "column": 37
-              }
+            "end": {
+              "offset": 161,
+              "line": 6,
+              "column": 38
             }
           }
         },
-        "columns": null
+        "right": {
+          "type": "number",
+          "value": 7
+        }
+      },
+      "right": {
+        "type": "binary_expr",
+        "operator": "=",
+        "left": {
+          "type": "column_ref",
+          "table": null,
+          "column": "method",
+          "collate": null
+        },
+        "right": {
+          "type": "single_quote_string",
+          "value": "PUT"
+        }
       }
-    ],
+    },
+    "right": {
+      "type": "binary_expr",
+      "operator": "=",
+      "left": {
+        "type": "column_ref",
+        "table": null,
+        "column": "responsestatus",
+        "collate": null
+      },
+      "right": {
+        "type": "single_quote_string",
+        "value": "204"
+      }
+    }
+  },
+  "groupby": null,
+  "having": null,
+  "orderby": null,
+  "limit": null,
+  "loc": {
+    "start": {
+      "offset": 0,
+      "line": 1,
+      "column": 1
+    },
+    "end": {
+      "offset": 233,
+      "line": 9,
+      "column": 7
+    }
+  },
+  "_next": {
+    "with": null,
     "type": "select",
     "options": null,
     "distinct": null,
@@ -263,7 +197,7 @@
             "name": [
               {
                 "type": "default",
-                "value": "json_extract"
+                "value": "json_extract_scalar"
               }
             ]
           },
@@ -273,55 +207,167 @@
               {
                 "type": "column_ref",
                 "table": null,
-                "column": "linkage",
+                "column": "responseheaders",
                 "collate": null
               },
               {
                 "type": "single_quote_string",
-                "value": "$.subjectId"
+                "value": "$[\"Xupdated-on\"]"
               }
             ]
           },
           "over": null,
           "loc": {
             "start": {
-              "offset": 289,
-              "line": 8,
-              "column": 16
+              "offset": 264,
+              "line": 11,
+              "column": 9
             },
             "end": {
-              "offset": 326,
-              "line": 8,
-              "column": 53
+              "offset": 321,
+              "line": 11,
+              "column": 66
             }
           }
         },
-        "as": null
+        "as": "linkChangedOn"
       }
     ],
     "from": [
       {
         "db": null,
-        "table": "unnested",
+        "table": "link",
         "as": null
       }
     ],
-    "where": null,
+    "where": {
+      "type": "binary_expr",
+      "operator": "AND",
+      "left": {
+        "type": "binary_expr",
+        "operator": "AND",
+        "left": {
+          "type": "binary_expr",
+          "operator": "=",
+          "left": {
+            "type": "function",
+            "name": {
+              "name": [
+                {
+                  "type": "default",
+                  "value": "cardinality"
+                }
+              ]
+            },
+            "args": {
+              "type": "expr_list",
+              "value": [
+                {
+                  "type": "function",
+                  "name": {
+                    "name": [
+                      {
+                        "type": "default",
+                        "value": "split"
+                      }
+                    ]
+                  },
+                  "args": {
+                    "type": "expr_list",
+                    "value": [
+                      {
+                        "type": "column_ref",
+                        "table": null,
+                        "column": "url",
+                        "collate": null
+                      },
+                      {
+                        "type": "single_quote_string",
+                        "value": "/"
+                      }
+                    ]
+                  },
+                  "over": null,
+                  "loc": {
+                    "start": {
+                      "offset": 394,
+                      "line": 15,
+                      "column": 21
+                    },
+                    "end": {
+                      "offset": 409,
+                      "line": 15,
+                      "column": 36
+                    }
+                  }
+                }
+              ]
+            },
+            "over": null,
+            "loc": {
+              "start": {
+                "offset": 382,
+                "line": 15,
+                "column": 9
+              },
+              "end": {
+                "offset": 411,
+                "line": 15,
+                "column": 38
+              }
+            }
+          },
+          "right": {
+            "type": "number",
+            "value": 7
+          }
+        },
+        "right": {
+          "type": "binary_expr",
+          "operator": "=",
+          "left": {
+            "type": "column_ref",
+            "table": null,
+            "column": "method",
+            "collate": null
+          },
+          "right": {
+            "type": "single_quote_string",
+            "value": "PUT"
+          }
+        }
+      },
+      "right": {
+        "type": "binary_expr",
+        "operator": "=",
+        "left": {
+          "type": "column_ref",
+          "table": null,
+          "column": "responsestatus",
+          "collate": null
+        },
+        "right": {
+          "type": "single_quote_string",
+          "value": "204"
+        }
+      }
+    },
     "groupby": null,
     "having": null,
     "orderby": null,
     "limit": null,
     "loc": {
       "start": {
-        "offset": 0,
-        "line": 1,
-        "column": 1
+        "offset": 249,
+        "line": 10,
+        "column": 7
       },
       "end": {
-        "offset": 339,
-        "line": 8,
-        "column": 66
+        "offset": 476,
+        "line": 17,
+        "column": 35
       }
     }
-  }
-]
+  },
+  "set_op": "union all"
+}

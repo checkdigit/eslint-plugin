@@ -158,6 +158,36 @@ createTester().run(ruleId, rule, {
       ],
     },
     {
+      name: 'UNION ALL - some selects are invalid',
+      code: `\`
+      SELECT
+        json_extract_scalar(responseheaders, '$["created-on"]') AS linkChangedOn
+      FROM
+        link
+      WHERE
+        cardinality(split(url, '/')) = 7
+        AND method = 'PUT'
+        AND responsestatus = '204'
+      UNION ALL
+      SELECT
+        json_extract_scalar(responseheaders, '$["Xupdated-on"]') AS linkChangedOn
+      FROM
+        link
+      WHERE
+        cardinality(split(url, '/')) = 7
+        AND method = 'PUT'
+        AND responsestatus = '204'
+      \``,
+      errors: [
+        {
+          messageId: 'AthenaError',
+          data: {
+            errorMessage: 'property not found responseheaders - $["Xupdated-on"]',
+          },
+        },
+      ],
+    },
+    {
       name: 'issuer - customer',
       code: `\`WITH parameters AS (
   SELECT

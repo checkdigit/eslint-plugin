@@ -43,7 +43,7 @@ interface ResolvedColumn {
 
 interface Table {
   ast: unknown;
-  name: string;
+  name?: string;
   apiOperation?: MatchedOperation[];
   columns: Record<string, ResolvedColumn[]>;
 }
@@ -174,7 +174,7 @@ function checkSelect(selectAST: With | Select, context: AthenaContext, withTable
     const unnestedColumn = unnestedInTable.columns[fromColumn]?.[0]; /*?*/
     const unnestedColumnSchema = unnestedColumn?.schema; /*?*/
     assert.ok(unnestedColumnSchema?.type === 'array');
-    const transientUnnestedTableName = `${unnestedInTable.name}:unnested`;
+    const transientUnnestedTableName = `${unnestedInTable.name ?? '<anonymous>'}:<unnested>`;
     allResolvedTables[transientUnnestedTableName] = [
       {
         ast: unnestedInTable.ast,
@@ -317,15 +317,25 @@ function checkSelect(selectAST: With | Select, context: AthenaContext, withTable
     ),
   );
 
-  if (withTableName !== undefined) {
-    context.tables[withTableName] = [
-      {
-        ast: selectAST,
-        name: withTableName,
-        columns: tableColumns,
-      },
-    ];
+  // eslint-disable-next-line no-underscore-dangle
+  const nextSelect = (selectAST as Select)._next;
+  if (nextSelect !== undefined) {
+    const resolvedNextSelect = checkSelect(nextSelect, context, withTableName);
+    log('next select', resolvedNextSelect);
+    // [TODO:] check to make sure that the next select has the same columns as the current select
   }
+
+  const resolvedSelect = {
+    ast: selectAST,
+    ...(withTableName === undefined ? {} : { name: withTableName }),
+    columns: tableColumns,
+  };
+
+  if (withTableName !== undefined) {
+    context.tables[withTableName] = [resolvedSelect];
+  }
+
+  return resolvedSelect;
 }
 
 function checkAthenaAst(ast: AST, context: AthenaContext) {
