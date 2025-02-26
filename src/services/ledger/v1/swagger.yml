@@ -1,0 +1,1094 @@
+openapi: 3.0.0
+info:
+  title: Ledger Service
+  version: 1.12.0
+  description: |
+    ## Introduction
+
+    The Ledger Service implements a highly available, double-entry general journal.  It has a REST-ful interface, with
+    strict cacheable, idempotency and immutability guarantees.  It is designed to be the single source of account
+    balance “truth” across a client platform, whether for card-based transactions, manual transaction processing
+    or batch, independent of product or feature sets.  Because of it's central role as a single source of balances,
+    it is designed for a mix of real-time, latency-sensitive workloads and high-scale batch workloads.
+
+    The Ledger Service is designed for extremely high availability, and uses multiple cloud regions (e.g. in AWS,
+    us-east-1 and us-east-2).  Due to the fundamental nature of distributed systems, the necessary trade-off it makes
+    is one of eventual consistency; some real-time account balance inquiries may take time to reflect posted entries.
+    However the underlying S3-based "system of record" datafeed is always considered to be accurate.
+
+    ## Accounts and Entries
+
+    Fundamentally, the Ledger API presents the financial state of the platform as a set of ledger accounts.  A
+    ledger account can be in any currency (such as USD, but also including non-traditional currencies such as
+    "points", "miles" or "hours").
+
+    The financial state of the platform can only be changed by the successful creation of an Entry.  An
+    Entry contains a set of debit and credit postings, the total of which which must be equivalent.  i.e. the
+    sum total of debit postings for a given currency must exactly equal the sum total of credit postings for that
+    currency.  An Entry may contain a mix of currencies, to support currency exchange transactions.
+    Each posting references an account and an amount; if the Entry is processed successfully, the balance of each
+    account will be adjusted by the given amount.
+
+    ## Use Case: Card Processing
+
+    Pending Entries used, for example, in card processing are handled exactly the same as Entries, except they contain
+    postings with future dates.  Postings with future dates will only impact the balance of the account after that
+    future date has passed.  Typically pending entries would be managed in a separate account from the ledger entries.
+
+    As an example, during a pre-authorization, an Entry is created against a pending account which represents the hold
+    on funds.  That Entry consists of postings that happen right now and immediately impact the available balance of the
+    overall cardholder's account, and also contains future postings that represent the expiration of the hold at the
+    required hold expiration time.  It is important during card processing for the balance of all pending entries to
+    be used along with the ledger account balance in order to determine available funds.
+
+    ## IDs
+
+    All IDs are supplied by the resource creator and must be unique.  They are either a UUID or a combination
+    of UUID and other text.
+
+    ## Accounts
+
+    The type of a transaction is defined by the types of accounts that are used in it.  The type of an account is
+    defined as part of the ID of the account (defined in the documentation as `idFragments`).  For example, an account
+    that handles ACH ingress funds flows would be defined as having the ID `<uuid>/ach/ingress`.
+
+    ## Amounts
+
+    All amounts are in minimum monetary units based on the currency (for example cents for USD).  Amounts are
+    numerical strings that can represent arbitrarily large integers.
+
+    ## Versioning
+
+    Accounts can be either versioned or un-versioned depending on whether performing a posting is dependent on the
+    balance of the account or not.  The `versioned` parameter passed when creating an account can be used to specify
+    whether an account is versioned or not.
+
+    In order to post an Entry to a versioned account, you must first obtain the balance of all versioned accounts
+    involved in the entry's list of postings.  The ETag header value sent in the `/balances` API call response will be
+    used as the If-Match header input on a subsequent `PUT` for `/entry/<entryId>` call.
+
+    Please note that all versioned accounts involved in a posting must have their balances obtained in a single `GET`
+    `/balances` call in order to supply a single If-Match header when creating the Entry.
+
+    If the balance of any of the versioned accounts has changed between the time the ETag was obtained from the `GET`
+    `/balances` call and the time when the `PUT` `/entry/<entryId>` call is made, the `PUT` will fail with a `409`
+    error code.
+
+    Versioned accounts should only be used for accounts where the balance determines whether a posting should take
+    place or not.  Accounts used in card transactions for an individual cardholder should be versioned whereas a BIN or
+    program level account however should not be versioned.
+
+    ## Idempotency and retries
+
+    All mutating operations (e.g. creating Accounts and Entries) are idempotent.  In practice this means if there is
+    any doubt whether an operation succeeded, the client should retry, and if necessary perform exponential backoff.
+    Check Digit's recommended process is the same as AWS, see:
+    [Error retries and exponential backoff in AWS](https://docs.aws.amazon.com/general/latest/gr/api-retries.html)
+
+    © Check Digit LLC. 2021-2024
+  contact:
+    name: Check Digit
+
+servers:
+  - url: /ledger/v1
+tags:
+  - name: Service Health
+  - name: API
+
+x-firehose-logged: false
+
+paths:
+  /ping:
+    get:
+      tags:
+        - Service Health
+      operationId: 'ping-get'
+      description: Tests the availability of the service and returns the current server time.
+      responses:
+        '200':
+          $ref: '#/components/responses/Ping'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+  /account/{accountId}:
+    put:
+      tags:
+        - API
+      operationId: 'account-put'
+      x-firehose-logged: true
+      description: Creates an account. This operation is idempotent.
+      parameters:
+        - $ref: '#/components/parameters/accountId'
+        - $ref: '#/components/parameters/createdOn'
+        - $ref: '#/components/parameters/lastModified'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewAccount'
+      responses:
+        '204':
+          $ref: '#/components/responses/Created'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        default:
+          $ref: '#/components/responses/ServerError'
+    get:
+      tags:
+        - API
+      operationId: 'account-get'
+      description: Obtains an account with a specified ID.
+      parameters:
+        - $ref: '#/components/parameters/accountId'
+        - $ref: '#/components/parameters/at'
+      responses:
+        '200':
+          $ref: '#/components/responses/AccountObtained'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+  /account/{accountId}/{idFragment1}:
+    put:
+      tags:
+        - API
+      operationId: 'account-put=fragment1'
+      x-firehose-logged: true
+      description: Creates an account. This operation is idempotent.
+      parameters:
+        - $ref: '#/components/parameters/accountId'
+        - $ref: '#/components/parameters/createdOn'
+        - $ref: '#/components/parameters/lastModified'
+        - $ref: '#/components/parameters/idFragment1'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewAccount'
+      responses:
+        '204':
+          $ref: '#/components/responses/Created'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        default:
+          $ref: '#/components/responses/ServerError'
+    get:
+      tags:
+        - API
+      operationId: 'account-get=fragment1'
+      description: Obtains an account with a specified ID.
+      parameters:
+        - $ref: '#/components/parameters/accountId'
+        - $ref: '#/components/parameters/at'
+        - $ref: '#/components/parameters/idFragment1'
+      responses:
+        '200':
+          $ref: '#/components/responses/AccountObtained'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+  /account/{accountId}/{idFragment1}/{idFragment2}:
+    put:
+      tags:
+        - API
+      operationId: 'account-put=fragment2'
+      x-firehose-logged: true
+      description: Creates an account. This operation is idempotent.
+      parameters:
+        - $ref: '#/components/parameters/accountId'
+        - $ref: '#/components/parameters/createdOn'
+        - $ref: '#/components/parameters/lastModified'
+        - $ref: '#/components/parameters/idFragment1'
+        - $ref: '#/components/parameters/idFragment2'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewAccount'
+      responses:
+        '204':
+          $ref: '#/components/responses/Created'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        default:
+          $ref: '#/components/responses/ServerError'
+    get:
+      tags:
+        - API
+      operationId: 'account-get=fragment2'
+      description: Obtains an account with a specified ID.
+      parameters:
+        - $ref: '#/components/parameters/accountId'
+        - $ref: '#/components/parameters/at'
+        - $ref: '#/components/parameters/idFragment1'
+        - $ref: '#/components/parameters/idFragment2'
+      responses:
+        '200':
+          $ref: '#/components/responses/AccountObtained'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+  /account/{accountId}/{idFragment1}/{idFragment2}/{idFragment3}:
+    put:
+      tags:
+        - API
+      operationId: 'account-put=fragment3'
+      x-firehose-logged: true
+      description: Creates an account. This operation is idempotent.
+      parameters:
+        - $ref: '#/components/parameters/accountId'
+        - $ref: '#/components/parameters/createdOn'
+        - $ref: '#/components/parameters/lastModified'
+        - $ref: '#/components/parameters/idFragment1'
+        - $ref: '#/components/parameters/idFragment2'
+        - $ref: '#/components/parameters/idFragment3'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewAccount'
+      responses:
+        '204':
+          $ref: '#/components/responses/Created'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        default:
+          $ref: '#/components/responses/ServerError'
+    get:
+      tags:
+        - API
+      operationId: 'account-get=fragment3'
+      description: Obtains an account with a specified ID.
+      parameters:
+        - $ref: '#/components/parameters/accountId'
+        - $ref: '#/components/parameters/at'
+        - $ref: '#/components/parameters/idFragment1'
+        - $ref: '#/components/parameters/idFragment2'
+        - $ref: '#/components/parameters/idFragment3'
+      responses:
+        '200':
+          $ref: '#/components/responses/AccountObtained'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+  /account-entries:
+    get:
+      tags:
+        - API
+      operationId: 'account-entries-query-get'
+      description: Obtains the journal entries for an account.
+      parameters:
+        - $ref: '#/components/parameters/toDate'
+        - $ref: '#/components/parameters/fromDate'
+        - $ref: '#/components/parameters/accountIdQuery'
+      responses:
+        '200':
+          description: Entries successfully obtained
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntriesList'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+  /entry/{entryId}:
+    put:
+      tags:
+        - API
+      operationId: 'entry-put'
+      x-firehose-logged: true
+      description: >-
+        Creates a journal entry with a specific id. This operation is
+        idempotent.
+      parameters:
+        - $ref: '#/components/parameters/entryId'
+        - $ref: '#/components/parameters/ifMatch'
+        - $ref: '#/components/parameters/createdOn'
+        - $ref: '#/components/parameters/lastModified'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewEntry'
+      responses:
+        '204':
+          $ref: '#/components/responses/Created'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '412':
+          $ref: '#/components/responses/PreConditionFailed'
+        default:
+          $ref: '#/components/responses/ServerError'
+    get:
+      tags:
+        - API
+      operationId: 'entry-get'
+      description: Obtains a journal entry with a specified id.
+      parameters:
+        - $ref: '#/components/parameters/entryId'
+        - $ref: '#/components/parameters/at'
+      responses:
+        '200':
+          description: Entry obtained successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseEntry'
+          headers:
+            Created-On:
+              $ref: '#/components/headers/Created-On'
+            Updated-On:
+              $ref: '#/components/headers/Updated-On'
+            Last-Modified:
+              $ref: '#/components/headers/Last-Modified'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+  /balance:
+    get:
+      tags:
+        - API
+      operationId: 'balance-get'
+      description: >-
+        Calculates the balance for multiple accounts at a specific point in
+        time.
+      parameters:
+        - $ref: '#/components/parameters/accountIdQuery'
+        - $ref: '#/components/parameters/at'
+        - $ref: '#/components/parameters/ifNoneMatch'
+      responses:
+        '200':
+          description: Calculated account balances.
+          headers:
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BalanceList'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+  /total:
+    get:
+      tags:
+        - API
+      operationId: 'total-get'
+      summary: This operation calculates the total debit or credit to an account within a period of time.
+      description: |
+        - The totals for multiple accounts can be calculated in a single request.
+        - Those totals can be narrowed to only include entries that involve accounts in the filteredAccountIdQuery.
+        - If debits exceed credits, the total value will be negative.
+        - If the filteredAccountIdQuery is not supplied, the entries will not be filtered before forming the total.
+        - Entries whose created entry mappings do not contain the entryAccountIds field will not be included in the totals calculation
+      parameters:
+        - $ref: '#/components/parameters/accountIdQuery'
+        - $ref: '#/components/parameters/filterAccountIdQuery'
+        - $ref: '#/components/parameters/fromDate'
+        - $ref: '#/components/parameters/toDate'
+      responses:
+        '200':
+          description: Calculated total of filtered entries for the accounts specified.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TotalsList'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+components:
+  schemas:
+    Ping:
+      type: object
+      additionalProperties: false
+      required:
+        - serverTime
+      properties:
+        serverTime:
+          type: string
+          format: date-time
+          description: Current server time.
+
+    Error:
+      type: object
+      additionalProperties: false
+      description: Error message.
+      required:
+        - code
+      properties:
+        message:
+          type: string
+        code:
+          type: string
+          enum:
+            - INVALID_AT
+            - INVALID_FROM
+            - INVALID_TO
+            - INVALID_CREATED_ON
+            - INVALID_LAST_MODIFIED
+            - INVALID_IF_MATCH
+            - FROM_GREATER_THAN_TO
+            - ACCOUNT_NOT_FOUND
+            - POSTING_AMOUNT_NOT_AN_INTEGER
+            - ACCOUNT_MULTIPLE_POSTINGS
+            - LAST_MODIFIED_BEFORE_ACCOUNT_CREATED_ON
+            - POSTING_WITH_ZERO_AMOUNT
+            - POSTING_WITH_NEGATIVE_AMOUNT
+            - VERSION_SUPPLIED_FOR_UNVERSIONED_ACCOUNT
+            - NO_POSTINGS
+            - INSUFFICIENT_POSTINGS
+            - UNEQUAL_CREDIT_DEBIT
+            - VERSION_BALANCE_MISMATCH
+            - VERSION_MISMATCH
+            - CURRENCY_MISMATCH
+            - UNHANDLED_ERROR
+
+    Currency:
+      type: string
+      enum:
+        - AED
+        - AFN
+        - ALL
+        - AMD
+        - ANG
+        - AOA
+        - ARS
+        - AUD
+        - AWG
+        - AZN
+        - BAM
+        - BBD
+        - BDT
+        - BGN
+        - BHD
+        - BIF
+        - BMD
+        - BND
+        - BOB
+        - BOV
+        - BRL
+        - BSD
+        - BTN
+        - BWP
+        - BYN
+        - BZD
+        - CAD
+        - CDF
+        - CHE
+        - CHF
+        - CHW
+        - CLF
+        - CLP
+        - CNY
+        - COP
+        - COU
+        - CRC
+        - CUC
+        - CUP
+        - CVE
+        - CZK
+        - DJF
+        - DKK
+        - DOP
+        - DZD
+        - EGP
+        - ERN
+        - ETB
+        - EUR
+        - FJD
+        - FKP
+        - GBP
+        - GEL
+        - GHS
+        - GIP
+        - GMD
+        - GNF
+        - GTQ
+        - GYD
+        - HKD
+        - HNL
+        - HRK
+        - HTG
+        - HUF
+        - IDR
+        - ILS
+        - INR
+        - IQD
+        - IRR
+        - ISK
+        - JMD
+        - JOD
+        - JPY
+        - KES
+        - KGS
+        - KHR
+        - KMF
+        - KPW
+        - KRW
+        - KWD
+        - KYD
+        - KZT
+        - LAK
+        - LBP
+        - LKR
+        - LRD
+        - LSL
+        - LYD
+        - MAD
+        - MDL
+        - MGA
+        - MKD
+        - MMK
+        - MNT
+        - MOP
+        - MRU
+        - MUR
+        - MVR
+        - MWK
+        - MXN
+        - MXV
+        - MYR
+        - MZN
+        - NAD
+        - NGN
+        - NIO
+        - NOK
+        - NPR
+        - NZD
+        - OMR
+        - PAB
+        - PEN
+        - PGK
+        - PHP
+        - PKR
+        - PLN
+        - PYG
+        - QAR
+        - RON
+        - RSD
+        - RUB
+        - RWF
+        - SAR
+        - SBD
+        - SCR
+        - SDG
+        - SEK
+        - SGD
+        - SHP
+        - SLL
+        - SOS
+        - SRD
+        - SSP
+        - STN
+        - SVC
+        - SYP
+        - SZL
+        - THB
+        - TJS
+        - TMT
+        - TND
+        - TOP
+        - TRY
+        - TTD
+        - TWD
+        - TZS
+        - UAH
+        - UGX
+        - USD
+        - USN
+        - UYI
+        - UYU
+        - UYW
+        - UZS
+        - VES
+        - VND
+        - VUV
+        - WST
+        - XAF
+        - XAG
+        - XAU
+        - XBA
+        - XBB
+        - XBC
+        - XBD
+        - XCD
+        - XDR
+        - XOF
+        - XPD
+        - XPF
+        - XPT
+        - XSU
+        - XTS
+        - XUA
+        - XXX
+        - YER
+        - ZAR
+        - ZMW
+        - ZWL
+
+    Account:
+      type: object
+      additionalProperties: false
+      required:
+        - accountId
+        - createdOn
+        - currency
+        - type
+      properties:
+        accountId:
+          type: string
+          description: Account ID
+        createdOn:
+          type: string
+          format: date-time
+          description: Account creation date/time.
+        currency:
+          $ref: '#/components/schemas/Currency'
+        name:
+          type: string
+          description: Account short name.
+        type:
+          type: string
+          enum:
+            - VERSIONED
+            - UNVERSIONED
+
+    NewAccount:
+      type: object
+      additionalProperties: false
+      required:
+        - currency
+      properties:
+        currency:
+          $ref: '#/components/schemas/Currency'
+        name:
+          type: string
+          description: Account short name
+        type:
+          type: string
+          enum:
+            - VERSIONED
+            - UNVERSIONED
+          description: >-
+            Determines whether performing a posting is dependent on the balance
+            of the account or not. Defaults to VERSIONED if not supplied.
+
+    BalanceList:
+      type: object
+      additionalProperties: false
+      description: Balances for the accounts requested.
+      required:
+        - at
+        - balances
+      properties:
+        at:
+          type: string
+          format: date-time
+          description: Account balance at this date/time
+        balances:
+          type: array
+          items:
+            $ref: '#/components/schemas/Balance'
+
+    Balance:
+      type: object
+      additionalProperties: false
+      description: Ledger balance at a point in time.
+      required:
+        - accountId
+        - balance
+      properties:
+        accountId:
+          type: string
+          description: Account ID
+        balance:
+          type: string
+
+    EntriesList:
+      type: object
+      additionalProperties: false
+      required:
+        - accountEntries
+      properties:
+        accountEntries:
+          type: array
+          items:
+            $ref: '#/components/schemas/Entries'
+
+    Entries:
+      type: object
+      additionalProperties: false
+      required:
+        - entries
+        - accountId
+      properties:
+        accountId:
+          type: string
+          description: Account ID
+        entries:
+          type: array
+          minItems: 0
+          items:
+            $ref: '#/components/schemas/Entry'
+
+    Entry:
+      type: object
+      additionalProperties: false
+      required:
+        - entryId
+        - createdOn
+        - postings
+      properties:
+        entryId:
+          type: string
+          description: Journal entry ID
+        createdOn:
+          type: string
+          format: date-time
+          description: Journal entry creation date/time
+        postings:
+          type: array
+          items:
+            $ref: '#/components/schemas/Post'
+
+    ResponseEntry:
+      type: object
+      additionalProperties: false
+      required:
+        - entryId
+        - createdOn
+        - postings
+      properties:
+        entryId:
+          type: string
+          description: Journal entry ID
+        createdOn:
+          type: string
+          format: date-time
+          description: Journal entry creation date/time
+        postings:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResponsePost'
+
+    NewEntry:
+      type: object
+      additionalProperties: false
+      required:
+        - postings
+      properties:
+        postings:
+          type: array
+          description: List of posts contained within the journal entry.
+          items:
+            $ref: '#/components/schemas/Post'
+
+    Post:
+      type: object
+      additionalProperties: false
+      required:
+        - amount
+        - currency
+        - type
+        - accountId
+      properties:
+        amount:
+          type: string
+        currency:
+          $ref: '#/components/schemas/Currency'
+        type:
+          $ref: '#/components/schemas/Type'
+        createdOn:
+          type: string
+          format: date-time
+        accountId:
+          type: string
+          description: account ID
+
+    ResponsePost:
+      type: object
+      additionalProperties: false
+      required:
+        - amount
+        - currency
+        - type
+        - accountId
+        - createdOn
+      properties:
+        amount:
+          type: string
+        currency:
+          $ref: '#/components/schemas/Currency'
+        type:
+          $ref: '#/components/schemas/Type'
+        createdOn:
+          type: string
+          format: date-time
+        accountId:
+          type: string
+          description: account ID
+
+    Type:
+      type: string
+      description: CREDIT or DEBIT
+      enum:
+        - CREDIT
+        - DEBIT
+
+    TotalsList:
+      type: array
+      additionalProperties: false
+      description: Totals of filtered entries for the accounts requested.
+      items:
+        $ref: '#/components/schemas/Total'
+      minItems: 1
+
+    Total:
+      type: object
+      additionalProperties: false
+      description: |
+        - The total debit or credit to an account.
+        - If debits exceed credits the total value will be negative.
+        - AccountIds may include idFragments formatted as: :accountId/:idFragment1/:idFragment2/:idFragment3.
+      required:
+        - accountId
+        - total
+      properties:
+        accountId:
+          type: string
+          description: account ID
+        total:
+          type: string
+          minLength: 1
+
+  parameters:
+    ifNoneMatch:
+      in: header
+      name: If-None-Match
+      description: If-None-Match header
+      schema:
+        type: string
+
+    idFragment1:
+      in: path
+      required: true
+      name: idFragment1
+      description: Fragment of a unique identifier.
+      schema:
+        type: string
+
+    idFragment2:
+      in: path
+      required: true
+      name: idFragment2
+      description: Fragment of a unique identifier.
+      schema:
+        type: string
+
+    idFragment3:
+      in: path
+      required: true
+      name: idFragment3
+      description: Fragment of a unique identifier.
+      schema:
+        type: string
+
+    ifMatch:
+      in: header
+      name: If-Match
+      description: If-Match header
+      schema:
+        type: string
+
+    accountId:
+      in: path
+      name: accountId
+      description: Unique identifier for an account.
+      required: true
+      schema:
+        type: string
+
+    accountIdQuery:
+      in: query
+      name: accountIds
+      description: |
+        - UUID for accounts.
+        - For accountIds with idFragments, format like so :accountId/:idFragment1/:idFragment2/:idFragment3.
+      required: true
+      schema:
+        type: array
+        minItems: 1
+        items:
+          type: string
+
+    filterAccountIdQuery:
+      in: query
+      name: filteredAccounts
+      description: |
+        - UUIDs for accounts to filter entries by.
+        - For accountIds with idFragments, format like so :accountId/:idFragment1/:idFragment2/:idFragment3.
+      schema:
+        type: array
+        minItems: 1
+        items:
+          type: string
+
+    at:
+      in: query
+      name: at
+      description: Returns data createdOn before this time.
+      required: true
+      schema:
+        type: string
+        format: date-time
+
+    entryId:
+      in: path
+      name: entryId
+      description: Unique identifier for an entry.
+      required: true
+      schema:
+        type: string
+
+    toDate:
+      in: query
+      name: toDate
+      description: >-
+        Return entries created before this time. Must be at least 1 second in
+        the past.
+      required: true
+      schema:
+        type: string
+        format: date-time
+
+    fromDate:
+      in: query
+      name: fromDate
+      description: >-
+        Return entries created at or after this time. Must be at least 1 second
+        in the past.
+      schema:
+        type: string
+        format: date-time
+
+    createdOn:
+      in: header
+      name: Created-On
+      description: used to set resource creation date.
+      schema:
+        type: string
+        format: date-time
+
+    lastModified:
+      in: header
+      name: Last-Modified
+      description: used to set resource creation date.
+      required: false
+      schema:
+        type: string
+        format: date-time
+
+  responses:
+    Ping:
+      description: ping successful response.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Ping'
+
+    ServerError:
+      description: Server Error response.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    NotFound:
+      description: Requested resource not found.
+
+    Conflict:
+      description: Conflict
+
+    PreConditionFailed:
+      description: Version tag mismatch
+
+    BadRequest:
+      description: Bad Request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    Created:
+      description: Created.
+      headers:
+        Created-On:
+          $ref: '#/components/headers/Created-On'
+        Updated-On:
+          $ref: '#/components/headers/Updated-On'
+        Last-Modified:
+          $ref: '#/components/headers/Last-Modified'
+
+    AccountObtained:
+      description: Account obtained.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Account'
+      headers:
+        Created-On:
+          $ref: '#/components/headers/Created-On'
+        Updated-On:
+          $ref: '#/components/headers/Updated-On'
+        Last-Modified:
+          $ref: '#/components/headers/Last-Modified'
+
+  headers:
+    Created-On:
+      description: When the resource was created.
+      required: true
+      schema:
+        type: string
+        format: date-time
+
+    Updated-On:
+      description: When the resource was created (all resources are immutable).
+      required: true
+      schema:
+        type: string
+        format: date-time
+
+    Last-Modified:
+      description: When the resource was created (all resources are immutable).
+      required: true
+      schema:
+        type: string
+        format: date-time
+
+    ETag:
+      description: Version information
+      required: true
+      schema:
+        type: string

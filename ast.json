@@ -7,9 +7,7 @@
           "value": "unnested"
         },
         "stmt": {
-          "tableList": [
-            "select::null::link"
-          ],
+          "tableList": ["select::null::link"],
           "columnList": [
             "select::null::url",
             "select::null::responsebody",

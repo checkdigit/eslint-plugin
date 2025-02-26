@@ -1389,5 +1389,222 @@ FROM
         },
       ],
     },
+    {
+      name: 'teampay-issuer - journal',
+      code: `\`with parameters as (
+  select
+    '' as p_from,
+    '' as p_to
+    /* example:
+     '2022-03-01T00:00:00.000Z' as p_from,
+     '2022-03-15T00:00:00.000Z' as p_to
+     */
+),
+client_names as (
+  select
+    distinct split(url, '/') [ 5 ] as clientId,
+    json_extract_scalar(responseheaders, '$["updated-on"]') as updatedOn,
+    json_extract_scalar(responsebody, '$.name') as clientName
+  from
+    "teampay-client-management"
+  where
+    method = 'PUT'
+    and responsestatus = '200'
+    and cardinality(split(url, '/')) = 5
+    and split(url, '/') [ 4 ] = 'client'
+),
+client_payment_sources as (
+  select
+    json_extract_scalar(requestbody, '$.clientId') as clientId,
+    array_agg(split(url, '/') [ 5 ]) as paymentSourceIds
+  from
+    "teampay-client-management"
+  where
+    method = 'PUT'
+    and responsestatus = '200'
+    and cardinality(split(url, '/')) = 5
+    and split(url, '/') [ 4 ] = 'ach-payment-source'
+  group by
+    json_extract_scalar(requestbody, '$.clientId')
+),
+ledger_account_names as (
+  select
+    /* TODO: replace magic number (should be length('/ledger/v1/account/')+1 ), length function does not work in aws-nock */
+    distinct substr(url, 20) as accountId,
+    json_extract_scalar(requestbody, '$.name') as accountName
+  from
+    "ledger"
+  where
+    method = 'PUT'
+    and responsestatus = '204'
+    and split_part(url, '/', 4) = 'account'
+),
+unique_entries as (
+  select
+    distinct split(url, '/') [ 5 ] as entryId,
+    json_extract_scalar(responseheaders, '$["created-on"]') as entryCreatedOn,
+    cast(
+      json_extract(requestbody, '$.Xpostings') as array(map(varchar, varchar))
+    ) as postings
+  from
+    ledger
+  where
+    method = 'PUT'
+    and responsestatus = '204'
+    and cardinality(split(url, '/')) = 5
+    and split(url, '/') [ 4 ] = 'entry'
+),
+flattened_postings as (
+  select
+    entryId,
+    entryCreatedOn,
+    posting [ 'accountId' ] as postingAccountId,
+    if(
+      strpos(posting [ 'accountId' ], '-PENDING') > 0,
+      substr(
+        posting [ 'accountId' ],
+        1,
+        /* TODO: replace magic number (should be length('-PENDING')), length function does not work in aws-nock */
+        length(posting [ 'accountId' ]) - 8
+      ),
+      if(
+        strpos(posting [ 'accountId' ], '/') > 0,
+        split(posting [ 'accountId' ], '/') [ 1 ],
+        posting [ 'accountId' ]
+      )
+    ) as postingRootAccountId,
+    coalesce(posting [ 'createdOn' ], entryCreatedOn) as postingCreatedOn,
+    posting [ 'type' ] as postingType,
+    posting [ 'amount' ] as postingAmount,
+    posting [ 'currency' ] as postingCurrency
+  from
+    parameters,
+    unique_entries
+    cross join unnest(postings) as t(posting)
+  where
+    coalesce(posting [ 'createdOn' ], entryCreatedOn) >= p_from
+    and coalesce(posting [ 'createdOn' ], entryCreatedOn) < p_to
+),
+posting_payment_source_client_name as (
+  select
+    p.postingCreatedOn || '|' || p.postingRootAccountId as postingAccountKey,
+    split(max(cn.updatedOn || '|' || cn.clientName), '|') [ 2 ] as clientName
+  from
+    flattened_postings p,
+    client_payment_sources cps,
+    client_names cn
+  where
+    contains(cps.paymentSourceIds, p.postingRootAccountId)
+    and cps.clientId = cn.clientId
+    and cn.updatedOn <= p.postingCreatedOn
+  group by
+    p.postingCreatedOn || '|' || p.postingRootAccountId
+),
+posting_client_name as (
+  select
+    p.postingCreatedOn || '|' || p.postingRootAccountId as postingAccountKey,
+    split(max(cn.updatedOn || '|' || cn.clientName), '|') [ 2 ] as clientName
+  from
+    flattened_postings p,
+    client_names cn
+  where
+    cn.clientId = p.postingRootAccountId
+    and cn.updatedOn <= p.postingCreatedOn
+  group by
+    p.postingCreatedOn || '|' || p.postingRootAccountId
+),
+postings_as_json as (
+  select
+    cast('"' || p.entryId || '"' as json) as entryId,
+    entryCreatedOn,
+    cast(
+      map(
+        array [ 'accountId',
+        'accountName',
+        'createdOn',
+        'type',
+        'amount',
+        'currency',
+        'paymentSourceType' ],
+        array [ cast('"' || p.postingAccountId || '"' as json),
+        cast(
+          '"' || coalesce(
+            if (
+              ppscn.clientName is not null,
+              if(
+                a.accountName is not null,
+                ppscn.clientName || ' - ' || a.accountName,
+                ppscn.clientName
+              ),
+              null
+            ),
+            pcn.clientName,
+            a.accountName,
+            ''
+          ) || '"' as json
+        ),
+        cast('"' || p.postingCreatedOn || '"' as json),
+        cast('"' || p.postingType || '"' as json),
+        cast('"' || p.postingAmount || '"' as json),
+        cast('"' || p.postingCurrency || '"' as json),
+        cast(
+          '"' || if (
+            cps.paymentSourceIds is not null,
+            'ACH',
+            'NOT APPLICABLE'
+          ) || '"' as json
+        ) ]
+      ) as json
+    ) as posting
+  from
+    flattened_postings as p
+    left outer join client_payment_sources as cps on contains(cps.paymentSourceIds, p.postingRootAccountId)
+    or cps.clientId = p.postingRootAccountId
+    left outer join posting_client_name as pcn on pcn.postingAccountKey = p.postingCreatedOn || '|' || p.postingRootAccountId
+    left outer join posting_payment_source_client_name as ppscn on ppscn.postingAccountKey = p.postingCreatedOn || '|' || p.postingRootAccountId
+    left outer join ledger_account_names as a on a.accountId = p.postingAccountId
+),
+journal_entries as (
+  select
+    json_format(
+      cast(
+        map(
+          array [ 'recordType',
+          'source',
+          'destination',
+          'entryId',
+          'createdOn',
+          'postings' ],
+          array [ cast('"ISSUER JOURNAL ENTRY"' as json),
+          cast('"teampay-prod"' as json),
+          cast('"choice-prod"' as json),
+          entryId,
+          cast('"' || max(entryCreatedOn) || '"' as json),
+          cast(array_agg(posting) as json) ]
+        ) as json
+      )
+    ) as journalEntry,
+    max(entryCreatedOn) as entryCreatedOn
+  from
+    postings_as_json
+  group by
+    entryId
+)
+select
+  journalEntry,
+  entryCreatedOn
+from
+  journal_entries
+order by
+  entryCreatedOn\``,
+      errors: [
+        {
+          messageId: 'AthenaError',
+          data: {
+            errorMessage: 'property not found requestbody - $.Xpostings',
+          },
+        },
+      ],
+    },
   ],
 });

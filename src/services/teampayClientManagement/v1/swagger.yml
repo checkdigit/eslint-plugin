@@ -1,0 +1,1376 @@
+openapi: 3.0.0
+info:
+  title: Teampay Client Management
+  version: 1.28.0
+  description: |
+    Teampay Client Management is a service used to create, update and retrieve a client and its payment sources.
+
+    The service also initiates payment transactions between a client account and its payment sources.
+
+    This service follows REST principles. `GET` operations are cache-able, and `PUT` operations are idempotent.
+
+    Client name, address and limits are mutable. Any updates to issuingCountryCode, funding, and products will result in a 400 Bad Request.
+  contact:
+    name: Teampay
+
+servers:
+  - url: /teampay-client-management/v1
+tags:
+  - name: Service Health
+  - name: API
+
+x-firehose-logged: false
+
+paths:
+  /ping:
+    get:
+      tags:
+        - Service Health
+      operationId: 'ping-get'
+      description: Tests the availability of the service and returns the current server time.
+      responses:
+        '200':
+          $ref: '#/components/responses/Ping'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+  /client/{clientId}:
+    get:
+      tags:
+        - API
+      operationId: 'client-get'
+      description: Retrieves client details.
+      parameters:
+        - $ref: '#/components/parameters/clientId'
+        - $ref: '#/components/parameters/at'
+      responses:
+        '200':
+          description: Client details obtained.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client'
+          headers:
+            Last-Modified:
+              $ref: '#/components/headers/Last-Modified'
+            Created-On:
+              $ref: '#/components/headers/Created-On'
+            Updated-On:
+              $ref: '#/components/headers/Updated-On'
+            ETag:
+              $ref: '#/components/headers/ETag'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/ServerError'
+    put:
+      tags:
+        - API
+      operationId: 'client-put'
+      x-firehose-logged: true
+      description: |
+        Create or update a client.
+        The If-Match header should be supplied when updating an existing client but not when creating a new one.
+        When updating a client, the If-Match header value should equal the ETag header value of the latest version of the specified client.
+        ETag values can be retrieved by using the GET /client/{clientId} endpoint.
+      parameters:
+        - $ref: '#/components/parameters/clientId'
+        - $ref: '#/components/parameters/ifMatch'
+      requestBody:
+        $ref: '#/components/requestBodies/NewClient'
+      responses:
+        '200':
+          description: Client created or updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client'
+          headers:
+            Last-Modified:
+              $ref: '#/components/headers/Last-Modified'
+            Created-On:
+              $ref: '#/components/headers/Created-On'
+            Updated-On:
+              $ref: '#/components/headers/Updated-On'
+            ETag:
+              $ref: '#/components/headers/ETag'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '412':
+          $ref: '#/components/responses/PreconditionFailed'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+  /client/{clientId}/balance:
+    get:
+      tags:
+        - API
+      operationId: 'client-balance-get'
+      description: Retrieve the available balance and ledger balance of a client account
+      parameters:
+        - $ref: '#/components/parameters/clientId'
+        - $ref: '#/components/parameters/at'
+      responses:
+        '200':
+          description: Balance retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientBalance'
+        '404':
+          description: Client not found
+        default:
+          $ref: '#/components/responses/ServerError'
+
+  /ach-payment-source/{achPaymentSourceId}:
+    get:
+      tags:
+        - API
+      operationId: 'ach-payment-source-get'
+      description: |
+        Retrieve a client ACH payment Source.
+        Some achPaymentSource data found in the response will be encrypted.
+
+        # Decrypting the achPaymentSource data
+
+        - Decrypt the transmissionKey found in the response using the RSA algorithm, and the matching private key for the public key that was shared with Check Digit to be able to decrypt ACH payment source data.
+        - Decrypt each encrypted achPaymentSource field using the AES-256-CBC algorithm, and the decrypted transmissionKey
+
+        Note - The AES secret key obtained after decrypting the transmission key will not be the same one that was used to create the ACH payment source.
+
+        Example achPaymentSource data
+        ###
+        {
+          "accountName":"hEajv5fwZp0Q0GgF2VYySspD4/xIL+t4q2Sp4PK7fXY=", <- Decrypt encrypted fields using the AES-256-CBC algorithm, and the decrypted encryptedDataEncryptionKey
+          "accountType":"CHECKING",
+          "accountNumber":"79M1/JWToIRV6UhKx3qH37+fg+3D/UWsNMILdTQtI6Y=",
+          "routingNumber":"82XBXUA18oEDBXj22V7/lMaou6uXMkbdnrqQf+UpFUk="
+        }
+        ###
+      parameters:
+        - $ref: '#/components/parameters/achPaymentSourceId'
+        - $ref: '#/components/parameters/at'
+      responses:
+        '200':
+          description: Client ACH payment source obtained
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientAchPaymentSource'
+          headers:
+            Last-Modified:
+              $ref: '#/components/headers/Last-Modified'
+            Created-On:
+              $ref: '#/components/headers/Created-On'
+            Updated-On:
+              $ref: '#/components/headers/Updated-On'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/ServerError'
+    put:
+      tags:
+        - API
+      operationId: 'ach-payment-source-put'
+      x-firehose-logged: true
+      description: |
+        Create an ACH payment source linked to a client.
+        The resulting ACH payment source ledger account IDs will be in the format of "{achPaymentSourceId}/payment/*"
+
+        ### Personally Identifiable Information (PII)
+        Some of the fields required for creation of a new ACH payment source are considered
+        personally identifiable information and hence must be transmitted and stored securely.
+
+        ### Encryption
+        All fields that are expected to be encrypted include the word 'encrypted' in their description.
+
+        Creation of new ACH payment sources uses a combination of both symmetric encryption, using the AES-256-CBC algorithm,
+        and asymmetric encryption, using the RSA algorithm. More specifically, the field values are encrypted symmetrically
+        with a secret key and the secret key is encrypted asymmetrically using a public/private key pair.
+
+        # Encrypting new ACH payment source data
+
+        - Generate a random secret key using AES
+        - AES encrypt each field (encryption expected) of the achPaymentSource with the secret key.
+        - RSA encrypt the secret key with the public key shared by Check Digit associated with the Teampay Client Management service and specific environment to produce a transmissionKey.
+        - Submit the transmissionKey in the ACH payment source creation request.
+
+        Example ACH payment source request data
+        ###
+        {
+           "clientId":"e28d87d7-dff3-44a6-b62e-e7d0065207c0",
+           "transmissionKey":"XhpZPSmNVVWrAzABhNXfHmTZIUlHt0wzHr/v2N3FaLwtL0stPnHC6+8okkCoHXvmmn4...", <-- Encrypted secret key using the RSA algorithm, and the public key shared by Check Digit
+           "achPaymentSource":{
+              "accountName":"hEajv5fwZp0Q0GgF2VYySspD4/xIL+t4q2Sp4PK7fXY=", <- AES-256-CBC encrypted field using the above secret key (before encryption)
+              "accountType":"CHECKING",
+              "accountNumber":"79M1/JWToIRV6UhKx3qH37+fg+3D/UWsNMILdTQtI6Y=",
+              "routingNumber":"82XBXUA18oEDBXj22V7/lMaou6uXMkbdnrqQf+UpFUk="
+           }
+        }
+        ###
+      parameters:
+        - $ref: '#/components/parameters/achPaymentSourceId'
+      requestBody:
+        $ref: '#/components/requestBodies/NewClientAchPaymentSource'
+      responses:
+        '200':
+          description: Client ACH payment source created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientAchPaymentSource'
+          headers:
+            Last-Modified:
+              $ref: '#/components/headers/Last-Modified'
+            Created-On:
+              $ref: '#/components/headers/Created-On'
+            Updated-On:
+              $ref: '#/components/headers/Updated-On'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+  /client/{clientId}/ach-payment-sources:
+    get:
+      tags:
+        - API
+      operationId: 'client-ach-payment-sources-get'
+      description: Retrieve a list of the client's ACH payment sources
+      parameters:
+        - $ref: '#/components/parameters/clientId'
+        - $ref: '#/components/parameters/at'
+      responses:
+        '200':
+          description: |
+            Client ACH payment sources obtained.
+            An empty array will be returned if there are no associated ACH payment sources with the client.
+          content:
+            application/json:
+              schema:
+                type: array
+                description: List of client ACH payment sources
+                items:
+                  $ref: '#/components/schemas/ClientAchPaymentSource'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+  /request/{paymentId}:
+    put:
+      tags:
+        - API
+      operationId: 'request-payment-put'
+      x-firehose-logged: true
+      description: Initiate a new payment requesting funds from a client's payment source
+      parameters:
+        - $ref: '#/components/parameters/paymentId'
+      requestBody:
+        $ref: '#/components/requestBodies/NewPayment'
+      responses:
+        '200':
+          description: Payment initiated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PayOrRequestPaymentResponse'
+          headers:
+            Last-Modified:
+              $ref: '#/components/headers/Last-Modified'
+            Created-On:
+              $ref: '#/components/headers/Created-On'
+            Updated-On:
+              $ref: '#/components/headers/Updated-On'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+  /pay/{paymentId}:
+    put:
+      tags:
+        - API
+      operationId: 'pay-payment-put'
+      x-firehose-logged: true
+      description: Initiate a new payment to pay funds to a client's payment source
+      parameters:
+        - $ref: '#/components/parameters/paymentId'
+      requestBody:
+        $ref: '#/components/requestBodies/NewPayment'
+      responses:
+        '200':
+          description: Payment initiated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PayOrRequestPaymentResponse'
+          headers:
+            Last-Modified:
+              $ref: '#/components/headers/Last-Modified'
+            Created-On:
+              $ref: '#/components/headers/Created-On'
+            Updated-On:
+              $ref: '#/components/headers/Updated-On'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+  /cancel/{paymentId}:
+    put:
+      tags:
+        - API
+      operationId: 'cancel-payment-put'
+      x-firehose-logged: true
+      description: Cancel a payment
+      parameters:
+        - $ref: '#/components/parameters/paymentId'
+      responses:
+        '200':
+          description: Payment cancelled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CancelPaymentResponse'
+          headers:
+            Last-Modified:
+              $ref: '#/components/headers/Last-Modified'
+            Created-On:
+              $ref: '#/components/headers/Created-On'
+            Updated-On:
+              $ref: '#/components/headers/Updated-On'
+        '412':
+          description: Payment already in process and cannot be canceled
+        default:
+          $ref: '#/components/responses/ServerError'
+
+  /credit-account-adjustment/{entryId}:
+    put:
+      tags:
+        - API
+      operationId: 'credit-account-adjustment-put'
+      x-firehose-logged: true
+      description: |
+        Create a credit account balance adjustment entry against a credit client's account.
+        - If the transactionType is 'CREDIT', the resulting entry will debit from the account with id '{clientId}/credit/adjustment' and credit the client account.
+        - If the transactionType is 'DEBIT', the resulting entry will debit from the client account and credit the account with id '{clientId}/credit/adjustment'.
+      parameters:
+        - $ref: '#/components/parameters/entryId'
+      requestBody:
+        $ref: '#/components/requestBodies/NewCreditAccountEntry'
+      responses:
+        '204':
+          description: Credit account balance adjustment entry successfully created
+          headers:
+            Last-Modified:
+              $ref: '#/components/headers/Last-Modified'
+            Created-On:
+              $ref: '#/components/headers/Created-On'
+            Updated-On:
+              $ref: '#/components/headers/Updated-On'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+  /credit-account-payment/{entryId}:
+    put:
+      tags:
+        - API
+      operationId: 'credit-account-payment-put'
+      x-firehose-logged: true
+      description: |
+        Create a credit account payment entry against a credit client's account.
+        - If the transactionType is 'CREDIT', the resulting entry will debit from the account with id '{clientId}/credit/payment' and credit the client account.
+        - If the transactionType is 'DEBIT', the resulting entry will debit from the client account and credit the account with id '{clientId}/credit/payment'.
+      parameters:
+        - $ref: '#/components/parameters/entryId'
+      requestBody:
+        $ref: '#/components/requestBodies/NewCreditAccountEntry'
+      responses:
+        '204':
+          description: Credit account payment entry successfully created
+          headers:
+            Last-Modified:
+              $ref: '#/components/headers/Last-Modified'
+            Created-On:
+              $ref: '#/components/headers/Created-On'
+            Updated-On:
+              $ref: '#/components/headers/Updated-On'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+  /correction/{entryId}:
+    put:
+      tags:
+        - API
+      operationId: 'correction-put'
+      x-firehose-logged: true
+      description: |
+        Create a correction payment entry against a client's account.
+        - If the transactionType is 'CREDIT', the resulting entry will debit from the account with id '{clientId}/correction' and credit the client account.
+        - If the transactionType is 'DEBIT', the resulting entry will debit from the client account and credit the account with id '{clientId}/correction'.
+        - An intermediary correction entry account with id matching the {entryId} supplied in the path parameter will also be created and part of the entry postings. This account can be used to keep track of the specific correction and its purpose.
+      parameters:
+        - $ref: '#/components/parameters/entryId'
+      requestBody:
+        $ref: '#/components/requestBodies/NewCorrectionAccountEntry'
+      responses:
+        '204':
+          description: Client correction account entry successfully created
+          headers:
+            Last-Modified:
+              $ref: '#/components/headers/Last-Modified'
+            Created-On:
+              $ref: '#/components/headers/Created-On'
+            Updated-On:
+              $ref: '#/components/headers/Updated-On'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+components:
+  schemas:
+    Ping:
+      type: object
+      additionalProperties: false
+      required:
+        - serverTime
+      properties:
+        serverTime:
+          type: string
+          format: date-time
+          description: Current server time
+
+    Error:
+      type: object
+      additionalProperties: false
+      description: Server error message
+      properties:
+        message:
+          type: string
+        code:
+          type: string
+
+    NewClient:
+      type: object
+      additionalProperties: false
+      description: New client request schema.
+      required:
+        - name
+        - address
+        - issuingCountryCode
+        - products
+        - limits
+      properties:
+        name:
+          $ref: '#/components/schemas/Name'
+        address:
+          $ref: '#/components/schemas/Address'
+        issuingCountryCode:
+          $ref: '#/components/schemas/IssuingCountryCode'
+        products:
+          $ref: '#/components/schemas/Products'
+        limits:
+          $ref: '#/components/schemas/Limits'
+        funding:
+          $ref: '#/components/schemas/Funding'
+        active:
+          $ref: '#/components/schemas/ActiveStatus'
+        subsidiaryOf:
+          $ref: '#/components/schemas/SubsidiaryOf'
+
+    Client:
+      type: object
+      additionalProperties: false
+      description: Client Schema.
+      required:
+        - name
+        - address
+        - issuingCountryCode
+        - limits
+        - products
+        - clientAccountId
+        - lastModified
+        - createdOn
+        - funding
+        - active
+        - configurationId
+      properties:
+        name:
+          $ref: '#/components/schemas/Name'
+        address:
+          $ref: '#/components/schemas/Address'
+        issuingCountryCode:
+          $ref: '#/components/schemas/IssuingCountryCode'
+        limits:
+          $ref: '#/components/schemas/Limits'
+        products:
+          $ref: '#/components/schemas/Products'
+        clientAccountId:
+          type: string
+          description: The ledger account that holds the funds which are spendable by cardholders linked to the client.
+        lastModified:
+          $ref: '#/components/schemas/LastModified'
+        createdOn:
+          $ref: '#/components/schemas/CreatedOn'
+        updatedOn:
+          $ref: '#/components/schemas/UpdatedOn'
+        funding:
+          $ref: '#/components/schemas/Funding'
+        active:
+          $ref: '#/components/schemas/ActiveStatus'
+        configurationId:
+          type: string
+          description: The unique identifier for the client's configuration data.
+        subsidiaryOf:
+          $ref: '#/components/schemas/SubsidiaryOf'
+
+    Products:
+      type: array
+      minItems: 1
+      description: Array of products that are applicable to the client
+      items:
+        $ref: '#/components/schemas/Product'
+
+    IssuingCountryCode:
+      type: string
+      description: The country in which the cards are issued
+      enum:
+        - US
+        - CA
+
+    Limits:
+      type: array
+      minItems: 0
+      description: |
+        An array of limits that apply at the organization level.
+        The organization level represents the combined total of all card transactions for the client.
+      items:
+        $ref: '#/components/schemas/Limit'
+
+    Limit:
+      type: object
+      additionalProperties: false
+      description: |
+        Limit Details
+        - There can only be one limit per client for each period, periodLength, and limitFunction combination.
+          Multiple limits with the same values for the combination of properties listed above will result in a 400 Bad Request.
+      required:
+        - period
+        - periodLength
+        - limitFunction
+        - value
+      properties:
+        period:
+          $ref: '#/components/schemas/Period'
+        periodLength:
+          $ref: '#/components/schemas/PeriodLength'
+        limitFunction:
+          $ref: '#/components/schemas/LimitFunction'
+        value:
+          $ref: '#/components/schemas/LimitValue'
+
+    Period:
+      type: string
+      description: |
+        DAY is a calendar day and will begin at 00:00:00 UTC.
+        MONTH is a calendar month and will begin on the first day of the month at 00:00:00 UTC.
+        All periods are rolling if the associated periodLength is greater than 1
+      enum:
+        - DAY
+        - MONTH
+
+    LimitFunction:
+      type: string
+      description: AMOUNT functions by summing up the aggregate data point values.
+      enum:
+        - AMOUNT
+
+    Product:
+      type: string
+      description: Type of card product
+      enum:
+        - VIRTUAL
+        - STANDARD
+        - PREMIUM
+
+    PeriodLength:
+      type: string
+      pattern: '^\d+$'
+      minLength: 1
+      description: How long the period lasts
+
+    LimitValue:
+      type: string
+      pattern: '^\d+$'
+      minLength: 1
+      description: Limit value to use. The value is expected to be in cents.
+
+    Name:
+      type: string
+      description: The name of the client.
+      minLength: 1
+
+    NewClientAchPaymentSource:
+      type: object
+      additionalProperties: false
+      description: New client ACH payment source details
+      required:
+        - clientId
+        - achPaymentSource
+        - transmissionKey
+      properties:
+        clientId:
+          $ref: '#/components/schemas/ClientId'
+        achPaymentSource:
+          $ref: '#/components/schemas/AchPaymentSource'
+        transmissionKey:
+          $ref: '#/components/schemas/TransmissionKey'
+
+    ClientId:
+      type: string
+      description: The Unique identifier for the client in uuid format
+      format: uuid
+
+    CreatedOn:
+      type: string
+      format: date-time
+      description: Original created on date time
+
+    LastModified:
+      type: string
+      format: date-time
+      description: Resource last modified date time
+
+    UpdatedOn:
+      type: string
+      format: date-time
+      description: Resource last modified date time
+
+    AchPaymentSource:
+      type: object
+      additionalProperties: false
+      description: ACH Payment Source
+      required:
+        - accountName
+        - accountType
+        - accountNumber
+        - routingNumber
+      properties:
+        accountName:
+          $ref: '#/components/schemas/AccountName'
+        accountType:
+          $ref: '#/components/schemas/AccountType'
+        accountNumber:
+          $ref: '#/components/schemas/AccountNumber'
+        routingNumber:
+          $ref: '#/components/schemas/RoutingNumber'
+
+    AccountName:
+      type: string
+      description: |
+        Name of the account owner, encrypted. The following conditions not being met will result in a 400 Bad Request:
+        - Must be less than or equal to 22 characters long
+        - Must contain only alphanumeric and space characters
+      minLength: 1
+
+    AccountType:
+      type: string
+      description: Type of account
+      minLength: 1
+      enum:
+        - CHECKING
+        - SAVINGS
+
+    AccountNumber:
+      type: string
+      description: |
+        Account number, encrypted. The following conditions not being met will result in a 400 Bad Request:
+        - Must be less than or equal to 17 characters long
+        - Must contain only numerical digits
+        - Must not only contain zeros
+      minLength: 1
+
+    RoutingNumber:
+      type: string
+      description: |
+        Routing number, encrypted. The following conditions not being met will result in a 400 Bad Request:
+        - Must be a valid bank routing number
+        - Must be 9 characters
+        - Must contain only numerical digits
+        - Must not only contain zeros
+      minLength: 1
+
+    ClientAchPaymentSource:
+      type: object
+      additionalProperties: false
+      description: Client ACH Payment Source Details
+      required:
+        - achPaymentSourceId
+        - clientId
+        - transmissionKey
+        - storageKeyId
+        - achPaymentSource
+        - lastModified
+        - createdOn
+      properties:
+        achPaymentSourceId:
+          $ref: '#/components/schemas/AchPaymentSourceId'
+        clientId:
+          $ref: '#/components/schemas/ClientId'
+        transmissionKey:
+          $ref: '#/components/schemas/TransmissionKey'
+        storageKeyId:
+          $ref: '#/components/schemas/StorageKeyId'
+        achPaymentSource:
+          $ref: '#/components/schemas/AchPaymentSource'
+        lastModified:
+          $ref: '#/components/schemas/LastModified'
+        createdOn:
+          $ref: '#/components/schemas/CreatedOn'
+        updatedOn:
+          $ref: '#/components/schemas/UpdatedOn'
+
+    NewPayment:
+      type: object
+      additionalProperties: false
+      description: Payment details
+      required:
+        - paymentSourceId
+        - clientId
+        - amount
+      properties:
+        paymentSourceId:
+          type: string
+          description: |
+            Identifier of a payment source from/to which funds are requested/paid.
+            The payment source must be associated with the client whose clientId is being submitted in the request or
+            a 400 Bad Request will be returned.
+        clientId:
+          type: string
+          description: The client whose account will be DEBITED/CREDITED funds from/to when the request/pay transaction is accepted.
+        amount:
+          type: string
+          pattern: '^[1-9]\d*$'
+          minLength: 1
+          maxLength: 9
+          description: |
+            The amount to be credited or debited.
+            The value is expected to be in cents.
+            As an example, a value of 100 would be equal to 1 dollar
+        companyEntryDescription:
+          $ref: '#/components/schemas/CompanyEntryDescription'
+
+    AchPaymentSourceId:
+      type: string
+      description: Identifier for the ACH payment source
+      format: uuid
+
+    Address:
+      description: The business address of the client. This will be the address used by the Address Verification Service
+      required:
+        - country
+        - streetLines
+      type: object
+      properties:
+        streetLines:
+          maxItems: 4
+          minItems: 1
+          type: array
+          description: Street lines
+          items:
+            minLength: 1
+            type: string
+            description: Street line
+        city:
+          minLength: 1
+          type: string
+          description: City
+        region:
+          minLength: 1
+          type: string
+          description: Region, State or Provence
+        postalCode:
+          minLength: 1
+          type: string
+          description: Postal or zip code
+        reportablePostalCode:
+          type: string
+          description: Postal code for reporting purposes.
+        country:
+          type: string
+          description: Country ISO 3166-1 alpha-2 codes
+          enum:
+            - AD
+            - AE
+            - AF
+            - AG
+            - AI
+            - AL
+            - AM
+            - AO
+            - AQ
+            - AR
+            - AS
+            - AT
+            - AU
+            - AW
+            - AX
+            - AZ
+            - BA
+            - BB
+            - BD
+            - BE
+            - BF
+            - BG
+            - BH
+            - BI
+            - BJ
+            - BL
+            - BM
+            - BN
+            - BO
+            - BQ
+            - BR
+            - BS
+            - BT
+            - BV
+            - BW
+            - BY
+            - BZ
+            - CA
+            - CC
+            - CD
+            - CF
+            - CG
+            - CH
+            - CI
+            - CK
+            - CL
+            - CM
+            - CN
+            - CO
+            - CR
+            - CU
+            - CV
+            - CW
+            - CX
+            - CY
+            - CZ
+            - DE
+            - DJ
+            - DK
+            - DM
+            - DO
+            - DZ
+            - EC
+            - EE
+            - EG
+            - EH
+            - ER
+            - ES
+            - ET
+            - FI
+            - FJ
+            - FK
+            - FM
+            - FO
+            - FR
+            - GA
+            - GB
+            - GD
+            - GE
+            - GF
+            - GG
+            - GH
+            - GI
+            - GL
+            - GM
+            - GN
+            - GP
+            - GQ
+            - GR
+            - GS
+            - GT
+            - GU
+            - GW
+            - GY
+            - HK
+            - HM
+            - HN
+            - HR
+            - HT
+            - HU
+            - ID
+            - IE
+            - IL
+            - IM
+            - IN
+            - IO
+            - IQ
+            - IR
+            - IS
+            - IT
+            - JE
+            - JM
+            - JO
+            - JP
+            - KE
+            - KG
+            - KH
+            - KI
+            - KM
+            - KN
+            - KP
+            - KR
+            - KW
+            - KY
+            - KZ
+            - LA
+            - LB
+            - LC
+            - LI
+            - LK
+            - LR
+            - LS
+            - LT
+            - LU
+            - LV
+            - LY
+            - MA
+            - MC
+            - MD
+            - ME
+            - MF
+            - MG
+            - MH
+            - MK
+            - ML
+            - MM
+            - MN
+            - MO
+            - MP
+            - MQ
+            - MR
+            - MS
+            - MT
+            - MU
+            - MV
+            - MW
+            - MX
+            - MY
+            - MZ
+            - NA
+            - NC
+            - NE
+            - NF
+            - NG
+            - NI
+            - NL
+            - NO
+            - NP
+            - NR
+            - NU
+            - NZ
+            - OM
+            - PA
+            - PE
+            - PF
+            - PG
+            - PH
+            - PK
+            - PL
+            - PM
+            - PN
+            - PR
+            - PS
+            - PT
+            - PW
+            - PY
+            - QA
+            - RE
+            - RO
+            - RS
+            - RU
+            - RW
+            - SA
+            - SB
+            - SC
+            - SD
+            - SE
+            - SG
+            - SH
+            - SI
+            - SJ
+            - SK
+            - SL
+            - SM
+            - SN
+            - SO
+            - SR
+            - SS
+            - ST
+            - SV
+            - SX
+            - SY
+            - SZ
+            - TC
+            - TD
+            - TF
+            - TG
+            - TH
+            - TJ
+            - TK
+            - TL
+            - TM
+            - TN
+            - TO
+            - TR
+            - TT
+            - TV
+            - TW
+            - TZ
+            - UA
+            - UG
+            - UM
+            - US
+            - UY
+            - UZ
+            - VA
+            - VC
+            - VE
+            - VG
+            - VI
+            - VN
+            - VU
+            - WF
+            - WS
+            - YE
+            - YT
+            - ZA
+            - ZM
+            - ZW
+
+    StorageKeyId:
+      type: string
+      description: |
+        DEK's non-derived identifier to be used by Check Digit services only.
+
+    TransmissionKey:
+      description: The Encrypted version of the AES-256 DEK
+      type: string
+
+    ClientBalance:
+      type: object
+      additionalProperties: false
+      description: |
+        Client account balance details.
+        - The currency of the balances are according to the issuingCountryCode of the client: USD for 'US' and CAD for 'CA'.
+        - The balance values are to the smallest decimal place for that currency. For example, 100 US Dollars would show as 10000.
+        - Negative balance values will have a '-' character in front of the value.
+      required:
+        - at
+        - ledgerBalance
+        - availableBalance
+      properties:
+        at:
+          type: string
+          format: date-time
+          description: The date/time that the balances apply to.
+        ledgerBalance:
+          type: string
+          minLength: 1
+          description: Ledger balance of the client account. This value does not take into account any pending transactions.
+        availableBalance:
+          type: string
+          minLength: 1
+          description: Available balance of the client account. This value takes into account pending transactions.
+
+    Funding:
+      type: string
+      description: |
+        The way in which client accounts will be funded.
+        - The default value is ACH if not supplied when creating a client
+        - Credit clients are not permitted to create ach payment sources, a 400 Bad Request will be returned
+        - ACH clients are not permitted to create credit account entries, a 400 Bad request will be returned
+      enum:
+        - ACH
+        - CREDIT
+
+    NewCreditAccountEntry:
+      type: object
+      additionalProperties: false
+      description: Credit account entry details
+      required:
+        - clientId
+        - transactionType
+        - amount
+      properties:
+        clientId:
+          type: string
+          description: The client whose credit balance will be adjusted by the specified amount.
+        transactionType:
+          type: string
+          description: |
+            Credit or Debit. Please note that the available credit balance may go negative if the DEBIT amount is greater than the current available credit balance.
+            - CREDIT will raise the available credit balance by the requested amount
+            - DEBIT will lower the available credit balance by the requested amount
+          enum:
+            - CREDIT
+            - DEBIT
+        amount:
+          type: string
+          pattern: '^[1-9]\d*$'
+          minLength: 1
+          description: |
+            The amount to be credited to or debited from the available credit balance
+            The value is expected to be in cents.
+            As an example, a value of 100 would be equal to 1 dollar
+
+    NewCorrectionAccountEntry:
+      type: object
+      additionalProperties: false
+      description: Correction account entry details
+      required:
+        - clientId
+        - transactionType
+        - amount
+        - purpose
+      properties:
+        clientId:
+          type: string
+          description: The client whose available balance will be adjusted by the specified amount.
+        transactionType:
+          type: string
+          description: |
+            Credit or Debit. Please note that the client balance may go negative if the DEBIT amount is greater than the current available client balance.
+            - CREDIT will raise the available client balance by the requested amount
+            - DEBIT will lower the available client balance by the requested amount
+          enum:
+            - CREDIT
+            - DEBIT
+        amount:
+          type: string
+          pattern: '^[1-9]\d*$'
+          minLength: 1
+          description: |
+            The amount to be credited to or debited from the available client balance
+            The value is expected to be in cents.
+            As an example, a value of 100 would be equal to 1 dollar
+        purpose:
+          type: object
+          description: The purpose for the correction. This will be JSON stringified to form the name of the correction entry account.
+
+    EntryId:
+      type: string
+      description: Ledger entryId associated with a paymentId
+
+    PayOrRequestPaymentResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - entryId
+        - traceNumber
+      properties:
+        entryId:
+          $ref: '#/components/schemas/EntryId'
+        referenceId:
+          type: string
+          description: Hash value of the paymentId, if the payment source destination does not allow passing in the UUID
+        traceNumber:
+          type: string
+          description: Uniquely identifies each Entry Detail Record within an ACH batch file.
+
+    CancelPaymentResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - entryId
+      properties:
+        entryId:
+          $ref: '#/components/schemas/EntryId'
+
+    ActiveStatus:
+      type: string
+      description: |
+        The client's active status
+        - The value is set to ACTIVE by default if not present when creating a client
+        - All new incoming card preauthorization and tokenization requests will be declined for INACTIVE clients
+      enum:
+        - ACTIVE
+        - INACTIVE
+
+    SubsidiaryOf:
+      type: string
+      description: |
+        Used to indicate the client is a subsidiary of another client
+        - This value must be set to a client ID of a client that is not already a subsidiary of another client
+        - An attempt to change the value of this field once set will result in a 400 Bad Request
+      format: uuid
+
+    CompanyEntryDescription:
+      type: string
+      description: Purpose or intent of the payment
+      minLength: 1
+      maxLength: 10
+
+  parameters:
+    clientId:
+      in: path
+      name: clientId
+      description: The unique identifier for the client in uuid format
+      required: true
+      schema:
+        $ref: '#/components/schemas/ClientId'
+
+    at:
+      in: query
+      name: at
+      description: Return data as it was before this time.  Must be at least 1 second in the past.
+      required: true
+      schema:
+        type: string
+        format: date-time
+
+    ifMatch:
+      name: If-Match
+      in: header
+      description: Required to make idempotent changes to data.
+      schema:
+        type: string
+
+    achPaymentSourceId:
+      in: path
+      name: achPaymentSourceId
+      description: The unique identifier for the ACH payment source in uuid format
+      required: true
+      schema:
+        $ref: '#/components/schemas/AchPaymentSourceId'
+
+    paymentId:
+      in: path
+      name: paymentId
+      description: The unique identifier for the payment request in uuid format
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    entryId:
+      in: path
+      name: entryId
+      description: The unique identifier for the credit account entry in uuid format
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+  responses:
+    Ping:
+      description: ping successful response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Ping'
+
+    ServerError:
+      description: Server Error response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    Conflict:
+      description: Conflict
+
+    NotFound:
+      description: Requested resource not found
+
+    PreconditionFailed:
+      description: Precondition failed
+
+  headers:
+    ETag:
+      description: Version information
+      required: true
+      schema:
+        type: string
+
+    Last-Modified:
+      description: The most recent date data for the client was changed
+      required: true
+      schema:
+        type: string
+        format: date-time
+
+    Created-On:
+      description: Original created on date time
+      required: true
+      schema:
+        type: string
+        format: date-time
+
+    Updated-On:
+      description: Time data was last modified
+      required: true
+      schema:
+        type: string
+        format: date-time
+
+  requestBodies:
+    NewClient:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NewClient'
+          examples:
+            newClient:
+              value:
+                name: Bobs Asphalt Company LLC.
+                address:
+                  streetLines:
+                    - 123 Asphalt Lane
+                  country: US
+                limits:
+                  - period: DAY
+                    periodLength: '30'
+                    limitFunction: AMOUNT
+                    value: '10000000'
+                issuingCountryCode: US
+                products:
+                  - VIRTUAL
+                  - STANDARD
+                funding: CREDIT
+                active: ACTIVE
+
+    NewClientAchPaymentSource:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NewClientAchPaymentSource'
+
+    NewPayment:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NewPayment'
+
+    NewCreditAccountEntry:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NewCreditAccountEntry'
+
+    NewCorrectionAccountEntry:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NewCorrectionAccountEntry'

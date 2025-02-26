@@ -59,5 +59,4 @@ describe('json.spec.ts', () => {
       path: "$..from[?(@ && @.type === 'unnest')].as.args.value[0].column",
     }); /*?*/
   });
-
 });

@@ -138,6 +138,56 @@ function checkSelect(selectAST: With | Select, context: AthenaContext, withTable
   }
 
   const tableColumns: Record<string, ResolvedColumn[]> = {};
+
+  // extract UNNEST columns
+  const unnestColumns = JSONPath<ColumnRefItem[]>({
+    json: selectAST,
+    path: "$..from[?(@ && @.type === 'unnest')]",
+  });
+  log('unnest columns', unnestColumns);
+  const unnestedColumnsToProcess = new Map<string, string>();
+  for (const unnestColumn of unnestColumns) {
+    const [fromColumn] = JSONPath<string[]>({
+      json: unnestColumn,
+      path: '$.expr.column',
+    }); /*?*/
+    assert.ok(fromColumn !== undefined);
+    const [toColumn] = JSONPath<string[]>({
+      json: unnestColumn,
+      path: '$.as.args.value[0].column',
+    }); /*?*/
+    assert.ok(toColumn !== undefined);
+    unnestedColumnsToProcess.set(fromColumn, toColumn);
+  }
+  log('unnested columns to process', unnestedColumnsToProcess);
+
+  // handle UNNEST columns prior to selected columns processing
+  const unnestedColumnsToProcessPostColumnSelection = new Map<string, string>();
+  for (const [fromColumn, toColumn] of unnestedColumnsToProcess.entries()) {
+    const unnestedInTable = Object.values(allResolvedTables)
+      .flat()
+      .find((table) => table.columns[fromColumn] !== undefined); /*?*/
+    if (unnestedInTable === undefined) {
+      unnestedColumnsToProcessPostColumnSelection.set(fromColumn, toColumn);
+      continue;
+    }
+    const unnestedColumn = unnestedInTable.columns[fromColumn]?.[0]; /*?*/
+    const unnestedColumnSchema = unnestedColumn?.schema; /*?*/
+    assert.ok(unnestedColumnSchema?.type === 'array');
+    const transientUnnestedTableName = `${unnestedInTable.name}:unnested`;
+    allResolvedTables[transientUnnestedTableName] = [
+      {
+        ast: unnestedInTable.ast,
+        name: transientUnnestedTableName,
+        apiOperation: unnestedInTable.apiOperation ?? [],
+        columns: {
+          [toColumn]: [getColumn(toColumn, unnestedColumnSchema.items as SchemaObject, unnestedColumn?.ast)],
+        },
+      },
+    ];
+  }
+
+  // handle selected columns
   for (const [index, columnAST] of selectAST.columns?.entries() ?? []) {
     log('checking column', columnAST);
     const columnAlias = (columnAST as Column).as as null | string; /*?*/
@@ -250,30 +300,13 @@ function checkSelect(selectAST: With | Select, context: AthenaContext, withTable
     );
   }
 
-  // handle UNNEST columns
-  const unnestColumns = JSONPath<ColumnRefItem[]>({
-    json: selectAST,
-    path: "$..from[?(@ && @.type === 'unnest')]",
-  });
-  log('unnest columns', unnestColumns);
-  for (const unnestColumn of unnestColumns) {
-    const [unnestedColumnName] = JSONPath<string[]>({
-      json: unnestColumn,
-      path: '$.expr.column',
-    }); /*?*/
-    assert.ok(unnestedColumnName !== undefined);
-    const unnestedColumn = tableColumns[unnestedColumnName]; /*?*/
-    assert.ok(unnestedColumn !== undefined);
+  // handle UNNEST columns post selected columns processing
+  for (const [fromColumn, toColumn] of unnestedColumnsToProcessPostColumnSelection.entries()) {
+    const unnestedColumn = tableColumns[fromColumn]; /*?*/
+    assert.ok(unnestedColumn !== undefined, `column ${fromColumn} not found in selected columns`);
     const unnestedColumnSchema = unnestedColumn[0]?.schema; /*?*/
     assert.ok(unnestedColumnSchema?.type === 'array');
-    const [addedColumnName] = JSONPath<string[]>({
-      json: unnestColumn,
-      path: '$.as.args.value[0].column',
-    }); /*?*/
-    assert.ok(addedColumnName !== undefined);
-    tableColumns[addedColumnName] = [
-      getColumn(addedColumnName, unnestedColumnSchema.items as SchemaObject, unnestColumn),
-    ];
+    tableColumns[toColumn] = [getColumn(toColumn, unnestedColumnSchema.items as SchemaObject, unnestedColumn[0]?.ast)];
   }
 
   log('resolved columns', tableColumns);
