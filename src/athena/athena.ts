@@ -11,7 +11,7 @@ import { strict as assert } from 'node:assert';
 
 import debug from 'debug';
 import { JSONPath } from 'jsonpath-plus';
-import { ESLintUtils } from '@typescript-eslint/utils';
+import { ESLintUtils, TSESTree } from '@typescript-eslint/utils';
 import type { OpenAPIV3_1 as v3 } from 'openapi-types';
 import type { SchemaObject } from 'ajv/dist/2020';
 
@@ -263,6 +263,7 @@ function checkSelect(selectAST: With | Select, context: AthenaContext, withTable
       path: "$..[?(@ && @.type === 'function' && @.name && @.name.name && @.name.name[0] && (@.name.name[0].value === 'json_extract_scalar' || @.name.name[0].value === 'json_extract') )].args.value[1].value",
     }); /*?*/
     if (propertyAccessor === undefined) {
+      // [TODO:] what if both function and json style property accessor are used?
       const [jsonStylePropertyAccessor] = JSONPath<string[]>({
         json: columnAST as object,
         path: "$..[?(@ && @.type === 'column_ref' && @.array_index)].array_index[0].index.value",
@@ -374,57 +375,70 @@ const rule: ESLintUtils.RuleModule<typeof SYNTEXT_ERROR | typeof ATHENA_ERROR> =
   },
   defaultOptions: [],
   create(context) {
-    return {
-      TemplateLiteral(sqlNode) {
-        const sql = sqlNode.quasis[0]?.value.raw?.trim();
-        if (sql === undefined || (!/^SELECT\s+/iu.test(sql) && !/^WITH\s+/iu.test(sql))) {
-          return;
-        }
+    function checkSql(sql: string, sqlNode: TSESTree.Node) {
+      if (!/^SELECT\s+/iu.test(sql) && !/^WITH\s+/iu.test(sql)) {
+        return;
+      }
+      let ast: AST;
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        ({ ast } = parse(sql, { includeLocations: true }));
+        // fs.writeFileSync('ast.json', JSON.stringify(ast, undefined, 2));
+      } catch (error) {
+        context.report({
+          node: sqlNode,
+          messageId: SYNTEXT_ERROR,
+          data: {
+            errorMessage: JSON.stringify(error, undefined, 2),
+          },
+        });
+        return;
+      }
 
-        let ast: AST;
-        try {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-          ({ ast } = parse(sql, { includeLocations: true }));
-          // fs.writeFileSync('ast.json', JSON.stringify(ast, undefined, 2));
-        } catch (error) {
+      const athenaContext: AthenaContext = {
+        apiSchemas: {},
+        tables: {},
+      };
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+        checkAthenaAst(Array.isArray(ast) ? ast[0] : ast, athenaContext);
+      } catch (error) {
+        if (error instanceof AthenaError) {
           context.report({
             node: sqlNode,
-            messageId: SYNTEXT_ERROR,
+            messageId: ATHENA_ERROR,
             data: {
-              errorMessage: JSON.stringify(error, undefined, 2),
+              errorMessage: error.message,
             },
           });
+        } else {
+          // eslint-disable-next-line no-console
+          console.error(`Failed to apply ${ruleId} rule for file "${context.filename}":`, error);
+          context.report({
+            node: sqlNode,
+            messageId: ATHENA_ERROR,
+            data: {
+              errorMessage: error instanceof Error ? String(error) : JSON.stringify(error, undefined, 2),
+            },
+          });
+        }
+      }
+    }
+
+    return {
+      TemplateLiteral(sqlNode) {
+        // 'cook' the original sql as a simplified string by taking out the subsituational expressions
+        const sql = sqlNode.quasis
+          .map((quasi) => quasi.value.cooked)
+          .join('')
+          .trim(); /*?*/
+        checkSql(sql, sqlNode);
+      },
+      Literal(sqlNode) {
+        if (typeof sqlNode.value !== 'string') {
           return;
         }
-
-        const athenaContext: AthenaContext = {
-          apiSchemas: {},
-          tables: {},
-        };
-        try {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-          checkAthenaAst(Array.isArray(ast) ? ast[0] : ast, athenaContext);
-        } catch (error) {
-          if (error instanceof AthenaError) {
-            context.report({
-              node: sqlNode,
-              messageId: ATHENA_ERROR,
-              data: {
-                errorMessage: error.message,
-              },
-            });
-          } else {
-            // eslint-disable-next-line no-console
-            console.error(`Failed to apply ${ruleId} rule for file "${context.filename}":`, error);
-            context.report({
-              node: sqlNode,
-              messageId: ATHENA_ERROR,
-              data: {
-                errorMessage: error instanceof Error ? String(error) : JSON.stringify(error, undefined, 2),
-              },
-            });
-          }
-        }
+        checkSql(sqlNode.value, sqlNode);
       },
     };
   },

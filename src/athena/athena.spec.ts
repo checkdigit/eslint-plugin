@@ -22,6 +22,20 @@ createTester().run(ruleId, rule, {
       code: `\`select * from link\``,
     },
     {
+      name: 'string instead of Template Literal',
+      code: `'select * from link'`,
+    },
+    {
+      name: 'Template literal with string interpolation',
+      code: `\`
+        select *
+        from link
+        where
+          json_extract_scalar(responseheaders, '$["created-on"]') < '\${new Date().toISOString()}'
+          and method = 'GET'
+      \``,
+    },
+    {
       name: 'SELECT with FROM - table name with single quotes',
       code: `\`select * from 'link'\``,
     },
@@ -41,11 +55,6 @@ createTester().run(ruleId, rule, {
       name: 'parse function expression with array access - in column',
       code: `\`WITH m AS (select * from link) 
         select DISTINCT split(url, '/') [5] as linkId FROM m\``,
-    },
-    {
-      name: 'parse JSON property access - in column',
-      code: `\`select posting['amount']\``,
-      skip: true,
     },
     {
       name: 'parse function expression with array access - in condition',
@@ -188,7 +197,7 @@ createTester().run(ruleId, rule, {
       ],
     },
     {
-      name: 'invalid direct MAP style property access',
+      name: 'invalid direct JSON style property access',
       code: `\`
         WITH unique_entries as (
           select
