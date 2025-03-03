@@ -32,6 +32,7 @@ import noEnum from './no-enum.ts';
 import noSideEffects from './no-side-effects.ts';
 import noRandomV4UUID from './no-random-v4-uuid.ts';
 import noTestImport from './no-test-import.ts';
+import noTypeAssertionAs from './no-type-assertion-as.ts';
 import noUuid from './no-uuid.ts';
 import noWallabyComment from './no-wallaby-comment.ts';
 import objectLiteralResponse from './object-literal-response.ts';
@@ -54,6 +55,7 @@ const rules: Record<string, TSESLint.LooseRuleDefinition> = {
   'no-test-import': noTestImport,
   'no-wallaby-comment': noWallabyComment,
   'no-side-effects': noSideEffects,
+  'no-type-assertion-as': noTypeAssertionAs,
   'regular-expression-comment': regexComment,
   'require-assert-predicate-rejects-throws': requireAssertPredicateRejectsThrows,
   'object-literal-response': objectLiteralResponse,
@@ -94,6 +96,7 @@ const configs: Record<string, TSESLint.FlatConfig.Config[]> = {
           'error',
           { excludedIdentifiers: ['assert', 'debug', 'log', 'promisify', 'Symbol.for'] },
         ],
+        '@checkdigit/no-type-assertion-as': 'error',
         '@checkdigit/regular-expression-comment': 'error',
         '@checkdigit/require-assert-predicate-rejects-throws': 'error',
         '@checkdigit/object-literal-response': 'error',
@@ -128,6 +131,7 @@ const configs: Record<string, TSESLint.FlatConfig.Config[]> = {
         '@checkdigit/require-ts-extension-imports-exports': 'error',
         '@checkdigit/no-wallaby-comment': 'off',
         '@checkdigit/no-side-effects': 'error',
+        '@checkdigit/no-type-assertion-as': 'error',
         '@checkdigit/regular-expression-comment': 'error',
         '@checkdigit/require-assert-predicate-rejects-throws': 'error',
         '@checkdigit/object-literal-response': 'error',
