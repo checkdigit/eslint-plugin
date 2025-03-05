@@ -6,11 +6,10 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import { ESLintUtils } from '@typescript-eslint/utils';
+import { AST_TOKEN_TYPES, ESLintUtils } from '@typescript-eslint/utils';
 
 export const ruleId = 'no-util';
 const NO_UTIL = 'NO_UTIL';
-const DISABLE_NEXT_LINE = 'eslint-disable-next-line';
 
 const createRule = ESLintUtils.RuleCreator((name) => name);
 
@@ -33,14 +32,16 @@ const rule: ESLintUtils.RuleModule<typeof NO_UTIL> = createRule({
         const filename = context.filename;
         const utilRegex = /(?:^|[-_/])util(?=[-_./]|$)/iu;
         if (utilRegex.test(filename)) {
-          const filePathComment = context.sourceCode
-            .getAllComments()
-            .find((comment) => !comment.value.includes(DISABLE_NEXT_LINE));
-          if (filePathComment !== undefined) {
+          const sourceCode = context.sourceCode;
+          const tokens = sourceCode.tokensAndComments;
+          const firstNonCommentToken = tokens.find(
+            (token) => token.type !== AST_TOKEN_TYPES.Block && token.type !== AST_TOKEN_TYPES.Line,
+          );
+          if (firstNonCommentToken !== undefined) {
             context.report({
               messageId: NO_UTIL,
               data: { filename },
-              node: filePathComment,
+              node: firstNonCommentToken,
             });
           }
         }
