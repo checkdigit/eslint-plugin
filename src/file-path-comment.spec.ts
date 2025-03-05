@@ -37,10 +37,6 @@ describe('file-path-comment', () => {
         filename: 'source/hello.ts',
         code: `// whatever does not matter\n`,
       },
-      {
-        filename: 'src/util.ts',
-        code: `// eslint-disable-next-line...../no-util\nconst x = 123;`,
-      },
     ],
     invalid: [
       {

@@ -8,8 +8,6 @@ import type { Rule } from 'eslint';
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-const DISABLE_NEXT_LINE = 'eslint-disable-next-line';
-
 export default {
   meta: {
     type: 'suggestion',
@@ -24,11 +22,6 @@ export default {
     const expectedPath = context.filename.split('src/')[1];
 
     if (firstLine === undefined || expectedPath === undefined) {
-      return {};
-    }
-
-    const firstComment = firstLine.split('// ')[1];
-    if (firstComment?.startsWith(DISABLE_NEXT_LINE) === true) {
       return {};
     }
 
