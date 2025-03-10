@@ -69,7 +69,7 @@ const rule: TSESLint.RuleModule<typeof NO_RANDOM_V4_UUID | typeof NO_UUID_MODULE
     },
     schema: [],
     messages: {
-      [NO_RANDOM_V4_UUID]: 'Avoid using `uuid.v4` or `crypto.randomUUID` for generating random v4 UUIDs.',
+      [NO_RANDOM_V4_UUID]: 'Avoid using `crypto.randomUUID` for generating random v4 UUIDs.',
       [NO_UUID_MODULE_FOR_V4]: 'Avoid using the `uuid` module for v4 UUID generation. Use `crypto.randomUUID` instead.',
     },
   },
@@ -77,6 +77,7 @@ const rule: TSESLint.RuleModule<typeof NO_RANDOM_V4_UUID | typeof NO_UUID_MODULE
   create(context) {
     const aliases: { uuid4Alias?: string; uuidDefaultAlias?: string; cryptoRandomUUIDAlias?: string } = {};
     let uuidImportNode: TSESTree.ImportDeclaration | null = null;
+    let hasReportedCallExpression = false;
 
     return {
       ImportDeclaration(node: TSESTree.ImportDeclaration) {
@@ -86,16 +87,24 @@ const rule: TSESLint.RuleModule<typeof NO_RANDOM_V4_UUID | typeof NO_UUID_MODULE
         }
       },
       CallExpression(node: TSESTree.CallExpression) {
-        if (isUuid4Call(node, aliases) || isCryptoRandomUUIDCall(node, aliases.cryptoRandomUUIDAlias)) {
+        if (isUuid4Call(node, aliases)) {
+          context.report({
+            node,
+            messageId: NO_UUID_MODULE_FOR_V4,
+          });
+          hasReportedCallExpression = true;
+        } else if (isCryptoRandomUUIDCall(node, aliases.cryptoRandomUUIDAlias)) {
           context.report({
             node,
             messageId: NO_RANDOM_V4_UUID,
           });
+          hasReportedCallExpression = true;
         }
       },
       'Program:exit'() {
         if (
           uuidImportNode &&
+          !hasReportedCallExpression &&
           aliases.uuid4Alias !== undefined &&
           aliases.uuid4Alias !== '' &&
           (aliases.uuidDefaultAlias === undefined || aliases.uuidDefaultAlias === '')

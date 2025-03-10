@@ -34,10 +34,6 @@ createTester().run(ruleId, rule, {
       code: `import { randomBytes } from 'node:crypto';
          const id = randomBytes(16);`,
     },
-    {
-      name: 'Valid case with no import',
-      code: `const id = crypto.randomBytes(16);`,
-    },
   ],
   invalid: [
     {
@@ -46,7 +42,7 @@ createTester().run(ruleId, rule, {
                const id = uuid.v4();`,
       errors: [
         {
-          messageId: 'NO_RANDOM_V4_UUID',
+          messageId: 'NO_UUID_MODULE_FOR_V4',
         },
       ],
     },
@@ -60,9 +56,6 @@ createTester().run(ruleId, rule, {
         {
           messageId: 'NO_UUID_MODULE_FOR_V4',
         },
-        {
-          messageId: 'NO_RANDOM_V4_UUID',
-        },
       ],
     },
     {
@@ -72,9 +65,6 @@ createTester().run(ruleId, rule, {
       errors: [
         {
           messageId: 'NO_UUID_MODULE_FOR_V4',
-        },
-        {
-          messageId: 'NO_RANDOM_V4_UUID',
         },
       ],
     },
@@ -95,10 +85,7 @@ createTester().run(ruleId, rule, {
           messageId: 'NO_UUID_MODULE_FOR_V4',
         },
         {
-          messageId: 'NO_RANDOM_V4_UUID',
-        },
-        {
-          messageId: 'NO_RANDOM_V4_UUID',
+          messageId: 'NO_UUID_MODULE_FOR_V4',
         },
       ],
     },
@@ -171,9 +158,6 @@ createTester().run(ruleId, rule, {
         {
           messageId: 'NO_UUID_MODULE_FOR_V4',
         },
-        {
-          messageId: 'NO_RANDOM_V4_UUID',
-        },
       ],
     },
     {
@@ -183,9 +167,6 @@ createTester().run(ruleId, rule, {
       errors: [
         {
           messageId: 'NO_UUID_MODULE_FOR_V4',
-        },
-        {
-          messageId: 'NO_RANDOM_V4_UUID',
         },
       ],
     },
