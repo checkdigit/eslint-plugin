@@ -8,6 +8,8 @@ const newUuid = v4();
 
 import { randomUUID } from 'node:crypto'; // prod
 const id = randomUUID();
+
+const id = crypto.randomUUID(); // prod
 ```
 
 ## Pass
