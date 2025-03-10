@@ -19,10 +19,24 @@ createTester().run(ruleId, rule, {
               }`,
     },
     {
-      name: 'Valid case with different alias import',
+      name: 'Valid case with different version import',
       code: `import { v5 } from 'uuid';
                const namespace = '12345678-1234-1234-1234-123456789abc';
                const newUuid = v5('name', namespace);`,
+    },
+    {
+      name: 'Valid case with different crypto method',
+      code: `import { randomInt } from 'node:crypto';
+         const id = randomInt(1, 100);`,
+    },
+    {
+      name: 'Valid case with different import',
+      code: `import { randomBytes } from 'node:crypto';
+         const id = randomBytes(16);`,
+    },
+    {
+      name: 'Valid case with no import',
+      code: `const id = crypto.randomBytes(16);`,
     },
   ],
   invalid: [
@@ -44,6 +58,9 @@ createTester().run(ruleId, rule, {
                }`,
       errors: [
         {
+          messageId: 'NO_UUID_MODULE_FOR_V4',
+        },
+        {
           messageId: 'NO_RANDOM_V4_UUID',
         },
       ],
@@ -53,6 +70,9 @@ createTester().run(ruleId, rule, {
       code: `import { v4 } from 'uuid';
                const newUuid = v4();`,
       errors: [
+        {
+          messageId: 'NO_UUID_MODULE_FOR_V4',
+        },
         {
           messageId: 'NO_RANDOM_V4_UUID',
         },
@@ -72,7 +92,97 @@ createTester().run(ruleId, rule, {
                const uuidV5 = v5('name', namespace);`,
       errors: [
         {
+          messageId: 'NO_UUID_MODULE_FOR_V4',
+        },
+        {
           messageId: 'NO_RANDOM_V4_UUID',
+        },
+        {
+          messageId: 'NO_RANDOM_V4_UUID',
+        },
+      ],
+    },
+    {
+      name: 'Invalid case with crypto.randomUUID',
+      code: `import { randomUUID } from 'node:crypto';
+         const id = randomUUID();`,
+      errors: [
+        {
+          messageId: 'NO_RANDOM_V4_UUID',
+        },
+      ],
+    },
+    {
+      name: 'Invalid case with alias import from crypto',
+      code: `import { randomUUID as uuid } from 'node:crypto';
+         const id = uuid();`,
+      errors: [
+        {
+          messageId: 'NO_RANDOM_V4_UUID',
+        },
+      ],
+    },
+    {
+      name: 'Invalid case with all the named exports crypto namespace',
+      code: `import * as crypto from 'node:crypto';
+         const id = crypto.randomUUID();`,
+      errors: [
+        {
+          messageId: 'NO_RANDOM_V4_UUID',
+        },
+      ],
+    },
+    {
+      name: 'Invalid case with mixed imports',
+      code: `import { randomUUID, randomBytes } from 'node:crypto';
+         const id = randomUUID();
+         const bytes = randomBytes(16);`,
+      errors: [
+        {
+          messageId: 'NO_RANDOM_V4_UUID',
+        },
+      ],
+    },
+    {
+      name: 'Invalid case with crypto namespace',
+      code: `import crypto from 'node:crypto';
+         const id = crypto.randomUUID();`,
+      errors: [
+        {
+          messageId: 'NO_RANDOM_V4_UUID',
+        },
+      ],
+    },
+    {
+      name: 'Invalid case with mixed import and alias',
+      code: `import crypto, { randomInt, randomUUID as uuid } from 'node:crypto';
+         const id = uuid();`,
+      errors: [
+        {
+          messageId: 'NO_RANDOM_V4_UUID',
+        },
+      ],
+    },
+    {
+      name: 'Invalid case with uuid module used only for v4 UUID generation',
+      code: `import { v4 } from 'uuid';
+         const id = v4();`,
+      errors: [
+        {
+          messageId: 'NO_UUID_MODULE_FOR_V4',
+        },
+        {
+          messageId: 'NO_RANDOM_V4_UUID',
+        },
+      ],
+    },
+    {
+      name: 'Invalid case with uuid module used only for alias v4 UUID generation',
+      code: `import { v4 as uuid } from 'uuid';
+         const id = uuid();`,
+      errors: [
+        {
+          messageId: 'NO_UUID_MODULE_FOR_V4',
         },
         {
           messageId: 'NO_RANDOM_V4_UUID',

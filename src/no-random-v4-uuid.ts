@@ -1,7 +1,7 @@
 // no-random-v4-uuid.ts
 
 /*
- * Copyright (c) 2022-2024 Check Digit, LLC
+ * Copyright (c) 2022-2025 Check Digit, LLC
  *
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
@@ -11,77 +11,98 @@ import getDocumentationUrl from './get-documentation-url.ts';
 
 export const ruleId = 'no-random-v4-uuid';
 const NO_RANDOM_V4_UUID = 'NO_RANDOM_V4_UUID';
+const NO_UUID_MODULE_FOR_V4 = 'NO_UUID_MODULE_FOR_V4';
 
 const createRule = ESLintUtils.RuleCreator((name) => getDocumentationUrl(name));
 
-// process the import declaration to get the alias for uuid.v4 and uuid.
 const processImportDeclaration = (
   node: TSESTree.ImportDeclaration,
-  uuid4Alias: string | undefined,
-  uuidDefaultAlias: string | undefined,
+  aliases: { uuid4Alias?: string; uuidDefaultAlias?: string; cryptoRandomUUIDAlias?: string },
 ) => {
-  let updatedUuid4Alias = uuid4Alias;
-  let updatedUuidDefaultAlias = uuidDefaultAlias;
   node.specifiers.forEach((specifier) => {
-    switch (specifier.type) {
-      case AST_NODE_TYPES.ImportSpecifier:
-        if (specifier.imported.type === AST_NODE_TYPES.Identifier && specifier.imported.name === 'v4') {
-          updatedUuid4Alias = specifier.local.name;
-        }
-        break;
-      case AST_NODE_TYPES.ImportDefaultSpecifier:
-        updatedUuidDefaultAlias = specifier.local.name;
-        break;
+    if (specifier.type === AST_NODE_TYPES.ImportSpecifier) {
+      if (
+        node.source.value === 'uuid' &&
+        specifier.imported.type === AST_NODE_TYPES.Identifier &&
+        specifier.imported.name === 'v4'
+      ) {
+        aliases.uuid4Alias = specifier.local.name;
+      } else if (
+        node.source.value === 'node:crypto' &&
+        specifier.imported.type === AST_NODE_TYPES.Identifier &&
+        specifier.imported.name === 'randomUUID'
+      ) {
+        aliases.cryptoRandomUUIDAlias = specifier.local.name;
+      }
+    } else if (specifier.type === AST_NODE_TYPES.ImportDefaultSpecifier && node.source.value === 'uuid') {
+      aliases.uuidDefaultAlias = specifier.local.name;
     }
   });
-  return { uuid4Alias: updatedUuid4Alias, uuidDefaultAlias: updatedUuidDefaultAlias };
 };
 
-// checks if the function call is either directly using the alias for uuid.v4 or using uuid.v4 as a member expression.
 const isUuid4Call = (
   node: TSESTree.CallExpression,
-  uuid4Alias: string | undefined,
-  uuidDefaultAlias: string | undefined,
+  aliases: { uuid4Alias?: string; uuidDefaultAlias?: string },
 ): boolean =>
-  (node.callee.type === AST_NODE_TYPES.Identifier && node.callee.name === uuid4Alias) ||
+  (node.callee.type === AST_NODE_TYPES.Identifier && node.callee.name === aliases.uuid4Alias) ||
   (node.callee.type === AST_NODE_TYPES.MemberExpression &&
     node.callee.object.type === AST_NODE_TYPES.Identifier &&
-    node.callee.object.name === uuidDefaultAlias &&
+    node.callee.object.name === aliases.uuidDefaultAlias &&
     node.callee.property.type === AST_NODE_TYPES.Identifier &&
     node.callee.property.name === 'v4');
 
-const rule: TSESLint.RuleModule<typeof NO_RANDOM_V4_UUID> = createRule({
+const isCryptoRandomUUIDCall = (node: TSESTree.CallExpression, alias?: string): boolean =>
+  (node.callee.type === AST_NODE_TYPES.Identifier && node.callee.name === alias) ||
+  (node.callee.type === AST_NODE_TYPES.MemberExpression &&
+    node.callee.object.type === AST_NODE_TYPES.Identifier &&
+    node.callee.object.name === 'crypto' &&
+    node.callee.property.type === AST_NODE_TYPES.Identifier &&
+    node.callee.property.name === 'randomUUID');
+
+const rule: TSESLint.RuleModule<typeof NO_RANDOM_V4_UUID | typeof NO_UUID_MODULE_FOR_V4> = createRule({
   name: ruleId,
   meta: {
     type: 'problem',
     docs: {
-      description: 'Disallow the use of `uuid.v4` for generating random v4 UUIDs',
+      description:
+        'Disallow the use of `uuid.v4` and `crypto.randomUUID` for generating random v4 UUIDs, and suggest replacing `uuid` module usage with `crypto.randomUUID`.',
     },
     schema: [],
     messages: {
-      [NO_RANDOM_V4_UUID]: 'Avoid using `uuid.v4` for generating random v4 UUIDs.',
+      [NO_RANDOM_V4_UUID]: 'Avoid using `uuid.v4` or `crypto.randomUUID` for generating random v4 UUIDs.',
+      [NO_UUID_MODULE_FOR_V4]: 'Avoid using the `uuid` module for v4 UUID generation. Use `crypto.randomUUID` instead.',
     },
   },
   defaultOptions: [],
   create(context) {
-    let uuid4Alias: string | undefined;
-    let uuidDefaultAlias: string | undefined;
-    let hasUuidImport = false;
+    const aliases: { uuid4Alias?: string; uuidDefaultAlias?: string; cryptoRandomUUIDAlias?: string } = {};
+    let uuidImportNode: TSESTree.ImportDeclaration | null = null;
 
     return {
       ImportDeclaration(node: TSESTree.ImportDeclaration) {
+        processImportDeclaration(node, aliases);
         if (node.source.value === 'uuid') {
-          hasUuidImport = true;
-          const result = processImportDeclaration(node, uuid4Alias, uuidDefaultAlias);
-          uuid4Alias = result.uuid4Alias;
-          uuidDefaultAlias = result.uuidDefaultAlias;
+          uuidImportNode = node;
         }
       },
       CallExpression(node: TSESTree.CallExpression) {
-        if (hasUuidImport && isUuid4Call(node, uuid4Alias, uuidDefaultAlias)) {
+        if (isUuid4Call(node, aliases) || isCryptoRandomUUIDCall(node, aliases.cryptoRandomUUIDAlias)) {
           context.report({
             node,
             messageId: NO_RANDOM_V4_UUID,
+          });
+        }
+      },
+      'Program:exit'() {
+        if (
+          uuidImportNode &&
+          aliases.uuid4Alias !== undefined &&
+          aliases.uuid4Alias !== '' &&
+          (aliases.uuidDefaultAlias === undefined || aliases.uuidDefaultAlias === '')
+        ) {
+          context.report({
+            node: uuidImportNode,
+            messageId: NO_UUID_MODULE_FOR_V4,
           });
         }
       },
