@@ -92,7 +92,7 @@ const configs: Record<string, TSESLint.FlatConfig.Config[]> = {
         '@checkdigit/no-wallaby-comment': 'error',
         '@checkdigit/no-side-effects': [
           'error',
-          { excludedIdentifiers: ['assert', 'debug', 'log', 'promisify', 'Symbol.for'] },
+          { excludedIdentifiers: ['assert', 'debug', 'log', 'promisify', 'Symbol.for', 'Object.freeze'] },
         ],
         '@checkdigit/regular-expression-comment': 'error',
         '@checkdigit/require-assert-predicate-rejects-throws': 'error',

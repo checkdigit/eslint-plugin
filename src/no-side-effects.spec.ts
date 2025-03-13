@@ -85,6 +85,47 @@ createTester().run(ruleId, rule, {
       options: [{ excludedIdentifiers: ['assert', 'debug', 'log'] }],
       name: 'Valid case with no exports with assertions and schema validation',
     },
+    {
+      code: `
+           import debug from 'debug';
+           import Koa from 'koa';
+           import { v4 as uuid } from 'uuid';
+           import Router from '@koa/router';
+           import { StatusCodes } from 'http-status-codes';    
+           
+           const log = debug('report:event');
+            const obj = {
+              prop: 'foo'
+            };
+            assert(\`I'm a number, \${numberValue}\`);
+            assert.ok(statusCode === StatusCodes.OK, 'Status code is not OK');
+            Object.freeze(obj);
+            Symbol.for('foo');
+            obj.prop = 'bar';
+            const jsonSchemaValidator = new Ajv({ allErrors: true }).compile(schema);`,
+      options: [{ excludedIdentifiers: ['assert', 'debug', 'log', 'Symbol.for', 'Object.freeze'] }],
+      name: 'valid case with export',
+    },
+    {
+      code: `
+             import debug from 'debug';
+             import Koa from 'koa';
+             import { v4 as uuid } from 'uuid';
+             import Router from '@koa/router';
+             import { StatusCodes } from 'http-status-codes';    
+             
+             const log = debug('report:event');
+             const obj = {
+              prop: 'foo'
+             };
+            
+            Object.freeze(obj);
+            Symbol.for('foo');
+            obj.prop = 'bar';
+            export default obj;`,
+      options: [{ excludedIdentifiers: ['assert', 'debug', 'log', 'Symbol.for', 'Object.freeze'] }],
+      name: 'valid case with object.freeze and Symbol.for',
+    },
   ],
   invalid: [
     {
@@ -160,7 +201,7 @@ createTester().run(ruleId, rule, {
                 const unresolvedConfiguration = getConfiguration(root());
                 const configuration = await service(unresolvedConfiguration);
                 const symbol1 = Symbol.for('foo');
-
+                assert.ok(statusCode === StatusCodes.OK, 'Status code is not OK');
                 const server = http.createServer(logger(configuration.requestHandler, unresolvedConfiguration.name));
                 server.listen(Number.parseInt(unresolvedConfiguration.env['PORT'], 10), '0.0.0.0');
                 

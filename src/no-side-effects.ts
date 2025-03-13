@@ -1,7 +1,7 @@
 // no-side-effects.ts
 
 /*
- * Copyright (c) 2022-2024 Check Digit, LLC
+ * Copyright (c) 2022-2025 Check Digit, LLC
  *
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
@@ -33,7 +33,11 @@ function isCallExpressionCalleeMemberExpression(statement: TSESTree.Node, exclud
     statement.expression.type === TSESTree.AST_NODE_TYPES.CallExpression &&
     statement.expression.callee.type === TSESTree.AST_NODE_TYPES.MemberExpression &&
     statement.expression.callee.object.type === TSESTree.AST_NODE_TYPES.Identifier &&
-    !excludedIdentifiers.includes(statement.expression.callee.object.name)
+    statement.expression.callee.property.type === TSESTree.AST_NODE_TYPES.Identifier &&
+    !excludedIdentifiers.includes(statement.expression.callee.object.name) &&
+    !excludedIdentifiers.includes(
+      `${statement.expression.callee.object.name}.${statement.expression.callee.property.name}`,
+    )
   );
 }
 
