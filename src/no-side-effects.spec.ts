@@ -94,14 +94,21 @@ createTester().run(ruleId, rule, {
            import { StatusCodes } from 'http-status-codes';    
            
            const log = debug('report:event');
-            const obj = {
-              prop: 'foo'
-            };
+           
             assert(\`I'm a number, \${numberValue}\`);
             assert.ok(statusCode === StatusCodes.OK, 'Status code is not OK');
-            Object.freeze(obj);
             Symbol.for('foo');
-            obj.prop = 'bar';
+            const object = {
+                  prop: 'foo'
+            };
+              
+            Object.freeze(object);
+            
+            try {
+                object.prop = 'bar';
+            } catch (error) {
+                console.error(error); 
+            }
             const jsonSchemaValidator = new Ajv({ allErrors: true }).compile(schema);`,
       options: [{ excludedIdentifiers: ['assert', 'debug', 'log', 'Symbol.for', 'Object.freeze'] }],
       name: 'valid case with export',
@@ -114,14 +121,18 @@ createTester().run(ruleId, rule, {
              import Router from '@koa/router';
              import { StatusCodes } from 'http-status-codes';    
              
-             const log = debug('report:event');
-             const obj = {
-              prop: 'foo'
-             };
-            
-            Object.freeze(obj);
-            Symbol.for('foo');
-            obj.prop = 'bar';
+            const log = debug('report:event');
+            const object = {
+                  prop: 'foo'
+              };
+              
+              Object.freeze(object);
+              
+              try {
+                  object.prop = 'bar';
+              } catch (error) {
+                  console.error(error); 
+              }
             export default obj;`,
       options: [{ excludedIdentifiers: ['assert', 'debug', 'log', 'Symbol.for', 'Object.freeze'] }],
       name: 'valid case with object.freeze and Symbol.for',
@@ -209,6 +220,17 @@ createTester().run(ruleId, rule, {
                   // function body
                 }
                 
+                const object = {
+                   prop: 'foo'
+                };
+                
+                Object.freeze(object);
+                
+                try {
+                    object.prop = 'bar';
+                } catch (error) {
+                    console.error(error); 
+                }
                 await new Promise((resolve) => {
                   server.on('listening', resolve);
                 });`,
@@ -219,7 +241,7 @@ createTester().run(ruleId, rule, {
         { messageId: 'NO_SIDE_EFFECTS' },
         { messageId: 'NO_SIDE_EFFECTS' },
       ],
-      options: [{ excludedIdentifiers: ['assert', 'debug', 'log', 'Symbol.for'] }],
+      options: [{ excludedIdentifiers: ['assert', 'debug', 'log', 'Symbol.for', 'Object.freeze'] }],
       name: 'Invalid case with multiple side effects including export default declarations and async operations',
     },
     {
@@ -233,13 +255,19 @@ createTester().run(ruleId, rule, {
                 const configuration = await service(unresolvedConfiguration);
                 const symbol1 = Symbol.for('foo');
                 
-                 const obj = {
-                  prop: 'foo'
-                 };
+                 const object = {
+                    prop: 'foo'
+                };
                 
-                Object.freeze(obj);
+                Object.freeze(object);
+                
+                try {
+                    object.prop = 'bar';
+                } catch (error) {
+                    console.error(error); 
+                }
+                
                 Symbol.for('foo');
-                obj.prop = 'bar';
                 export default obj;
                 const server = http.createServer(logger(configuration.requestHandler, unresolvedConfiguration.name));
                 server.listen(Number.parseInt(unresolvedConfiguration.env['PORT'], 10), '0.0.0.0');
