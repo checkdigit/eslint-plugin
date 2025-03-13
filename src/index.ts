@@ -90,10 +90,7 @@ const configs: Record<string, TSESLint.FlatConfig.Config[]> = {
         '@checkdigit/require-strict-assert': 'error',
         '@checkdigit/require-ts-extension-imports-exports': 'error',
         '@checkdigit/no-wallaby-comment': 'error',
-        '@checkdigit/no-side-effects': [
-          'error',
-          { excludedIdentifiers: ['assert', 'debug', 'log', 'promisify', 'Symbol.for', 'Object.freeze'] },
-        ],
+        '@checkdigit/no-side-effects': 'error',
         '@checkdigit/regular-expression-comment': 'error',
         '@checkdigit/require-assert-predicate-rejects-throws': 'error',
         '@checkdigit/object-literal-response': 'error',
