@@ -79,6 +79,10 @@ function isVariableDeclarationCallExpression(node: TSESTree.Node, excludedIdenti
     return false;
   }
 
+  if (node.kind === 'const' || node.kind === 'using') {
+    return false;
+  }
+
   const init = node.declarations[0]?.init;
   if (init?.type !== TSESTree.AST_NODE_TYPES.CallExpression) {
     return false;
@@ -91,17 +95,78 @@ function isVariableDeclarationCallExpression(node: TSESTree.Node, excludedIdenti
   );
 }
 
-// Helper function to check if a given AST node (statement) has any side effects that should be reported
+// Verifies if the export declaration contains a variable declaration with an await expression or a call expression.
+function isExportNamedDeclarationWithSideEffects(statement: TSESTree.Node, excludedIdentifiers: string[]): boolean {
+  return (
+    statement.type === TSESTree.AST_NODE_TYPES.ExportNamedDeclaration &&
+    statement.declaration !== null &&
+    (isVariableDeclarationAwaitExpression(statement.declaration) ||
+      isVariableDeclarationCallExpression(statement.declaration, excludedIdentifiers))
+  );
+}
+
+// Verifies if the expression statement contains a call expression with an identifier or member expression callee that is not excluded.
+function isExpressionStatementWithSideEffects(statement: TSESTree.Node, excludedIdentifiers: string[]): boolean {
+  return (
+    statement.type === TSESTree.AST_NODE_TYPES.ExpressionStatement &&
+    statement.expression.type === TSESTree.AST_NODE_TYPES.CallExpression &&
+    ((statement.expression.callee.type === TSESTree.AST_NODE_TYPES.Identifier &&
+      !excludedIdentifiers.includes(statement.expression.callee.name)) ||
+      (statement.expression.callee.type === TSESTree.AST_NODE_TYPES.MemberExpression &&
+        statement.expression.callee.object.type === TSESTree.AST_NODE_TYPES.Identifier &&
+        statement.expression.callee.property.type === TSESTree.AST_NODE_TYPES.Identifier &&
+        !excludedIdentifiers.includes(
+          `${statement.expression.callee.object.name}.${statement.expression.callee.property.name}`,
+        )))
+  );
+}
+
+// Type guard that checks if a given AST node is a variable declaration and that the variable is not declared with the const keyword
+function isNotValidVariableDeclaration(node: TSESTree.Node): boolean {
+  return node.type === TSESTree.AST_NODE_TYPES.VariableDeclaration && node.kind !== 'const' && node.kind !== 'using';
+}
+
+// Checks if the node is a const or using variable declaration
+function isConstOrUsingVariableDeclaration(node: TSESTree.Node): boolean {
+  return node.type === TSESTree.AST_NODE_TYPES.VariableDeclaration && (node.kind === 'const' || node.kind === 'using');
+}
+
+// Checks if the node is a control flow statement
+function isControlFlowStatement(node: TSESTree.Node): boolean {
+  return (
+    node.type === TSESTree.AST_NODE_TYPES.TryStatement ||
+    node.type === TSESTree.AST_NODE_TYPES.IfStatement ||
+    node.type === TSESTree.AST_NODE_TYPES.SwitchStatement ||
+    node.type === TSESTree.AST_NODE_TYPES.ForStatement ||
+    node.type === TSESTree.AST_NODE_TYPES.WhileStatement ||
+    node.type === TSESTree.AST_NODE_TYPES.DoWhileStatement
+  );
+}
+
+// Checks if the node is an assignment expression
+function isAssignmentExpression(node: TSESTree.Node): boolean {
+  return (
+    node.type === TSESTree.AST_NODE_TYPES.ExpressionStatement &&
+    node.expression.type === TSESTree.AST_NODE_TYPES.AssignmentExpression
+  );
+}
+
+// Checks if the statement has side effects
 function hasSideEffects(statement: TSESTree.Node, excludedIdentifiers: string[]): boolean {
+  if (isConstOrUsingVariableDeclaration(statement)) {
+    return false;
+  }
+
   return (
     isAwaitExpression(statement) ||
     isCallExpressionCalleeMemberExpression(statement, excludedIdentifiers) ||
     isVariableDeclarationAwaitExpression(statement) ||
     isVariableDeclarationCallExpression(statement, excludedIdentifiers) ||
-    (statement.type === TSESTree.AST_NODE_TYPES.ExportNamedDeclaration &&
-      statement.declaration !== null &&
-      (isVariableDeclarationAwaitExpression(statement.declaration) ||
-        isVariableDeclarationCallExpression(statement.declaration, excludedIdentifiers)))
+    isExportNamedDeclarationWithSideEffects(statement, excludedIdentifiers) ||
+    isExpressionStatementWithSideEffects(statement, excludedIdentifiers) ||
+    isControlFlowStatement(statement) ||
+    isNotValidVariableDeclaration(statement) ||
+    isAssignmentExpression(statement)
   );
 }
 
