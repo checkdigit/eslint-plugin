@@ -3,13 +3,13 @@
 ## Fail
 
 ```js
-import { v4 } from 'uuid'; // prod
+import { v4 } from 'uuid';
 const newUuid = v4();
 
-import { randomUUID } from 'node:crypto'; // prod
+import { randomUUID } from 'node:crypto';
 const id = randomUUID();
 
-const id = crypto.randomUUID(); // prod
+const id = crypto.randomUUID();
 ```
 
 ## Pass

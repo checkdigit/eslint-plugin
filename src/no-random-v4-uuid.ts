@@ -15,10 +15,13 @@ const NO_UUID_MODULE_FOR_V4 = 'NO_UUID_MODULE_FOR_V4';
 
 const createRule = ESLintUtils.RuleCreator((name) => getDocumentationUrl(name));
 
-const processImportDeclaration = (
-  node: TSESTree.ImportDeclaration,
-  aliases: { uuid4Alias?: string; uuidDefaultAlias?: string; cryptoRandomUUIDAlias?: string },
-) => {
+interface Aliases {
+  uuid4Alias?: string;
+  uuidDefaultAlias?: string;
+  nodeCryptoRandomUUIDAlias?: string;
+}
+
+const processImportDeclaration = (node: TSESTree.ImportDeclaration, aliases: Aliases) => {
   node.specifiers.forEach((specifier) => {
     if (specifier.type === AST_NODE_TYPES.ImportSpecifier) {
       if (
@@ -32,7 +35,7 @@ const processImportDeclaration = (
         specifier.imported.type === AST_NODE_TYPES.Identifier &&
         specifier.imported.name === 'randomUUID'
       ) {
-        aliases.cryptoRandomUUIDAlias = specifier.local.name;
+        aliases.nodeCryptoRandomUUIDAlias = specifier.local.name;
       }
     } else if (specifier.type === AST_NODE_TYPES.ImportDefaultSpecifier && node.source.value === 'uuid') {
       aliases.uuidDefaultAlias = specifier.local.name;
@@ -40,10 +43,7 @@ const processImportDeclaration = (
   });
 };
 
-const isUuid4Call = (
-  node: TSESTree.CallExpression,
-  aliases: { uuid4Alias?: string; uuidDefaultAlias?: string },
-): boolean =>
+const isUuid4Call = (node: TSESTree.CallExpression, aliases: Aliases): boolean =>
   (node.callee.type === AST_NODE_TYPES.Identifier && node.callee.name === aliases.uuid4Alias) ||
   (node.callee.type === AST_NODE_TYPES.MemberExpression &&
     node.callee.object.type === AST_NODE_TYPES.Identifier &&
@@ -75,16 +75,11 @@ const rule: TSESLint.RuleModule<typeof NO_RANDOM_V4_UUID | typeof NO_UUID_MODULE
   },
   defaultOptions: [],
   create(context) {
-    const aliases: { uuid4Alias?: string; uuidDefaultAlias?: string; cryptoRandomUUIDAlias?: string } = {};
-    let uuidImportNode: TSESTree.ImportDeclaration | null = null;
-    let hasReportedCallExpression = false;
+    const aliases: Aliases = {};
 
     return {
       ImportDeclaration(node: TSESTree.ImportDeclaration) {
         processImportDeclaration(node, aliases);
-        if (node.source.value === 'uuid') {
-          uuidImportNode = node;
-        }
       },
       CallExpression(node: TSESTree.CallExpression) {
         if (isUuid4Call(node, aliases)) {
@@ -92,26 +87,10 @@ const rule: TSESLint.RuleModule<typeof NO_RANDOM_V4_UUID | typeof NO_UUID_MODULE
             node,
             messageId: NO_UUID_MODULE_FOR_V4,
           });
-          hasReportedCallExpression = true;
-        } else if (isCryptoRandomUUIDCall(node, aliases.cryptoRandomUUIDAlias)) {
+        } else if (isCryptoRandomUUIDCall(node, aliases.nodeCryptoRandomUUIDAlias)) {
           context.report({
             node,
             messageId: NO_RANDOM_V4_UUID,
-          });
-          hasReportedCallExpression = true;
-        }
-      },
-      'Program:exit'() {
-        if (
-          uuidImportNode &&
-          !hasReportedCallExpression &&
-          aliases.uuid4Alias !== undefined &&
-          aliases.uuid4Alias !== '' &&
-          (aliases.uuidDefaultAlias === undefined || aliases.uuidDefaultAlias === '')
-        ) {
-          context.report({
-            node: uuidImportNode,
-            messageId: NO_UUID_MODULE_FOR_V4,
           });
         }
       },
