@@ -61,5 +61,31 @@ createTester().run(ruleId, rule, {
       errors: [{ messageId: 'NO_AS_TYPE_ASSERTION' }],
       output: `const result = response satisfies SuccessResponse | ErrorResponse;`,
     },
+    {
+      name: 'Invalid case with as type assertion and intersection type',
+      code: `const result = response as SuccessResponse & ErrorResponse;`,
+      errors: [{ messageId: 'NO_AS_TYPE_ASSERTION' }],
+      output: `const result = response satisfies SuccessResponse & ErrorResponse;`,
+    },
+    {
+      name: 'Invalid case with as unknown type assertion',
+      code: `const value = someValue as unknown;`,
+      errors: [{ messageId: 'NO_UNKNOWN_TYPE_ASSERTION' }],
+    },
+    {
+      name: 'Invalid case with as unknown as type assertion',
+      code: `const value = someValue as unknown as SomeType;`,
+      errors: [{ messageId: 'NO_UNKNOWN_TYPE_ASSERTION' }],
+    },
+    {
+      name: 'Invalid case with as unknown as part of union type assertion',
+      code: `const result = response as unknown | SomeType;`,
+      errors: [{ messageId: 'NO_UNKNOWN_TYPE_ASSERTION' }],
+    },
+    {
+      name: 'Invalid case with as unknown as part of intersection type assertion',
+      code: `const result = response as unknown & SomeType`,
+      errors: [{ messageId: 'NO_UNKNOWN_TYPE_ASSERTION' }],
+    },
   ],
 });
