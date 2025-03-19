@@ -8,6 +8,7 @@
 
 import { ESLintUtils } from '@typescript-eslint/utils';
 import { TSESTree } from '@typescript-eslint/typescript-estree';
+import getDocumentationUrl from './get-documentation-url.ts';
 
 interface RuleOptions {
   excludedIdentifiers: string[];
@@ -35,10 +36,6 @@ const isVariableDeclarationAwaitExpression = (node: TSESTree.Node): boolean =>
 // Checks if a node is a VariableDeclaration that is not const or using
 const isNotValidVariableDeclaration = (node: TSESTree.Node): boolean =>
   node.type === TSESTree.AST_NODE_TYPES.VariableDeclaration && node.kind !== 'const' && node.kind !== 'using';
-
-// Checks if a node is a VariableDeclaration that is const or using
-const isConstOrUsingVariableDeclaration = (node: TSESTree.Node): boolean =>
-  node.type === TSESTree.AST_NODE_TYPES.VariableDeclaration && (node.kind === 'const' || node.kind === 'using');
 
 // Checks if a node is a control flow statement
 const isControlFlowStatement = (node: TSESTree.Node): boolean =>
@@ -92,13 +89,17 @@ const isVariableDeclarationCallExpression = (node: TSESTree.Node, excludedIdenti
     return false;
   }
 
-  if (node.kind === 'const' || node.kind === 'using') {
-    return false;
-  }
-
   const init = node.declarations[0]?.init;
   if (init?.type !== TSESTree.AST_NODE_TYPES.CallExpression) {
     return false;
+  }
+
+  const callee = init.callee;
+  if (
+    callee.type === TSESTree.AST_NODE_TYPES.ArrowFunctionExpression ||
+    callee.type === TSESTree.AST_NODE_TYPES.FunctionExpression
+  ) {
+    return true;
   }
 
   return (
@@ -128,33 +129,73 @@ const isExpressionStatementWithSideEffects = (statement: TSESTree.Node, excluded
         `${statement.expression.callee.object.name}.${statement.expression.callee.property.name}`,
       )));
 
-// Checks if a statement has side effects
-const hasSideEffects = (statement: TSESTree.Node, excludedIdentifiers: string[]): boolean => {
-  if (isConstOrUsingVariableDeclaration(statement)) {
+// Checks if a node is a VariableDeclaration with a NewExpression
+const isVariableDeclarationNewExpression = (node: TSESTree.Node): boolean => {
+  if (node.type !== TSESTree.AST_NODE_TYPES.VariableDeclaration || node.declarations.length === 0) {
     return false;
   }
 
-  return (
-    isAwaitExpression(statement) ||
-    isCallExpressionCalleeMemberExpression(statement, excludedIdentifiers) ||
-    isVariableDeclarationAwaitExpression(statement) ||
-    isVariableDeclarationCallExpression(statement, excludedIdentifiers) ||
-    isExportNamedDeclarationWithSideEffects(statement, excludedIdentifiers) ||
-    isExpressionStatementWithSideEffects(statement, excludedIdentifiers) ||
-    isControlFlowStatement(statement) ||
-    isNotValidVariableDeclaration(statement) ||
-    isAssignmentExpression(statement)
-  );
+  const init = node.declarations[0]?.init;
+  return init?.type === TSESTree.AST_NODE_TYPES.NewExpression;
 };
 
-const createRule: ReturnType<typeof ESLintUtils.RuleCreator> = ESLintUtils.RuleCreator((name) => name);
+// Checks if a node is a FunctionDeclaration with an AwaitExpression
+const isFunctionDeclarationAwaitExpression = (node: TSESTree.Node): boolean =>
+  node.type === TSESTree.AST_NODE_TYPES.FunctionDeclaration &&
+  node.body.body.some(
+    (statement) =>
+      statement.type === TSESTree.AST_NODE_TYPES.ExpressionStatement &&
+      statement.expression.type === TSESTree.AST_NODE_TYPES.AwaitExpression,
+  );
+
+// Update the hasSideEffects function to return a string indicating the type of side effect
+const hasSideEffects = (statement: TSESTree.Node, excludedIdentifiers: string[]): string | null => {
+  if (isAwaitExpression(statement)) {
+    return TSESTree.AST_NODE_TYPES.AwaitExpression;
+  }
+  if (isCallExpressionCalleeMemberExpression(statement, excludedIdentifiers)) {
+    return 'CallExpressionCalleeMemberExpression';
+  }
+  if (isVariableDeclarationAwaitExpression(statement)) {
+    return 'VariableDeclarationAwaitExpression';
+  }
+  if (isVariableDeclarationCallExpression(statement, excludedIdentifiers)) {
+    return 'VariableDeclarationCallExpression';
+  }
+  if (isVariableDeclarationNewExpression(statement)) {
+    return 'VariableDeclarationNewExpression';
+  }
+  if (isExportNamedDeclarationWithSideEffects(statement, excludedIdentifiers)) {
+    return 'ExportNamedDeclarationWithSideEffects';
+  }
+  if (isExpressionStatementWithSideEffects(statement, excludedIdentifiers)) {
+    return 'ExpressionStatementWithSideEffects';
+  }
+  if (isControlFlowStatement(statement)) {
+    return 'ControlFlowStatement';
+  }
+  if (isNotValidVariableDeclaration(statement)) {
+    return 'NotValidVariableDeclaration';
+  }
+  if (isAssignmentExpression(statement)) {
+    return TSESTree.AST_NODE_TYPES.AssignmentExpression;
+  }
+  if (isFunctionDeclarationAwaitExpression(statement)) {
+    return 'FunctionDeclarationAwaitExpression';
+  }
+  return null;
+};
+
+const createRule: ReturnType<typeof ESLintUtils.RuleCreator> = ESLintUtils.RuleCreator((name) =>
+  getDocumentationUrl(name),
+);
 
 const rule: ReturnType<typeof createRule> = createRule({
   name: ruleId,
   meta: {
     type: 'problem',
     docs: {
-      description: 'Ensure no side effects can occur at the module-level',
+      description: 'Ensure no side effects can occur at the module-level only if exporting module',
     },
     schema: [
       {
@@ -190,10 +231,14 @@ const rule: ReturnType<typeof createRule> = createRule({
         }
 
         node.body.forEach((statement: TSESTree.Node) => {
-          if (hasSideEffects(statement, excludedIdentifiers)) {
+          const sideEffectType = hasSideEffects(statement, excludedIdentifiers);
+          if (sideEffectType !== null) {
             context.report({
               node: statement,
               messageId: NO_SIDE_EFFECTS,
+              data: {
+                sideEffectType,
+              },
             });
           }
         });
