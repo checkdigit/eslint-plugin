@@ -69,7 +69,7 @@ const rule: TSESLint.RuleModule<typeof NO_RANDOM_V4_UUID | typeof NO_UUID_MODULE
     },
     schema: [],
     messages: {
-      [NO_RANDOM_V4_UUID]: 'Avoid using `crypto.randomUUID` for generating random v4 UUIDs.',
+      [NO_RANDOM_V4_UUID]: 'Avoid generating v4 UUIDs',
       [NO_UUID_MODULE_FOR_V4]: 'Avoid using the `uuid` module for v4 UUID generation. Use `crypto.randomUUID` instead.',
     },
   },
