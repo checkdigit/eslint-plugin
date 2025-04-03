@@ -81,5 +81,45 @@ createTester().run(ruleId, rule, {
       code: `const result = response as unknown & SomeType`,
       errors: [{ messageId: 'NO_AS_TYPE_ASSERTION' }],
     },
+    {
+      name: 'Invalid case with nested as type assertion',
+      code: `const nested = (request.body as TestEvent) as AnotherEventType;`,
+      errors: [{ messageId: 'NO_AS_TYPE_ASSERTION' }],
+    },
+    {
+      name: 'Invalid case with as type assertion in function parameter',
+      code: `function handleEvent(event: any) { const typedEvent = event as TestEvent; }`,
+      errors: [{ messageId: 'NO_AS_TYPE_ASSERTION' }],
+    },
+    {
+      name: 'Invalid case with as type assertion in return statement',
+      code: `function getEvent(): TestEvent { return request.body as TestEvent; }`,
+      errors: [{ messageId: 'NO_AS_TYPE_ASSERTION' }],
+    },
+    {
+      name: 'Invalid case with as type assertion in arrow function',
+      code: `const getEvent = (): TestEvent => request.body as TestEvent;`,
+      errors: [{ messageId: 'NO_AS_TYPE_ASSERTION' }],
+    },
+    {
+      name: 'Invalid case with as type assertion in class property',
+      code: `class EventProcessor { private event = request.body as TestEvent; }`,
+      errors: [{ messageId: 'NO_AS_TYPE_ASSERTION' }],
+    },
+    {
+      name: 'Invalid case with as type assertion in conditional expression',
+      code: `const event = condition ? (request.body as TestEvent) : (request.body as AnotherEventType);`,
+      errors: [{ messageId: 'NO_AS_TYPE_ASSERTION' }, { messageId: 'NO_AS_TYPE_ASSERTION' }],
+    },
+    {
+      name: 'Invalid case with as type assertion in template literal',
+      code: `const event = \`\${request.body as TestEvent}\`;`,
+      errors: [{ messageId: 'NO_AS_TYPE_ASSERTION' }],
+    },
+    {
+      name: 'Invalid case with as type assertion in array destructuring',
+      code: `const [event] = [request.body as TestEvent];`,
+      errors: [{ messageId: 'NO_AS_TYPE_ASSERTION' }],
+    },
   ],
 });

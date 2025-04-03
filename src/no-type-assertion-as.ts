@@ -29,24 +29,7 @@ const rule: ESLintUtils.RuleModule<typeof NO_AS_TYPE_ASSERTION> = createRule({
   create(context) {
     return {
       TSAsExpression(node: TSESTree.TSAsExpression) {
-        const isUnknownUnionOrIntersection =
-          (node.typeAnnotation.type === AST_NODE_TYPES.TSUnionType ||
-            node.typeAnnotation.type === AST_NODE_TYPES.TSIntersectionType) &&
-          node.typeAnnotation.types.some((type) => type.type === AST_NODE_TYPES.TSUnknownKeyword);
-
-        if (
-          node.typeAnnotation.type === AST_NODE_TYPES.TSUnknownKeyword ||
-          (node.expression.type === AST_NODE_TYPES.TSAsExpression &&
-            node.expression.typeAnnotation.type === AST_NODE_TYPES.TSUnknownKeyword) ||
-          isUnknownUnionOrIntersection
-        ) {
-          if (node.parent.type !== AST_NODE_TYPES.TSAsExpression) {
-            context.report({
-              node,
-              messageId: NO_AS_TYPE_ASSERTION,
-            });
-          }
-        } else {
+        if (node.parent.type !== AST_NODE_TYPES.TSAsExpression) {
           context.report({
             node,
             messageId: NO_AS_TYPE_ASSERTION,
