@@ -31,7 +31,7 @@ const isAwaitExpression = (statement: TSESTree.Node): boolean =>
 const isVariableDeclarationAwaitExpression = (node: TSESTree.Node): boolean =>
   node.type === TSESTree.AST_NODE_TYPES.VariableDeclaration &&
   node.declarations.length > 0 &&
-  node.declarations[0]?.init?.type === TSESTree.AST_NODE_TYPES.AwaitExpression;
+  node.declarations[0].init?.type === TSESTree.AST_NODE_TYPES.AwaitExpression;
 
 // Checks if a node is a VariableDeclaration that is not const or using
 const isNotValidVariableDeclaration = (node: TSESTree.Node): boolean =>
@@ -89,7 +89,7 @@ const isVariableDeclarationCallExpression = (node: TSESTree.Node, excludedIdenti
     return false;
   }
 
-  const init = node.declarations[0]?.init;
+  const init = node.declarations[0].init;
   if (init?.type !== TSESTree.AST_NODE_TYPES.CallExpression) {
     return false;
   }
@@ -135,7 +135,7 @@ const isVariableDeclarationNewExpression = (node: TSESTree.Node): boolean => {
     return false;
   }
 
-  const init = node.declarations[0]?.init;
+  const init = node.declarations[0].init;
   return init?.type === TSESTree.AST_NODE_TYPES.NewExpression;
 };
 
