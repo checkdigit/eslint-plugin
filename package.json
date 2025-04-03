@@ -1,6 +1,6 @@
 {
   "name": "@checkdigit/eslint-plugin",
-  "version": "7.13.1",
+  "version": "7.13.2",
   "description": "Check Digit eslint plugins",
   "keywords": [
     "eslint",
