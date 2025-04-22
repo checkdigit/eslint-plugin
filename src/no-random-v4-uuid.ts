@@ -64,13 +64,12 @@ const rule: TSESLint.RuleModule<typeof NO_RANDOM_V4_UUID | typeof NO_UUID_MODULE
   meta: {
     type: 'problem',
     docs: {
-      description:
-        'Disallow the use of `uuid.v4` and `crypto.randomUUID` for generating random v4 UUIDs, and suggest replacing `uuid` module usage with `crypto.randomUUID`.',
+      description: 'Disallow the use of `uuid.v4` and `crypto.randomUUID` for generating random v4 UUIDs.',
     },
     schema: [],
     messages: {
-      [NO_RANDOM_V4_UUID]: 'Avoid using `crypto.randomUUID` for generating random v4 UUIDs.',
-      [NO_UUID_MODULE_FOR_V4]: 'Avoid using the `uuid` module for v4 UUID generation. Use `crypto.randomUUID` instead.',
+      [NO_RANDOM_V4_UUID]: 'Avoid generating v4 UUIDs',
+      [NO_UUID_MODULE_FOR_V4]: 'Avoid using the `uuid` module for v4 UUID generation',
     },
   },
   defaultOptions: [],
