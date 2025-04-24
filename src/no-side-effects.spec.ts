@@ -167,6 +167,14 @@ createTester().run(ruleId, rule, {
       options: [{ excludedIdentifiers: ['debug', 'log', 'Symbol.for', 'Object.freeze'] }],
       name: 'Valid case with generator and resource',
     },
+    {
+      code: `async function fetchData() {
+              const data = await fetch('https://api.example.com');
+              console.log(data);
+            }`,
+      options: [{ excludedIdentifiers: ['debug', 'log', 'Symbol.for', 'Object.freeze'] }],
+      name: 'Valid case with async function and await expression',
+    },
   ],
   invalid: [
     {
@@ -315,6 +323,7 @@ createTester().run(ruleId, rule, {
            async function myAsyncFunction() {
              await Promise.resolve();
            }
+           export const result = await myAsyncFunction();
            async function* test() {
              throw new Error('should not be called');
            }
