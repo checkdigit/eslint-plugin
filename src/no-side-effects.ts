@@ -139,15 +139,6 @@ const isVariableDeclarationNewExpression = (node: TSESTree.Node): boolean => {
   return init?.type === TSESTree.AST_NODE_TYPES.NewExpression;
 };
 
-// Checks if a node is a FunctionDeclaration with an AwaitExpression
-const isFunctionDeclarationAwaitExpression = (node: TSESTree.Node): boolean =>
-  node.type === TSESTree.AST_NODE_TYPES.FunctionDeclaration &&
-  node.body.body.some(
-    (statement) =>
-      statement.type === TSESTree.AST_NODE_TYPES.ExpressionStatement &&
-      statement.expression.type === TSESTree.AST_NODE_TYPES.AwaitExpression,
-  );
-
 // Update the hasSideEffects function to return a string indicating the type of side effect
 const hasSideEffects = (statement: TSESTree.Node, excludedIdentifiers: string[]): string | null => {
   if (isAwaitExpression(statement)) {
@@ -179,9 +170,6 @@ const hasSideEffects = (statement: TSESTree.Node, excludedIdentifiers: string[])
   }
   if (isAssignmentExpression(statement)) {
     return TSESTree.AST_NODE_TYPES.AssignmentExpression;
-  }
-  if (isFunctionDeclarationAwaitExpression(statement)) {
-    return 'FunctionDeclarationAwaitExpression';
   }
   return null;
 };
