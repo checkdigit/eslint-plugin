@@ -121,5 +121,10 @@ createTester().run(ruleId, rule, {
       code: `const [event] = [request.body as TestEvent];`,
       errors: [{ messageId: 'NO_AS_TYPE_ASSERTION' }],
     },
+    {
+      name: 'Invalid case with double as type assertion (unknown to specific type)',
+      code: `const value = someValue as unknown as SomeType;`,
+      errors: [{ messageId: 'NO_AS_TYPE_ASSERTION' }],
+    },
   ],
 });

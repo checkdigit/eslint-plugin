@@ -27,14 +27,28 @@ const rule: ESLintUtils.RuleModule<typeof NO_AS_TYPE_ASSERTION> = createRule({
   },
   defaultOptions: [],
   create(context) {
+    const parserServices = ESLintUtils.getParserServices(context);
+    const checker = parserServices.program.getTypeChecker();
+
     return {
       TSAsExpression(node: TSESTree.TSAsExpression) {
-        if (node.parent.type !== AST_NODE_TYPES.TSAsExpression) {
-          context.report({
-            node,
-            messageId: NO_AS_TYPE_ASSERTION,
-          });
+        if (node.parent.type === AST_NODE_TYPES.TSAsExpression) {
+          return;
         }
+
+        const tsNode = parserServices.esTreeNodeToTSNodeMap.get(node.expression);
+        const originalType = checker.getTypeAtLocation(tsNode);
+        const targetType = checker.getTypeAtLocation(parserServices.esTreeNodeToTSNodeMap.get(node.typeAnnotation));
+
+        // Ensure the types are not assignable
+        if (!checker.isTypeAssignableTo(originalType, targetType)) {
+          return;
+        }
+
+        context.report({
+          node,
+          messageId: NO_AS_TYPE_ASSERTION,
+        });
       },
     };
   },
