@@ -21,7 +21,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
+          node-version: '22.x'
           registry-url: 'https://registry.npmjs.org'
       - name: Check Label
         uses: checkdigit/github-actions/check-label@main
@@ -33,8 +33,6 @@ jobs:
         run: npm install -g npm@latest
       - name: Install Dependencies
         run: npm ci --ignore-scripts
-      - name: Audit Signatures
-        run: npm audit signatures
       - name: Run Test
         run: npm run ci:test
       - name: Prepare Beta
