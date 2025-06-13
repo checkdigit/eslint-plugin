@@ -33,6 +33,7 @@ import noSideEffects from './no-side-effects.ts';
 import noRandomV4UUID from './no-random-v4-uuid.ts';
 import noTestImport from './no-test-import.ts';
 import noTypeAssertionAs from './no-type-assertion-as.ts';
+import noUtil from './no-util.ts';
 import noUuid from './no-uuid.ts';
 import noWallabyComment from './no-wallaby-comment.ts';
 import objectLiteralResponse from './object-literal-response.ts';
@@ -48,6 +49,7 @@ const rules: Record<string, TSESLint.LooseRuleDefinition> = {
   'no-enum': noEnum,
   'no-random-v4-uuid': noRandomV4UUID,
   'no-status-code-assert': noStatusCodeAssert,
+  'no-util': noUtil,
   'no-uuid': noUuid,
   'require-assert-message': requireAssertMessage,
   'require-strict-assert': requireStrictAssert,
@@ -87,6 +89,7 @@ const configs: Record<string, TSESLint.FlatConfig.Config[]> = {
         '@checkdigit/file-path-comment': 'error',
         '@checkdigit/no-random-v4-uuid': 'error',
         '@checkdigit/no-status-code-assert': 'error',
+        '@checkdigit/no-util': 'error',
         '@checkdigit/no-uuid': 'error',
         '@checkdigit/require-assert-message': 'error',
         '@checkdigit/require-strict-assert': 'error',
@@ -122,6 +125,7 @@ const configs: Record<string, TSESLint.FlatConfig.Config[]> = {
         '@checkdigit/file-path-comment': 'off',
         '@checkdigit/no-random-v4-uuid': 'error',
         '@checkdigit/no-status-code-assert': 'error',
+        '@checkdigit/no-util': 'error',
         '@checkdigit/no-uuid': 'error',
         '@checkdigit/require-assert-message': 'error',
         '@checkdigit/require-strict-assert': 'error',
