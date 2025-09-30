@@ -1,4 +1,5 @@
 import { promises as fs } from 'node:fs';
+
 import ts from 'typescript-eslint';
 import sonarjs from 'eslint-plugin-sonarjs';
 import importPlugin from 'eslint-plugin-import';
@@ -8,6 +9,7 @@ import eslintPlugin from 'eslint-plugin-eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
 import js from '@eslint/js';
 import prettier from 'eslint-config-prettier';
+
 import isAwsSdkV3Used from './src/is-aws-sdk-v3-used.ts';
 
 const ignores = [
