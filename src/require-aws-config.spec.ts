@@ -1,4 +1,4 @@
-// file-path-comment.spec.ts
+// require-aws-config.spec.ts
 
 /*
  * Copyright (c) 2021-2025 Check Digit, LLC

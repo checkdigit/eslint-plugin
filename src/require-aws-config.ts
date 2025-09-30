@@ -38,7 +38,7 @@ const rule: ESLintUtils.RuleModule<typeof MESSAGE_ID_REQUIRE_AWS_CONFIG> = creat
         if (node.callee.type === AST_NODE_TYPES.Identifier && node.callee.name.endsWith('Client')) {
           context.report({
             node,
-            messageId: 'requireAwsConfig',
+            messageId: MESSAGE_ID_REQUIRE_AWS_CONFIG,
             data: { awsClientName: node.callee.name },
           });
         } else if (node.callee.type === AST_NODE_TYPES.MemberExpression) {
@@ -47,7 +47,7 @@ const rule: ESLintUtils.RuleModule<typeof MESSAGE_ID_REQUIRE_AWS_CONFIG> = creat
           if (property.type === AST_NODE_TYPES.Identifier && property.name.endsWith('Client')) {
             context.report({
               node,
-              messageId: 'requireAwsConfig',
+              messageId: MESSAGE_ID_REQUIRE_AWS_CONFIG,
               data: { awsClientName: property.name },
             });
           }
