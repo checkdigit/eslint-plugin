@@ -16,7 +16,12 @@ export default async function isAwsSdkV3Used(): Promise<boolean> {
     return cachedIsAwsSdkV3Used;
   }
 
-  process.loadEnvFile();
+  try {
+    process.loadEnvFile();
+  } catch {
+    return false;
+  }
+
   const isService = process.env['SERVICE_NAME'] !== undefined;
   if (!isService) {
     return false;
