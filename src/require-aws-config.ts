@@ -18,7 +18,7 @@ const rule: ESLintUtils.RuleModule<typeof MESSAGE_ID_REQUIRE_AWS_CONFIG> = creat
   meta: {
     type: 'problem',
     docs: {
-      description: 'Require to apply @checkdigit/aws-config along with qualifier instead of using aws client directly.',
+      description: 'Require applying @checkdigit/aws-config with qualifier instead of using AWS clients directly.',
     },
     messages: {
       [MESSAGE_ID_REQUIRE_AWS_CONFIG]:
