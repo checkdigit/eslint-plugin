@@ -6,36 +6,58 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import { AST_NODE_TYPES, ESLintUtils } from '@typescript-eslint/utils';
+import { AST_NODE_TYPES, ESLintUtils, TSESTree } from '@typescript-eslint/utils';
 import getDocumentationUrl from './get-documentation-url.ts';
 
 export const ruleId = 'require-aws-config';
 export const MESSAGE_ID_REQUIRE_AWS_CONFIG = 'requireAwsConfig';
 const createRule = ESLintUtils.RuleCreator((name) => getDocumentationUrl(name));
 
+function isAwsSdkClientModule(importDeclaration: TSESTree.ImportDeclaration): boolean {
+  return importDeclaration.source.value.startsWith('@aws-sdk/client-');
+}
+
+function isAwsClient(awsClientName: string, importedAwsClients?: Set<string>): boolean {
+  // for simplicity, just check if it ends with 'Client'
+  // we can consider type checking in the future if needed to verify if it actually extends from AWS SDK's Smithy Client class
+  return (
+    awsClientName.endsWith('Client') && (importedAwsClients === undefined || importedAwsClients.has(awsClientName))
+  );
+}
+
+const importedAwsClients = new Set<string>();
+
 const rule: ESLintUtils.RuleModule<typeof MESSAGE_ID_REQUIRE_AWS_CONFIG> = createRule({
   name: ruleId,
   meta: {
     type: 'problem',
     docs: {
-      description: 'Require applying @checkdigit/aws-config with qualifier instead of using AWS clients directly.',
+      description:
+        'Require applying @checkdigit/aws-config with qualifier/environment instead of creating new AWS client instance directly.',
     },
     messages: {
       [MESSAGE_ID_REQUIRE_AWS_CONFIG]:
-        'Please apply @checkdigit/aws-config along with qualifier instead of using aws client {{awsClientName}} directly.',
+        'Please apply @checkdigit/aws-config with qualifier/environment instead of creating new instance of {{awsClientName}} directly.',
     },
     schema: [],
   },
   defaultOptions: [],
   create(context) {
-    const { isAwsSdkV3Used } = context.settings;
-    if (isAwsSdkV3Used !== true) {
-      return {};
-    }
-
     return {
+      ImportDeclaration(node) {
+        if (!isAwsSdkClientModule(node)) {
+          return;
+        }
+
+        for (const specifier of node.specifiers) {
+          if (specifier.type === AST_NODE_TYPES.ImportSpecifier && isAwsClient(specifier.local.name)) {
+            importedAwsClients.add(specifier.local.name);
+          }
+        }
+      },
+
       NewExpression(node) {
-        if (node.callee.type === AST_NODE_TYPES.Identifier && node.callee.name.endsWith('Client')) {
+        if (node.callee.type === AST_NODE_TYPES.Identifier && isAwsClient(node.callee.name, importedAwsClients)) {
           context.report({
             node,
             messageId: MESSAGE_ID_REQUIRE_AWS_CONFIG,
@@ -44,7 +66,7 @@ const rule: ESLintUtils.RuleModule<typeof MESSAGE_ID_REQUIRE_AWS_CONFIG> = creat
         } else if (node.callee.type === AST_NODE_TYPES.MemberExpression) {
           // Handle `new AWS.DynamoDBClient()` style (MemberExpression)
           const property = node.callee.property;
-          if (property.type === AST_NODE_TYPES.Identifier && property.name.endsWith('Client')) {
+          if (property.type === AST_NODE_TYPES.Identifier && isAwsClient(property.name, importedAwsClients)) {
             context.report({
               node,
               messageId: MESSAGE_ID_REQUIRE_AWS_CONFIG,

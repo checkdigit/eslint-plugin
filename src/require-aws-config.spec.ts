@@ -12,41 +12,38 @@ import createTester from './ts-tester.test.ts';
 createTester().run(ruleId, rule, {
   valid: [
     {
-      settings: { isAwsSdkV3Used: false },
-      code: `const dynamoClient = new DynamoDBClient({});`,
+      code: `import { EncryptCommand, KMSClient } from '@aws-sdk/client-kms';
+        const command = new EncryptCommand({});`,
     },
     {
-      settings: { isAwsSdkV3Used: true },
-      code: `const dynamoClient = awsConfig(DynamoDBClient, {qualifier, environment});`,
+      code: `import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+        const dynamoClient = awsConfig(DynamoDBClient, {qualifier, environment});`,
     },
     {
-      settings: { isAwsSdkV3Used: false },
-      code: `const paymentCryptographyClient = new PaymentCryptography();`,
-    },
-    {
-      settings: { isAwsSdkV3Used: true },
-      code: `const paymentCryptographyClient = new PaymentCryptography();`,
+      // we probably should add a separate rule to disallow "aggregated client" pattern and force using Bare-bones clients/commands
+      code: `import { PaymentCryptography } from '@aws-sdk/client-payment-cryptography';
+        const paymentCryptography = new PaymentCryptography();`,
     },
   ],
   invalid: [
     {
-      settings: { isAwsSdkV3Used: true },
-      code: `const s3Client = new S3Client({});`,
+      code: `import { S3Client } from '@aws-sdk/client-s3';
+        const s3Client = new S3Client({});`,
       errors: [{ messageId: MESSAGE_ID_REQUIRE_AWS_CONFIG, data: { awsClientName: 'S3Client' } }],
     },
     {
-      settings: { isAwsSdkV3Used: true },
-      code: `const kmsClient = new KMSClient({});`,
-      errors: [{ messageId: MESSAGE_ID_REQUIRE_AWS_CONFIG, data: { awsClientName: 'KMSClient' } }],
-    },
-    {
-      settings: { isAwsSdkV3Used: true },
-      code: `const dynamoClient = new DynamoDBClient({});`,
+      code: `import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+        const dynamoClient = new DynamoDBClient({});`,
       errors: [{ messageId: MESSAGE_ID_REQUIRE_AWS_CONFIG, data: { awsClientName: 'DynamoDBClient' } }],
     },
     {
-      settings: { isAwsSdkV3Used: true },
-      code: `const athenaClient = new AthenaClient({});`,
+      code: `import { KMSClient } from '@aws-sdk/client-kms';
+        const kmsClient = new KMSClient({});`,
+      errors: [{ messageId: MESSAGE_ID_REQUIRE_AWS_CONFIG, data: { awsClientName: 'KMSClient' } }],
+    },
+    {
+      code: `import { AthenaClient } from '@aws-sdk/client-athena';
+        const athenaClient = new AthenaClient({});`,
       errors: [{ messageId: MESSAGE_ID_REQUIRE_AWS_CONFIG, data: { awsClientName: 'AthenaClient' } }],
     },
   ],

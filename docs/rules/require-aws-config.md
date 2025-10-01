@@ -1,4 +1,4 @@
-# Make sure that @checkdigit/aws-config is applied when using AWS Sdk V3 client.
+# Make sure that @checkdigit/aws-config is applied when using AWS Sdk V3 clients
 
 ## Fail
 
