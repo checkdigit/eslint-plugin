@@ -30,8 +30,6 @@ function isAwsClient(awsClientName: string, importedAwsClients?: Set<string>): b
   );
 }
 
-const importedAwsClients = new Set<string>();
-
 const rule: ESLintUtils.RuleModule<typeof MESSAGE_ID_REQUIRE_AWS_CONFIG | typeof MESSAGE_ID_NO_CHECKDIGIT_AWS> =
   createRule({
     name: ruleId,
@@ -43,7 +41,7 @@ const rule: ESLintUtils.RuleModule<typeof MESSAGE_ID_REQUIRE_AWS_CONFIG | typeof
       },
       messages: {
         [MESSAGE_ID_REQUIRE_AWS_CONFIG]:
-          'Please apply @checkdigit/aws-config with qualifier/environment instead of creating new instance of {{awsClientName}} directly.',
+          'Please apply @checkdigit/aws-config with qualifier/environment instead of creating a new instance of {{awsClientName}} directly.',
         [MESSAGE_ID_NO_CHECKDIGIT_AWS]:
           'No longer import from deprecated module "@checkdigit/aws". Please migrate to the official AWS SDK v3 modules.',
       },
@@ -52,6 +50,7 @@ const rule: ESLintUtils.RuleModule<typeof MESSAGE_ID_REQUIRE_AWS_CONFIG | typeof
     defaultOptions: [],
     create(context) {
       const { isAwsSdkV3Used } = context.settings;
+      const importedAwsClients = new Set<string>();
 
       return {
         ImportDeclaration(node) {
