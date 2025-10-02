@@ -10,6 +10,8 @@ import tsParser from '@typescript-eslint/parser';
 import js from '@eslint/js';
 import prettier from 'eslint-config-prettier';
 
+import isAwsSdkV3Used from './src/is-aws-sdk-v3-used.ts';
+
 const ignores = [
   ...(await fs.readFile('.gitignore', 'utf-8')).split('\n').filter((path) => path.trim() !== ''),
   'eslint.config.mjs',
@@ -18,6 +20,11 @@ const ignores = [
 
 export default [
   { ignores },
+  {
+    settings: {
+      isAwsSdkV3Used: await isAwsSdkV3Used(),
+    },
+  },
   {
     linterOptions: {
       reportUnusedDisableDirectives: 'error',

@@ -43,6 +43,8 @@ import requireStrictAssert from './require-strict-assert.ts';
 import requireAssertMessage from './require-assert-message';
 import requireTsExtensionImportsExports from './require-ts-extension-imports-exports.ts';
 
+export { default as isAwsSdkV3Used } from './is-aws-sdk-v3-used.ts';
+
 const rules: Record<string, TSESLint.LooseRuleDefinition> = {
   'file-path-comment': filePathComment,
   'no-card-numbers': noCardNumbers,
