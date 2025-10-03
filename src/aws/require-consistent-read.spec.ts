@@ -79,7 +79,7 @@ createTester().run(ruleId, rule, {
               id: '123',
             },
         }));`,
-      errors: [{ messageId: MESSAGE_ID_CONSISTENT_READ_TRUE, data: { readCommandType: 'GetItemCommand' } }],
+      errors: [{ messageId: MESSAGE_ID_CONSISTENT_READ_TRUE, data: { readCommandType: 'GetItem' } }],
     },
     {
       name: 'Query without consistent read',
@@ -94,7 +94,7 @@ createTester().run(ruleId, rule, {
             },
             ConsistentRead: false,
         }));`,
-      errors: [{ messageId: MESSAGE_ID_CONSISTENT_READ_TRUE, data: { readCommandType: 'QueryCommand' } }],
+      errors: [{ messageId: MESSAGE_ID_CONSISTENT_READ_TRUE, data: { readCommandType: 'Query' } }],
     },
     {
       name: 'BatchGetItem without consistent read',
@@ -110,7 +110,7 @@ createTester().run(ruleId, rule, {
             },
             ConsistentRead: false,
         }));`,
-      errors: [{ messageId: MESSAGE_ID_CONSISTENT_READ_TRUE, data: { readCommandType: 'BatchGetItemCommand' } }],
+      errors: [{ messageId: MESSAGE_ID_CONSISTENT_READ_TRUE, data: { readCommandType: 'BatchGetItem' } }],
     },
     {
       name: 'Query with global index but incorrectly with consistent read as well',
@@ -126,7 +126,7 @@ createTester().run(ruleId, rule, {
             },
             ConsistentRead: true,
         }));`,
-      errors: [{ messageId: MESSAGE_ID_CONSISTENT_READ_FALSE, data: { readCommandType: 'QueryCommand' } }],
+      errors: [{ messageId: MESSAGE_ID_CONSISTENT_READ_FALSE, data: { readCommandType: 'Query' } }],
     },
   ],
 });
