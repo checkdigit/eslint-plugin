@@ -40,7 +40,7 @@ createTester().run(ruleId, rule, {
         }));`,
     },
     {
-      name: 'BatchGetItem  with consistent read',
+      name: 'BatchGetItem with consistent read',
       code: `dynamoDb.send(new BatchGetItemCommand({
             RequestItems: {
               'MyTable': {

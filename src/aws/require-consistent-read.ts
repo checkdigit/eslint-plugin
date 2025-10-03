@@ -126,10 +126,11 @@ const rule: ESLintUtils.RuleModule<typeof MESSAGE_ID_CONSISTENT_READ_TRUE | type
       type: 'problem',
       docs: {
         description:
-          'For AWS dynamodb commands Query/Get/BatchGet, ConsistentRead option should be set as true unless global index is used. This will make the service more robust at the ignorable cost of RCU.',
+          'For AWS dynamodb commands Query/GetItem/BatchGetItem, ConsistentRead option should be set as true unless global index is used. This will make the service more robust at the ignorable cost of RCU.',
       },
       messages: {
-        [MESSAGE_ID_CONSISTENT_READ_TRUE]: 'ConsistentRead option should be set as true for {{readCommandType}} command.',
+        [MESSAGE_ID_CONSISTENT_READ_TRUE]:
+          'ConsistentRead option should be set as true for {{readCommandType}} command.',
         [MESSAGE_ID_CONSISTENT_READ_FALSE]:
           'ConsistentRead option should be set as false for {{readCommandType}} command when using a global secondary index.',
       },
