@@ -14,7 +14,7 @@ export const MESSAGE_ID_CONSISTENT_READ_TRUE = 'MESSAGE_ID_CONSISTENT_READ_TRUE'
 export const MESSAGE_ID_CONSISTENT_READ_FALSE = 'MESSAGE_ID_CONSISTENT_READ_FALSE';
 
 interface ReadCommandInfo {
-  type: 'GetItemCommand' | 'QueryCommand' | 'BatchGetItemCommand';
+  type: 'GetItem' | 'Query' | 'BatchGetItem';
   consistentRead?: boolean;
   usedIndex?: boolean;
 }
@@ -76,18 +76,18 @@ export function getReadCommandInfo(objectExpression: TSESTree.ObjectExpression):
   let readCommandInfo: ReadCommandInfo | undefined;
 
   if (existsRequestItemsProperty(extractedProperties)) {
-    readCommandInfo = { type: 'BatchGetItemCommand' };
+    readCommandInfo = { type: 'BatchGetItem' };
   } else {
     const hasTableName = 'TableName' in extractedProperties;
     const hasKey = existsKeyProperty(extractedProperties);
     if (hasTableName && hasKey) {
-      readCommandInfo = { type: 'GetItemCommand' };
+      readCommandInfo = { type: 'GetItem' };
     } else {
       const hasKeyCondExpr = extractedProperties['KeyConditionExpression']?.value.type === AST_NODE_TYPES.Literal;
       const hasLegacyKeyConditions =
         extractedProperties['KeyConditions']?.value.type === AST_NODE_TYPES.ObjectExpression;
       if (hasTableName && (hasKeyCondExpr || hasLegacyKeyConditions)) {
-        readCommandInfo = { type: 'QueryCommand' };
+        readCommandInfo = { type: 'Query' };
       }
     }
   }
@@ -126,12 +126,12 @@ const rule: ESLintUtils.RuleModule<typeof MESSAGE_ID_CONSISTENT_READ_TRUE | type
       type: 'problem',
       docs: {
         description:
-          'For AWS dynamodb commands Query/Get/BatchGet, ConsistentRead option should be set as true unless global index is used. this will make the service more robust at the ignorable cost of RCU.',
+          'For AWS dynamodb commands Query/Get/BatchGet, ConsistentRead option should be set as true unless global index is used. This will make the service more robust at the ignorable cost of RCU.',
       },
       messages: {
-        [MESSAGE_ID_CONSISTENT_READ_TRUE]: 'ConsistentRead option should be set as true for {{readCommandType}}.',
+        [MESSAGE_ID_CONSISTENT_READ_TRUE]: 'ConsistentRead option should be set as true for {{readCommandType}} command.',
         [MESSAGE_ID_CONSISTENT_READ_FALSE]:
-          'ConsistentRead option should be set as false for {{readCommandType}} when using a global secondary index.',
+          'ConsistentRead option should be set as false for {{readCommandType}} command when using a global secondary index.',
       },
       schema: [],
     },

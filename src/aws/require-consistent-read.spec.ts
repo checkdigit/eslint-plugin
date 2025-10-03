@@ -1,4 +1,4 @@
-// aws/require-resolve-full-response.spec.ts
+// aws/require-consistent-read.spec.ts
 
 /*
  * Copyright (c) 2021-2025 Check Digit, LLC
@@ -97,7 +97,7 @@ createTester().run(ruleId, rule, {
       errors: [{ messageId: MESSAGE_ID_CONSISTENT_READ_TRUE, data: { readCommandType: 'QueryCommand' } }],
     },
     {
-      name: 'BatchGetItem  without consistent read',
+      name: 'BatchGetItem without consistent read',
       code: `dynamoDb.send(new BatchGetItemCommand({
             RequestItems: {
               'MyTable': {
