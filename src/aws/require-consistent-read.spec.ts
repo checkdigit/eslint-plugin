@@ -27,17 +27,18 @@ createTester().run(ruleId, rule, {
     },
     {
       name: 'Query with consistent read',
-      code: `dynamoDb.send(new QueryCommand({
-        TableName: 'MyTable',
-        KeyConditionExpression: '#id = :id',
-        ExpressionAttributeNames: {
-          '#id': 'id',
-            },
-            ExpressionAttributeValues: {
-              ':id': '123',
-            },
-            ConsistentRead: true,
-        }));`,
+      code: `const TABLE_NAME = 'MyTable';
+        dynamoDb.send(new QueryCommand({
+          TableName: TABLE_NAME,
+          KeyConditionExpression: '#id = :id',
+          ExpressionAttributeNames: {
+            '#id': 'id',
+              },
+              ExpressionAttributeValues: {
+                ':id': '123',
+              },
+              ConsistentRead: true,
+          }));`,
     },
     {
       name: 'BatchGetItem with consistent read',
@@ -69,6 +70,21 @@ createTester().run(ruleId, rule, {
             ConsistentRead: false,
         }));`,
     },
+    {
+      name: 'No error should be reported for Update command',
+      code: `dynamoDb.send(new UpdateItemCommand({
+        TableName: ACCOUNTS_TABLE,
+        Key: {
+          accountId: account.accountId,
+        },
+        UpdateExpression: 'SET version = :version',
+        ConditionExpression: 'version = :oldVersion',
+        ExpressionAttributeValues: {
+          ':version': entryToCreate.entryId,
+          ':oldVersion': account.version,
+        },
+      }));`,
+    },
   ],
   invalid: [
     {
@@ -78,6 +94,18 @@ createTester().run(ruleId, rule, {
             Key: {
               id: '123',
             },
+        }));`,
+      errors: [{ messageId: MESSAGE_ID_CONSISTENT_READ_TRUE, data: { readCommandType: 'GetItem' } }],
+    },
+    {
+      name: 'ConsistentRead not being literal true should be reported as well',
+      code: `const consistentRead = Math.random() > 0.5;
+          dynamoDb.send(new GetItemCommand({
+            TableName: 'MyTable',
+            Key: {
+              id: '123',
+            },
+            ConsistentRead: consistentRead,
         }));`,
       errors: [{ messageId: MESSAGE_ID_CONSISTENT_READ_TRUE, data: { readCommandType: 'GetItem' } }],
     },
