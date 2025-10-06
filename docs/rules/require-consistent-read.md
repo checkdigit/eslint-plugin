@@ -1,4 +1,4 @@
-# For AWS dynamodb commands Query/GetItem/BatchGetItem, ConsistentRead option should always be set as true unless global index is used. This will make the service more robust at the ignorable cost of RCU.
+# For AWS dynamodb commands Query/Get/BatchGet, ConsistentRead option should always be set as true unless global index is used. This will make the service more robust at the ignorable cost of RCU.
 
 ## Fail
 

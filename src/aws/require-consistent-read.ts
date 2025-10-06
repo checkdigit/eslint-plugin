@@ -14,7 +14,7 @@ export const MESSAGE_ID_CONSISTENT_READ_TRUE = 'MESSAGE_ID_CONSISTENT_READ_TRUE'
 export const MESSAGE_ID_CONSISTENT_READ_FALSE = 'MESSAGE_ID_CONSISTENT_READ_FALSE';
 
 interface ReadCommandInfo {
-  type: 'GetItem' | 'Query' | 'BatchGetItem';
+  type: 'Get' | 'Query' | 'BatchGet';
   consistentRead?: boolean;
   usedIndex?: boolean;
 }
@@ -75,7 +75,7 @@ export function getReadCommandInfo(objectExpression: TSESTree.ObjectExpression):
   let readCommandInfo: ReadCommandInfo | undefined;
 
   if (existsRequestItemsProperty(extractedProperties)) {
-    readCommandInfo = { type: 'BatchGetItem' };
+    readCommandInfo = { type: 'BatchGet' };
   } else {
     const hasTableName = 'TableName' in extractedProperties;
     const hasKey = existsKeyProperty(extractedProperties);
@@ -83,7 +83,7 @@ export function getReadCommandInfo(objectExpression: TSESTree.ObjectExpression):
       // make sure it is not an update or conditional write;
       // we can't really tell if it's a delete, but we simply ignore that case assuming they'll never be used
       if (!('UpdateExpression' in extractedProperties) && !('ConditionExpression' in extractedProperties)) {
-        readCommandInfo = { type: 'GetItem' };
+        readCommandInfo = { type: 'Get' };
       }
     } else {
       const hasKeyCondExpr = extractedProperties['KeyConditionExpression']?.value.type === AST_NODE_TYPES.Literal;
@@ -129,7 +129,7 @@ const rule: ESLintUtils.RuleModule<typeof MESSAGE_ID_CONSISTENT_READ_TRUE | type
       type: 'problem',
       docs: {
         description:
-          'For AWS dynamodb commands Query/GetItem/BatchGetItem, ConsistentRead option should always be set as true unless global index is used. This will make the service more robust at the ignorable cost of RCU.',
+          'For AWS dynamodb commands Query/Get/BatchGet, ConsistentRead option should always be set as true unless global index is used. This will make the service more robust at the ignorable cost of RCU.',
       },
       messages: {
         [MESSAGE_ID_CONSISTENT_READ_TRUE]:
