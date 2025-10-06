@@ -1,4 +1,5 @@
 import { promises as fs } from 'node:fs';
+
 import ts from 'typescript-eslint';
 import sonarjs from 'eslint-plugin-sonarjs';
 import importPlugin from 'eslint-plugin-import';
