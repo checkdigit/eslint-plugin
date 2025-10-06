@@ -27,6 +27,7 @@ import requireServiceCallResponseDeclaration, {
   ruleId as requireServiceCallResponseDeclarationRuleId,
 } from './require-service-call-response-declaration.ts';
 import requireConsistentRead, { ruleId as requireConsistentReadRuleId } from './aws/require-consistent-read.ts';
+import requireAwsConfig, { ruleId as requireAwsConfigRuleId } from './require-aws-config.ts';
 import filePathComment from './file-path-comment.ts';
 import noCardNumbers from './no-card-numbers.ts';
 import noEnum from './no-enum.ts';
@@ -42,6 +43,8 @@ import requireAssertPredicateRejectsThrows from './require-assert-predicate-reje
 import requireStrictAssert from './require-strict-assert.ts';
 import requireAssertMessage from './require-assert-message';
 import requireTsExtensionImportsExports from './require-ts-extension-imports-exports.ts';
+
+export { default as isAwsSdkV3Used } from './is-aws-sdk-v3-used.ts';
 
 const rules: Record<string, TSESLint.LooseRuleDefinition> = {
   'file-path-comment': filePathComment,
@@ -67,6 +70,7 @@ const rules: Record<string, TSESLint.LooseRuleDefinition> = {
   [noDuplicatedImportsRuleId]: noDuplicatedImports,
   [noServeRuntimeRuleId]: noServeRuntime,
   [requireServiceCallResponseDeclarationRuleId]: requireServiceCallResponseDeclaration,
+  [requireAwsConfigRuleId]: requireAwsConfig,
   [requireFixedServicesImportRuleId]: requireFixedServicesImport,
   [requireTypeOutOfTypeOnlyImportsRuleId]: requireTypeOutOfTypeOnlyImports,
   [requireConsistentReadRuleId]: requireConsistentRead,
@@ -110,6 +114,7 @@ const configs: Record<string, TSESLint.FlatConfig.Config[]> = {
         [`@checkdigit/${noServeRuntimeRuleId}`]: 'error',
         [`@checkdigit/${requireServiceCallResponseDeclarationRuleId}`]: 'error',
         [`@checkdigit/${requireConsistentReadRuleId}`]: 'error',
+        [`@checkdigit/${requireAwsConfigRuleId}`]: 'error',
       },
     },
   ],
@@ -146,6 +151,7 @@ const configs: Record<string, TSESLint.FlatConfig.Config[]> = {
         [`@checkdigit/${noServeRuntimeRuleId}`]: 'off',
         [`@checkdigit/${requireServiceCallResponseDeclarationRuleId}`]: 'off',
         [`@checkdigit/${requireConsistentReadRuleId}`]: 'off',
+        [`@checkdigit/${requireAwsConfigRuleId}`]: 'off',
       },
     },
   ],
