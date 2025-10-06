@@ -1,4 +1,4 @@
-// require-aws-config.spec.ts
+// aws/require-aws-config.spec.ts
 
 /*
  * Copyright (c) 2021-2025 Check Digit, LLC
@@ -6,8 +6,8 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
+import createTester from '../ts-tester.test.ts';
 import rule, { MESSAGE_ID_NO_CHECKDIGIT_AWS, MESSAGE_ID_REQUIRE_AWS_CONFIG, ruleId } from './require-aws-config.ts';
-import createTester from './ts-tester.test.ts';
 
 createTester().run(ruleId, rule, {
   valid: [
