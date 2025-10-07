@@ -1,4 +1,4 @@
-// require-aws-config.ts
+// aws/require-aws-config.ts
 
 /*
  * Copyright (c) 2021-2025 Check Digit, LLC
@@ -7,7 +7,7 @@
  */
 
 import { AST_NODE_TYPES, ESLintUtils, TSESTree } from '@typescript-eslint/utils';
-import getDocumentationUrl from './get-documentation-url.ts';
+import getDocumentationUrl from '../get-documentation-url.ts';
 
 export const ruleId = 'require-aws-config';
 export const MESSAGE_ID_REQUIRE_AWS_CONFIG = 'requireAwsConfig';

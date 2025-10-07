@@ -1,4 +1,4 @@
-// is-aws-sdk-v3-used.ts
+// aws/is-aws-sdk-v3-used.ts
 
 import { promises as fs } from 'node:fs';
 
