@@ -14,8 +14,15 @@ function isAwsSdkClientModule(importDeclaration: TSESTree.ImportDeclaration): bo
   );
 }
 
+// Aggregated clients are higher-level helpers that should not be imported.
 function isAggregatedClient(name: string): boolean {
-  return !name.endsWith('Client') && !name.endsWith('Command');
+  return (
+    !name.endsWith('Client') &&
+    !name.endsWith('Command') &&
+    !name.endsWith('Exception') &&
+    !name.endsWith('Input') &&
+    !name.endsWith('Output')
+  );
 }
 
 const rule: ESLintUtils.RuleModule<typeof MESSAGE_ID_AGGREGATED_CLIENT> = createRule({
@@ -41,7 +48,15 @@ const rule: ESLintUtils.RuleModule<typeof MESSAGE_ID_AGGREGATED_CLIENT> = create
         }
 
         for (const specifier of node.specifiers) {
-          if (specifier.type === AST_NODE_TYPES.ImportSpecifier && isAggregatedClient(specifier.local.name)) {
+          const isTypeImport = specifier.type === AST_NODE_TYPES.ImportSpecifier && specifier.importKind === 'type';
+          const isException = specifier.local.name.endsWith('Exception');
+
+          if (
+            specifier.type === AST_NODE_TYPES.ImportSpecifier &&
+            !isTypeImport &&
+            !isException &&
+            isAggregatedClient(specifier.local.name)
+          ) {
             context.report({
               node: specifier,
               messageId: MESSAGE_ID_AGGREGATED_CLIENT,

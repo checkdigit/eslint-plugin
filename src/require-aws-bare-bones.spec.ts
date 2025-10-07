@@ -60,6 +60,29 @@ createTester().run(ruleId, rule, {
         const paymentCryptography = new PaymentCryptographyClient({});
         await paymentCryptography.send(new EncryptCommand({}));`,
     },
+    {
+      code: `import { S3Client, GetObjectCommand, type GetObjectCommandOutput } from '@aws-sdk/client-s3';`,
+    },
+    {
+      code: `import { VerificationFailedException, VerifyPinDataCommand } from '@aws-sdk/client-payment-cryptography-data';`,
+    },
+    {
+      code: `import { type ImportKeyInput } from '@aws-sdk/client-payment-cryptography';`,
+    },
+    {
+      code: `import { PaymentCryptographyClient, EncryptCommand } from '@aws-sdk/client-payment-cryptography';`,
+    },
+    {
+      code: `import { VerificationFailedException  } from '@aws-sdk/client-payment-cryptography-data';
+            import {
+              CreateAliasCommand,
+              type CreateAliasCommandOutput,
+              type CreateAliasInput,
+              ImportKeyCommand,
+              type ImportKeyCommandOutput,
+              type ImportKeyInput,
+            } from '@aws-sdk/client-payment-cryptography'`,
+    },
   ],
   invalid: [
     {
@@ -125,6 +148,18 @@ createTester().run(ruleId, rule, {
     {
       code: `import { PaymentCryptography } from '@aws-sdk/client-payment-cryptography';
         const paymentCryptography = new PaymentCryptography();`,
+      errors: [{ messageId: MESSAGE_ID_AGGREGATED_CLIENT, data: { clientName: 'PaymentCryptography' } }],
+    },
+    {
+      code: `import { S3 } from '@aws-sdk/client-s3';`,
+      errors: [{ messageId: MESSAGE_ID_AGGREGATED_CLIENT, data: { clientName: 'S3' } }],
+    },
+    {
+      code: `import { PaymentCryptography } from '@aws-sdk/client-payment-cryptography';`,
+      errors: [{ messageId: MESSAGE_ID_AGGREGATED_CLIENT, data: { clientName: 'PaymentCryptography' } }],
+    },
+    {
+      code: `import { ImportKeyCommand, ImportKeyInput, ImportKeyCommandOutput, PaymentCryptography } from '@aws-sdk/client-payment-cryptography';`,
       errors: [{ messageId: MESSAGE_ID_AGGREGATED_CLIENT, data: { clientName: 'PaymentCryptography' } }],
     },
   ],
