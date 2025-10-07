@@ -19,8 +19,8 @@ import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
 const s3 = new S3Client({});
 await s3.send(new GetObjectCommand({}));
 
-import { DynamoDB } from '@aws-sdk/client-dynamodb';
+import { DynamoDBClient, PutItemCommand } from '@aws-sdk/client-dynamodb';
 
-const ddb = new DynamoDB({});
-await ddb.putItem({});
+const ddb = new DynamoDBClient({});
+await ddb.send(new PutItemCommand({}));
 ```
