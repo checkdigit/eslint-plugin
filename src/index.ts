@@ -27,6 +27,7 @@ import requireServiceCallResponseDeclaration, {
   ruleId as requireServiceCallResponseDeclarationRuleId,
 } from './require-service-call-response-declaration.ts';
 import requireAwsConfig, { ruleId as requireAwsConfigRuleId } from './require-aws-config.ts';
+import requireAWSBareBones, { ruleId as requireAWSBareBonesRuleId } from './require-aws-bare-bones.ts';
 import filePathComment from './file-path-comment.ts';
 import noCardNumbers from './no-card-numbers.ts';
 import noEnum from './no-enum.ts';
@@ -72,6 +73,7 @@ const rules: Record<string, TSESLint.LooseRuleDefinition> = {
   [requireAwsConfigRuleId]: requireAwsConfig,
   [requireFixedServicesImportRuleId]: requireFixedServicesImport,
   [requireTypeOutOfTypeOnlyImportsRuleId]: requireTypeOutOfTypeOnlyImports,
+  [requireAWSBareBonesRuleId]: requireAWSBareBones,
 };
 
 const plugin: TSESLint.FlatConfig.Plugin = {
@@ -112,6 +114,7 @@ const configs: Record<string, TSESLint.FlatConfig.Config[]> = {
         [`@checkdigit/${noServeRuntimeRuleId}`]: 'error',
         [`@checkdigit/${requireServiceCallResponseDeclarationRuleId}`]: 'error',
         [`@checkdigit/${requireAwsConfigRuleId}`]: 'error',
+        [`@checkdigit/${requireAWSBareBonesRuleId}`]: 'error',
       },
     },
   ],
@@ -148,6 +151,7 @@ const configs: Record<string, TSESLint.FlatConfig.Config[]> = {
         [`@checkdigit/${noServeRuntimeRuleId}`]: 'off',
         [`@checkdigit/${requireServiceCallResponseDeclarationRuleId}`]: 'off',
         [`@checkdigit/${requireAwsConfigRuleId}`]: 'off',
+        [`@checkdigit/${requireAWSBareBonesRuleId}`]: 'off',
       },
     },
   ],
