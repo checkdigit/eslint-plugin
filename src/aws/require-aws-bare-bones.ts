@@ -1,10 +1,12 @@
 // require-aws-bare-bones.ts
 
 import { AST_NODE_TYPES, ESLintUtils, TSESTree } from '@typescript-eslint/utils';
-import getDocumentationUrl from './get-documentation-url.ts';
+import getDocumentationUrl from '../get-documentation-url.ts';
 
 export const ruleId = 'require-aws-bare-bones';
 export const MESSAGE_ID_AGGREGATED_CLIENT = 'noAggregatedClient';
+
+const BARE_BONES_SUFFIXES = /(?:Client|Command|Exception|Input|Output)$/u;
 
 const createRule = ESLintUtils.RuleCreator((name) => getDocumentationUrl(name));
 
@@ -14,15 +16,8 @@ function isAwsSdkClientModule(importDeclaration: TSESTree.ImportDeclaration): bo
   );
 }
 
-// Aggregated clients are higher-level helpers that should not be imported.
 function isAggregatedClient(name: string): boolean {
-  return (
-    !name.endsWith('Client') &&
-    !name.endsWith('Command') &&
-    !name.endsWith('Exception') &&
-    !name.endsWith('Input') &&
-    !name.endsWith('Output')
-  );
+  return !BARE_BONES_SUFFIXES.test(name);
 }
 
 const rule: ESLintUtils.RuleModule<typeof MESSAGE_ID_AGGREGATED_CLIENT> = createRule({

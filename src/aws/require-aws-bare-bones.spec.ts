@@ -1,7 +1,7 @@
 // require-aws-bare-bones.spec.ts
 
+import createTester from '../ts-tester.test.ts';
 import rule, { MESSAGE_ID_AGGREGATED_CLIENT, ruleId } from './require-aws-bare-bones.ts';
-import createTester from './ts-tester.test.ts';
 
 createTester().run(ruleId, rule, {
   valid: [
@@ -82,6 +82,9 @@ createTester().run(ruleId, rule, {
               type ImportKeyCommandOutput,
               type ImportKeyInput,
             } from '@aws-sdk/client-payment-cryptography'`,
+    },
+    {
+      code: `import aws from '@checkdigit/aws';`,
     },
   ],
   invalid: [
