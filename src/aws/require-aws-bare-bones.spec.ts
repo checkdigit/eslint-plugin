@@ -86,6 +86,30 @@ createTester().run(ruleId, rule, {
     {
       code: `import aws from '@checkdigit/aws';`,
     },
+    {
+      code: `import { DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb';
+             import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+             import awsConfig from '@checkdigit/aws-config';
+        const dynamo = awsConfig(DynamoDBClient, { qualifier, environment });
+        const dynamoDocument = DynamoDBDocument.from(dynamo);
+        await dynamoDocument.send(new PutCommand({ TableName: 'foo', Item: { id: 1 } }));`,
+    },
+    {
+      code: `import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+            import { Upload } from '@aws-sdk/lib-storage';
+            const s3 = new S3Client({});
+            const upload = new Upload({ client: s3, params: { Bucket: 'b', Key: 'k', Body: 'data' } });`,
+    },
+    {
+      code: `import { someUtility } from '@aws-sdk/lib-utilities';`,
+    },
+    {
+      code: `import { S3Client } from '@aws-sdk/client-s3';
+             import { Upload } from '@aws-sdk/lib-storage';`,
+    },
+    {
+      code: `import { type UploadOptions } from '@aws-sdk/lib-storage';`,
+    },
   ],
   invalid: [
     {
@@ -164,6 +188,28 @@ createTester().run(ruleId, rule, {
     {
       code: `import { ImportKeyCommand, ImportKeyInput, ImportKeyCommandOutput, PaymentCryptography } from '@aws-sdk/client-payment-cryptography';`,
       errors: [{ messageId: MESSAGE_ID_AGGREGATED_CLIENT, data: { clientName: 'PaymentCryptography' } }],
+    },
+    {
+      code: `import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
+        const ddbDoc = new DynamoDBDocument({});
+        await ddbDoc.put({ TableName: 'foo', Item: { id: 1 } });`,
+      errors: [{ messageId: MESSAGE_ID_AGGREGATED_CLIENT, data: { clientName: 'DynamoDBDocument' } }],
+    },
+    {
+      code: `import { S3 } from '@aws-sdk/client-s3';
+            import { Upload } from '@aws-sdk/lib-storage';
+            const s3 = new S3({});
+            const upload = new Upload({ client: s3, params: { Bucket: 'b', Key: 'k', Body: 'data' } });`,
+      errors: [{ messageId: MESSAGE_ID_AGGREGATED_CLIENT, data: { clientName: 'S3' } }],
+    },
+    {
+      code: `import { Storage } from '@aws-sdk/lib-storage';
+             const storage = new Storage();`,
+      errors: [{ messageId: MESSAGE_ID_AGGREGATED_CLIENT, data: { clientName: 'Storage' } }],
+    },
+    {
+      code: `import { Utilities } from '@aws-sdk/lib-utilities';`,
+      errors: [{ messageId: MESSAGE_ID_AGGREGATED_CLIENT, data: { clientName: 'Utilities' } }],
     },
   ],
 });

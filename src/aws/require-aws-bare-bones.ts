@@ -6,19 +6,36 @@ import getDocumentationUrl from '../get-documentation-url.ts';
 export const ruleId = 'require-aws-bare-bones';
 export const MESSAGE_ID_AGGREGATED_CLIENT = 'noAggregatedClient';
 
-const BARE_BONES_SUFFIXES = /(?:Client|Command|Exception|Input|Output)$/u;
+const BARE_BONES_SUFFIXES = new Set(['Client', 'Command', 'Exception', 'Input', 'Output']);
+const AWS_LIB_AGGREGATED_SUFFIXES = new Set(['Document']);
+const AWS_SDK_CLIENT = '@aws-sdk/client-';
+const AWS_SDK_LIB = '@aws-sdk/lib-';
 
-const createRule = ESLintUtils.RuleCreator((name) => getDocumentationUrl(name));
+const createRule = ESLintUtils.RuleCreator(getDocumentationUrl);
 
-function isAwsSdkClientModule(importDeclaration: TSESTree.ImportDeclaration): boolean {
-  return (
-    typeof importDeclaration.source.value === 'string' && importDeclaration.source.value.startsWith('@aws-sdk/client-')
-  );
-}
+const isAwsSdkClientModule = ({ source }: TSESTree.ImportDeclaration): boolean =>
+  typeof source.value === 'string' && (source.value.startsWith(AWS_SDK_CLIENT) || source.value.startsWith(AWS_SDK_LIB));
 
-function isAggregatedClient(name: string): boolean {
-  return !BARE_BONES_SUFFIXES.test(name);
-}
+const kebabToPascal = (str: string): string =>
+  str
+    .split('-')
+    .map((item) => item.charAt(0).toUpperCase() + item.slice(1))
+    .join('');
+
+const endsWithAnySuffix = (name: string, suffixes: Set<string>): boolean =>
+  Array.from(suffixes).some((suffix) => name.endsWith(suffix));
+
+const isAggregatedClient = (name: string, importSource: string): boolean => {
+  if (importSource.startsWith(AWS_SDK_CLIENT)) {
+    return !endsWithAnySuffix(name, BARE_BONES_SUFFIXES);
+  }
+  if (importSource.startsWith(AWS_SDK_LIB)) {
+    const pkg = importSource.replace(AWS_SDK_LIB, '');
+    const pkgPascal = kebabToPascal(pkg);
+    return name.startsWith(pkgPascal) || endsWithAnySuffix(name, AWS_LIB_AGGREGATED_SUFFIXES);
+  }
+  return false;
+};
 
 const rule: ESLintUtils.RuleModule<typeof MESSAGE_ID_AGGREGATED_CLIENT> = createRule({
   name: ruleId,
@@ -26,11 +43,11 @@ const rule: ESLintUtils.RuleModule<typeof MESSAGE_ID_AGGREGATED_CLIENT> = create
     type: 'problem',
     docs: {
       description:
-        'Disallow importing aggregated AWS SDK v3 clients. Use bare-bones pattern (Client + Command) for better tree-shaking.',
+        'Disallow importing aggregated AWS SDK v3 clients. Use bare-bones pattern (Client/Lib plus Command) for better tree-shaking.',
     },
     messages: {
       [MESSAGE_ID_AGGREGATED_CLIENT]:
-        'Do not import aggregated AWS SDK v3 client "{{clientName}}". Use bare-bones pattern ({{clientName}}Client + Command) instead.',
+        'Do not import aggregated AWS SDK v3 client "{{clientName}}". Use bare-bones pattern ({{clientName}}Client/ Lib plus Command) instead.',
     },
     schema: [],
   },
@@ -44,13 +61,11 @@ const rule: ESLintUtils.RuleModule<typeof MESSAGE_ID_AGGREGATED_CLIENT> = create
 
         for (const specifier of node.specifiers) {
           const isTypeImport = specifier.type === AST_NODE_TYPES.ImportSpecifier && specifier.importKind === 'type';
-          const isException = specifier.local.name.endsWith('Exception');
 
           if (
             specifier.type === AST_NODE_TYPES.ImportSpecifier &&
             !isTypeImport &&
-            !isException &&
-            isAggregatedClient(specifier.local.name)
+            isAggregatedClient(specifier.local.name, node.source.value)
           ) {
             context.report({
               node: specifier,
