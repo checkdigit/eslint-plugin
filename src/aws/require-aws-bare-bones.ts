@@ -47,7 +47,7 @@ const rule: ESLintUtils.RuleModule<typeof MESSAGE_ID_AGGREGATED_CLIENT> = create
     },
     messages: {
       [MESSAGE_ID_AGGREGATED_CLIENT]:
-        'Do not import aggregated AWS SDK v3 client "{{clientName}}". Use bare-bones pattern ({{clientName}}Client/ Lib plus Command) instead.',
+        'Do not import aggregated AWS SDK v3 client "{{clientName}}". Use bare-bones pattern ({{clientName}}Client/Lib plus Command) instead.',
     },
     schema: [],
   },
