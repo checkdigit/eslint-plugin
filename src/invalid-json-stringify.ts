@@ -51,7 +51,7 @@ export default {
           node.callee.property.name === 'stringify'
         ) {
           const argument = node.arguments[0];
-          if (argument !== undefined && argument.type === 'Identifier') {
+          if (argument?.type === 'Identifier') {
             invalidParameterNamePatterns.some((invalidParameterNamePattern) => {
               if (invalidParameterNamePattern.test(argument.name)) {
                 context.report({
