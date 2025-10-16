@@ -22,8 +22,14 @@ const kebabToPascal = (str: string): string =>
     .map((item) => item.charAt(0).toUpperCase() + item.slice(1))
     .join('');
 
-const endsWithAnySuffix = (name: string, suffixes: Set<string>): boolean =>
-  Array.from(suffixes).some((suffix) => name.endsWith(suffix));
+const endsWithAnySuffix = (name: string, suffixes: Set<string>): boolean => {
+  for (const suffix of suffixes) {
+    if (name.endsWith(suffix)) {
+      return true;
+    }
+  }
+  return false;
+};
 
 const isAggregatedClient = (name: string, importSource: string): boolean => {
   if (importSource.startsWith(AWS_SDK_CLIENT)) {

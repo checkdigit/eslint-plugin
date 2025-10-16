@@ -90,7 +90,7 @@ createTester().run(ruleId, rule, {
       code: `import { DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb';
              import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
              import awsConfig from '@checkdigit/aws-config';
-        const dynamo = awsConfig(DynamoDBClient, { qualifier, environment });
+        const dynamo = awsConfig(DynamoDBDocumentClient, { qualifier, environment });
         const dynamoDocument = DynamoDBDocument.from(dynamo);
         await dynamoDocument.send(new PutCommand({ TableName: 'foo', Item: { id: 1 } }));`,
     },

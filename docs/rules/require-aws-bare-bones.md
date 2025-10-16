@@ -1,6 +1,6 @@
 # Enforce Bare-Bones AWS SDK v3 Client Usage
 
-Ensure that only bare-bones AWS SDK v3 clients, lib and commands are imported and used. Importing and using aggregated clients (e.g., `S3`, `DynamoDB`) is disallowed to promote modularization and enable better tree-shaking for reduced bundle size.
+Ensure that only bare-bones AWS SDK v3 clients, libs, and commands are imported and used. Importing and using aggregated clients (e.g., `S3`, `DynamoDB`) is disallowed to promote modularization and enable better tree-shaking for reduced bundle size.
 
 ## Fail
 
