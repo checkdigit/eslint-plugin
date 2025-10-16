@@ -211,5 +211,25 @@ createTester().run(ruleId, rule, {
       code: `import { Utilities } from '@aws-sdk/lib-utilities';`,
       errors: [{ messageId: MESSAGE_ID_AGGREGATED_CLIENT, data: { clientName: 'Utilities' } }],
     },
+    {
+      code: `import { DynamoDBPaginator } from '@aws-sdk/lib-dynamodb';`,
+      errors: [{ messageId: MESSAGE_ID_AGGREGATED_CLIENT, data: { clientName: 'DynamoDBPaginator' } }],
+    },
+    {
+      code: `import { SQSManager } from '@aws-sdk/lib-sqs';`,
+      errors: [{ messageId: MESSAGE_ID_AGGREGATED_CLIENT, data: { clientName: 'SQSManager' } }],
+    },
+    {
+      code: `import { S3Utils } from '@aws-sdk/lib-s3';`,
+      errors: [{ messageId: MESSAGE_ID_AGGREGATED_CLIENT, data: { clientName: 'S3Utils' } }],
+    },
+    {
+      code: `import { LambdaService } from '@aws-sdk/lib-lambda';`,
+      errors: [{ messageId: MESSAGE_ID_AGGREGATED_CLIENT, data: { clientName: 'LambdaService' } }],
+    },
+    {
+      code: `import { EC2Collection } from '@aws-sdk/lib-ec2';`,
+      errors: [{ messageId: MESSAGE_ID_AGGREGATED_CLIENT, data: { clientName: 'EC2Collection' } }],
+    },
   ],
 });

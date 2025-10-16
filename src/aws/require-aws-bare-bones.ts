@@ -7,7 +7,7 @@ export const ruleId = 'require-aws-bare-bones';
 export const MESSAGE_ID_AGGREGATED_CLIENT = 'noAggregatedClient';
 
 const BARE_BONES_SUFFIXES = new Set(['Client', 'Command', 'Exception', 'Input', 'Output']);
-const AWS_LIB_AGGREGATED_SUFFIXES = new Set(['Document']);
+const AWS_LIB_AGGREGATED_SUFFIXES = new Set(['Document', 'Paginator', 'Utils', 'Service', 'Collection', 'Manager']);
 const AWS_SDK_CLIENT = '@aws-sdk/client-';
 const AWS_SDK_LIB = '@aws-sdk/lib-';
 
@@ -32,7 +32,10 @@ const isAggregatedClient = (name: string, importSource: string): boolean => {
   if (importSource.startsWith(AWS_SDK_LIB)) {
     const pkg = importSource.replace(AWS_SDK_LIB, '');
     const pkgPascal = kebabToPascal(pkg);
-    return name.startsWith(pkgPascal) || endsWithAnySuffix(name, AWS_LIB_AGGREGATED_SUFFIXES);
+    return (
+      (name.startsWith(pkgPascal) && !endsWithAnySuffix(name, BARE_BONES_SUFFIXES)) ||
+      endsWithAnySuffix(name, AWS_LIB_AGGREGATED_SUFFIXES)
+    );
   }
   return false;
 };
