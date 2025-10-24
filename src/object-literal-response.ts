@@ -59,7 +59,7 @@ export default {
           }
 
           // check response headers
-          if (responseContext && responseContext.type === 'ObjectExpression') {
+          if (responseContext?.type === 'ObjectExpression') {
             const headers = responseContext.properties.find(
               (property) =>
                 property.type === 'Property' && property.key.type === 'Identifier' && property.key.name === 'headers',
@@ -73,7 +73,7 @@ export default {
           }
 
           // check response body
-          if (responseContext && responseContext.type === 'ObjectExpression') {
+          if (responseContext?.type === 'ObjectExpression') {
             const status = responseContext.properties.find(
               (property) =>
                 property.type === 'Property' && property.key.type === 'Identifier' && property.key.name === 'status',

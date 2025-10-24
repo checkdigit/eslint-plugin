@@ -26,8 +26,9 @@ import noServeRuntime, { ruleId as noServeRuntimeRuleId } from './no-serve-runti
 import requireServiceCallResponseDeclaration, {
   ruleId as requireServiceCallResponseDeclarationRuleId,
 } from './require-service-call-response-declaration.ts';
-import requireConsistentRead, { ruleId as requireConsistentReadRuleId } from './aws/require-consistent-read.ts';
 import requireAwsConfig, { ruleId as requireAwsConfigRuleId } from './aws/require-aws-config.ts';
+import requireAWSBareBones, { ruleId as requireAWSBareBonesRuleId } from './aws/require-aws-bare-bones.ts';
+import requireConsistentRead, { ruleId as requireConsistentReadRuleId } from './aws/require-consistent-read.ts';
 import filePathComment from './file-path-comment.ts';
 import noCardNumbers from './no-card-numbers.ts';
 import noEnum from './no-enum.ts';
@@ -73,6 +74,7 @@ const rules: Record<string, TSESLint.LooseRuleDefinition> = {
   [requireAwsConfigRuleId]: requireAwsConfig,
   [requireFixedServicesImportRuleId]: requireFixedServicesImport,
   [requireTypeOutOfTypeOnlyImportsRuleId]: requireTypeOutOfTypeOnlyImports,
+  [requireAWSBareBonesRuleId]: requireAWSBareBones,
   [requireConsistentReadRuleId]: requireConsistentRead,
 };
 
@@ -115,6 +117,7 @@ const configs: Record<string, TSESLint.FlatConfig.Config[]> = {
         [`@checkdigit/${requireServiceCallResponseDeclarationRuleId}`]: 'error',
         [`@checkdigit/${requireConsistentReadRuleId}`]: 'error',
         [`@checkdigit/${requireAwsConfigRuleId}`]: 'error',
+        [`@checkdigit/${requireAWSBareBonesRuleId}`]: 'error',
       },
     },
   ],
@@ -152,6 +155,7 @@ const configs: Record<string, TSESLint.FlatConfig.Config[]> = {
         [`@checkdigit/${requireServiceCallResponseDeclarationRuleId}`]: 'off',
         [`@checkdigit/${requireConsistentReadRuleId}`]: 'off',
         [`@checkdigit/${requireAwsConfigRuleId}`]: 'off',
+        [`@checkdigit/${requireAWSBareBonesRuleId}`]: 'off',
       },
     },
   ],
