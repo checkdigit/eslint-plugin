@@ -112,7 +112,6 @@ createTester().run(ruleId, rule, {
     },
     {
       code: `import type { Credentials } from '@aws-sdk/client-sts';`,
-      only: true,
     },
   ],
   invalid: [
