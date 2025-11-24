@@ -71,6 +71,7 @@ const rule: ESLintUtils.RuleModule<typeof MESSAGE_ID_AGGREGATED_CLIENT> = create
         for (const specifier of node.specifiers) {
           if (
             specifier.type === AST_NODE_TYPES.ImportSpecifier &&
+            specifier.importKind !== 'type' &&
             isAggregatedClient(specifier.local.name, node.source.value)
           ) {
             context.report({
