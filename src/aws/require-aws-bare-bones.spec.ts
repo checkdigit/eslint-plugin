@@ -110,6 +110,12 @@ createTester().run(ruleId, rule, {
     {
       code: `import { type UploadOptions } from '@aws-sdk/lib-storage';`,
     },
+    {
+      code: `import type { Credentials } from '@aws-sdk/client-sts';`,
+    },
+    {
+      code: `import { S3Client, type S3 } from '@aws-sdk/client-s3';`,
+    },
   ],
   invalid: [
     {

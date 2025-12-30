@@ -6,8 +6,8 @@ import getDocumentationUrl from '../get-documentation-url.ts';
 export const ruleId = 'require-aws-bare-bones';
 export const MESSAGE_ID_AGGREGATED_CLIENT = 'noAggregatedClient';
 
-const BARE_BONES_SUFFIXES = new Set(['Client', 'Command', 'Exception', 'Input', 'Output']);
-const AWS_LIB_AGGREGATED_SUFFIXES = new Set(['Document', 'Paginator', 'Utils', 'Service', 'Collection', 'Manager']);
+const BARE_BONES_SUFFIXES = ['Client', 'Command', 'Exception', 'Input', 'Output'];
+const AWS_LIB_AGGREGATED_SUFFIXES = ['Document', 'Paginator', 'Utils', 'Service', 'Collection', 'Manager'];
 const AWS_SDK_CLIENT = '@aws-sdk/client-';
 const AWS_SDK_LIB = '@aws-sdk/lib-';
 
@@ -22,7 +22,7 @@ const kebabToPascal = (str: string): string =>
     .map((item) => item.charAt(0).toUpperCase() + item.slice(1))
     .join('');
 
-const endsWithAnySuffix = (name: string, suffixes: Set<string>): boolean => {
+const endsWithAnySuffix = (name: string, suffixes: string[]): boolean => {
   for (const suffix of suffixes) {
     if (name.endsWith(suffix)) {
       return true;
@@ -64,16 +64,14 @@ const rule: ESLintUtils.RuleModule<typeof MESSAGE_ID_AGGREGATED_CLIENT> = create
   create(context) {
     return {
       ImportDeclaration(node) {
-        if (!isAwsSdkClientModule(node)) {
+        if (node.importKind === 'type' || !isAwsSdkClientModule(node)) {
           return;
         }
 
         for (const specifier of node.specifiers) {
-          const isTypeImport = specifier.type === AST_NODE_TYPES.ImportSpecifier && specifier.importKind === 'type';
-
           if (
             specifier.type === AST_NODE_TYPES.ImportSpecifier &&
-            !isTypeImport &&
+            specifier.importKind !== 'type' &&
             isAggregatedClient(specifier.local.name, node.source.value)
           ) {
             context.report({
