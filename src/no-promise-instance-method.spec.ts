@@ -6,7 +6,7 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import { describe } from '@jest/globals';
+import { describe } from 'node:test';
 import rule, {
   NO_PROMISE_INSTANCE_METHOD_CATCH_FINALLY,
   NO_PROMISE_INSTANCE_METHOD_THEN,

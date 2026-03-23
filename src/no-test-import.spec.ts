@@ -7,8 +7,11 @@
  */
 
 import { RuleTester } from 'eslint';
-import { describe } from '@jest/globals';
-import rule, { NO_TEST_IMPORT, type NoTestImportRuleOptions } from './no-test-import.ts';
+import { describe } from 'node:test';
+import rule, {
+  NO_TEST_IMPORT,
+  type NoTestImportRuleOptions,
+} from './no-test-import.ts';
 
 describe('no-test-import', () => {
   new RuleTester({
@@ -85,7 +88,9 @@ describe('no-test-import', () => {
     ],
   });
 
-  const overwrittenConfiguration: NoTestImportRuleOptions = { testFilePattern: '\\.test\\.xyz$' };
+  const overwrittenConfiguration: NoTestImportRuleOptions = {
+    testFilePattern: '\\.test\\.xyz$',
+  };
   new RuleTester({
     languageOptions: {
       parserOptions: {

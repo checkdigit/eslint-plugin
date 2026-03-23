@@ -7,7 +7,7 @@
  */
 
 import { RuleTester } from 'eslint';
-import { describe } from '@jest/globals';
+import { describe } from 'node:test';
 import rule, {
   REQUIRE_OBJECT_LITERAL_FOR_ERROR_RESPONSE_MESSAGE_ID,
   REQUIRE_OBJECT_LITERAL_FOR_HEADERS_MESSAGE_ID,

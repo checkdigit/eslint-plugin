@@ -12,7 +12,8 @@ export default {
   meta: {
     type: 'problem',
     docs: {
-      description: 'Require comments for regular expressions before or on the same line',
+      description:
+        'Require comments for regular expressions before or on the same line',
       url: 'https://github.com/checkdigit/eslint-plugin',
     },
   },
@@ -27,7 +28,9 @@ export default {
           const previousLineComment = lines[previousLine - 1];
 
           // Check if the regular expression contains any simple text
-          const isSimpleTextPattern = /^[0-9:./,\sa-zA-Z-]*$/gu.test(node.value.source);
+          const isSimpleTextPattern = /^[0-9:./,\sa-zA-Z-]*$/gu.test(
+            node.value.source,
+          );
           if (isSimpleTextPattern) {
             return;
           }
@@ -40,7 +43,10 @@ export default {
             // This regex is to check if the line starts with or without spaces and followed by two or more consecutive slashes // or start with /* and may have one or more asterisks, continuing until the first occurrence of */.
             const commentRegularExpressionLine = /^\s*(?:\/{2,}|\/\*+)/gu;
             const hasComment = regularExpression.test(comment.value.trim());
-            if (comment.type === 'Line' || comment.loc.start.line === comment.loc.end.line) {
+            if (
+              comment.type === 'Line' ||
+              comment.loc.start.line === comment.loc.end.line
+            ) {
               return (
                 (comment.loc.end.line === previousLine &&
                   previousLineComment !== undefined &&

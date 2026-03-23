@@ -7,7 +7,7 @@
  */
 
 import { RuleTester } from 'eslint';
-import { describe } from '@jest/globals';
+import { describe } from 'node:test';
 
 import rule from './regular-expression-comment.ts';
 

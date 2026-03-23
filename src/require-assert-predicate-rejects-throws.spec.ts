@@ -7,7 +7,7 @@
  */
 
 import { RuleTester } from 'eslint';
-import { describe } from '@jest/globals';
+import { describe } from 'node:test';
 
 import rule from './require-assert-predicate-rejects-throws.ts';
 
@@ -207,13 +207,23 @@ describe('require-assert-predicate-rejects-throws', () => {
       {
         code: `import { strict as assert } from 'node:assert';
                assert.throws(throwingSecond, 'Second');`,
-        errors: [{ message: 'Second argument in throws method should be of type AssertPredicate.' }],
+        errors: [
+          {
+            message:
+              'Second argument in throws method should be of type AssertPredicate.',
+          },
+        ],
         filename: 'src/require-assert-predicate-rejects-throws.ts',
       },
       {
         code: `import { strict as anyAssert } from 'node:assert';
                anyAssert.rejects(() => new Date(), 'Test Error');`,
-        errors: [{ message: 'Second argument in rejects method should be of type AssertPredicate.' }],
+        errors: [
+          {
+            message:
+              'Second argument in rejects method should be of type AssertPredicate.',
+          },
+        ],
         filename: 'src/require-assert-predicate-rejects-throws.ts',
       },
       {
@@ -221,7 +231,12 @@ describe('require-assert-predicate-rejects-throws', () => {
                assert.rejects(async () => {
                 throw new TypeError('Wrong value');
               });`,
-        errors: [{ message: 'Second argument in rejects method should be of type AssertPredicate.' }],
+        errors: [
+          {
+            message:
+              'Second argument in rejects method should be of type AssertPredicate.',
+          },
+        ],
         filename: 'src/require-assert-predicate-rejects-throws.ts',
       },
     ],

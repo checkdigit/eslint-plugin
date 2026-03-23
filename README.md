@@ -1,6 +1,6 @@
 # @checkdigit/eslint-plugin
 
-Copyright (c) 2021-2024 [Check Digit, LLC](https://checkdigit.com)
+Copyright (c) 2021-2026 [Check Digit, LLC](https://checkdigit.com)
 
 ## Rules
 

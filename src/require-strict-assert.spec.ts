@@ -6,7 +6,7 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 import { RuleTester } from 'eslint';
-import { describe } from '@jest/globals';
+import { describe } from 'node:test';
 
 import rule from './require-strict-assert.ts';
 
@@ -71,7 +71,8 @@ describe('require-strict-assert', () => {
             message: 'Invalid form of strict assertion mode',
           },
           {
-            message: 'strict method not required when in strict assertion mode.',
+            message:
+              'strict method not required when in strict assertion mode.',
           },
         ],
         output: `import { strict as assert } from 'node:assert';
@@ -82,7 +83,8 @@ describe('require-strict-assert', () => {
                assert.strictEqual(value1, value2);`,
         errors: [
           {
-            message: 'strict method not required when in strict assertion mode.',
+            message:
+              'strict method not required when in strict assertion mode.',
           },
         ],
         output: `import { strict as assert } from 'node:assert';
@@ -93,7 +95,8 @@ describe('require-strict-assert', () => {
                assert.deepStrictEqual(obj1, obj2);`,
         errors: [
           {
-            message: 'strict method not required when in strict assertion mode.',
+            message:
+              'strict method not required when in strict assertion mode.',
           },
         ],
         output: `import { strict as assert } from 'node:assert';
@@ -104,7 +107,8 @@ describe('require-strict-assert', () => {
                assert.notStrictEqual(value1, value2);`,
         errors: [
           {
-            message: 'strict method not required when in strict assertion mode.',
+            message:
+              'strict method not required when in strict assertion mode.',
           },
         ],
         output: `import { strict as assert } from 'node:assert';
@@ -115,7 +119,8 @@ describe('require-strict-assert', () => {
                assert.notDeepStrictEqual(obj1, obj2);`,
         errors: [
           {
-            message: 'strict method not required when in strict assertion mode.',
+            message:
+              'strict method not required when in strict assertion mode.',
           },
         ],
         output: `import { strict as assert } from 'node:assert';
@@ -127,7 +132,8 @@ describe('require-strict-assert', () => {
                assert.strict(val1, 'val2');`,
         errors: [
           {
-            message: 'strict method not required when in strict assertion mode.',
+            message:
+              'strict method not required when in strict assertion mode.',
           },
         ],
         output: `import { strict as assert } from 'node:assert';
@@ -149,7 +155,8 @@ describe('require-strict-assert', () => {
                foo.strictEqual(val1, 'val2');`,
         errors: [
           {
-            message: 'strict method not required when in strict assertion mode.',
+            message:
+              'strict method not required when in strict assertion mode.',
           },
         ],
         output: `import { strict as foo } from 'node:assert';

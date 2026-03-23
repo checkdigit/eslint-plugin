@@ -7,8 +7,13 @@
  */
 
 import { StatusCodes } from 'http-status-codes';
-import { AST_NODE_TYPES, ESLintUtils, TSESLint, TSESTree } from '@typescript-eslint/utils';
-import getDocumentationUrl from './get-documentation-url';
+import {
+  AST_NODE_TYPES,
+  ESLintUtils,
+  TSESLint,
+  TSESTree,
+} from '@typescript-eslint/utils';
+import getDocumentationUrl from './get-documentation-url.ts';
 
 export const ruleId = 'no-status-code-assert';
 const NO_STATUS_CODE_ASSERT = 'NO_STATUS_CODE_ASSERT';
@@ -31,7 +36,10 @@ const hasStatusCodeOrValue = (arg: TSESTree.Node): boolean => {
       break;
     }
     case AST_NODE_TYPES.Literal:
-      if (typeof arg.value === 'number' && Object.values(StatusCodes).includes(arg.value)) {
+      if (
+        typeof arg.value === 'number' &&
+        Object.values(StatusCodes).includes(arg.value)
+      ) {
         return true;
       }
       break;
@@ -52,19 +60,25 @@ const isAssertMemberExpression = (node: TSESTree.Node): boolean =>
   node.object.name === 'assert' &&
   node.property.type === AST_NODE_TYPES.Identifier;
 
-const isAssertCallWithStatusCode = (callee: TSESTree.Node, args: TSESTree.Node[]): boolean =>
-  (isAssertIdentifier(callee) || isAssertMemberExpression(callee)) && args.some((arg) => hasStatusCodeOrValue(arg));
+const isAssertCallWithStatusCode = (
+  callee: TSESTree.Node,
+  args: TSESTree.Node[],
+): boolean =>
+  (isAssertIdentifier(callee) || isAssertMemberExpression(callee)) &&
+  args.some((arg) => hasStatusCodeOrValue(arg));
 
 const rule: TSESLint.RuleModule<typeof NO_STATUS_CODE_ASSERT> = createRule({
   name: ruleId,
   meta: {
     type: 'problem',
     docs: {
-      description: 'Disallow using status codes in assertions; use error handling instead',
+      description:
+        'Disallow using status codes in assertions; use error handling instead',
     },
     schema: [],
     messages: {
-      [NO_STATUS_CODE_ASSERT]: 'Do not use status codes in assertions; use error handling instead',
+      [NO_STATUS_CODE_ASSERT]:
+        'Do not use status codes in assertions; use error handling instead',
     },
   },
   defaultOptions: [],

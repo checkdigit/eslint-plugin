@@ -1,8 +1,8 @@
 // no-enum.spec.ts
 
-import rule, { ruleId } from './no-enum';
+import rule, { ruleId } from './no-enum.ts';
 
-import createTester from './ts-tester.test';
+import createTester from './ts-tester.test.ts';
 
 createTester().run(ruleId, rule, {
   valid: [

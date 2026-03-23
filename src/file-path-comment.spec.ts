@@ -7,12 +7,14 @@
  */
 
 import { RuleTester } from 'eslint';
-import { describe } from '@jest/globals';
+import { describe } from 'node:test';
 
 import rule from './file-path-comment.ts';
 
 describe('file-path-comment', () => {
-  const ruleTester = new RuleTester({ languageOptions: { parserOptions: { ecmaVersion: 2020 } } });
+  const ruleTester = new RuleTester({
+    languageOptions: { parserOptions: { ecmaVersion: 2020 } },
+  });
 
   ruleTester.run('file-path-comment', rule, {
     valid: [
@@ -42,13 +44,17 @@ describe('file-path-comment', () => {
       {
         filename: 'src/hello.ts',
         code: `// not-hello.ts`,
-        errors: [{ message: 'first line is a comment but is not a path to the file' }],
+        errors: [
+          { message: 'first line is a comment but is not a path to the file' },
+        ],
         output: `// hello.ts`,
       },
       {
         filename: 'src/hello.ts',
         code: `//hello.ts\n`,
-        errors: [{ message: 'first line is a comment but is not a path to the file' }],
+        errors: [
+          { message: 'first line is a comment but is not a path to the file' },
+        ],
         output: `// hello.ts\n`,
       },
       {

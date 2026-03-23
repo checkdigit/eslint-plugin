@@ -7,8 +7,11 @@
  */
 
 import { RuleTester } from 'eslint';
-import { describe } from '@jest/globals';
-import rule, { INVALID_JSON_STRINGIFY, ruleId } from './invalid-json-stringify.ts';
+import { describe } from 'node:test';
+import rule, {
+  INVALID_JSON_STRINGIFY,
+  ruleId,
+} from './invalid-json-stringify.ts';
 
 describe(ruleId, () => {
   new RuleTester({
@@ -19,7 +22,11 @@ describe(ruleId, () => {
       },
     },
   }).run(ruleId, rule, {
-    valid: [`console.log(error);`, `JSON.stringify(body);`, `JSON.parse(error);`],
+    valid: [
+      `console.log(error);`,
+      `JSON.stringify(body);`,
+      `JSON.parse(error);`,
+    ],
     invalid: [
       {
         code: `JSON.stringify(error);`,

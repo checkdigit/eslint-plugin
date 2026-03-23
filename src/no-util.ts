@@ -35,7 +35,9 @@ const rule: ESLintUtils.RuleModule<typeof NO_UTIL> = createRule({
           const sourceCode = context.sourceCode;
           const tokens = sourceCode.tokensAndComments;
           const firstNonCommentToken = tokens.find(
-            (token) => token.type !== AST_TOKEN_TYPES.Block && token.type !== AST_TOKEN_TYPES.Line,
+            (token) =>
+              token.type !== AST_TOKEN_TYPES.Block &&
+              token.type !== AST_TOKEN_TYPES.Line,
           );
           if (firstNonCommentToken !== undefined) {
             context.report({

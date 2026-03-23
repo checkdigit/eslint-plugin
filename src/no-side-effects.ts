@@ -20,12 +20,15 @@ const NO_SIDE_EFFECTS = 'NO_SIDE_EFFECTS';
 // Type guards
 
 // Checks if a node is an ExpressionStatement
-const isExpressionStatement = (node: TSESTree.Node): node is TSESTree.ExpressionStatement =>
+const isExpressionStatement = (
+  node: TSESTree.Node,
+): node is TSESTree.ExpressionStatement =>
   node.type === TSESTree.AST_NODE_TYPES.ExpressionStatement;
 
 // Checks if a statement is an AwaitExpression
 const isAwaitExpression = (statement: TSESTree.Node): boolean =>
-  isExpressionStatement(statement) && statement.expression.type === TSESTree.AST_NODE_TYPES.AwaitExpression;
+  isExpressionStatement(statement) &&
+  statement.expression.type === TSESTree.AST_NODE_TYPES.AwaitExpression;
 
 // Checks if a node is a VariableDeclaration with an AwaitExpression
 const isVariableDeclarationAwaitExpression = (node: TSESTree.Node): boolean =>
@@ -35,7 +38,9 @@ const isVariableDeclarationAwaitExpression = (node: TSESTree.Node): boolean =>
 
 // Checks if a node is a VariableDeclaration that is not const or using
 const isNotValidVariableDeclaration = (node: TSESTree.Node): boolean =>
-  node.type === TSESTree.AST_NODE_TYPES.VariableDeclaration && node.kind !== 'const' && node.kind !== 'using';
+  node.type === TSESTree.AST_NODE_TYPES.VariableDeclaration &&
+  node.kind !== 'const' &&
+  node.kind !== 'using';
 
 // Checks if a node is a control flow statement
 const isControlFlowStatement = (node: TSESTree.Node): boolean =>
@@ -56,36 +61,59 @@ const isAssignmentExpression = (node: TSESTree.Node): boolean =>
 // Helper functions
 
 // Checks if the callee is an identifier and not excluded
-const isIdentifierCallee = (node: TSESTree.CallExpression, excludedIdentifiers: string[]): boolean =>
-  node.callee.type === TSESTree.AST_NODE_TYPES.Identifier && !excludedIdentifiers.includes(node.callee.name);
+const isIdentifierCallee = (
+  node: TSESTree.CallExpression,
+  excludedIdentifiers: string[],
+): boolean =>
+  node.callee.type === TSESTree.AST_NODE_TYPES.Identifier &&
+  !excludedIdentifiers.includes(node.callee.name);
 
 // Checks if the callee is a member expression and not excluded
-const isMemberExpressionCallee = (node: TSESTree.CallExpression, excludedIdentifiers: string[]): boolean =>
+const isMemberExpressionCallee = (
+  node: TSESTree.CallExpression,
+  excludedIdentifiers: string[],
+): boolean =>
   node.callee.type === TSESTree.AST_NODE_TYPES.MemberExpression &&
   node.callee.object.type === TSESTree.AST_NODE_TYPES.Identifier &&
   node.callee.property.type === TSESTree.AST_NODE_TYPES.Identifier &&
-  !excludedIdentifiers.includes(`${node.callee.object.name}.${node.callee.property.name}`);
+  !excludedIdentifiers.includes(
+    `${node.callee.object.name}.${node.callee.property.name}`,
+  );
 
 // Checks if the callee is a member expression with a non-identifier object
-const isNonIdentifierObjectMemberExpressionCallee = (node: TSESTree.CallExpression): boolean =>
+const isNonIdentifierObjectMemberExpressionCallee = (
+  node: TSESTree.CallExpression,
+): boolean =>
   node.callee.type === TSESTree.AST_NODE_TYPES.MemberExpression &&
   node.callee.object.type !== TSESTree.AST_NODE_TYPES.Identifier;
 
 // Checks if a statement is a CallExpression with a member expression callee
-const isCallExpressionCalleeMemberExpression = (statement: TSESTree.Node, excludedIdentifiers: string[]): boolean =>
+const isCallExpressionCalleeMemberExpression = (
+  statement: TSESTree.Node,
+  excludedIdentifiers: string[],
+): boolean =>
   isExpressionStatement(statement) &&
   statement.expression.type === TSESTree.AST_NODE_TYPES.CallExpression &&
-  statement.expression.callee.type === TSESTree.AST_NODE_TYPES.MemberExpression &&
-  statement.expression.callee.object.type === TSESTree.AST_NODE_TYPES.Identifier &&
-  statement.expression.callee.property.type === TSESTree.AST_NODE_TYPES.Identifier &&
+  statement.expression.callee.type ===
+    TSESTree.AST_NODE_TYPES.MemberExpression &&
+  statement.expression.callee.object.type ===
+    TSESTree.AST_NODE_TYPES.Identifier &&
+  statement.expression.callee.property.type ===
+    TSESTree.AST_NODE_TYPES.Identifier &&
   !excludedIdentifiers.includes(statement.expression.callee.object.name) &&
   !excludedIdentifiers.includes(
     `${statement.expression.callee.object.name}.${statement.expression.callee.property.name}`,
   );
 
 // Checks if a node is a VariableDeclaration with a CallExpression
-const isVariableDeclarationCallExpression = (node: TSESTree.Node, excludedIdentifiers: string[]): boolean => {
-  if (node.type !== TSESTree.AST_NODE_TYPES.VariableDeclaration || node.declarations.length === 0) {
+const isVariableDeclarationCallExpression = (
+  node: TSESTree.Node,
+  excludedIdentifiers: string[],
+): boolean => {
+  if (
+    node.type !== TSESTree.AST_NODE_TYPES.VariableDeclaration ||
+    node.declarations.length === 0
+  ) {
     return false;
   }
 
@@ -110,28 +138,43 @@ const isVariableDeclarationCallExpression = (node: TSESTree.Node, excludedIdenti
 };
 
 // Checks if an ExportNamedDeclaration has side effects
-const isExportNamedDeclarationWithSideEffects = (statement: TSESTree.Node, excludedIdentifiers: string[]): boolean =>
+const isExportNamedDeclarationWithSideEffects = (
+  statement: TSESTree.Node,
+  excludedIdentifiers: string[],
+): boolean =>
   statement.type === TSESTree.AST_NODE_TYPES.ExportNamedDeclaration &&
   statement.declaration !== null &&
   (isVariableDeclarationAwaitExpression(statement.declaration) ||
-    isVariableDeclarationCallExpression(statement.declaration, excludedIdentifiers));
+    isVariableDeclarationCallExpression(
+      statement.declaration,
+      excludedIdentifiers,
+    ));
 
 // Checks if an ExpressionStatement has side effects
-const isExpressionStatementWithSideEffects = (statement: TSESTree.Node, excludedIdentifiers: string[]): boolean =>
+const isExpressionStatementWithSideEffects = (
+  statement: TSESTree.Node,
+  excludedIdentifiers: string[],
+): boolean =>
   statement.type === TSESTree.AST_NODE_TYPES.ExpressionStatement &&
   statement.expression.type === TSESTree.AST_NODE_TYPES.CallExpression &&
   ((statement.expression.callee.type === TSESTree.AST_NODE_TYPES.Identifier &&
     !excludedIdentifiers.includes(statement.expression.callee.name)) ||
-    (statement.expression.callee.type === TSESTree.AST_NODE_TYPES.MemberExpression &&
-      statement.expression.callee.object.type === TSESTree.AST_NODE_TYPES.Identifier &&
-      statement.expression.callee.property.type === TSESTree.AST_NODE_TYPES.Identifier &&
+    (statement.expression.callee.type ===
+      TSESTree.AST_NODE_TYPES.MemberExpression &&
+      statement.expression.callee.object.type ===
+        TSESTree.AST_NODE_TYPES.Identifier &&
+      statement.expression.callee.property.type ===
+        TSESTree.AST_NODE_TYPES.Identifier &&
       !excludedIdentifiers.includes(
         `${statement.expression.callee.object.name}.${statement.expression.callee.property.name}`,
       )));
 
 // Checks if a node is a VariableDeclaration with a NewExpression
 const isVariableDeclarationNewExpression = (node: TSESTree.Node): boolean => {
-  if (node.type !== TSESTree.AST_NODE_TYPES.VariableDeclaration || node.declarations.length === 0) {
+  if (
+    node.type !== TSESTree.AST_NODE_TYPES.VariableDeclaration ||
+    node.declarations.length === 0
+  ) {
     return false;
   }
 
@@ -140,7 +183,10 @@ const isVariableDeclarationNewExpression = (node: TSESTree.Node): boolean => {
 };
 
 // Update the hasSideEffects function to return a string indicating the type of side effect
-const hasSideEffects = (statement: TSESTree.Node, excludedIdentifiers: string[]): string | null => {
+const hasSideEffects = (
+  statement: TSESTree.Node,
+  excludedIdentifiers: string[],
+): string | null => {
   if (isAwaitExpression(statement)) {
     return TSESTree.AST_NODE_TYPES.AwaitExpression;
   }
@@ -174,16 +220,16 @@ const hasSideEffects = (statement: TSESTree.Node, excludedIdentifiers: string[])
   return null;
 };
 
-const createRule: ReturnType<typeof ESLintUtils.RuleCreator> = ESLintUtils.RuleCreator((name) =>
-  getDocumentationUrl(name),
-);
+const createRule: ReturnType<typeof ESLintUtils.RuleCreator> =
+  ESLintUtils.RuleCreator((name) => getDocumentationUrl(name));
 
 const rule: ReturnType<typeof createRule> = createRule({
   name: ruleId,
   meta: {
     type: 'problem',
     docs: {
-      description: 'Ensure no side effects can occur at the module-level only if exporting module',
+      description:
+        'Ensure no side effects can occur at the module-level only if exporting module',
     },
     schema: [
       {
@@ -204,13 +250,15 @@ const rule: ReturnType<typeof createRule> = createRule({
   defaultOptions: [{ excludedIdentifiers: [''] }],
   create(context) {
     const options: RuleOptions = context.options[0] as RuleOptions;
-    const excludedIdentifiers = options.excludedIdentifiers.length > 0 ? options.excludedIdentifiers : [];
+    const excludedIdentifiers =
+      options.excludedIdentifiers.length > 0 ? options.excludedIdentifiers : [];
     return {
       Program(node: TSESTree.Program) {
         const hasExport = node.body.some(
           (statement: TSESTree.Node) =>
             statement.type === TSESTree.AST_NODE_TYPES.ExportNamedDeclaration ||
-            statement.type === TSESTree.AST_NODE_TYPES.ExportDefaultDeclaration ||
+            statement.type ===
+              TSESTree.AST_NODE_TYPES.ExportDefaultDeclaration ||
             statement.type === TSESTree.AST_NODE_TYPES.ExportAllDeclaration,
         );
 

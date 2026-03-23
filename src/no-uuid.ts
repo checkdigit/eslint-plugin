@@ -11,9 +11,15 @@ import type { Rule } from 'eslint';
 
 const UUID_FOUND = 'UUID_FOUND';
 const UUIDS_FOUND = 'UUIDS_FOUND';
-const uuidRegex = /[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}/gmu;
+const uuidRegex =
+  /[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}/gmu;
 
-function checkForUuid(value: string, context: Rule.RuleContext, node?: Node, loc?: SourceLocation) {
+function checkForUuid(
+  value: string,
+  context: Rule.RuleContext,
+  node?: Node,
+  loc?: SourceLocation,
+) {
   const matches = value.match(uuidRegex);
   if (matches === null) {
     return;

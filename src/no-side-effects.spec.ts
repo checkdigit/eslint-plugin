@@ -67,7 +67,11 @@ createTester().run(ruleId, rule, {
              import { v4 as uuid } from 'uuid';
              import Router from '@koa/router';
              import { StatusCodes } from 'http-status-codes';`,
-      options: [{ excludedIdentifiers: ['debug', 'log', 'Symbol.for', 'Object.freeze'] }],
+      options: [
+        {
+          excludedIdentifiers: ['debug', 'log', 'Symbol.for', 'Object.freeze'],
+        },
+      ],
       name: 'Valid case with imports only',
     },
     {
@@ -75,7 +79,11 @@ createTester().run(ruleId, rule, {
              Symbol.for('foo');
              const object = { prop: 'foo' };
              Object.freeze(object);`,
-      options: [{ excludedIdentifiers: ['debug', 'log', 'Symbol.for', 'Object.freeze'] }],
+      options: [
+        {
+          excludedIdentifiers: ['debug', 'log', 'Symbol.for', 'Object.freeze'],
+        },
+      ],
       name: 'Valid case with Symbol.for and Object.freeze',
     },
     {
@@ -85,7 +93,11 @@ createTester().run(ruleId, rule, {
                 console.error(error); 
              }
              const jsonSchemaValidator = new Ajv({ allErrors: true }).compile(schema);`,
-      options: [{ excludedIdentifiers: ['debug', 'log', 'Symbol.for', 'Object.freeze'] }],
+      options: [
+        {
+          excludedIdentifiers: ['debug', 'log', 'Symbol.for', 'Object.freeze'],
+        },
+      ],
       name: 'Valid case with try-catch and schema validation',
     },
     {
@@ -99,7 +111,11 @@ createTester().run(ruleId, rule, {
              const object = { prop: 'foo' };
              Object.freeze(object);
              export default obj;`,
-      options: [{ excludedIdentifiers: ['debug', 'log', 'Symbol.for', 'Object.freeze'] }],
+      options: [
+        {
+          excludedIdentifiers: ['debug', 'log', 'Symbol.for', 'Object.freeze'],
+        },
+      ],
       name: 'Valid case with export default',
     },
     {
@@ -109,7 +125,11 @@ createTester().run(ruleId, rule, {
                static myStaticMethod() {}
                private myPrivateMethod() {}
              }`,
-      options: [{ excludedIdentifiers: ['debug', 'log', 'Symbol.for', 'Object.freeze'] }],
+      options: [
+        {
+          excludedIdentifiers: ['debug', 'log', 'Symbol.for', 'Object.freeze'],
+        },
+      ],
       name: 'Valid case with class declaration',
     },
     {
@@ -121,7 +141,11 @@ createTester().run(ruleId, rule, {
              namespace MyNamespace {
                const value = 42;
              }`,
-      options: [{ excludedIdentifiers: ['debug', 'log', 'Symbol.for', 'Object.freeze'] }],
+      options: [
+        {
+          excludedIdentifiers: ['debug', 'log', 'Symbol.for', 'Object.freeze'],
+        },
+      ],
       name: 'Valid case with enum and namespace',
     },
     {
@@ -138,7 +162,11 @@ createTester().run(ruleId, rule, {
              const myUnknown: unknown = 'unknown';
              const myTrue: true = true;
              const myFalse: false = false;`,
-      options: [{ excludedIdentifiers: ['debug', 'log', 'Symbol.for', 'Object.freeze'] }],
+      options: [
+        {
+          excludedIdentifiers: ['debug', 'log', 'Symbol.for', 'Object.freeze'],
+        },
+      ],
       name: 'Valid case with various variable declarations',
     },
     {
@@ -148,14 +176,22 @@ createTester().run(ruleId, rule, {
              module MyModule {
                const moduleValue = 50;
              }`,
-      options: [{ excludedIdentifiers: ['debug', 'log', 'Symbol.for', 'Object.freeze'] }],
+      options: [
+        {
+          excludedIdentifiers: ['debug', 'log', 'Symbol.for', 'Object.freeze'],
+        },
+      ],
       name: 'Valid case with function and module',
     },
     {
       code: `const isTypeof = typeof x === 'number';
              const isInstanceof = y instanceof Number;
              const isIn = 'prop' in myObject;`,
-      options: [{ excludedIdentifiers: ['debug', 'log', 'Symbol.for', 'Object.freeze'] }],
+      options: [
+        {
+          excludedIdentifiers: ['debug', 'log', 'Symbol.for', 'Object.freeze'],
+        },
+      ],
       name: 'Valid case with type checks',
     },
     {
@@ -164,7 +200,11 @@ createTester().run(ruleId, rule, {
                yield 1;
              }
              using myResource = { dispose() {} };`,
-      options: [{ excludedIdentifiers: ['debug', 'log', 'Symbol.for', 'Object.freeze'] }],
+      options: [
+        {
+          excludedIdentifiers: ['debug', 'log', 'Symbol.for', 'Object.freeze'],
+        },
+      ],
       name: 'Valid case with generator and resource',
     },
     {
@@ -172,7 +212,11 @@ createTester().run(ruleId, rule, {
               const data = await fetch('https://api.example.com');
               console.log(data);
             }`,
-      options: [{ excludedIdentifiers: ['debug', 'log', 'Symbol.for', 'Object.freeze'] }],
+      options: [
+        {
+          excludedIdentifiers: ['debug', 'log', 'Symbol.for', 'Object.freeze'],
+        },
+      ],
       name: 'Valid case with async function and await expression',
     },
   ],
@@ -182,8 +226,14 @@ createTester().run(ruleId, rule, {
            const jsonSchemaValidator = new Ajv({ allErrors: true }).compile(schema);
            export * from './module';`,
       errors: [
-        { messageId: 'NO_SIDE_EFFECTS', data: { sideEffectType: 'ExpressionStatementWithSideEffects' } },
-        { messageId: 'NO_SIDE_EFFECTS', data: { sideEffectType: 'VariableDeclarationCallExpression' } },
+        {
+          messageId: 'NO_SIDE_EFFECTS',
+          data: { sideEffectType: 'ExpressionStatementWithSideEffects' },
+        },
+        {
+          messageId: 'NO_SIDE_EFFECTS',
+          data: { sideEffectType: 'VariableDeclarationCallExpression' },
+        },
       ],
       options: [{ excludedIdentifiers: ['debug', 'log'] }],
       name: 'Invalid case with assertions and schema validation',
@@ -194,8 +244,14 @@ createTester().run(ruleId, rule, {
            const symbol1 = Symbol.for('foo');
            export * from './module';`,
       errors: [
-        { messageId: 'NO_SIDE_EFFECTS', data: { sideEffectType: 'VariableDeclarationCallExpression' } },
-        { messageId: 'NO_SIDE_EFFECTS', data: { sideEffectType: 'VariableDeclarationAwaitExpression' } },
+        {
+          messageId: 'NO_SIDE_EFFECTS',
+          data: { sideEffectType: 'VariableDeclarationCallExpression' },
+        },
+        {
+          messageId: 'NO_SIDE_EFFECTS',
+          data: { sideEffectType: 'VariableDeclarationAwaitExpression' },
+        },
       ],
       options: [{ excludedIdentifiers: ['debug', 'log', 'Symbol.for'] }],
       name: 'Invalid case with variable declarations and async operations',
@@ -207,9 +263,18 @@ createTester().run(ruleId, rule, {
              server.on('listening', resolve);
            });`,
       errors: [
-        { messageId: 'NO_SIDE_EFFECTS', data: { sideEffectType: 'VariableDeclarationCallExpression' } },
-        { messageId: 'NO_SIDE_EFFECTS', data: { sideEffectType: 'ExpressionStatementWithSideEffects' } },
-        { messageId: 'NO_SIDE_EFFECTS', data: { sideEffectType: 'VariableDeclarationAwaitExpression' } },
+        {
+          messageId: 'NO_SIDE_EFFECTS',
+          data: { sideEffectType: 'VariableDeclarationCallExpression' },
+        },
+        {
+          messageId: 'NO_SIDE_EFFECTS',
+          data: { sideEffectType: 'ExpressionStatementWithSideEffects' },
+        },
+        {
+          messageId: 'NO_SIDE_EFFECTS',
+          data: { sideEffectType: 'VariableDeclarationAwaitExpression' },
+        },
       ],
       options: [{ excludedIdentifiers: ['debug', 'log', 'Symbol.for'] }],
       name: 'Invalid case with server creation and async operations',
@@ -222,11 +287,24 @@ createTester().run(ruleId, rule, {
              // function body
            }`,
       errors: [
-        { messageId: 'NO_SIDE_EFFECTS', data: { sideEffectType: 'ExpressionStatementWithSideEffects' } },
-        { messageId: 'NO_SIDE_EFFECTS', data: { sideEffectType: 'VariableDeclarationCallExpression' } },
-        { messageId: 'NO_SIDE_EFFECTS', data: { sideEffectType: 'ExpressionStatementWithSideEffects' } },
+        {
+          messageId: 'NO_SIDE_EFFECTS',
+          data: { sideEffectType: 'ExpressionStatementWithSideEffects' },
+        },
+        {
+          messageId: 'NO_SIDE_EFFECTS',
+          data: { sideEffectType: 'VariableDeclarationCallExpression' },
+        },
+        {
+          messageId: 'NO_SIDE_EFFECTS',
+          data: { sideEffectType: 'ExpressionStatementWithSideEffects' },
+        },
       ],
-      options: [{ excludedIdentifiers: ['debug', 'log', 'Symbol.for', 'Object.freeze'] }],
+      options: [
+        {
+          excludedIdentifiers: ['debug', 'log', 'Symbol.for', 'Object.freeze'],
+        },
+      ],
       name: 'Invalid case with assertions and server creation',
     },
     {
@@ -244,10 +322,20 @@ createTester().run(ruleId, rule, {
              // function body
            }`,
       errors: [
-        { messageId: 'NO_SIDE_EFFECTS', data: { sideEffectType: 'ExpressionStatementWithSideEffects' } },
-        { messageId: 'NO_SIDE_EFFECTS', data: { sideEffectType: 'VariableDeclarationAwaitExpression' } },
+        {
+          messageId: 'NO_SIDE_EFFECTS',
+          data: { sideEffectType: 'ExpressionStatementWithSideEffects' },
+        },
+        {
+          messageId: 'NO_SIDE_EFFECTS',
+          data: { sideEffectType: 'VariableDeclarationAwaitExpression' },
+        },
       ],
-      options: [{ excludedIdentifiers: ['debug', 'log', 'Symbol.for', 'Object.freeze'] }],
+      options: [
+        {
+          excludedIdentifiers: ['debug', 'log', 'Symbol.for', 'Object.freeze'],
+        },
+      ],
       name: 'Invalid case with Object.freeze and async operations',
     },
     {
@@ -269,12 +357,34 @@ createTester().run(ruleId, rule, {
              // function body
            }`,
       errors: [
-        { messageId: 'NO_SIDE_EFFECTS', data: { sideEffectType: 'NotValidVariableDeclaration' } },
-        { messageId: 'NO_SIDE_EFFECTS', data: { sideEffectType: 'ControlFlowStatement' } },
-        { messageId: 'NO_SIDE_EFFECTS', data: { sideEffectType: 'ControlFlowStatement' } },
-        { messageId: 'NO_SIDE_EFFECTS', data: { sideEffectType: 'ControlFlowStatement' } },
+        {
+          messageId: 'NO_SIDE_EFFECTS',
+          data: { sideEffectType: 'NotValidVariableDeclaration' },
+        },
+        {
+          messageId: 'NO_SIDE_EFFECTS',
+          data: { sideEffectType: 'ControlFlowStatement' },
+        },
+        {
+          messageId: 'NO_SIDE_EFFECTS',
+          data: { sideEffectType: 'ControlFlowStatement' },
+        },
+        {
+          messageId: 'NO_SIDE_EFFECTS',
+          data: { sideEffectType: 'ControlFlowStatement' },
+        },
       ],
-      options: [{ excludedIdentifiers: ['debug', 'log', 'Symbol.for', 'Object.freeze', 'memoize'] }],
+      options: [
+        {
+          excludedIdentifiers: [
+            'debug',
+            'log',
+            'Symbol.for',
+            'Object.freeze',
+            'memoize',
+          ],
+        },
+      ],
       name: 'Invalid case with control flow statements',
     },
     {
@@ -298,11 +408,30 @@ createTester().run(ruleId, rule, {
              // function body
            }`,
       errors: [
-        { messageId: 'NO_SIDE_EFFECTS', data: { sideEffectType: 'VariableDeclarationNewExpression' } },
-        { messageId: 'NO_SIDE_EFFECTS', data: { sideEffectType: 'VariableDeclarationCallExpression' } },
-        { messageId: 'NO_SIDE_EFFECTS', data: { sideEffectType: 'VariableDeclarationCallExpression' } },
+        {
+          messageId: 'NO_SIDE_EFFECTS',
+          data: { sideEffectType: 'VariableDeclarationNewExpression' },
+        },
+        {
+          messageId: 'NO_SIDE_EFFECTS',
+          data: { sideEffectType: 'VariableDeclarationCallExpression' },
+        },
+        {
+          messageId: 'NO_SIDE_EFFECTS',
+          data: { sideEffectType: 'VariableDeclarationCallExpression' },
+        },
       ],
-      options: [{ excludedIdentifiers: ['debug', 'log', 'Symbol.for', 'Object.freeze', 'memoize'] }],
+      options: [
+        {
+          excludedIdentifiers: [
+            'debug',
+            'log',
+            'Symbol.for',
+            'Object.freeze',
+            'memoize',
+          ],
+        },
+      ],
       name: 'Invalid case with various variable declarations',
     },
     {
@@ -314,8 +443,23 @@ createTester().run(ruleId, rule, {
            export default function myFunction() {
              // function body
            }`,
-      errors: [{ messageId: 'NO_SIDE_EFFECTS', data: { sideEffectType: 'ExpressionStatementWithSideEffects' } }],
-      options: [{ excludedIdentifiers: ['debug', 'log', 'Symbol.for', 'Object.freeze', 'memoize'] }],
+      errors: [
+        {
+          messageId: 'NO_SIDE_EFFECTS',
+          data: { sideEffectType: 'ExpressionStatementWithSideEffects' },
+        },
+      ],
+      options: [
+        {
+          excludedIdentifiers: [
+            'debug',
+            'log',
+            'Symbol.for',
+            'Object.freeze',
+            'memoize',
+          ],
+        },
+      ],
       name: 'Invalid case with type checks and method call',
     },
     {
@@ -333,8 +477,23 @@ createTester().run(ruleId, rule, {
            using myResource = { dispose() {} };
            const readFile = memoize((name: string) => fs.readFile(name));
            export * from './module';`,
-      errors: [{ messageId: 'NO_SIDE_EFFECTS', data: { sideEffectType: 'VariableDeclarationAwaitExpression' } }],
-      options: [{ excludedIdentifiers: ['debug', 'log', 'Symbol.for', 'Object.freeze', 'memoize'] }],
+      errors: [
+        {
+          messageId: 'NO_SIDE_EFFECTS',
+          data: { sideEffectType: 'VariableDeclarationAwaitExpression' },
+        },
+      ],
+      options: [
+        {
+          excludedIdentifiers: [
+            'debug',
+            'log',
+            'Symbol.for',
+            'Object.freeze',
+            'memoize',
+          ],
+        },
+      ],
       name: 'Invalid case with async function, generator, and resource',
     },
   ],

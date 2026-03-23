@@ -7,7 +7,7 @@
  */
 
 import { RuleTester } from 'eslint';
-import { describe } from '@jest/globals';
+import { describe } from 'node:test';
 
 import rule from './no-uuid.ts';
 
@@ -27,7 +27,8 @@ const NOT_A_UUID = "I'm not a uuid, I think";
 `;
 
 // eslint-disable-next-line no-template-curly-in-string
-const TEMPLATE_TEST = "const NOT_A_UUID = `A template that isn't a uuid. ${1+1} = 2`";
+const TEMPLATE_TEST =
+  "const NOT_A_UUID = `A template that isn't a uuid. ${1+1} = 2`";
 
 const STRING_WITH_NON_UUID = `
   const foo = 'C73BCDCC-2669-4Bf6-XXX-81d3-E4AE73FB11FD';

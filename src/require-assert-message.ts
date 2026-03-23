@@ -22,11 +22,13 @@ const rule: TSESLint.RuleModule<string, unknown[]> = createRule({
   meta: {
     type: 'problem',
     docs: {
-      description: 'Validate that message argument is always supplied to node:assert methods',
+      description:
+        'Validate that message argument is always supplied to node:assert methods',
     },
     schema: [],
     messages: {
-      [MISSING_ASSERT_MESSAGE]: 'Missing message argument in {{methodName}}() method.',
+      [MISSING_ASSERT_MESSAGE]:
+        'Missing message argument in {{methodName}}() method.',
     },
   },
   defaultOptions: [],
@@ -39,7 +41,8 @@ const rule: TSESLint.RuleModule<string, unknown[]> = createRule({
         if (node.source.value === 'node:assert') {
           const specifier = node.specifiers.find(
             (importSpecifier) =>
-              importSpecifier.type === TSESTree.AST_NODE_TYPES.ImportDefaultSpecifier ||
+              importSpecifier.type ===
+                TSESTree.AST_NODE_TYPES.ImportDefaultSpecifier ||
               importSpecifier.type === TSESTree.AST_NODE_TYPES.ImportSpecifier,
           );
           if (specifier) {
@@ -61,11 +64,16 @@ const rule: TSESLint.RuleModule<string, unknown[]> = createRule({
             if (!(methodName in messageIndexCache)) {
               const tsNode = parserServices.esTreeNodeToTSNodeMap.get(node);
               const signature = checker.getResolvedSignature(tsNode);
-              messageIndexCache[methodName] = signature?.getParameters().findIndex((param) => param.name === 'message');
+              messageIndexCache[methodName] = signature
+                ?.getParameters()
+                .findIndex((param) => param.name === 'message');
             }
 
             const messageIndex = messageIndexCache[methodName];
-            if (messageIndex !== undefined && node.arguments.length <= messageIndex) {
+            if (
+              messageIndex !== undefined &&
+              node.arguments.length <= messageIndex
+            ) {
               context.report({
                 node,
                 messageId: MISSING_ASSERT_MESSAGE,
