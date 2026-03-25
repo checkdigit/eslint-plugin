@@ -1,18 +1,23 @@
 // no-enum.spec.ts
 
-import rule, { ruleId } from './no-enum';
+import { describe, it } from 'node:test';
 
-import createTester from './ts-tester.test';
+import rule, { ruleId } from './no-enum.ts';
+import { createTypescriptRuleTester } from './rule-tester.test.ts';
 
-createTester().run(ruleId, rule, {
-  valid: [
-    {
-      name: 'Valid case with status object and type alias',
-      code: `const status = { SUCCESS: 'success', FAILURE: 'failure' }; type Status = 'success' | 'failure';`,
-    },
-    {
-      name: 'Valid case with enum property with in JSON schema definition',
-      code: `export const test = {
+describe(ruleId, () => {
+  const ruleTester = createTypescriptRuleTester();
+
+  it('validates good code', () => {
+    ruleTester.run(ruleId, rule, {
+      valid: [
+        {
+          name: 'Valid case with status object and type alias',
+          code: `const status = { SUCCESS: 'success', FAILURE: 'failure' }; type Status = 'success' | 'failure';`,
+        },
+        {
+          name: 'Valid case with enum property with in JSON schema definition',
+          code: `export const test = {
                 properties: {
                   testString1: {
                     type: 'string'
@@ -31,10 +36,10 @@ createTester().run(ruleId, rule, {
                 required: ['testString1', 'testType', 'testString2', 'testString3'],
                 type: 'object',
               };`,
-    },
-    {
-      name: 'Valid case with nested enum properties',
-      code: `
+        },
+        {
+          name: 'Valid case with nested enum properties',
+          code: `
             const complexStructure = {
               nested: {
                 enum: ['VALUE1', 'VALUE2'],
@@ -44,10 +49,10 @@ createTester().run(ruleId, rule, {
               },
             };
           `,
-    },
-    {
-      name: 'Valid case with deeply nested enum properties',
-      code: `
+        },
+        {
+          name: 'Valid case with deeply nested enum properties',
+          code: `
           const complexStructure = {
             level1: {
               level2: {
@@ -68,10 +73,10 @@ createTester().run(ruleId, rule, {
             },
           };
         `,
-    },
-    {
-      name: 'Valid case with enum properties in array',
-      code: `
+        },
+        {
+          name: 'Valid case with enum properties in array',
+          code: `
           const complexStructure = {
             level1: [
               {
@@ -91,21 +96,28 @@ createTester().run(ruleId, rule, {
             ],
           };
         `,
-    },
-  ],
-  invalid: [
-    {
-      name: 'Invalid case with enum declaration',
-      code: `enum Days { MONDAY = 'Monday', TUESDAY = 'Tuesday', WEDNESDAY = 'Wednesday' };`,
-      errors: [
-        {
-          messageId: 'NO_ENUM',
         },
       ],
-    },
-    {
-      name: 'Invalid case with export enum declaration',
-      code: `export enum TEST_NAMES {
+      invalid: [],
+    });
+  });
+
+  it('errors on invalid code and provides the correct error message', () => {
+    ruleTester.run(ruleId, rule, {
+      valid: [],
+      invalid: [
+        {
+          name: 'Invalid case with enum declaration',
+          code: `enum Days { MONDAY = 'Monday', TUESDAY = 'Tuesday', WEDNESDAY = 'Wednesday' };`,
+          errors: [
+            {
+              messageId: 'NO_ENUM',
+            },
+          ],
+        },
+        {
+          name: 'Invalid case with export enum declaration',
+          code: `export enum TEST_NAMES {
                 testString1 = 'testString1',
                 testString2 = 'testString2',
                 testString3 = 'testString3',
@@ -116,111 +128,113 @@ createTester().run(ruleId, rule, {
                 testString8 = 'testString8',
                 testString9 = 'testString9',
               }`,
-      errors: [{ messageId: 'NO_ENUM' }],
-    },
-    {
-      name: 'Invalid case with enum declaration in an arrow function',
-      code: `const example = () => {
-           enum TEST_NAMES { TEST_STRING1 = 'testString1', TEST_STRING2 = 'testString2', TEST_STRING3 = 'testString3' };};`,
-      errors: [
-        {
-          messageId: 'NO_ENUM',
+          errors: [{ messageId: 'NO_ENUM' }],
         },
-      ],
-    },
-    {
-      name: 'Invalid case with enum declaration in a switch statement',
-      code: `switch (value) {
+        {
+          name: 'Invalid case with enum declaration in an arrow function',
+          code: `const example = () => {
+           enum TEST_NAMES { TEST_STRING1 = 'testString1', TEST_STRING2 = 'testString2', TEST_STRING3 = 'testString3' };};`,
+          errors: [
+            {
+              messageId: 'NO_ENUM',
+            },
+          ],
+        },
+        {
+          name: 'Invalid case with enum declaration in a switch statement',
+          code: `switch (value) {
        case 'example':
         enum TEST_NAMES { TEST_STRING1 = 'testString1', TEST_STRING2 = 'testString2', TEST_STRING3 = 'testString3' };
         break;  }`,
-      errors: [
-        {
-          messageId: 'NO_ENUM',
+          errors: [
+            {
+              messageId: 'NO_ENUM',
+            },
+          ],
         },
-      ],
-    },
-    {
-      name: 'Invalid case with enum declaration in a function',
-      code: `
+        {
+          name: 'Invalid case with enum declaration in a function',
+          code: `
     function example() {
       enum TEST_NAMES { TEST_STRING1 = 'testString1', TEST_STRING2 = 'testString2', TEST_STRING3 = 'testString3' };
     }
    `,
-      errors: [
-        {
-          messageId: 'NO_ENUM',
+          errors: [
+            {
+              messageId: 'NO_ENUM',
+            },
+          ],
         },
-      ],
-    },
-    {
-      name: 'Invalid case with enum declaration in a class',
-      code: `
+        {
+          name: 'Invalid case with enum declaration in a class',
+          code: `
       enum TEST_NAMES { TEST_STRING1 = 'testString1', TEST_STRING2 = 'testString2' }
       class Example {
         testName: TEST_NAMES;
       }
     `,
-      errors: [
-        {
-          messageId: 'NO_ENUM',
+          errors: [
+            {
+              messageId: 'NO_ENUM',
+            },
+          ],
         },
-      ],
-    },
-    {
-      name: 'Invalid case with enum declaration in a namespace',
-      code: `
+        {
+          name: 'Invalid case with enum declaration in a namespace',
+          code: `
     namespace ExampleNamespace {
       export enum TEST_NAMES { TEST_STRING1 = 'testString1', TEST_STRING2 = 'testString2', TEST_STRING3 = 'testString3', TEST_STRING4 = 'testString4' };
     }
   `,
-      errors: [
-        {
-          messageId: 'NO_ENUM',
+          errors: [
+            {
+              messageId: 'NO_ENUM',
+            },
+          ],
         },
-      ],
-    },
-    {
-      name: 'Invalid case with enum declaration in an interface',
-      code: `
+        {
+          name: 'Invalid case with enum declaration in an interface',
+          code: `
        enum TEST_NAMES { TEST_STRING1 = 'testString1', TEST_STRING2 = 'testString2', TEST_STRING3 = 'testString3' }
       interface ExampleInterface {
         testName: TEST_NAMES;
       }
      `,
-      errors: [
-        {
-          messageId: 'NO_ENUM',
+          errors: [
+            {
+              messageId: 'NO_ENUM',
+            },
+          ],
         },
-      ],
-    },
-    {
-      name: 'Invalid case with enum declaration in a type alias',
-      code: `
+        {
+          name: 'Invalid case with enum declaration in a type alias',
+          code: `
       enum TEST_NAMES { TEST_STRING1 = 'testString1', TEST_STRING2 = 'testString2', TEST_STRING3 = 'testString3' }
 
       type ExampleType = {
         testName: TEST_NAMES;
       };
      `,
-      errors: [
-        {
-          messageId: 'NO_ENUM',
+          errors: [
+            {
+              messageId: 'NO_ENUM',
+            },
+          ],
         },
-      ],
-    },
-    {
-      name: 'Invalid case with enum declaration in a module',
-      code: `
+        {
+          name: 'Invalid case with enum declaration in a module',
+          code: `
     module ExampleModule {
       export enum TEST_NAMES { TEST_STRING1 = 'testString1', TEST_STRING2 = 'testString2', TEST_STRING3 = 'testString3', TEST_STRING4 = 'testString4' };
     }
   `,
-      errors: [
-        {
-          messageId: 'NO_ENUM',
+          errors: [
+            {
+              messageId: 'NO_ENUM',
+            },
+          ],
         },
       ],
-    },
-  ],
+    });
+  });
 });

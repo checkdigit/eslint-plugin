@@ -18,8 +18,15 @@ const REQUIRE_TS_EXTENSION_EXPORTS = 'REQUIRE-TS-EXTENSION-EXPORTS';
 
 const createRule = ESLintUtils.RuleCreator((name) => getDocumentationUrl(name));
 
-const checkPath = (filename: string, filePath: string): { fixedPath: string | null; isFixNeeded: boolean } => {
-  if (filePath.startsWith('.') && !filePath.endsWith('.ts') && !filePath.endsWith('.json')) {
+const checkPath = (
+  filename: string,
+  filePath: string,
+): { fixedPath: string | null; isFixNeeded: boolean } => {
+  if (
+    filePath.startsWith('.') &&
+    !filePath.endsWith('.ts') &&
+    !filePath.endsWith('.json')
+  ) {
     const absolutePath = path.resolve(path.dirname(filename), filePath);
     const tsPath = `${absolutePath}.ts`;
     const existsPath = [absolutePath, tsPath].find(fs.existsSync);
@@ -38,13 +45,16 @@ const rule: TSESLint.RuleModule<string, unknown[]> = createRule({
   meta: {
     type: 'suggestion',
     docs: {
-      description: 'Ensure .ts extension is at the end of all imports and exports',
+      description:
+        'Ensure .ts extension is at the end of all imports and exports',
     },
     fixable: 'code',
     schema: [],
     messages: {
-      [REQUIRE_TS_EXTENSION_IMPORTS]: 'Import paths should end with .ts extension',
-      [REQUIRE_TS_EXTENSION_EXPORTS]: 'Export paths should end with .ts extension',
+      [REQUIRE_TS_EXTENSION_IMPORTS]:
+        'Import paths should end with .ts extension',
+      [REQUIRE_TS_EXTENSION_EXPORTS]:
+        'Export paths should end with .ts extension',
     },
   },
   defaultOptions: [],
@@ -52,7 +62,10 @@ const rule: TSESLint.RuleModule<string, unknown[]> = createRule({
     const filename = context.filename;
 
     const handleDeclaration = (
-      node: TSESTree.ImportDeclaration | TSESTree.ExportNamedDeclaration | TSESTree.ExportAllDeclaration,
+      node:
+        | TSESTree.ImportDeclaration
+        | TSESTree.ExportNamedDeclaration
+        | TSESTree.ExportAllDeclaration,
     ) => {
       if (node.source !== null) {
         const importPath = node.source.value;

@@ -44,7 +44,12 @@ function luhnCheck(cardNumber: string) {
   );
 }
 
-function checkForCardNumbers(value: string, context: Rule.RuleContext, node?: Node, loc?: SourceLocation) {
+function checkForCardNumbers(
+  value: string,
+  context: Rule.RuleContext,
+  node?: Node,
+  loc?: SourceLocation,
+) {
   const matches = value.match(cardNumberRegex);
   if (matches === null) {
     return;

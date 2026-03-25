@@ -17,7 +17,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha }}
-      - name: Setup Node.js
+      - name: Use Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '24.x'
@@ -26,19 +26,21 @@ jobs:
         run: npm ci --ignore-scripts
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Prepare
+        run: npm run prepare
       - name: Calculate Code Coverage
         run: npm run ci:coverage
       - name: Create Coverage Report for base branch
         run: |
-          mv coverage/lcov.info coverage/lcov_head.info
+          mv coverage coverage-pr
           git fetch
           git checkout origin/${{ github.event.pull_request.base.ref }}
-          npm ci --ignore-scripts && npm run ci:coverage
+          npm ci --ignore-scripts && npm run prepare && npm run ci:coverage
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Post Coverage Report
         uses: checkdigit/github-actions/coverage-reporter@main
         with:
-          lcov-file: 'coverage/lcov_head.info'
-          lcov-base: 'coverage/lcov.info'
+          coverage-results-folder-pr: 'coverage-pr'
+          coverage-results-folder-base: 'coverage'
           delete-old-comments: true

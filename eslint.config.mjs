@@ -2,7 +2,6 @@ import { promises as fs } from 'node:fs';
 
 import ts from 'typescript-eslint';
 import sonarjs from 'eslint-plugin-sonarjs';
-import importPlugin from 'eslint-plugin-import';
 import noOnlyTests from 'eslint-plugin-no-only-tests';
 import noSecrets from 'eslint-plugin-no-secrets';
 import eslintPlugin from 'eslint-plugin-eslint-plugin';
@@ -11,7 +10,9 @@ import js from '@eslint/js';
 import prettier from 'eslint-config-prettier';
 
 const ignores = [
-  ...(await fs.readFile('.gitignore', 'utf-8')).split('\n').filter((path) => path.trim() !== ''),
+  ...(await fs.readFile('.gitignore', 'utf-8'))
+    .split('\n')
+    .filter((path) => path.trim() !== ''),
   'eslint.config.mjs',
   'ts-init/**/*',
 ];
@@ -27,10 +28,8 @@ export default [
   ...ts.configs.strictTypeChecked,
   ...ts.configs.stylisticTypeChecked,
   sonarjs.configs.recommended,
-  importPlugin.flatConfigs.recommended,
-  importPlugin.flatConfigs.typescript,
   prettier,
-  eslintPlugin.configs['flat/recommended'],
+  eslintPlugin.configs.recommended,
   {
     plugins: {
       'no-only-tests': noOnlyTests,
@@ -42,12 +41,6 @@ export default [
       sourceType: 'module',
       parserOptions: {
         projectService: true,
-      },
-    },
-    settings: {
-      'import/resolver': {
-        typescript: true,
-        node: true,
       },
     },
     rules: {
@@ -119,12 +112,6 @@ export default [
           ignoreDeclarationSort: true,
         },
       ],
-      'import/order': [
-        'error',
-        {
-          'newlines-between': 'ignore',
-        },
-      ],
     },
   },
   {
@@ -142,6 +129,39 @@ export default [
       '@typescript-eslint/no-unsafe-member-access': 'off',
       '@typescript-eslint/no-unsafe-assignment': 'off',
       '@typescript-eslint/no-unsafe-return': 'off',
+      '@typescript-eslint/no-floating-promises': [
+        'error',
+        {
+          allowForKnownSafeCalls: [
+            {
+              from: 'package',
+              name: [
+                'after',
+                'afterEach',
+                'before',
+                'beforeEach',
+                'describe',
+                'describe.only',
+                'describe.skip',
+                'describe.todo',
+                'it',
+                'it.only',
+                'it.skip',
+                'it.todo',
+                'suite',
+                'suite.only',
+                'suite.skip',
+                'suite.todo',
+                'test',
+                'test.only',
+                'test.skip',
+                'test.todo',
+              ],
+              package: 'node:test',
+            },
+          ],
+        },
+      ],
       '@typescript-eslint/restrict-template-expressions': 'off',
     },
   },

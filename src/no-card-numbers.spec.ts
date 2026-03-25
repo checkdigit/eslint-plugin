@@ -6,10 +6,10 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import { RuleTester } from 'eslint';
-import { describe } from '@jest/globals';
+import { describe, it } from 'node:test';
 
 import rule from './no-card-numbers.ts';
+import { createEslintRuleTester } from './rule-tester.test.ts';
 
 const CARD_NUMBER_FOUND = 'CARD_NUMBER_FOUND';
 const CARD_NUMBERS_FOUND = 'CARD_NUMBERS_FOUND';
@@ -26,8 +26,9 @@ const STRING_TEST = `
 const NOT_A_SECRET = "I'm not a secret, I think";
 `;
 
-// eslint-disable-next-line no-template-curly-in-string
-const TEMPLATE_TEST = "const NOT_A_SECRET = `A template that isn't a secret. ${1+1} = 2`";
+const TEMPLATE_TEST =
+  // eslint-disable-next-line no-template-curly-in-string
+  "const NOT_A_SECRET = `A template that isn't a secret. ${1+1} = 2`";
 
 const CONTAINS_CARD_NUMBER_IN_NUMBER = `
 const foo = 4507894813950280;
@@ -94,61 +95,66 @@ const foo = '9118724531442999';
 `;
 
 describe('no-card-numbers', () => {
-  const ruleTester = new RuleTester({
-    languageOptions: {
-      parserOptions: { ecmaVersion: 2020 },
-    },
+  const ruleTester = createEslintRuleTester();
+  it('validates good code', () => {
+    ruleTester.run('no-card-numbers', rule, {
+      valid: [
+        {
+          code: STRING_TEST,
+        },
+        {
+          code: TEMPLATE_TEST,
+        },
+        {
+          code: STRING_WITH_CARD_NUMBER_THAT_DOESNT_PASS_LUHN_CHECK,
+        },
+        {
+          code: CONTAINS_A_PASSING_CARD_NUMBER,
+        },
+        {
+          code: CONTAINS_A_PASSING_CARD_NUMBER_IN_COMMENT,
+        },
+        {
+          code: CONTAINS_PASSING_BUT_INVALID_0_PREFIX_CARD_NUMBER_IN_STRING,
+        },
+        {
+          code: CONTAINS_PASSING_BUT_INVALID_1_PREFIX_CARD_NUMBER_IN_STRING,
+        },
+        {
+          code: CONTAINS_PASSING_BUT_INVALID_7_PREFIX_CARD_NUMBER_IN_STRING,
+        },
+        {
+          code: CONTAINS_PASSING_BUT_INVALID_8_PREFIX_CARD_NUMBER_IN_STRING,
+        },
+        {
+          code: CONTAINS_PASSING_BUT_INVALID_9_PREFIX_CARD_NUMBER_IN_STRING,
+        },
+      ],
+      invalid: [],
+    });
   });
-  ruleTester.run('no-card-numbers', rule, {
-    valid: [
-      {
-        code: STRING_TEST,
-      },
-      {
-        code: TEMPLATE_TEST,
-      },
-      {
-        code: STRING_WITH_CARD_NUMBER_THAT_DOESNT_PASS_LUHN_CHECK,
-      },
-      {
-        code: CONTAINS_A_PASSING_CARD_NUMBER,
-      },
-      {
-        code: CONTAINS_A_PASSING_CARD_NUMBER_IN_COMMENT,
-      },
-      {
-        code: CONTAINS_PASSING_BUT_INVALID_0_PREFIX_CARD_NUMBER_IN_STRING,
-      },
-      {
-        code: CONTAINS_PASSING_BUT_INVALID_1_PREFIX_CARD_NUMBER_IN_STRING,
-      },
-      {
-        code: CONTAINS_PASSING_BUT_INVALID_7_PREFIX_CARD_NUMBER_IN_STRING,
-      },
-      {
-        code: CONTAINS_PASSING_BUT_INVALID_8_PREFIX_CARD_NUMBER_IN_STRING,
-      },
-      {
-        code: CONTAINS_PASSING_BUT_INVALID_9_PREFIX_CARD_NUMBER_IN_STRING,
-      },
-    ],
-    invalid: [
-      {
-        code: CONTAINS_CARD_NUMBER_IN_NUMBER,
-        errors: [CARD_NUMBER_FOUND_MSG],
-      },
-      {
-        code: CONTAINS_SEVERAL_CARD_NUMBERS_IN_STRING,
-        errors: [CARD_NUMBERS_FOUND_MSG],
-      },
-      {
-        code: CONTAINS_CARD_NUMBER_IN_COMMENT,
-        errors: [CARD_NUMBER_FOUND_MSG],
-      },
-      {
-        code: CONTAINS_SEVERAL_CARD_NUMBERS_IN_COMMENT,
-        errors: [CARD_NUMBERS_FOUND_MSG],
-      },
-    ],
+
+  it('errors on invalid code', () => {
+    ruleTester.run('no-card-numbers', rule, {
+      valid: [],
+      invalid: [
+        {
+          code: CONTAINS_CARD_NUMBER_IN_NUMBER,
+          errors: [CARD_NUMBER_FOUND_MSG],
+        },
+        {
+          code: CONTAINS_SEVERAL_CARD_NUMBERS_IN_STRING,
+          errors: [CARD_NUMBERS_FOUND_MSG],
+        },
+        {
+          code: CONTAINS_CARD_NUMBER_IN_COMMENT,
+          errors: [CARD_NUMBER_FOUND_MSG],
+        },
+        {
+          code: CONTAINS_SEVERAL_CARD_NUMBERS_IN_COMMENT,
+          errors: [CARD_NUMBERS_FOUND_MSG],
+        },
+      ],
+    });
   });
 });

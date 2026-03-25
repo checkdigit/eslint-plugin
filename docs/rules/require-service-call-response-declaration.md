@@ -20,7 +20,9 @@ if (pingResponse.status !== StatusCodes.OK) {
 }
 
 // service wrapper call
-const anotherPingResponse = await pingService.get(`/ping/v1/ping`, { resolveWithFullResponse: true });
+const anotherPingResponse = await pingService.get(`/ping/v1/ping`, {
+  resolveWithFullResponse: true,
+});
 if (anotherPingResponse.status === StatusCodes.NOT_FOUND) {
   // do something else
 }

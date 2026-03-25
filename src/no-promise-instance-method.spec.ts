@@ -6,102 +6,114 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import { describe } from '@jest/globals';
+import { describe, it } from 'node:test';
+
 import rule, {
   NO_PROMISE_INSTANCE_METHOD_CATCH_FINALLY,
   NO_PROMISE_INSTANCE_METHOD_THEN,
   ruleId,
 } from './no-promise-instance-method.ts';
-import createTester from './tester.test.ts';
+import { createEslintRuleTester } from './rule-tester.test.ts';
 
 describe(ruleId, () => {
-  createTester().run(ruleId, rule, {
-    valid: [
-      `await init();`,
-      `await Promise.resolve();`,
-      `await (new Promise(() => {}))();`,
-      `try {
+  const ruleTester = createEslintRuleTester();
+
+  it('validates good code', () => {
+    ruleTester.run(ruleId, rule, {
+      valid: [
+        `await init();`,
+        `await Promise.resolve();`,
+        `await (new Promise(() => {}))();`,
+        `try {
         await init();
       } catch (error) {
         console.error(error);
       } finally {
         console.log('done');
       }`,
-    ],
-    invalid: [
-      {
-        code: `// test new Promise instance
+      ],
+      invalid: [],
+    });
+  });
+
+  it('errors on invalid code and provides the correct error message', () => {
+    ruleTester.run(ruleId, rule, {
+      valid: [],
+      invalid: [
+        {
+          code: `// test new Promise instance
         (new Promise(()=>{})()).then(()=>{});`,
-        errors: [
-          {
-            messageId: NO_PROMISE_INSTANCE_METHOD_THEN,
-          },
-        ],
-      },
-      {
-        code: `// test 'then' on async function call
+          errors: [
+            {
+              messageId: NO_PROMISE_INSTANCE_METHOD_THEN,
+            },
+          ],
+        },
+        {
+          code: `// test 'then' on async function call
         async function hi() {
           console.log('hi')
         };
         hi().then(()=>{});`,
-        errors: [
-          {
-            messageId: NO_PROMISE_INSTANCE_METHOD_THEN,
-          },
-        ],
-      },
-      {
-        code: `// test 'then' on reference of Promise
+          errors: [
+            {
+              messageId: NO_PROMISE_INSTANCE_METHOD_THEN,
+            },
+          ],
+        },
+        {
+          code: `// test 'then' on reference of Promise
         const result = Promise.resolve();
         result.then(()=>{});`,
-        errors: [
-          {
-            messageId: NO_PROMISE_INSTANCE_METHOD_THEN,
-          },
-        ],
-      },
-      {
-        code: `// test static method of Promise
+          errors: [
+            {
+              messageId: NO_PROMISE_INSTANCE_METHOD_THEN,
+            },
+          ],
+        },
+        {
+          code: `// test static method of Promise
         Promise.all([]).then(()=>{});`,
-        errors: [
-          {
-            messageId: NO_PROMISE_INSTANCE_METHOD_THEN,
-          },
-        ],
-      },
-      {
-        code: `// test external async function call
+          errors: [
+            {
+              messageId: NO_PROMISE_INSTANCE_METHOD_THEN,
+            },
+          ],
+        },
+        {
+          code: `// test external async function call
         fetch("http://example.com").then(()=>{});`,
-        errors: [
-          {
-            messageId: NO_PROMISE_INSTANCE_METHOD_THEN,
-          },
-        ],
-      },
-      {
-        code: `// test '.catch' on async function call
+          errors: [
+            {
+              messageId: NO_PROMISE_INSTANCE_METHOD_THEN,
+            },
+          ],
+        },
+        {
+          code: `// test '.catch' on async function call
         async function hi() {
           console.log('hi')
         };
         hi().catch(()=>{});`,
-        errors: [
-          {
-            messageId: NO_PROMISE_INSTANCE_METHOD_CATCH_FINALLY,
-          },
-        ],
-      },
-      {
-        code: `// test '.finally' on async function call
+          errors: [
+            {
+              messageId: NO_PROMISE_INSTANCE_METHOD_CATCH_FINALLY,
+            },
+          ],
+        },
+        {
+          code: `// test '.finally' on async function call
         async function hi() {
           console.log('hi')
         };
         hi().finally(()=>{});`,
-        errors: [
-          {
-            messageId: NO_PROMISE_INSTANCE_METHOD_CATCH_FINALLY,
-          },
-        ],
-      },
-    ],
+          errors: [
+            {
+              messageId: NO_PROMISE_INSTANCE_METHOD_CATCH_FINALLY,
+            },
+          ],
+        },
+      ],
+    });
   });
 });

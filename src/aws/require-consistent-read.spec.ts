@@ -6,28 +6,34 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import createTester from '../ts-tester.test.ts';
+import { describe, it } from 'node:test';
+
 import rule, {
   MESSAGE_ID_CONSISTENT_READ_FALSE,
   MESSAGE_ID_CONSISTENT_READ_TRUE,
   ruleId,
 } from './require-consistent-read.ts';
+import { createTypescriptRuleTester } from '../rule-tester.test.ts';
 
-createTester().run(ruleId, rule, {
-  valid: [
-    {
-      name: 'Get with consistent read',
-      code: `dynamoDb.send(new GetCommand({
+describe(ruleId, () => {
+  const ruleTester = createTypescriptRuleTester();
+
+  it('validates good code', () => {
+    ruleTester.run(ruleId, rule, {
+      valid: [
+        {
+          name: 'Get with consistent read',
+          code: `dynamoDb.send(new GetCommand({
         TableName: 'MyTable',
         Key: {
           id: '123',
         },
         ConsistentRead: true,
       }));`,
-    },
-    {
-      name: 'Query with consistent read',
-      code: `const TABLE_NAME = 'MyTable';
+        },
+        {
+          name: 'Query with consistent read',
+          code: `const TABLE_NAME = 'MyTable';
         dynamoDb.send(new QueryCommand({
           TableName: TABLE_NAME,
           KeyConditionExpression: '#id = :id',
@@ -39,10 +45,10 @@ createTester().run(ruleId, rule, {
               },
               ConsistentRead: true,
           }));`,
-    },
-    {
-      name: 'BatchGet with consistent read',
-      code: `dynamoDb.send(new BatchGetCommand({
+        },
+        {
+          name: 'BatchGet with consistent read',
+          code: `dynamoDb.send(new BatchGetCommand({
             RequestItems: {
               'MyTable': {
                 Keys: [
@@ -54,10 +60,10 @@ createTester().run(ruleId, rule, {
             },
             ConsistentRead: true,
         }));`,
-    },
-    {
-      name: 'Query with global index and without consistent read',
-      code: `dynamoDb.send(new QueryCommand({
+        },
+        {
+          name: 'Query with global index and without consistent read',
+          code: `dynamoDb.send(new QueryCommand({
             TableName: 'MyTable',
             IndexName: 'MyIndex',
             KeyConditionExpression: '#id = :id',
@@ -69,10 +75,10 @@ createTester().run(ruleId, rule, {
             },
             ConsistentRead: false,
         }));`,
-    },
-    {
-      name: 'No error should be reported for Update command',
-      code: `dynamoDb.send(new UpdateItemCommand({
+        },
+        {
+          name: 'No error should be reported for Update command',
+          code: `dynamoDb.send(new UpdateItemCommand({
         TableName: ACCOUNTS_TABLE,
         Key: {
           accountId: account.accountId,
@@ -84,22 +90,34 @@ createTester().run(ruleId, rule, {
           ':oldVersion': account.version,
         },
       }));`,
-    },
-  ],
-  invalid: [
-    {
-      name: 'Get without consistent read',
-      code: `dynamoDb.send(new GetCommand({
+        },
+      ],
+      invalid: [],
+    });
+  });
+
+  it('errors on invalid code and provides the correct error message', () => {
+    ruleTester.run(ruleId, rule, {
+      valid: [],
+      invalid: [
+        {
+          name: 'Get without consistent read',
+          code: `dynamoDb.send(new GetCommand({
             TableName: 'MyTable',
             Key: {
               id: '123',
             },
         }));`,
-      errors: [{ messageId: MESSAGE_ID_CONSISTENT_READ_TRUE, data: { readCommandType: 'Get' } }],
-    },
-    {
-      name: 'ConsistentRead not being literal true should be reported as well',
-      code: `const consistentRead = Math.random() > 0.5;
+          errors: [
+            {
+              messageId: MESSAGE_ID_CONSISTENT_READ_TRUE,
+              data: { readCommandType: 'Get' },
+            },
+          ],
+        },
+        {
+          name: 'ConsistentRead not being literal true should be reported as well',
+          code: `const consistentRead = Math.random() > 0.5;
           dynamoDb.send(new GetCommand({
             TableName: 'MyTable',
             Key: {
@@ -107,11 +125,16 @@ createTester().run(ruleId, rule, {
             },
             ConsistentRead: consistentRead,
         }));`,
-      errors: [{ messageId: MESSAGE_ID_CONSISTENT_READ_TRUE, data: { readCommandType: 'Get' } }],
-    },
-    {
-      name: 'Query without consistent read',
-      code: `dynamoDb.send(new QueryCommand({
+          errors: [
+            {
+              messageId: MESSAGE_ID_CONSISTENT_READ_TRUE,
+              data: { readCommandType: 'Get' },
+            },
+          ],
+        },
+        {
+          name: 'Query without consistent read',
+          code: `dynamoDb.send(new QueryCommand({
             TableName: 'MyTable',
             KeyConditionExpression: '#id = :id',
             ExpressionAttributeNames: {
@@ -122,11 +145,16 @@ createTester().run(ruleId, rule, {
             },
             ConsistentRead: false,
         }));`,
-      errors: [{ messageId: MESSAGE_ID_CONSISTENT_READ_TRUE, data: { readCommandType: 'Query' } }],
-    },
-    {
-      name: 'BatchGet without consistent read',
-      code: `dynamoDb.send(new BatchGetCommand({
+          errors: [
+            {
+              messageId: MESSAGE_ID_CONSISTENT_READ_TRUE,
+              data: { readCommandType: 'Query' },
+            },
+          ],
+        },
+        {
+          name: 'BatchGet without consistent read',
+          code: `dynamoDb.send(new BatchGetCommand({
             RequestItems: {
               'MyTable': {
                 Keys: [
@@ -138,11 +166,16 @@ createTester().run(ruleId, rule, {
             },
             ConsistentRead: false,
         }));`,
-      errors: [{ messageId: MESSAGE_ID_CONSISTENT_READ_TRUE, data: { readCommandType: 'BatchGet' } }],
-    },
-    {
-      name: 'Query with global index but incorrectly with consistent read as well',
-      code: `dynamoDb.send(new QueryCommand({
+          errors: [
+            {
+              messageId: MESSAGE_ID_CONSISTENT_READ_TRUE,
+              data: { readCommandType: 'BatchGet' },
+            },
+          ],
+        },
+        {
+          name: 'Query with global index but incorrectly with consistent read as well',
+          code: `dynamoDb.send(new QueryCommand({
             TableName: 'MyTable',
             IndexName: 'MyIndex',
             KeyConditionExpression: '#id = :id',
@@ -154,7 +187,14 @@ createTester().run(ruleId, rule, {
             },
             ConsistentRead: true,
         }));`,
-      errors: [{ messageId: MESSAGE_ID_CONSISTENT_READ_FALSE, data: { readCommandType: 'Query' } }],
-    },
-  ],
+          errors: [
+            {
+              messageId: MESSAGE_ID_CONSISTENT_READ_FALSE,
+              data: { readCommandType: 'Query' },
+            },
+          ],
+        },
+      ],
+    });
+  });
 });

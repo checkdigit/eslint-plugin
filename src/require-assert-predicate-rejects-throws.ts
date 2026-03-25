@@ -12,7 +12,8 @@ export default {
   meta: {
     type: 'problem',
     docs: {
-      description: 'Validate that assert Predicate is always supplied to node:assert rejects,throws methods',
+      description:
+        'Validate that assert Predicate is always supplied to node:assert rejects,throws methods',
       url: 'https://github.com/checkdigit/eslint-plugin',
     },
   },
@@ -39,7 +40,8 @@ export default {
           callee.object.type === 'Identifier' &&
           callee.object.name === assertIdentifier &&
           callee.property.type === 'Identifier' &&
-          (callee.property.name === 'rejects' || callee.property.name === 'throws') &&
+          (callee.property.name === 'rejects' ||
+            callee.property.name === 'throws') &&
           node.arguments.length >= 1
         ) {
           const assertPredicate = node.arguments[1];
@@ -54,7 +56,8 @@ export default {
           ) {
             context.report({
               node,
-              message: 'Second argument in {{method}} method should be of type AssertPredicate.',
+              message:
+                'Second argument in {{method}} method should be of type AssertPredicate.',
               data: {
                 method: callee.property.name,
               },

@@ -1,9 +1,8 @@
 name: Check Published
 
 on:
-  workflow_dispatch:
   schedule:
-    - cron: '14 18 * * *'
+    - cron: '30 20 * * *'
 
 jobs:
   checkPublished:

@@ -6,117 +6,145 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import { RuleTester } from 'eslint';
-import { describe } from '@jest/globals';
-import rule, { NO_TEST_IMPORT, type NoTestImportRuleOptions } from './no-test-import.ts';
+import { describe, it } from 'node:test';
+
+import rule, {
+  NO_TEST_IMPORT,
+  type NoTestImportRuleOptions,
+} from './no-test-import.ts';
+import { createEslintRuleTester } from './rule-tester.test.ts';
 
 describe('no-test-import', () => {
-  new RuleTester({
+  const ruleTester = createEslintRuleTester();
+  const overwrittenConfigurationTester = createEslintRuleTester({
     languageOptions: {
       parserOptions: {
         ecmaVersion: 2020,
         sourceType: 'module',
       },
     },
-  }).run('no-test-import with default configuration', rule, {
-    valid: [
-      {
-        filename: 'src/api/v1/message.ts',
-        code: `import util from './util';`,
-      },
-      {
-        filename: 'src/api/v1/message.ts',
-        code: `import util from './util.ts';`,
-      },
-      {
-        filename: 'src/api/v1/message.test.ts',
-        code: `import util from './util';`,
-      },
-      {
-        filename: 'src/api/v1/message.test.ts',
-        code: `import util from './util.ts';`,
-      },
-      {
-        filename: 'src/api/v1/message.spec.ts',
-        code: `import util from './util';`,
-      },
-      {
-        filename: 'src/api/v1/message.spec.ts',
-        code: `import util from './util.ts';`,
-      },
-    ],
-    invalid: [
-      {
-        filename: 'src/api/v1/message.ts',
-        code: `import util from './util.spec';`,
-        errors: [
-          {
-            messageId: NO_TEST_IMPORT,
-          },
-        ],
-      },
-      {
-        filename: 'src/api/v1/message.ts',
-        code: `import util from './util.spec.ts';`,
-        errors: [
-          {
-            messageId: NO_TEST_IMPORT,
-          },
-        ],
-      },
-      {
-        filename: 'src/api/v1/message.ts',
-        code: `import util from './util.test';`,
-        errors: [
-          {
-            messageId: NO_TEST_IMPORT,
-          },
-        ],
-      },
-      {
-        filename: 'src/api/v1/message.ts',
-        code: `import util from './util.test.ts';`,
-        errors: [
-          {
-            messageId: NO_TEST_IMPORT,
-          },
-        ],
-      },
-    ],
   });
+  const overwrittenConfiguration: NoTestImportRuleOptions = {
+    testFilePattern: '\\.test\\.xyz$',
+  };
 
-  const overwrittenConfiguration: NoTestImportRuleOptions = { testFilePattern: '\\.test\\.xyz$' };
-  new RuleTester({
-    languageOptions: {
-      parserOptions: {
-        ecmaVersion: 2020,
-        sourceType: 'module',
-      },
-    },
-  }).run('no-test-import with overwritten configuration', rule, {
-    valid: [
-      {
-        filename: 'src/api/v1/message.ts',
-        code: `import util from './util.test';`,
-        options: [overwrittenConfiguration],
-      },
-      {
-        filename: 'src/api/v1/message.ts',
-        code: `import util from './util.spec';`,
-        options: [overwrittenConfiguration],
-      },
-    ],
-    invalid: [
-      {
-        filename: 'src/api/v1/message.ts',
-        code: `import util from './util.test.xyz';`,
-        options: [overwrittenConfiguration],
-        errors: [
+  it('validates good code', () => {
+    ruleTester.run('no-test-import with default configuration', rule, {
+      valid: [
+        {
+          filename: 'src/api/v1/message.ts',
+          code: `import util from './util';`,
+        },
+        {
+          filename: 'src/api/v1/message.ts',
+          code: `import util from './util.ts';`,
+        },
+        {
+          filename: 'src/api/v1/message.test.ts',
+          code: `import util from './util';`,
+        },
+        {
+          filename: 'src/api/v1/message.test.ts',
+          code: `import util from './util.ts';`,
+        },
+        {
+          filename: 'src/api/v1/message.spec.ts',
+          code: `import util from './util';`,
+        },
+        {
+          filename: 'src/api/v1/message.spec.ts',
+          code: `import util from './util.ts';`,
+        },
+      ],
+      invalid: [],
+    });
+
+    it('errors on invalid code and provides the correct error message', () => {
+      ruleTester.run('no-test-import with default configuration', rule, {
+        valid: [],
+        invalid: [
           {
-            messageId: NO_TEST_IMPORT,
+            filename: 'src/api/v1/message.ts',
+            code: `import util from './util.spec';`,
+            errors: [
+              {
+                messageId: NO_TEST_IMPORT,
+              },
+            ],
+          },
+          {
+            filename: 'src/api/v1/message.ts',
+            code: `import util from './util.spec.ts';`,
+            errors: [
+              {
+                messageId: NO_TEST_IMPORT,
+              },
+            ],
+          },
+          {
+            filename: 'src/api/v1/message.ts',
+            code: `import util from './util.test';`,
+            errors: [
+              {
+                messageId: NO_TEST_IMPORT,
+              },
+            ],
+          },
+          {
+            filename: 'src/api/v1/message.ts',
+            code: `import util from './util.test.ts';`,
+            errors: [
+              {
+                messageId: NO_TEST_IMPORT,
+              },
+            ],
           },
         ],
-      },
-    ],
+      });
+    });
+
+    it('validates good code with overwritten configuration', () => {
+      overwrittenConfigurationTester.run(
+        'no-test-import with overwritten configuration',
+        rule,
+        {
+          valid: [
+            {
+              filename: 'src/api/v1/message.ts',
+              code: `import util from './util.test';`,
+              options: [overwrittenConfiguration],
+            },
+            {
+              filename: 'src/api/v1/message.ts',
+              code: `import util from './util.spec';`,
+              options: [overwrittenConfiguration],
+            },
+          ],
+          invalid: [],
+        },
+      );
+    });
+
+    it('errors on invalid code with overwritten configuration and provides the correct error message', () => {
+      overwrittenConfigurationTester.run(
+        'no-test-import with overwritten configuration',
+        rule,
+        {
+          valid: [],
+          invalid: [
+            {
+              filename: 'src/api/v1/message.ts',
+              code: `import util from './util.test.xyz';`,
+              options: [overwrittenConfiguration],
+              errors: [
+                {
+                  messageId: NO_TEST_IMPORT,
+                },
+              ],
+            },
+          ],
+        },
+      );
+    });
   });
 });

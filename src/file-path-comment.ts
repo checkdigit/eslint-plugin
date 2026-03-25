@@ -40,7 +40,10 @@ export default {
           },
           message: 'first line cannot be a block comment',
           fix(fixer: Rule.RuleFixer) {
-            return fixer.insertTextBeforeRange([0, 0], `// ${expectedPath}\n\n`);
+            return fixer.insertTextBeforeRange(
+              [0, 0],
+              `// ${expectedPath}\n\n`,
+            );
           },
         });
       } else {
@@ -57,7 +60,10 @@ export default {
           },
           message: 'first line is not a comment with the file path',
           fix(fixer: Rule.RuleFixer) {
-            return fixer.insertTextBeforeRange([0, 0], `// ${expectedPath}\n\n`);
+            return fixer.insertTextBeforeRange(
+              [0, 0],
+              `// ${expectedPath}\n\n`,
+            );
           },
         });
       }
@@ -77,7 +83,10 @@ export default {
           },
           message: 'first line is a comment but is not a path to the file',
           fix(fixer: Rule.RuleFixer) {
-            return fixer.replaceTextRange([0, firstLine.length], `// ${expectedPath}`);
+            return fixer.replaceTextRange(
+              [0, firstLine.length],
+              `// ${expectedPath}`,
+            );
           },
         });
       }

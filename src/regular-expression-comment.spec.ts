@@ -6,10 +6,10 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import { RuleTester } from 'eslint';
-import { describe } from '@jest/globals';
+import { describe, it } from 'node:test';
 
 import rule from './regular-expression-comment.ts';
+import { createEslintRuleTester } from './rule-tester.test.ts';
 
 const VALID_TEST_1 = `// This regular expression removes all non-alphanumeric characters.
 const NOT_A_SECRET = /W/gu;`;
@@ -96,116 +96,122 @@ const testRegex2 = /created test file for the new file TEST\\.123456789\\./gmu;
 const INVALID_TEST_7 = `const testRegex1 = /error processing x:test\\.test-xyz\\.test\\.xyz\\.abc/gmu;`;
 
 describe('regular-expression-comment', () => {
-  const ruleTester = new RuleTester({
-    languageOptions: {
-      parserOptions: { ecmaVersion: 2020 },
-    },
+  const ruleTester = createEslintRuleTester();
+
+  it('validates good code', () => {
+    ruleTester.run('regular-expression-comment', rule, {
+      valid: [
+        {
+          code: VALID_TEST_1,
+        },
+        {
+          code: VALID_TEST_2,
+        },
+        {
+          code: VALID_TEST_3,
+        },
+        {
+          code: VALID_TEST_4,
+        },
+        {
+          code: VALID_TEST_5,
+        },
+        {
+          code: VALID_TEST_6,
+        },
+        {
+          code: VALID_TEST_7,
+        },
+        {
+          code: VALID_TEST_8,
+        },
+        {
+          code: VALID_TEST_9,
+        },
+        {
+          code: VALID_TEST_10,
+        },
+        {
+          code: VALID_TEST_11,
+        },
+      ],
+      invalid: [],
+    });
   });
-  ruleTester.run('regular-expression-comment', rule, {
-    valid: [
-      {
-        code: VALID_TEST_1,
-      },
-      {
-        code: VALID_TEST_2,
-      },
-      {
-        code: VALID_TEST_3,
-      },
-      {
-        code: VALID_TEST_4,
-      },
-      {
-        code: VALID_TEST_5,
-      },
-      {
-        code: VALID_TEST_6,
-      },
-      {
-        code: VALID_TEST_7,
-      },
-      {
-        code: VALID_TEST_8,
-      },
-      {
-        code: VALID_TEST_9,
-      },
-      {
-        code: VALID_TEST_10,
-      },
-      {
-        code: VALID_TEST_11,
-      },
-    ],
-    invalid: [
-      {
-        code: INVALID_TEST_1,
-        errors: [
-          {
-            message: 'Missing comment for regular expression',
-          },
-        ],
-      },
-      {
-        code: INVALID_TEST_2,
-        errors: [
-          {
-            message: 'Missing comment for regular expression',
-          },
-          {
-            message: 'Missing comment for regular expression',
-          },
-        ],
-      },
-      {
-        code: INVALID_TEST_3,
-        errors: [
-          {
-            message: 'Missing comment for regular expression',
-          },
-        ],
-      },
-      {
-        code: INVALID_TEST_4,
-        errors: [
-          {
-            message: 'Missing comment for regular expression',
-          },
-          {
-            message: 'Missing comment for regular expression',
-          },
-        ],
-      },
-      {
-        code: INVALID_TEST_5,
-        errors: [
-          {
-            message: 'Missing comment for regular expression',
-          },
-          {
-            message: 'Missing comment for regular expression',
-          },
-        ],
-      },
-      {
-        code: INVALID_TEST_6,
-        errors: [
-          {
-            message: 'Missing comment for regular expression',
-          },
-          {
-            message: 'Missing comment for regular expression',
-          },
-        ],
-      },
-      {
-        code: INVALID_TEST_7,
-        errors: [
-          {
-            message: 'Missing comment for regular expression',
-          },
-        ],
-      },
-    ],
+
+  it('errors on invalid code and provides the correct error message', () => {
+    ruleTester.run('regular-expression-comment', rule, {
+      valid: [],
+      invalid: [
+        {
+          code: INVALID_TEST_1,
+          errors: [
+            {
+              message: 'Missing comment for regular expression',
+            },
+          ],
+        },
+        {
+          code: INVALID_TEST_2,
+          errors: [
+            {
+              message: 'Missing comment for regular expression',
+            },
+            {
+              message: 'Missing comment for regular expression',
+            },
+          ],
+        },
+        {
+          code: INVALID_TEST_3,
+          errors: [
+            {
+              message: 'Missing comment for regular expression',
+            },
+          ],
+        },
+        {
+          code: INVALID_TEST_4,
+          errors: [
+            {
+              message: 'Missing comment for regular expression',
+            },
+            {
+              message: 'Missing comment for regular expression',
+            },
+          ],
+        },
+        {
+          code: INVALID_TEST_5,
+          errors: [
+            {
+              message: 'Missing comment for regular expression',
+            },
+            {
+              message: 'Missing comment for regular expression',
+            },
+          ],
+        },
+        {
+          code: INVALID_TEST_6,
+          errors: [
+            {
+              message: 'Missing comment for regular expression',
+            },
+            {
+              message: 'Missing comment for regular expression',
+            },
+          ],
+        },
+        {
+          code: INVALID_TEST_7,
+          errors: [
+            {
+              message: 'Missing comment for regular expression',
+            },
+          ],
+        },
+      ],
+    });
   });
 });

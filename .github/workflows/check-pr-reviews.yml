@@ -6,10 +6,10 @@ on:
 
 jobs:
   checkPrReviews:
-    runs-on: ubuntu-latest
     name: Check PR Reviews
+    runs-on: ubuntu-latest
     steps:
-      - name: Check PR Reviews
+      - name: Perform Check of PR Reviews
         uses: checkdigit/github-actions/check-pr-reviews@main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

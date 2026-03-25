@@ -6,79 +6,100 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import { RuleTester } from 'eslint';
-import { describe } from '@jest/globals';
-import rule, { INVALID_JSON_STRINGIFY, ruleId } from './invalid-json-stringify.ts';
+import { describe, it } from 'node:test';
+import { Linter } from 'eslint';
+
+import rule, {
+  INVALID_JSON_STRINGIFY,
+  ruleId,
+} from './invalid-json-stringify.ts';
+import { createEslintRuleTester } from './rule-tester.test.ts';
 
 describe(ruleId, () => {
-  new RuleTester({
+  const configuration: Linter.Config = {
     languageOptions: {
       parserOptions: {
         ecmaVersion: 2020,
         sourceType: 'module',
       },
     },
-  }).run(ruleId, rule, {
-    valid: [`console.log(error);`, `JSON.stringify(body);`, `JSON.parse(error);`],
-    invalid: [
-      {
-        code: `JSON.stringify(error);`,
-        errors: [
-          {
-            messageId: INVALID_JSON_STRINGIFY,
-            suggestions: [
-              {
-                messageId: INVALID_JSON_STRINGIFY,
-                output: 'String(error);',
-              },
-            ],
-          },
-        ],
-      },
-      {
-        code: `JSON.stringify(error, null, 2);`,
-        errors: [
-          {
-            messageId: INVALID_JSON_STRINGIFY,
-            suggestions: [
-              {
-                messageId: INVALID_JSON_STRINGIFY,
-                output: 'String(error);',
-              },
-            ],
-          },
-        ],
-      },
-      {
-        // eslint-disable-next-line no-template-curly-in-string
-        code: 'console.log(`got an error: ${JSON.stringify(error)}`);',
-        errors: [
-          {
-            messageId: INVALID_JSON_STRINGIFY,
-            suggestions: [
-              {
-                messageId: INVALID_JSON_STRINGIFY,
-                // eslint-disable-next-line no-template-curly-in-string
-                output: 'console.log(`got an error: ${String(error)}`);',
-              },
-            ],
-          },
-        ],
-      },
-      {
-        code: `JSON.stringify(responseError);`,
-        errors: [
-          {
-            messageId: INVALID_JSON_STRINGIFY,
-            suggestions: [
-              {
-                messageId: INVALID_JSON_STRINGIFY,
-                output: 'String(responseError);',
-              },
-            ],
-          },
-        ],
-      },
-    ],
+  };
+  const ruleTester = createEslintRuleTester(configuration);
+
+  it('validates good code', () => {
+    ruleTester.run(ruleId, rule, {
+      valid: [
+        `console.log(error);`,
+        `JSON.stringify(body);`,
+        `JSON.parse(error);`,
+      ],
+      invalid: [],
+    });
+  });
+
+  it('errors on invalid code and provides the correct suggestions', () => {
+    ruleTester.run(ruleId, rule, {
+      valid: [],
+      invalid: [
+        {
+          code: `JSON.stringify(error);`,
+          errors: [
+            {
+              messageId: INVALID_JSON_STRINGIFY,
+              suggestions: [
+                {
+                  messageId: INVALID_JSON_STRINGIFY,
+                  output: 'String(error);',
+                },
+              ],
+            },
+          ],
+        },
+        {
+          code: `JSON.stringify(error, null, 2);`,
+          errors: [
+            {
+              messageId: INVALID_JSON_STRINGIFY,
+              suggestions: [
+                {
+                  messageId: INVALID_JSON_STRINGIFY,
+                  output: 'String(error);',
+                },
+              ],
+            },
+          ],
+        },
+        {
+          // eslint-disable-next-line no-template-curly-in-string
+          code: 'console.log(`got an error: ${JSON.stringify(error)}`);',
+          errors: [
+            {
+              messageId: INVALID_JSON_STRINGIFY,
+              suggestions: [
+                {
+                  messageId: INVALID_JSON_STRINGIFY,
+                  // eslint-disable-next-line no-template-curly-in-string
+                  output: 'console.log(`got an error: ${String(error)}`);',
+                },
+              ],
+            },
+          ],
+        },
+        {
+          code: `JSON.stringify(responseError);`,
+          errors: [
+            {
+              messageId: INVALID_JSON_STRINGIFY,
+              suggestions: [
+                {
+                  messageId: INVALID_JSON_STRINGIFY,
+                  output: 'String(responseError);',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    });
   });
 });

@@ -24,7 +24,8 @@ const rule: ESLintUtils.RuleModule<'mergeDuplicatedImports'> = createRule({
       description: 'Merge duplicated import statements with the same "from".',
     },
     messages: {
-      mergeDuplicatedImports: 'Merge duplicated import statements with the same "from".',
+      mergeDuplicatedImports:
+        'Merge duplicated import statements with the same "from".',
     },
     fixable: 'code',
     schema: [],
@@ -45,11 +46,16 @@ const rule: ESLintUtils.RuleModule<'mergeDuplicatedImports'> = createRule({
         declarations.push(node);
       },
       'Program:exit'() {
-        for (const [moduleName, allDeclarations] of importDeclarations.entries()) {
+        for (const [
+          moduleName,
+          allDeclarations,
+        ] of importDeclarations.entries()) {
           const declarations = allDeclarations.filter(
             (declaration) =>
               !declaration.specifiers.some(
-                (specifier) => specifier.type === TSESTree.AST_NODE_TYPES.ImportNamespaceSpecifier,
+                (specifier) =>
+                  specifier.type ===
+                  TSESTree.AST_NODE_TYPES.ImportNamespaceSpecifier,
               ),
           );
           if (declarations.length <= 1) {
@@ -64,7 +70,8 @@ const rule: ESLintUtils.RuleModule<'mergeDuplicatedImports'> = createRule({
               declaration.importKind === 'type' ||
               declaration.specifiers.every(
                 (specifier) =>
-                  specifier.type === TSESTree.AST_NODE_TYPES.ImportSpecifier && specifier.importKind === 'type',
+                  specifier.type === TSESTree.AST_NODE_TYPES.ImportSpecifier &&
+                  specifier.importKind === 'type',
               ),
           );
 
@@ -76,30 +83,48 @@ const rule: ESLintUtils.RuleModule<'mergeDuplicatedImports'> = createRule({
 
               const defaultSpecifier = declarations
                 .flatMap((declaration) =>
+                  // eslint-disable-next-line sonarjs/no-nested-functions
                   declaration.specifiers.map((specifier) =>
-                    specifier.type === TSESTree.AST_NODE_TYPES.ImportDefaultSpecifier ? specifier : undefined,
+                    specifier.type ===
+                    TSESTree.AST_NODE_TYPES.ImportDefaultSpecifier
+                      ? specifier
+                      : undefined,
                   ),
                 )
                 .filter(Boolean);
-              const defaultSpecifierText = defaultSpecifier[0] ? sourceCode.getText(defaultSpecifier[0]) : undefined;
+              const defaultSpecifierText = defaultSpecifier[0]
+                ? sourceCode.getText(defaultSpecifier[0])
+                : undefined;
 
               const mergedSpecifiers = declarations.flatMap((declaration) => {
                 const isCurrentDeclarationTypeOnly =
                   declaration.importKind === 'type' ||
                   declaration.specifiers.every(
+                    // eslint-disable-next-line sonarjs/no-nested-functions
                     (specifier) =>
-                      specifier.type === TSESTree.AST_NODE_TYPES.ImportSpecifier && specifier.importKind === 'type',
+                      specifier.type ===
+                        TSESTree.AST_NODE_TYPES.ImportSpecifier &&
+                      specifier.importKind === 'type',
                   );
-                return declaration.specifiers
-                  .filter((specifier) => specifier.type !== TSESTree.AST_NODE_TYPES.ImportDefaultSpecifier)
-                  .map((specifier) =>
-                    // eslint-disable-next-line no-nested-ternary
-                    isAllTypeOnly
-                      ? sourceCode.getText(specifier).replace('type ', '')
-                      : isCurrentDeclarationTypeOnly
-                        ? `type ${sourceCode.getText(specifier)}`
-                        : sourceCode.getText(specifier),
-                  );
+                return (
+                  declaration.specifiers
+                    .filter(
+                      // eslint-disable-next-line sonarjs/no-nested-functions
+                      (specifier) =>
+                        specifier.type !==
+                        TSESTree.AST_NODE_TYPES.ImportDefaultSpecifier,
+                    )
+                    // eslint-disable-next-line sonarjs/no-nested-functions
+                    .map((specifier) =>
+                      // eslint-disable-next-line no-nested-ternary
+                      isAllTypeOnly
+                        ? sourceCode.getText(specifier).replace('type ', '')
+                        : // eslint-disable-next-line sonarjs/no-nested-conditional
+                          isCurrentDeclarationTypeOnly
+                          ? `type ${sourceCode.getText(specifier)}`
+                          : sourceCode.getText(specifier),
+                    )
+                );
               });
               const mergedSpecifiersText = `${isAllTypeOnly ? 'type ' : ''}{ ${mergedSpecifiers.join(', ')} }`;
 
@@ -109,7 +134,12 @@ const rule: ESLintUtils.RuleModule<'mergeDuplicatedImports'> = createRule({
 
               // Remove the remaining imports
               declarations.slice(1).forEach((declaration) => {
-                fixes.push(fixer.removeRange([declaration.range[0], declaration.range[1] + 1]));
+                fixes.push(
+                  fixer.removeRange([
+                    declaration.range[0],
+                    declaration.range[1] + 1,
+                  ]),
+                );
               });
 
               return fixes;
