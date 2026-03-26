@@ -12,6 +12,7 @@ import rule, {
   REQUIRE_OBJECT_LITERAL_FOR_ERROR_RESPONSE_MESSAGE_ID,
   REQUIRE_OBJECT_LITERAL_FOR_HEADERS_MESSAGE_ID,
   REQUIRE_OBJECT_LITERAL_MESSAGE_ID,
+  ruleId,
 } from './object-literal-response.ts';
 import { createEslintRuleTester } from './rule-tester.test.ts';
 
@@ -60,7 +61,7 @@ setResponse(response, {
 });
   `;
 
-describe('object-literal-response', () => {
+describe(ruleId, () => {
   const ruleTester = createEslintRuleTester({
     languageOptions: {
       parserOptions: { ecmaVersion: 'latest', project: true },
@@ -68,7 +69,7 @@ describe('object-literal-response', () => {
   });
 
   it('validates good code', () => {
-    ruleTester.run('object-literal-response', rule, {
+    ruleTester.run(ruleId, rule, {
       valid: [
         {
           code: RESPONSE_200_OBJECT_LITERAL,
@@ -91,7 +92,7 @@ describe('object-literal-response', () => {
   });
 
   it('errors on invalid code and provides the correct error message', () => {
-    ruleTester.run('object-literal-response', rule, {
+    ruleTester.run(ruleId, rule, {
       valid: [],
       invalid: [
         {

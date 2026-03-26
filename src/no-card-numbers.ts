@@ -9,6 +9,8 @@
 import type { Node, SourceLocation } from 'estree';
 import type { Rule } from 'eslint';
 
+export const ruleId = 'no-card-numbers';
+
 const CARD_NUMBER_FOUND = 'CARD_NUMBER_FOUND';
 const CARD_NUMBERS_FOUND = 'CARD_NUMBERS_FOUND';
 const cardNumberRegex = /\d{15,19}/gmu;

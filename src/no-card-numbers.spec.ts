@@ -8,7 +8,7 @@
 
 import { describe, it } from 'node:test';
 
-import rule from './no-card-numbers.ts';
+import rule, { ruleId } from './no-card-numbers.ts';
 import { createEslintRuleTester } from './rule-tester.test.ts';
 
 const CARD_NUMBER_FOUND = 'CARD_NUMBER_FOUND';
@@ -94,10 +94,10 @@ const CONTAINS_PASSING_BUT_INVALID_9_PREFIX_CARD_NUMBER_IN_STRING = `
 const foo = '9118724531442999';
 `;
 
-describe('no-card-numbers', () => {
+describe(ruleId, () => {
   const ruleTester = createEslintRuleTester();
   it('validates good code', () => {
-    ruleTester.run('no-card-numbers', rule, {
+    ruleTester.run(ruleId, rule, {
       valid: [
         {
           code: STRING_TEST,
@@ -135,7 +135,7 @@ describe('no-card-numbers', () => {
   });
 
   it('errors on invalid code', () => {
-    ruleTester.run('no-card-numbers', rule, {
+    ruleTester.run(ruleId, rule, {
       valid: [],
       invalid: [
         {

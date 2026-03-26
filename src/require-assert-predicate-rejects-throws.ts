@@ -8,6 +8,8 @@
 
 import type { Rule } from 'eslint';
 
+export const ruleId = 'require-assert-predicate-rejects-throws';
+
 export default {
   meta: {
     type: 'problem',

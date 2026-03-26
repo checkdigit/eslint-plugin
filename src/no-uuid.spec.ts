@@ -8,7 +8,7 @@
 
 import { describe, it } from 'node:test';
 
-import rule from './no-uuid.ts';
+import rule, { ruleId } from './no-uuid.ts';
 import { createEslintRuleTester } from './rule-tester.test.ts';
 
 const UUID_FOUND = 'UUID_FOUND';
@@ -52,11 +52,11 @@ const CONTAINS_MULTIPLE_UUIDS_IN_COMMENT = `
 const foo = 'nothing wrong here';
 `;
 
-describe('no-uuid', () => {
+describe(ruleId, () => {
   const ruleTester = createEslintRuleTester();
 
   it('validates good code', () => {
-    ruleTester.run('no-uuid', rule, {
+    ruleTester.run(ruleId, rule, {
       valid: [
         {
           code: STRING_TEST,
@@ -73,7 +73,7 @@ describe('no-uuid', () => {
   });
 
   it('errors on invalid code and provides the correct error message', () => {
-    ruleTester.run('no-uuid', rule, {
+    ruleTester.run(ruleId, rule, {
       valid: [],
       invalid: [
         {

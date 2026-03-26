@@ -9,6 +9,8 @@
 import type { Rule, SourceCode } from 'eslint';
 import type { Comment } from 'estree';
 
+export const ruleId = 'no-wallaby-comment';
+
 // eslint-disable-next-line sonarjs/slow-regex
 const wallabyRegex = /(?<=(?:^|\*\/)\s*)[?]{1,2}|file\.only|file\.skip/gu;
 const commentRegex =

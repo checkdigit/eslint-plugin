@@ -8,7 +8,7 @@
 
 import { describe, it } from 'node:test';
 
-import rule from './regular-expression-comment.ts';
+import rule, { ruleId } from './regular-expression-comment.ts';
 import { createEslintRuleTester } from './rule-tester.test.ts';
 
 const VALID_TEST_1 = `// This regular expression removes all non-alphanumeric characters.
@@ -95,11 +95,11 @@ const testRegex2 = /created test file for the new file TEST\\.123456789\\./gmu;
 
 const INVALID_TEST_7 = `const testRegex1 = /error processing x:test\\.test-xyz\\.test\\.xyz\\.abc/gmu;`;
 
-describe('regular-expression-comment', () => {
+describe(ruleId, () => {
   const ruleTester = createEslintRuleTester();
 
   it('validates good code', () => {
-    ruleTester.run('regular-expression-comment', rule, {
+    ruleTester.run(ruleId, rule, {
       valid: [
         {
           code: VALID_TEST_1,
@@ -140,7 +140,7 @@ describe('regular-expression-comment', () => {
   });
 
   it('errors on invalid code and provides the correct error message', () => {
-    ruleTester.run('regular-expression-comment', rule, {
+    ruleTester.run(ruleId, rule, {
       valid: [],
       invalid: [
         {

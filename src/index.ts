@@ -20,7 +20,9 @@ import noLegacyServiceTyping, {
 import noPromiseInstanceMethod, {
   ruleId as noPromiseInstanceMethodRuleId,
 } from './no-promise-instance-method.ts';
-import noStatusCodeAssert from './no-status-code-assert.ts';
+import noStatusCodeAssert, {
+  ruleId as noStatusCodeAssertRuleId,
+} from './no-status-code-assert.ts';
 import requireFixedServicesImport, {
   ruleId as requireFixedServicesImportRuleId,
 } from './require-fixed-services-import.ts';
@@ -45,42 +47,66 @@ import requireAWSBareBones, {
 import requireConsistentRead, {
   ruleId as requireConsistentReadRuleId,
 } from './aws/require-consistent-read.ts';
-import filePathComment from './file-path-comment.ts';
-import noCardNumbers from './no-card-numbers.ts';
-import noEnum from './no-enum.ts';
-import noSideEffects from './no-side-effects.ts';
-import noRandomV4UUID from './no-random-v4-uuid.ts';
-import noTestImport from './no-test-import.ts';
-import noUtil from './no-util.ts';
-import noUuid from './no-uuid.ts';
-import noWallabyComment from './no-wallaby-comment.ts';
-import objectLiteralResponse from './object-literal-response.ts';
-import regexComment from './regular-expression-comment.ts';
-import requireAssertPredicateRejectsThrows from './require-assert-predicate-rejects-throws.ts';
-import requireStrictAssert from './require-strict-assert.ts';
-import requireAssertMessage from './require-assert-message';
-import requireTsExtensionImportsExports from './require-ts-extension-imports-exports.ts';
+import filePathComment, {
+  ruleId as filePathCommentRuleId,
+} from './file-path-comment.ts';
+import noCardNumbers, {
+  ruleId as noCardNumbersRuleId,
+} from './no-card-numbers.ts';
+import noEnum, { ruleId as noEnumRuleId } from './no-enum.ts';
+import noSideEffects, {
+  ruleId as noSideEffectsRuleId,
+} from './no-side-effects.ts';
+import noRandomV4UUID, {
+  ruleId as noRandomV4UUIDRuleId,
+} from './no-random-v4-uuid.ts';
+import noTestImport, {
+  ruleId as noTestImportRuleId,
+} from './no-test-import.ts';
+import noUtil, { ruleId as noUtilRuleId } from './no-util.ts';
+import noUuid, { ruleId as noUUIDRuleId } from './no-uuid.ts';
+import noWallabyComment, {
+  ruleId as noWallabyCommentRuleId,
+} from './no-wallaby-comment.ts';
+import objectLiteralResponse, {
+  ruleId as objectLiteralResponseRuleId,
+} from './object-literal-response.ts';
+import regexComment, {
+  ruleId as regularExpressionCommentRuleId,
+} from './regular-expression-comment.ts';
+import requireAssertPredicateRejectsThrows, {
+  ruleId as requireAssertPredicateRejectsThrowsRuleId,
+} from './require-assert-predicate-rejects-throws.ts';
+import requireStrictAssert, {
+  ruleId as requireStrictAssertRuleId,
+} from './require-strict-assert.ts';
+import requireAssertMessage, {
+  ruleId as requireAssertMessageRuleId,
+} from './require-assert-message';
+import requireTsExtensionImportsExports, {
+  ruleId as requireTSExtensionImportsExportsRuleId,
+} from './require-ts-extension-imports-exports.ts';
 
 export { default as isAwsSdkV3Used } from './aws/is-aws-sdk-v3-used.ts';
 
 const rules: Record<string, TSESLint.LooseRuleDefinition> = {
-  'file-path-comment': filePathComment,
-  'no-card-numbers': noCardNumbers,
-  'no-enum': noEnum,
-  'no-random-v4-uuid': noRandomV4UUID,
-  'no-status-code-assert': noStatusCodeAssert,
-  'no-util': noUtil,
-  'no-uuid': noUuid,
-  'require-assert-message': requireAssertMessage,
-  'require-strict-assert': requireStrictAssert,
-  'require-ts-extension-imports-exports': requireTsExtensionImportsExports,
-  'no-test-import': noTestImport,
-  'no-wallaby-comment': noWallabyComment,
-  'no-side-effects': noSideEffects,
-  'regular-expression-comment': regexComment,
-  'require-assert-predicate-rejects-throws':
+  [filePathCommentRuleId]: filePathComment,
+  [noCardNumbersRuleId]: noCardNumbers,
+  [noEnumRuleId]: noEnum,
+  [noRandomV4UUIDRuleId]: noRandomV4UUID,
+  [noStatusCodeAssertRuleId]: noStatusCodeAssert,
+  [noUtilRuleId]: noUtil,
+  [noUUIDRuleId]: noUuid,
+  [requireAssertMessageRuleId]: requireAssertMessage,
+  [requireStrictAssertRuleId]: requireStrictAssert,
+  [requireTSExtensionImportsExportsRuleId]: requireTsExtensionImportsExports,
+  [noTestImportRuleId]: noTestImport,
+  [noWallabyCommentRuleId]: noWallabyComment,
+  [noSideEffectsRuleId]: noSideEffects,
+  [regularExpressionCommentRuleId]: regexComment,
+  [requireAssertPredicateRejectsThrowsRuleId]:
     requireAssertPredicateRejectsThrows,
-  'object-literal-response': objectLiteralResponse,
+  [objectLiteralResponseRuleId]: objectLiteralResponse,
   [invalidJsonStringifyRuleId]: invalidJsonStringify,
   [noPromiseInstanceMethodRuleId]: noPromiseInstanceMethod,
   [noLegacyServiceTypingRuleId]: noLegacyServiceTyping,
@@ -108,22 +134,22 @@ const configs: Record<string, TSESLint.FlatConfig.Config[]> = {
         '@checkdigit': plugin,
       },
       rules: {
-        '@checkdigit/no-card-numbers': 'error',
-        '@checkdigit/no-enum': 'error',
-        '@checkdigit/file-path-comment': 'error',
-        '@checkdigit/no-random-v4-uuid': 'error',
-        '@checkdigit/no-status-code-assert': 'error',
-        '@checkdigit/no-util': 'error',
-        '@checkdigit/no-uuid': 'error',
-        '@checkdigit/require-assert-message': 'error',
-        '@checkdigit/require-strict-assert': 'error',
-        '@checkdigit/require-ts-extension-imports-exports': 'error',
-        '@checkdigit/no-wallaby-comment': 'error',
-        '@checkdigit/no-side-effects': 'error',
-        '@checkdigit/regular-expression-comment': 'error',
-        '@checkdigit/require-assert-predicate-rejects-throws': 'error',
-        '@checkdigit/object-literal-response': 'error',
-        '@checkdigit/no-test-import': 'error',
+        [`@checkdigit/${noCardNumbersRuleId}`]: 'error',
+        [`@checkdigit/${noEnumRuleId}`]: 'error',
+        [`@checkdigit/${filePathCommentRuleId}`]: 'error',
+        [`@checkdigit/${noRandomV4UUIDRuleId}`]: 'error',
+        [`@checkdigit/${noStatusCodeAssertRuleId}`]: 'error',
+        [`@checkdigit/${noUtilRuleId}`]: 'error',
+        [`@checkdigit/${noUUIDRuleId}`]: 'error',
+        [`@checkdigit/${requireAssertMessageRuleId}`]: 'error',
+        [`@checkdigit/${requireStrictAssertRuleId}`]: 'error',
+        [`@checkdigit/${requireTSExtensionImportsExportsRuleId}`]: 'error',
+        [`@checkdigit/${noWallabyCommentRuleId}`]: 'error',
+        [`@checkdigit/${noSideEffectsRuleId}`]: 'error',
+        [`@checkdigit/${regularExpressionCommentRuleId}`]: 'error',
+        [`@checkdigit/${requireAssertPredicateRejectsThrowsRuleId}`]: 'error',
+        [`@checkdigit/${objectLiteralResponseRuleId}`]: 'error',
+        [`@checkdigit/${noTestImportRuleId}`]: 'error',
         [`@checkdigit/${invalidJsonStringifyRuleId}`]: 'error',
         [`@checkdigit/${noPromiseInstanceMethodRuleId}`]: 'error',
         [`@checkdigit/${noLegacyServiceTypingRuleId}`]: 'error',
@@ -146,22 +172,22 @@ const configs: Record<string, TSESLint.FlatConfig.Config[]> = {
         '@checkdigit': plugin,
       },
       rules: {
-        '@checkdigit/no-card-numbers': 'error',
-        '@checkdigit/no-enum': 'error',
-        '@checkdigit/file-path-comment': 'off',
-        '@checkdigit/no-random-v4-uuid': 'error',
-        '@checkdigit/no-status-code-assert': 'error',
-        '@checkdigit/no-util': 'error',
-        '@checkdigit/no-uuid': 'error',
-        '@checkdigit/require-assert-message': 'error',
-        '@checkdigit/require-strict-assert': 'error',
-        '@checkdigit/require-ts-extension-imports-exports': 'error',
-        '@checkdigit/no-wallaby-comment': 'off',
-        '@checkdigit/no-side-effects': 'error',
-        '@checkdigit/regular-expression-comment': 'error',
-        '@checkdigit/require-assert-predicate-rejects-throws': 'error',
-        '@checkdigit/object-literal-response': 'error',
-        '@checkdigit/no-test-import': 'error',
+        [`@checkdigit/${noCardNumbersRuleId}`]: 'error',
+        [`@checkdigit/${noEnumRuleId}`]: 'error',
+        [`@checkdigit/${filePathCommentRuleId}`]: 'error',
+        [`@checkdigit/${noRandomV4UUIDRuleId}`]: 'error',
+        [`@checkdigit/${noStatusCodeAssertRuleId}`]: 'error',
+        [`@checkdigit/${noUtilRuleId}`]: 'error',
+        [`@checkdigit/${noUUIDRuleId}`]: 'error',
+        [`@checkdigit/${requireAssertMessageRuleId}`]: 'error',
+        [`@checkdigit/${requireStrictAssertRuleId}`]: 'error',
+        [`@checkdigit/${requireTSExtensionImportsExportsRuleId}`]: 'error',
+        [`@checkdigit/${noWallabyCommentRuleId}`]: 'error',
+        [`@checkdigit/${noSideEffectsRuleId}`]: 'error',
+        [`@checkdigit/${regularExpressionCommentRuleId}`]: 'error',
+        [`@checkdigit/${requireAssertPredicateRejectsThrowsRuleId}`]: 'error',
+        [`@checkdigit/${objectLiteralResponseRuleId}`]: 'error',
+        [`@checkdigit/${noTestImportRuleId}`]: 'error',
         [`@checkdigit/${invalidJsonStringifyRuleId}`]: 'error',
         [`@checkdigit/${noPromiseInstanceMethodRuleId}`]: 'off',
         [`@checkdigit/${noLegacyServiceTypingRuleId}`]: 'off',

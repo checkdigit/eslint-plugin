@@ -10,17 +10,17 @@ import { describe, it } from 'node:test';
 
 import { Linter } from 'eslint';
 
-import rule from './file-path-comment.ts';
+import rule, { ruleId } from './file-path-comment.ts';
 import { createEslintRuleTester } from './rule-tester.test.ts';
 
-describe('file-path-comment', () => {
+describe(ruleId, () => {
   const configuration: Linter.Config = {
     languageOptions: { parserOptions: { ecmaVersion: 2020 } },
   };
   const ruleTester = createEslintRuleTester(configuration);
 
   it('valid code', () => {
-    ruleTester.run('file-path-comment', rule, {
+    ruleTester.run(ruleId, rule, {
       valid: [
         {
           filename: 'src/world/hello.ts',
@@ -49,7 +49,7 @@ describe('file-path-comment', () => {
   });
 
   it('invalid code', () => {
-    ruleTester.run('file-path-comment', rule, {
+    ruleTester.run(ruleId, rule, {
       valid: [],
       invalid: [
         {

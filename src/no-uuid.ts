@@ -9,6 +9,8 @@
 import type { Node, SourceLocation } from 'estree';
 import type { Rule } from 'eslint';
 
+export const ruleId = 'no-uuid';
+
 const UUID_FOUND = 'UUID_FOUND';
 const UUIDS_FOUND = 'UUIDS_FOUND';
 const uuidRegex =

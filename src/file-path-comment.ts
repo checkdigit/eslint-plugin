@@ -8,6 +8,7 @@ import type { Rule } from 'eslint';
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
+export const ruleId = 'file-path-comment';
 export default {
   meta: {
     type: 'suggestion',

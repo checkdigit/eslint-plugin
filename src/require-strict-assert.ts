@@ -11,6 +11,8 @@ import type { Rule } from 'eslint';
 const NODE_ASSERT_STRICT = 'node:assert/strict';
 const NODE_ASSERT = 'node:assert';
 
+export const ruleId = 'require-strict-assert';
+
 export default {
   meta: {
     type: 'problem',

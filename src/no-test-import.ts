@@ -17,6 +17,7 @@ export interface NoTestImportRuleOptions {
 }
 const DEFAULT_OPTIONS = { testFilePattern: '\\.(test|spec)(\\.\\w+)?$' };
 export const NO_TEST_IMPORT = 'NO_TEST_IMPORT';
+export const ruleId = 'no-test-import';
 
 export default {
   meta: {

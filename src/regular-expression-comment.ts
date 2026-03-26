@@ -8,6 +8,8 @@
 
 import type { Rule } from 'eslint';
 
+export const ruleId = 'regular-expression-comment';
+
 export default {
   meta: {
     type: 'problem',

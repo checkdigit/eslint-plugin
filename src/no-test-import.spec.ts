@@ -11,10 +11,11 @@ import { describe, it } from 'node:test';
 import rule, {
   NO_TEST_IMPORT,
   type NoTestImportRuleOptions,
+  ruleId,
 } from './no-test-import.ts';
 import { createEslintRuleTester } from './rule-tester.test.ts';
 
-describe('no-test-import', () => {
+describe(ruleId, () => {
   const ruleTester = createEslintRuleTester();
   const overwrittenConfigurationTester = createEslintRuleTester({
     languageOptions: {
@@ -29,7 +30,7 @@ describe('no-test-import', () => {
   };
 
   it('validates good code', () => {
-    ruleTester.run('no-test-import with default configuration', rule, {
+    ruleTester.run(`${ruleId} with default configuration`, rule, {
       valid: [
         {
           filename: 'src/api/v1/message.ts',
@@ -60,7 +61,7 @@ describe('no-test-import', () => {
     });
 
     it('errors on invalid code and provides the correct error message', () => {
-      ruleTester.run('no-test-import with default configuration', rule, {
+      ruleTester.run(`${ruleId} with default configuration`, rule, {
         valid: [],
         invalid: [
           {
@@ -105,7 +106,7 @@ describe('no-test-import', () => {
 
     it('validates good code with overwritten configuration', () => {
       overwrittenConfigurationTester.run(
-        'no-test-import with overwritten configuration',
+        `${ruleId} with overwritten configuration`,
         rule,
         {
           valid: [
@@ -127,7 +128,7 @@ describe('no-test-import', () => {
 
     it('errors on invalid code with overwritten configuration and provides the correct error message', () => {
       overwrittenConfigurationTester.run(
-        'no-test-import with overwritten configuration',
+        `${ruleId} with overwritten configuration`,
         rule,
         {
           valid: [],

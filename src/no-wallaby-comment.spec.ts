@@ -8,7 +8,7 @@
 
 import { describe, it } from 'node:test';
 
-import rule from './no-wallaby-comment.ts';
+import rule, { ruleId } from './no-wallaby-comment.ts';
 import { createEslintRuleTester } from './rule-tester.test.ts';
 
 const LINE_ONE_NO_COMMENTS = `const NOT_A_SECRET = "A template that isn't a secret.";`;
@@ -208,11 +208,11 @@ const NOT_A_SECRET = "A template that isn't a secret"; // test the comment
 const TEST = "this isn't secret"; // testing with ? here and there ??.
 `;
 
-describe('no-wallaby-comment', () => {
+describe(ruleId, () => {
   const ruleTester = createEslintRuleTester();
 
   it('validates good code', () => {
-    ruleTester.run('no-wallaby-comment', rule, {
+    ruleTester.run(ruleId, rule, {
       valid: [
         {
           code: LINE_ONE_NO_COMMENTS,
@@ -247,7 +247,7 @@ describe('no-wallaby-comment', () => {
   });
 
   it('errors on invalid code, provides the correct error message and correctly fixes the code', () => {
-    ruleTester.run('no-wallaby-comment', rule, {
+    ruleTester.run(ruleId, rule, {
       valid: [],
       invalid: [
         {

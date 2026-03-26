@@ -8,14 +8,14 @@
 
 import { describe, it } from 'node:test';
 
-import rule from './require-assert-predicate-rejects-throws.ts';
+import rule, { ruleId } from './require-assert-predicate-rejects-throws.ts';
 import { createEslintRuleTester } from './rule-tester.test.ts';
 
-describe('require-assert-predicate-rejects-throws', () => {
+describe(ruleId, () => {
   const ruleTester = createEslintRuleTester();
 
   it('validates good code', () => {
-    ruleTester.run('require-assert-predicate-rejects-throws', rule, {
+    ruleTester.run(ruleId, rule, {
       valid: [
         {
           code: `import { strict as assert } from 'node:assert';
@@ -205,7 +205,7 @@ describe('require-assert-predicate-rejects-throws', () => {
     });
 
     it('errors on invalid code and provides the correct error message', () => {
-      ruleTester.run('require-assert-predicate-rejects-throws', rule, {
+      ruleTester.run(ruleId, rule, {
         valid: [],
         invalid: [
           {

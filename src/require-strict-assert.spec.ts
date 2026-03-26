@@ -8,14 +8,14 @@
 
 import { describe, it } from 'node:test';
 
-import rule from './require-strict-assert.ts';
+import rule, { ruleId } from './require-strict-assert.ts';
 import { createEslintRuleTester } from './rule-tester.test.ts';
 
-describe('require-strict-assert', () => {
+describe(ruleId, () => {
   const ruleTester = createEslintRuleTester();
 
   it('validates good code', () => {
-    ruleTester.run('require-strict-assert', rule, {
+    ruleTester.run(ruleId, rule, {
       valid: [
         {
           code: `import { strict as assert } from 'node:assert';`,
@@ -35,7 +35,7 @@ describe('require-strict-assert', () => {
   });
 
   it('errors on invalid code and provides the correct error message', () => {
-    ruleTester.run('require-strict-assert', rule, {
+    ruleTester.run(ruleId, rule, {
       valid: [],
       invalid: [
         {
