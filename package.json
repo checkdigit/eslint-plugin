@@ -65,7 +65,7 @@
   },
   "devDependencies": {
     "@checkdigit/prettier-config": "^8.0.0",
-    "@checkdigit/typescript-config": "^10.0.1",
+    "@checkdigit/typescript-config": "10.1.0-PR.90-0823",
     "@eslint/js": "^10.0.1",
     "@types/eslint": "^9.6.1",
     "@types/eslint-config-prettier": "^6.11.3",
