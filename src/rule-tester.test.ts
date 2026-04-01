@@ -15,7 +15,6 @@ export function createEslintRuleTester(
     },
   },
 ): EslintRuleTester {
-  // Not setting node:test functions here for formatting in stdout
   EslintRuleTester.describe = describe;
   EslintRuleTester.it = it;
   // eslint-disable-next-line no-only-tests/no-only-tests
