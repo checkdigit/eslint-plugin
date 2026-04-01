@@ -22,22 +22,26 @@ describe(ruleId, () => {
     ruleTester.run(ruleId, rule, {
       valid: [
         {
+          name: 'Valid kms import and client usage when using sdk v3',
           settings: { isAwsSdkV3Used: true },
           code: `import { EncryptCommand, KMSClient } from '@aws-sdk/client-kms';
         const command = new EncryptCommand({});`,
         },
         {
+          name: 'Valid dynamo import and client usage with awsConfig when using sdk v3',
           settings: { isAwsSdkV3Used: true },
           code: `import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
         const dynamoClient = awsConfig(DynamoDBClient, {qualifier, environment});`,
         },
         {
+          name: 'Valid payment cryptography import and client usage with awsConfig when using sdk v3',
           settings: { isAwsSdkV3Used: true },
           // we probably should add a separate rule to disallow "aggregated client" pattern and force using Bare-bones clients/commands
           code: `import { PaymentCryptography } from '@aws-sdk/client-payment-cryptography';
         const paymentCryptography = new PaymentCryptography();`,
         },
         {
+          name: 'Valid s3 import and client usage when not using sdk v3',
           settings: { isAwsSdkV3Used: false },
           code: `import { S3Client } from '@aws-sdk/client-s3';
         const s3Client = new S3Client({});`,
@@ -52,6 +56,7 @@ describe(ruleId, () => {
       valid: [],
       invalid: [
         {
+          name: 'Invalid s3 import and client usage when using sdk v3 without awsConfig',
           settings: { isAwsSdkV3Used: true },
           code: `import { S3Client } from '@aws-sdk/client-s3';
         const s3Client = new S3Client({});`,
@@ -63,6 +68,7 @@ describe(ruleId, () => {
           ],
         },
         {
+          name: 'Invalid DynamoDB import and client usage when using sdk v3 without awsConfig',
           settings: { isAwsSdkV3Used: true },
           code: `import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
         const dynamoClient = new DynamoDBClient({});`,
@@ -74,6 +80,7 @@ describe(ruleId, () => {
           ],
         },
         {
+          name: 'Invalid KMS import and client usage when using sdk v3 without awsConfig',
           settings: { isAwsSdkV3Used: true },
           code: `import { KMSClient } from '@aws-sdk/client-kms';
         const kmsClient = new KMSClient({});`,
@@ -85,6 +92,7 @@ describe(ruleId, () => {
           ],
         },
         {
+          name: 'Invalid Athena import and client usage when using sdk v3 without aws config',
           settings: { isAwsSdkV3Used: true },
           code: `import { AthenaClient } from '@aws-sdk/client-athena';
         const athenaClient = new AthenaClient({});`,
@@ -96,6 +104,7 @@ describe(ruleId, () => {
           ],
         },
         {
+          name: 'Invalid aws import when using sdk v3',
           settings: { isAwsSdkV3Used: true },
           code: `import aws from '@checkdigit/aws';`,
           errors: [{ messageId: MESSAGE_ID_NO_CHECKDIGIT_AWS }],

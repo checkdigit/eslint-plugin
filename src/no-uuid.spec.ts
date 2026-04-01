@@ -59,12 +59,15 @@ describe(ruleId, () => {
     ruleTester.run(ruleId, rule, {
       valid: [
         {
+          name: 'String that does not contain a uuid',
           code: STRING_TEST,
         },
         {
+          name: 'String template that does not contain a uuid',
           code: TEMPLATE_TEST,
         },
         {
+          name: 'String that contains an invalid uuid string that resembles a uuid',
           code: STRING_WITH_NON_UUID,
         },
       ],
@@ -77,18 +80,22 @@ describe(ruleId, () => {
       valid: [],
       invalid: [
         {
+          name: 'String contains a uuid',
           code: CONTAINS_UUID_IN_STRING,
           errors: [UUID_FOUND_MSG],
         },
         {
+          name: 'String contains multiple uuids',
           code: CONTAINS_MULTIPLE_UUIDS_IN_STRING,
           errors: [UUIDS_FOUND_MSG],
         },
         {
+          name: 'Comment contains a uuid',
           code: CONTAINS_UUID_IN_COMMENT,
           errors: [UUID_FOUND_MSG],
         },
         {
+          name: 'Comment contains multiple uuids',
           code: CONTAINS_MULTIPLE_UUIDS_IN_COMMENT,
           errors: [UUIDS_FOUND_MSG],
         },

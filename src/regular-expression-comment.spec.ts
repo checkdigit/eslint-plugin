@@ -102,36 +102,47 @@ describe(ruleId, () => {
     ruleTester.run(ruleId, rule, {
       valid: [
         {
+          name: 'Regex with a comment describing what the regex is doing',
           code: VALID_TEST_1,
         },
         {
+          name: 'Regex with a comment describing what the regex is doing on the same line',
           code: VALID_TEST_2,
         },
         {
+          name: 'Regex with a block comment describing what the regex is doing',
           code: VALID_TEST_3,
         },
         {
+          name: 'Regex with a block comment describing what the regex is doing on the same line',
           code: VALID_TEST_4,
         },
         {
+          name: 'Multiple regexes with comments describing what the regexes are doing',
           code: VALID_TEST_5,
         },
         {
+          name: 'Multiple regexes with comments describing what the regexes are doing with varying whitespace',
           code: VALID_TEST_6,
         },
         {
+          name: 'Multiple regexes with comments describing what the regexes are doing with varying whitespace and comment types',
           code: VALID_TEST_7,
         },
         {
+          name: 'Nested regex with a comment describing what the regex is doing',
           code: VALID_TEST_8,
         },
         {
+          name: 'Regex with multiple escaped characters with a comment describing what the regex is doing',
           code: VALID_TEST_9,
         },
         {
+          name: 'Regex with multiple escaped characters with a comment that has extra leading whitespace describing what the regex is doing',
           code: VALID_TEST_10,
         },
         {
+          name: 'Strings that do not contain secrets',
           code: VALID_TEST_11,
         },
       ],
@@ -144,6 +155,7 @@ describe(ruleId, () => {
       valid: [],
       invalid: [
         {
+          name: 'Missing comment for regular expression',
           code: INVALID_TEST_1,
           errors: [
             {
@@ -152,6 +164,7 @@ describe(ruleId, () => {
           ],
         },
         {
+          name: 'Multiple regexes missing comments describing what the regexes are doing',
           code: INVALID_TEST_2,
           errors: [
             {
@@ -163,6 +176,7 @@ describe(ruleId, () => {
           ],
         },
         {
+          name: 'Regex with multiple patterns missing a comment describing what the regex is doing',
           code: INVALID_TEST_3,
           errors: [
             {
@@ -171,6 +185,7 @@ describe(ruleId, () => {
           ],
         },
         {
+          name: 'Two regexes separated by a newline missing comments describing what the regexes are doing',
           code: INVALID_TEST_4,
           errors: [
             {
@@ -182,6 +197,7 @@ describe(ruleId, () => {
           ],
         },
         {
+          name: 'Two regexes separated by a newline missing comments describing what the regexes are doing with varying whitespace',
           code: INVALID_TEST_5,
           errors: [
             {
@@ -193,6 +209,7 @@ describe(ruleId, () => {
           ],
         },
         {
+          name: 'Two regexes separated by a newline containing plaintext missing comments describing what the regexes are doing',
           code: INVALID_TEST_6,
           errors: [
             {
@@ -204,6 +221,7 @@ describe(ruleId, () => {
           ],
         },
         {
+          name: 'Regex containing plaintext, escaped characters and symbols missing a comment describing what the regex is doing',
           code: INVALID_TEST_7,
           errors: [
             {

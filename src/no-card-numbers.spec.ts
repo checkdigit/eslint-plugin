@@ -100,33 +100,43 @@ describe(ruleId, () => {
     ruleTester.run(ruleId, rule, {
       valid: [
         {
+          name: 'Valid string test',
           code: STRING_TEST,
         },
         {
+          name: 'Valid template test',
           code: TEMPLATE_TEST,
         },
         {
+          name: 'Valid string with card number that does not pass luhn check',
           code: STRING_WITH_CARD_NUMBER_THAT_DOESNT_PASS_LUHN_CHECK,
         },
         {
+          name: 'Valid string with a card number that passes luhn check but is not a valid card number',
           code: CONTAINS_A_PASSING_CARD_NUMBER,
         },
         {
+          name: 'Valid comment with a card number that passes luhn check but is not a valid card number',
           code: CONTAINS_A_PASSING_CARD_NUMBER_IN_COMMENT,
         },
         {
+          name: 'String that contains a card numbered prefixed with a 0',
           code: CONTAINS_PASSING_BUT_INVALID_0_PREFIX_CARD_NUMBER_IN_STRING,
         },
         {
+          name: 'Contains a card number that passes a luhn check but is prefixed with a 1',
           code: CONTAINS_PASSING_BUT_INVALID_1_PREFIX_CARD_NUMBER_IN_STRING,
         },
         {
+          name: 'Contains a card number that passes a luhn check but is prefixed with a 7',
           code: CONTAINS_PASSING_BUT_INVALID_7_PREFIX_CARD_NUMBER_IN_STRING,
         },
         {
+          name: 'Contains a card number that passes a luhn check but is prefixed with an 8',
           code: CONTAINS_PASSING_BUT_INVALID_8_PREFIX_CARD_NUMBER_IN_STRING,
         },
         {
+          name: 'Contains a card number that passes a luhn check but is prefixed with a 9',
           code: CONTAINS_PASSING_BUT_INVALID_9_PREFIX_CARD_NUMBER_IN_STRING,
         },
       ],
@@ -139,18 +149,22 @@ describe(ruleId, () => {
       valid: [],
       invalid: [
         {
+          name: 'String contains a card number',
           code: CONTAINS_CARD_NUMBER_IN_NUMBER,
           errors: [CARD_NUMBER_FOUND_MSG],
         },
         {
+          name: 'String contains several card numbers',
           code: CONTAINS_SEVERAL_CARD_NUMBERS_IN_STRING,
           errors: [CARD_NUMBERS_FOUND_MSG],
         },
         {
+          name: 'Comment contains a card number',
           code: CONTAINS_CARD_NUMBER_IN_COMMENT,
           errors: [CARD_NUMBER_FOUND_MSG],
         },
         {
+          name: 'Several card numbers in a comment',
           code: CONTAINS_SEVERAL_CARD_NUMBERS_IN_COMMENT,
           errors: [CARD_NUMBERS_FOUND_MSG],
         },

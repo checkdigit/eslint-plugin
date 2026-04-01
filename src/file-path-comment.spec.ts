@@ -23,6 +23,7 @@ describe(ruleId, () => {
     ruleTester.run(ruleId, rule, {
       valid: [
         {
+          name: 'Valid path comment',
           filename: 'src/world/hello.ts',
           code: `// world/hello.ts`,
           languageOptions: {
@@ -32,14 +33,17 @@ describe(ruleId, () => {
           },
         },
         {
+          name: 'Valid path comment under src directory',
           filename: 'src/hello.ts',
           code: `// hello.ts\n`,
         },
         {
+          name: 'Valid path comment for file in root directory',
           filename: 'hello.ts',
           code: `// whatever does not matter\n`,
         },
         {
+          name: 'Valid path comment for file in root directory',
           filename: 'source/hello.ts',
           code: `// whatever does not matter\n`,
         },
@@ -53,6 +57,7 @@ describe(ruleId, () => {
       valid: [],
       invalid: [
         {
+          name: 'First line is a comment but does not match the file path',
           filename: 'src/hello.ts',
           code: `// not-hello.ts`,
           errors: [
@@ -63,6 +68,7 @@ describe(ruleId, () => {
           output: `// hello.ts`,
         },
         {
+          name: 'Not a valid path comment since there is no whitespace after //',
           filename: 'src/hello.ts',
           code: `//hello.ts\n`,
           errors: [
@@ -73,12 +79,14 @@ describe(ruleId, () => {
           output: `// hello.ts\n`,
         },
         {
+          name: 'First line is a block comment',
           filename: 'src/hello.ts',
           code: `/* not-hello.ts */`,
           errors: [{ message: 'first line cannot be a block comment' }],
           output: `// hello.ts\n\n/* not-hello.ts */`,
         },
         {
+          name: 'First line is not a path comment',
           filename: 'src/hello.ts',
           code: `const x = 123;`,
           errors: [
@@ -87,6 +95,7 @@ describe(ruleId, () => {
           output: `// hello.ts\n\nconst x = 123;`,
         },
         {
+          name: 'Empty file with no path comment',
           filename: 'src/hello.ts',
           code: ``,
           errors: [

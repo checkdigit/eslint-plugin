@@ -59,41 +59,85 @@ describe(ruleId, () => {
       ],
       invalid: [],
     });
+  });
 
-    it('errors on invalid code and provides the correct error message', () => {
-      ruleTester.run(`${ruleId} with default configuration`, rule, {
+  it('errors on invalid code and provides the correct error message', () => {
+    ruleTester.run(`${ruleId} with default configuration`, rule, {
+      valid: [],
+      invalid: [
+        {
+          filename: 'src/api/v1/message.ts',
+          code: `import util from './util.spec';`,
+          errors: [
+            {
+              messageId: NO_TEST_IMPORT,
+            },
+          ],
+        },
+        {
+          filename: 'src/api/v1/message.ts',
+          code: `import util from './util.spec.ts';`,
+          errors: [
+            {
+              messageId: NO_TEST_IMPORT,
+            },
+          ],
+        },
+        {
+          filename: 'src/api/v1/message.ts',
+          code: `import util from './util.test';`,
+          errors: [
+            {
+              messageId: NO_TEST_IMPORT,
+            },
+          ],
+        },
+        {
+          filename: 'src/api/v1/message.ts',
+          code: `import util from './util.test.ts';`,
+          errors: [
+            {
+              messageId: NO_TEST_IMPORT,
+            },
+          ],
+        },
+      ],
+    });
+  });
+
+  it('validates good code with overwritten configuration', () => {
+    overwrittenConfigurationTester.run(
+      `${ruleId} with overwritten configuration`,
+      rule,
+      {
+        valid: [
+          {
+            filename: 'src/api/v1/message.ts',
+            code: `import util from './util.test';`,
+            options: [overwrittenConfiguration],
+          },
+          {
+            filename: 'src/api/v1/message.ts',
+            code: `import util from './util.spec';`,
+            options: [overwrittenConfiguration],
+          },
+        ],
+        invalid: [],
+      },
+    );
+  });
+
+  it('errors on invalid code with overwritten configuration and provides the correct error message', () => {
+    overwrittenConfigurationTester.run(
+      `${ruleId} with overwritten configuration`,
+      rule,
+      {
         valid: [],
         invalid: [
           {
             filename: 'src/api/v1/message.ts',
-            code: `import util from './util.spec';`,
-            errors: [
-              {
-                messageId: NO_TEST_IMPORT,
-              },
-            ],
-          },
-          {
-            filename: 'src/api/v1/message.ts',
-            code: `import util from './util.spec.ts';`,
-            errors: [
-              {
-                messageId: NO_TEST_IMPORT,
-              },
-            ],
-          },
-          {
-            filename: 'src/api/v1/message.ts',
-            code: `import util from './util.test';`,
-            errors: [
-              {
-                messageId: NO_TEST_IMPORT,
-              },
-            ],
-          },
-          {
-            filename: 'src/api/v1/message.ts',
-            code: `import util from './util.test.ts';`,
+            code: `import util from './util.test.xyz';`,
+            options: [overwrittenConfiguration],
             errors: [
               {
                 messageId: NO_TEST_IMPORT,
@@ -101,51 +145,7 @@ describe(ruleId, () => {
             ],
           },
         ],
-      });
-    });
-
-    it('validates good code with overwritten configuration', () => {
-      overwrittenConfigurationTester.run(
-        `${ruleId} with overwritten configuration`,
-        rule,
-        {
-          valid: [
-            {
-              filename: 'src/api/v1/message.ts',
-              code: `import util from './util.test';`,
-              options: [overwrittenConfiguration],
-            },
-            {
-              filename: 'src/api/v1/message.ts',
-              code: `import util from './util.spec';`,
-              options: [overwrittenConfiguration],
-            },
-          ],
-          invalid: [],
-        },
-      );
-    });
-
-    it('errors on invalid code with overwritten configuration and provides the correct error message', () => {
-      overwrittenConfigurationTester.run(
-        `${ruleId} with overwritten configuration`,
-        rule,
-        {
-          valid: [],
-          invalid: [
-            {
-              filename: 'src/api/v1/message.ts',
-              code: `import util from './util.test.xyz';`,
-              options: [overwrittenConfiguration],
-              errors: [
-                {
-                  messageId: NO_TEST_IMPORT,
-                },
-              ],
-            },
-          ],
-        },
-      );
-    });
+      },
+    );
   });
 });

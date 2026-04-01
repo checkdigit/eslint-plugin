@@ -86,7 +86,7 @@ describe(ruleId, () => {
     });
   });
 
-  it('errors on invalid code an provides the correct errror message', () => {
+  it('errors on invalid code and provides the correct error message', () => {
     ruleTester.run(ruleId, rule, {
       valid: [],
       invalid: [

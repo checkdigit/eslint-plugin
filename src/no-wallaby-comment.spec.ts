@@ -215,30 +215,39 @@ describe(ruleId, () => {
     ruleTester.run(ruleId, rule, {
       valid: [
         {
+          name: 'Line one no comments',
           code: LINE_ONE_NO_COMMENTS,
         },
         {
+          name: 'Line two no comments',
           code: LINE_TWO_NO_COMMENTS,
         },
         {
+          name: 'Line seven with comments',
           code: LINE_SEVEN_WITH_COMMENTS,
         },
         {
+          name: 'Line 12 with comments',
           code: LINE_12_WITH_COMMENTS,
         },
         {
+          name: 'Line 13 with comments',
           code: LINE_13_WITH_COMMENTS,
         },
         {
+          name: 'Line 14 with comments',
           code: LINE_14_WITH_COMMENTS,
         },
         {
+          name: 'Line 15 with comments',
           code: LINE_15_WITH_COMMENTS,
         },
         {
+          name: 'Line 16 with comments',
           code: LINE_16_WITH_COMMENTS,
         },
         {
+          name: 'Line 17 with comments',
           code: LINE_17_WITH_COMMENTS,
         },
       ],
@@ -251,46 +260,55 @@ describe(ruleId, () => {
       valid: [],
       invalid: [
         {
+          name: 'Errors on a wallaby comment with no whitespace before wallaby comment',
           code: `const NOT_A_SECRET = "A template that isn't a secret.";// ? `,
           errors: [{ message: 'Remove wallaby-specific comments' }],
           output: `const NOT_A_SECRET = "A template that isn't a secret.";`,
         },
         {
+          name: 'Errors on a wallaby comment with no whitespace before wallaby comment and two question marks',
           code: `const NOT_A_SECRET = "A template that isn't a secret.";// ?? `,
           errors: [{ message: 'Remove wallaby-specific comments' }],
           output: `const NOT_A_SECRET = "A template that isn't a secret.";`,
         },
         {
+          name: 'Errors on a wallaby comment with no whitespace before wallaby comment and ending with a period',
           code: `const NOT_A_SECRET = "A template that isn't a secret.";// ?. `,
           errors: [{ message: 'Remove wallaby-specific comments' }],
           output: `const NOT_A_SECRET = "A template that isn't a secret.";`,
         },
         {
+          name: 'Errors on wallaby comment with no whitespace before wallaby comment and ending with two question marks and a period',
           code: `const NOT_A_SECRET = "A template that isn't a secret.";// ??. `,
           errors: [{ message: 'Remove wallaby-specific comments' }],
           output: `const NOT_A_SECRET = "A template that isn't a secret.";`,
         },
         {
+          name: 'Errors on a wallaby comment with whitespace before wallaby comment',
           code: `const NOT_A_SECRET = "A template that isn't a secret.";     // ?     `,
           errors: [{ message: 'Remove wallaby-specific comments' }],
           output: `const NOT_A_SECRET = "A template that isn't a secret.";`,
         },
         {
+          name: 'Errors on a file.only that has whitespace prepended and appended to it',
           code: `  // file.only    `,
           errors: [{ message: 'Remove wallaby-specific comments' }],
           output: ``,
         },
         {
+          name: 'Errors on a file.only that has whitespace appended to it',
           code: `// file.only   `,
           errors: [{ message: 'Remove wallaby-specific comments' }],
           output: ``,
         },
         {
+          name: 'Errors on a file.skip that has whitespace appended to it',
           code: `//  file.skip   `,
           errors: [{ message: 'Remove wallaby-specific comments' }],
           output: ``,
         },
         {
+          name: 'Line one with multiple wallaby comments',
           code: LINE_ONE_WITH_MULTIPLE_COMMENTS,
           errors: [
             { message: 'Remove wallaby-specific comments' },
@@ -301,6 +319,7 @@ describe(ruleId, () => {
           output: LINE_ONE_WITH_MULTIPLE_COMMENTS_EXPECTED,
         },
         {
+          name: 'Line two with multiple wallaby comments',
           code: LINE_TWO_WITH_MULTIPLE_COMMENTS,
           errors: [
             { message: 'Remove wallaby-specific comments' },
@@ -311,41 +330,49 @@ describe(ruleId, () => {
           output: LINE_TWO_WITH_MULTIPLE_COMMENTS_EXPECTED,
         },
         {
+          name: 'Line three with comments',
           code: LINE_THREE_WITH_COMMENTS,
           errors: [{ message: 'Remove wallaby-specific comments' }],
           output: '',
         },
         {
+          name: 'Line four with comments',
           code: LINE_FOUR_WITH_COMMENTS,
           errors: [{ message: 'Remove wallaby-specific comments' }],
           output: '',
         },
         {
+          name: 'Line five with comments',
           code: LINE_FIVE_WITH_COMMENTS,
           errors: [{ message: 'Remove wallaby-specific comments' }],
           output: '',
         },
         {
+          name: 'Line six with comments',
           code: LINE_SIX_WITH_COMMENTS,
           errors: [{ message: 'Remove wallaby-specific comments' }],
           output: LINE_SIX_WITH_COMMENTS_EXPECTED,
         },
         {
+          name: 'Line eight with comments',
           code: LINE_EIGHT_WITH_COMMENTS,
           errors: [{ message: 'Remove wallaby-specific comments' }],
           output: LINE_EIGHT_WITH_COMMENTS_EXPECTED,
         },
         {
+          name: 'Line nine with comments',
           code: LINE_NINE_WITH_COMMENTS,
           errors: [{ message: 'Remove wallaby-specific comments' }],
           output: LINE_NINE_WITH_COMMENTS_EXPECTED,
         },
         {
+          name: 'Line ten with comments',
           code: LINE_TEN_WITH_COMMENTS,
           errors: [{ message: 'Remove wallaby-specific comments' }],
           output: LINE_TEN_WITH_COMMENTS_EXPECTED,
         },
         {
+          name: 'Line eleven with comments',
           code: LINE_11_WITH_COMMENTS,
           errors: [{ message: 'Remove wallaby-specific comments' }],
           output: LINE_11_WITH_COMMENTS_EXPECTED,

@@ -18,6 +18,7 @@ describe(ruleId, () => {
     ruleTester.run(ruleId, rule, {
       valid: [
         {
+          name: 'The correct and expected thrown error message are validated',
           code: `import { strict as assert } from 'node:assert';
                 assert.rejects(
                    async () => {
@@ -29,6 +30,7 @@ describe(ruleId, () => {
           filename: 'src/require-assert-predicate-rejects-throws.ts',
         },
         {
+          name: 'The correct and expected thrown type error and message are validated',
           code: `import { strict as strictAssert } from 'node:assert';
                   strictAssert.rejects(
                   async () => {
@@ -42,6 +44,7 @@ describe(ruleId, () => {
           filename: 'src/require-assert-predicate-rejects-throws.ts',
         },
         {
+          name: 'The correct and expected thrown type error is returned using a callback and validated',
           code: `import { strict as assert } from 'node:assert';
                   assert.rejects(
                   async () => {
@@ -56,6 +59,7 @@ describe(ruleId, () => {
           filename: 'src/require-assert-predicate-rejects-throws.ts',
         },
         {
+          name: 'The correct and expected rejected promise is returned using a .then and .catch callbacks',
           code: `import { strict as assert } from 'node:assert';
                   assert.rejects(
                     Promise.reject(new Error('Wrong value')),
@@ -68,6 +72,7 @@ describe(ruleId, () => {
           filename: 'src/require-assert-predicate-rejects-throws.ts',
         },
         {
+          name: 'The correct and expected thrown RangeError is returned and validates the type of error thrown using a callback as well as validating the error message returned',
           code: `import { strict as assert } from 'node:assert';
                 assert.throws(
                    () => {
@@ -79,6 +84,7 @@ describe(ruleId, () => {
           filename: 'src/require-assert-predicate-rejects-throws.ts',
         },
         {
+          name: 'Asserts that there is an error if no error is thrown from the function being tested',
           code: `import { strict as assert } from 'node:assert';
                 assert.throws(() => new Date(), (error) => {
                     return error instanceof Error && error.message === 'Expected error message';
@@ -86,6 +92,7 @@ describe(ruleId, () => {
           filename: 'src/require-assert-predicate-rejects-throws.ts',
         },
         {
+          name: 'The correct and expected thrown type error full structure is validated using assert.throws',
           code: `import assert from 'node:assert/strict';
               const err = new TypeError('Wrong value');
               err.code = 404;
@@ -112,6 +119,7 @@ describe(ruleId, () => {
           filename: 'src/require-assert-predicate-rejects-throws.ts',
         },
         {
+          name: 'The correct and expected thrown type error full structure is validated when callback contains comments using assert.throws',
           code: `import assert from 'node:assert/strict';
               const err = new TypeError('Wrong value');
               err.code = 404;
@@ -147,6 +155,7 @@ describe(ruleId, () => {
           filename: 'src/require-assert-predicate-rejects-throws.ts',
         },
         {
+          name: 'Matches errors by properties rather than identity',
           code: `import { strict as assert } from 'node:assert';
                assert.throws(
                   () => {
@@ -161,6 +170,7 @@ describe(ruleId, () => {
           filename: 'src/require-assert-predicate-rejects-throws.ts',
         },
         {
+          name: 'Expected matches with regular expression',
           code: `import { strict as assert } from 'node:assert';
                assert.throws(
                 () => {
@@ -171,6 +181,7 @@ describe(ruleId, () => {
           filename: 'src/require-assert-predicate-rejects-throws.ts',
         },
         {
+          name: 'Expected matches using an assert and regular expression in the callback',
           code: `import { strict as assert } from 'node:assert';
                assert.throws(
                   () => {
@@ -186,6 +197,7 @@ describe(ruleId, () => {
           filename: 'src/require-assert-predicate-rejects-throws.ts',
         },
         {
+          name: 'Assert.rejects is valid when using .then and .catch callback to handle error message validation',
           code: `import { strict as assert } from 'node:assert';
                assert.rejects(
                 Promise.reject(new Error('Wrong value')),
@@ -203,48 +215,51 @@ describe(ruleId, () => {
       ],
       invalid: [],
     });
+  });
 
-    it('errors on invalid code and provides the correct error message', () => {
-      ruleTester.run(ruleId, rule, {
-        valid: [],
-        invalid: [
-          {
-            code: `import { strict as assert } from 'node:assert';
+  it('errors on invalid code and provides the correct error message', () => {
+    ruleTester.run(ruleId, rule, {
+      valid: [],
+      invalid: [
+        {
+          name: 'Does not allow asserting an error that was not thrown',
+          code: `import { strict as assert } from 'node:assert';
                assert.throws(throwingSecond, 'Second');`,
-            errors: [
-              {
-                message:
-                  'Second argument in throws method should be of type AssertPredicate.',
-              },
-            ],
-            filename: 'src/require-assert-predicate-rejects-throws.ts',
-          },
-          {
-            code: `import { strict as anyAssert } from 'node:assert';
+          errors: [
+            {
+              message:
+                'Second argument in throws method should be of type AssertPredicate.',
+            },
+          ],
+          filename: 'src/require-assert-predicate-rejects-throws.ts',
+        },
+        {
+          name: 'Does not allow a function that does not throw an error',
+          code: `import { strict as anyAssert } from 'node:assert';
                anyAssert.rejects(() => new Date(), 'Test Error');`,
-            errors: [
-              {
-                message:
-                  'Second argument in rejects method should be of type AssertPredicate.',
-              },
-            ],
-            filename: 'src/require-assert-predicate-rejects-throws.ts',
-          },
-          {
-            code: `import { strict as assert } from 'node:assert';
+          errors: [
+            {
+              message:
+                'Second argument in rejects method should be of type AssertPredicate.',
+            },
+          ],
+          filename: 'src/require-assert-predicate-rejects-throws.ts',
+        },
+        {
+          name: 'Reject does not accept a non reject error',
+          code: `import { strict as assert } from 'node:assert';
                assert.rejects(async () => {
                 throw new TypeError('Wrong value');
               });`,
-            errors: [
-              {
-                message:
-                  'Second argument in rejects method should be of type AssertPredicate.',
-              },
-            ],
-            filename: 'src/require-assert-predicate-rejects-throws.ts',
-          },
-        ],
-      });
+          errors: [
+            {
+              message:
+                'Second argument in rejects method should be of type AssertPredicate.',
+            },
+          ],
+          filename: 'src/require-assert-predicate-rejects-throws.ts',
+        },
+      ],
     });
   });
 });

@@ -18,13 +18,16 @@ describe(ruleId, () => {
     ruleTester.run(ruleId, rule, {
       valid: [
         {
+          name: 'Importing strict as assert from node:assert',
           code: `import { strict as assert } from 'node:assert';`,
         },
         {
+          name: 'Importing strict as assert from node:assert with additional import',
           code: `import { strict as assert } from 'node:assert';
                import otherModule from 'other-module';`,
         },
         {
+          name: 'Importing a different module that has a strict equal method is still valid',
           code: `import foo from 'something-that-is-not-assert';
                const val1 = 'val2';
                foo.strictEqual(val1, 'val2');`,
@@ -39,6 +42,7 @@ describe(ruleId, () => {
       valid: [],
       invalid: [
         {
+          name: 'Errors when importing all exports as assert from node:assert',
           code: `import * as assert from 'node:assert';`,
           errors: [
             {
@@ -48,6 +52,7 @@ describe(ruleId, () => {
           output: `import { strict as assert } from 'node:assert';`,
         },
         {
+          name: 'Errors when importing assert from node:assert',
           code: `import assert from 'node:assert';`,
           errors: [
             {
@@ -57,6 +62,7 @@ describe(ruleId, () => {
           output: `import { strict as assert } from 'node:assert';`,
         },
         {
+          name: 'Errors when importing all exports as assert from node:assert with additional imports',
           code: `import * as assert from 'node:assert';
                import otherModule1 from 'other-module1';
                import otherModule2 from 'other-module2';`,
@@ -70,6 +76,7 @@ describe(ruleId, () => {
                import otherModule2 from 'other-module2';`,
         },
         {
+          name: 'Errors when importing assert from node:assert and using assertion methods',
           code: `import assert from 'node:assert';
                assert.strictEqual(value1, value2);`,
           errors: [
@@ -85,6 +92,7 @@ describe(ruleId, () => {
                assert.equal(value1, value2);`,
         },
         {
+          name: 'Errors when importing strict as assert from node:assert and using redundant strict assertion methods',
           code: `import { strict as assert } from 'node:assert';
                assert.strictEqual(value1, value2);`,
           errors: [
@@ -97,6 +105,7 @@ describe(ruleId, () => {
                assert.equal(value1, value2);`,
         },
         {
+          name: 'Errors when importing strict as assert from node:assert and using redundant deep strict assertion methods',
           code: `import { strict as assert } from 'node:assert';
                assert.deepStrictEqual(obj1, obj2);`,
           errors: [
@@ -109,6 +118,7 @@ describe(ruleId, () => {
                assert.deepEqual(obj1, obj2);`,
         },
         {
+          name: 'Errors when importing strict as assert from node:assert and using redundant not strict equal assertion method',
           code: `import { strict as assert } from 'node:assert';
                assert.notStrictEqual(value1, value2);`,
           errors: [
@@ -121,6 +131,7 @@ describe(ruleId, () => {
                assert.notEqual(value1, value2);`,
         },
         {
+          name: 'Errors when importing strict as assert from node:assert and using redundant not deep strict equal assertion methods',
           code: `import { strict as assert } from 'node:assert';
                assert.notDeepStrictEqual(obj1, obj2);`,
           errors: [
@@ -133,6 +144,7 @@ describe(ruleId, () => {
                assert.notDeepEqual(obj1, obj2);`,
         },
         {
+          name: 'Errors when importing strict as assert from node:assert and using redundant strict assertion method',
           code: `import { strict as assert } from 'node:assert';
                const val1 = 'val2';
                assert.strict(val1, 'val2');`,
@@ -147,6 +159,7 @@ describe(ruleId, () => {
                assert.equal(val1, 'val2');`,
         },
         {
+          name: 'Errors when importing assert from node:assert/strict',
           code: `import assert from 'node:assert/strict';`,
           errors: [
             {
@@ -156,6 +169,7 @@ describe(ruleId, () => {
           output: `import { strict as assert } from 'node:assert';`,
         },
         {
+          name: 'Errors when importing strict as anything other than assert from node:assert',
           code: `import { strict as foo } from 'node:assert';
                const val1 = 'val2';
                foo.strictEqual(val1, 'val2');`,

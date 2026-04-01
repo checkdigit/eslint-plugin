@@ -21,16 +21,28 @@ describe(ruleId, () => {
   it('validates good code', () => {
     ruleTester.run(ruleId, rule, {
       valid: [
-        `await init();`,
-        `await Promise.resolve();`,
-        `await (new Promise(() => {}))();`,
-        `try {
+        {
+          name: 'Valid await statement',
+          code: `await init();`,
+        },
+        {
+          name: 'Valid promise await',
+          code: `await Promise.resolve();`,
+        },
+        {
+          name: 'Valid await on a nested promise',
+          code: `await (new Promise(() => {}))();`,
+        },
+        {
+          name: 'Valid await on promises nested within try-catch-finally block',
+          code: `try {
         await init();
       } catch (error) {
         console.error(error);
       } finally {
         console.log('done');
       }`,
+        },
       ],
       invalid: [],
     });
@@ -41,6 +53,7 @@ describe(ruleId, () => {
       valid: [],
       invalid: [
         {
+          name: '.then callback on a Promise',
           code: `// test new Promise instance
         (new Promise(()=>{})()).then(()=>{});`,
           errors: [
@@ -50,6 +63,7 @@ describe(ruleId, () => {
           ],
         },
         {
+          name: '.then callback on an async function',
           code: `// test 'then' on async function call
         async function hi() {
           console.log('hi')
@@ -62,6 +76,7 @@ describe(ruleId, () => {
           ],
         },
         {
+          name: '.then callback on a non-awaited promise',
           code: `// test 'then' on reference of Promise
         const result = Promise.resolve();
         result.then(()=>{});`,
@@ -72,6 +87,7 @@ describe(ruleId, () => {
           ],
         },
         {
+          name: 'Un-awaited Promise',
           code: `// test static method of Promise
         Promise.all([]).then(()=>{});`,
           errors: [
@@ -81,6 +97,7 @@ describe(ruleId, () => {
           ],
         },
         {
+          name: '.then callback on a fetch function call that returns a Promise',
           code: `// test external async function call
         fetch("http://example.com").then(()=>{});`,
           errors: [
@@ -90,6 +107,7 @@ describe(ruleId, () => {
           ],
         },
         {
+          name: '.catch callback on an async function',
           code: `// test '.catch' on async function call
         async function hi() {
           console.log('hi')
@@ -102,6 +120,7 @@ describe(ruleId, () => {
           ],
         },
         {
+          name: '.finally callback on an async function',
           code: `// test '.finally' on async function call
         async function hi() {
           console.log('hi')
