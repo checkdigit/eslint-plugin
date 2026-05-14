@@ -59,4 +59,12 @@ describe('json.spec.ts', () => {
       path: "$..from[?(@ && @.type === 'unnest')].as.args.value[0].column",
     }); /*?*/
   });
+
+  it.skip('api matcher', () => {
+    const json = JSON.parse(fs.readFileSync('ast.json', 'utf-8'));
+    JSONPath({
+      json,
+      path: "$..from[?(@ && @.type === 'unnest')].as.args.value[0].column",
+    }); /*?*/
+  });
 });

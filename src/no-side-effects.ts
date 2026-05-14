@@ -42,7 +42,7 @@ function isVariableDeclarationAwaitExpression(node: TSESTree.Node): boolean {
   return (
     node.type === TSESTree.AST_NODE_TYPES.VariableDeclaration &&
     node.declarations.length > 0 &&
-    node.declarations[0]?.init?.type === TSESTree.AST_NODE_TYPES.AwaitExpression
+    node.declarations[0].init?.type === TSESTree.AST_NODE_TYPES.AwaitExpression
   );
 }
 
@@ -75,7 +75,7 @@ function isVariableDeclarationCallExpression(node: TSESTree.Node, excludedIdenti
     return false;
   }
 
-  const init = node.declarations[0]?.init;
+  const init = node.declarations[0].init;
   if (init?.type !== TSESTree.AST_NODE_TYPES.CallExpression) {
     return false;
   }
@@ -128,7 +128,7 @@ const rule: ReturnType<typeof createRule> = createRule({
   },
   defaultOptions: [{ excludedIdentifiers: [''] }],
   create(context) {
-    const options: RuleOptions = context.options[0] as RuleOptions;
+    const options: RuleOptions = context.options[0];
     const excludedIdentifiers = options.excludedIdentifiers.length > 0 ? options.excludedIdentifiers : [];
     return {
       Program(node: TSESTree.Program) {

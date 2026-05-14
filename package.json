@@ -87,7 +87,7 @@
     "@types/json-pointer": "^1.0.34",
     "@typescript-eslint/parser": "^8.24.0",
     "@typescript-eslint/rule-tester": "^8.24.0",
-    "eslint": "9.19.0",
+    "eslint": "^9.20.0",
     "eslint-config-prettier": "^10.0.1",
     "eslint-import-resolver-typescript": "^3.7.0",
     "eslint-plugin-eslint-plugin": "^6.4.0",

@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e ' *)",
+      "Bash(npm view *)",
+      "Bash(node -e \"const v=require\\('/dev/stdin'\\);const nine=v.filter\\(x=>x.startsWith\\('9.'\\)\\); console.log\\('Latest 9.x:', nine[nine.length-1]\\); console.log\\('Last 10:', nine.slice\\(-10\\).join\\(', '\\)\\)\")",
+      "Bash(npm install *)",
+      "Bash(grep -v \"^$\")",
+      "Bash(echo \"Exit: $?\")",
+      "Bash(NODE_OPTIONS=\"--disable-warning ExperimentalWarning --experimental-vm-modules\" npx jest src/athena/athena.spec.ts src/athena/zzz.spec.ts --no-coverage)",
+      "Bash(NODE_OPTIONS=\"--disable-warning ExperimentalWarning --experimental-vm-modules\" npx jest src/athena/athena.spec.ts --no-coverage)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(list\\(d['apis'].keys\\(\\)\\)\\)\")",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); ops=d['apis'].get\\('/payment-card/v1/card/:cardId', {}\\); print\\(list\\(ops.keys\\(\\)\\)\\)\")",
+      "Bash(NODE_OPTIONS=\"--disable-warning ExperimentalWarning --experimental-vm-modules\" npx jest src/athena/athena.spec.ts)",
+      "Bash(npm test *)",
+      "Bash(echo \"exit: $?\")",
+      "Bash(echo \"EXIT_CODE: $?\")",
+      "Bash(npx prettier *)"
+    ]
+  }
+}

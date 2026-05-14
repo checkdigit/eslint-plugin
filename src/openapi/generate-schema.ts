@@ -93,6 +93,7 @@ function getRequestParametersSchema(
   const parametersSchema = Object.fromEntries(
     parameters.map((parameter) => [
       parameterType === 'header' ? parameter.name.toLowerCase() : parameter.name,
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       parameter.schema ?? ({ type: 'string' } as v31.SchemaObject),
     ]),
   );
@@ -200,6 +201,7 @@ function getResponseHeadersSchema(
   const resolvedHeaderSchemas = Object.fromEntries(
     Object.entries(resolvedHeaders).map(([name, header]) => [
       name,
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       header.schema ?? ({ type: 'string' } as v31.SchemaObject),
     ]),
   );

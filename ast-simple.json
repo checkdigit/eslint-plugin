@@ -1,0 +1,186 @@
+{
+  "with": null,
+  "type": "select",
+  "options": null,
+  "distinct": null,
+  "columns": [
+    {
+      "type": "expr",
+      "expr": {
+        "type": "function",
+        "name": {
+          "name": [
+            {
+              "type": "default",
+              "value": "json_extract_scalar"
+            }
+          ]
+        },
+        "args": {
+          "type": "expr_list",
+          "value": [
+            {
+              "type": "column_ref",
+              "table": "l",
+              "column": "responseheaders",
+              "collate": null
+            },
+            {
+              "type": "single_quote_string",
+              "value": "$[\"created-on\"]"
+            }
+          ]
+        },
+        "over": null,
+        "loc": {
+          "start": {
+            "offset": 15,
+            "line": 2,
+            "column": 9
+          },
+          "end": {
+            "offset": 73,
+            "line": 2,
+            "column": 67
+          }
+        }
+      },
+      "as": "linkCreatedOn"
+    }
+  ],
+  "from": [
+    {
+      "db": null,
+      "table": "link",
+      "as": "l"
+    }
+  ],
+  "where": {
+    "type": "binary_expr",
+    "operator": "AND",
+    "left": {
+      "type": "binary_expr",
+      "operator": "AND",
+      "left": {
+        "type": "binary_expr",
+        "operator": "=",
+        "left": {
+          "type": "function",
+          "name": {
+            "name": [
+              {
+                "type": "default",
+                "value": "cardinality"
+              }
+            ]
+          },
+          "args": {
+            "type": "expr_list",
+            "value": [
+              {
+                "type": "function",
+                "name": {
+                  "name": [
+                    {
+                      "type": "default",
+                      "value": "split"
+                    }
+                  ]
+                },
+                "args": {
+                  "type": "expr_list",
+                  "value": [
+                    {
+                      "type": "column_ref",
+                      "table": "l",
+                      "column": "url",
+                      "collate": null
+                    },
+                    {
+                      "type": "single_quote_string",
+                      "value": "/"
+                    }
+                  ]
+                },
+                "over": null,
+                "loc": {
+                  "start": {
+                    "offset": 151,
+                    "line": 6,
+                    "column": 21
+                  },
+                  "end": {
+                    "offset": 168,
+                    "line": 6,
+                    "column": 38
+                  }
+                }
+              }
+            ]
+          },
+          "over": null,
+          "loc": {
+            "start": {
+              "offset": 139,
+              "line": 6,
+              "column": 9
+            },
+            "end": {
+              "offset": 170,
+              "line": 6,
+              "column": 40
+            }
+          }
+        },
+        "right": {
+          "type": "number",
+          "value": 7
+        }
+      },
+      "right": {
+        "type": "binary_expr",
+        "operator": "=",
+        "left": {
+          "type": "column_ref",
+          "table": "l",
+          "column": "method",
+          "collate": null
+        },
+        "right": {
+          "type": "single_quote_string",
+          "value": "PUT"
+        }
+      }
+    },
+    "right": {
+      "type": "binary_expr",
+      "operator": "=",
+      "left": {
+        "type": "column_ref",
+        "table": "l",
+        "column": "responsestatus",
+        "collate": null
+      },
+      "right": {
+        "type": "single_quote_string",
+        "value": "204"
+      }
+    }
+  },
+  "groupby": null,
+  "having": null,
+  "orderby": null,
+  "limit": null,
+  "loc": {
+    "start": {
+      "offset": 0,
+      "line": 1,
+      "column": 1
+    },
+    "end": {
+      "offset": 239,
+      "line": 8,
+      "column": 37
+    }
+  }
+}

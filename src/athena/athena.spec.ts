@@ -114,6 +114,26 @@ createTester().run(ruleId, rule, {
         \``,
     },
     {
+      name: 'AND/OR conditions in WHERE',
+      code: `\` select *
+  FROM
+    "payment-card"
+  WHERE
+    method = 'PUT'
+AND (
+     (
+       split(url, '/') [ 4 ] = 'card'
+       AND cardinality(split(url, '/')) = 5
+     )
+     OR (
+       split(url, '/') [ 4 ] = 'card'
+       AND split(url, '/') [ 6 ] = 'number'
+       AND cardinality(split(url, '/')) = 6
+     )
+   )
+\``,
+    },
+    {
       name: 'complex query - only SELECT - 1 table - with alias',
       code: `\`SELECT
         json_extract_scalar(l.responseheaders, '$["created-on"]') AS linkCreatedOn
@@ -1241,7 +1261,7 @@ ORDER BY
         {
           messageId: 'AthenaError',
           data: {
-            errorMessage: `can't found column XpersonId in tables: parameters,merged_card_data,link_data`,
+            errorMessage: `can't found column XpersonId in tables: parameters, card_creation, card_update, matching_cards, combined_card_history, merged_card_data, link_data`,
           },
         },
       ],

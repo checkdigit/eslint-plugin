@@ -6,60 +6,42 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-// import fs from 'node:fs';
 import { strict as assert } from 'node:assert';
 
 import debug from 'debug';
 import { JSONPath } from 'jsonpath-plus';
 import { ESLintUtils, TSESTree } from '@typescript-eslint/utils';
-import type { OpenAPIV3_1 as v3 } from 'openapi-types';
 import type { SchemaObject } from 'ajv/dist/2020';
 
 import { parse } from '../peggy/athena-peggy';
-import type { ApiSchemas } from '../openapi/generate-schema';
-import type { AST, BaseFrom, Column, ColumnRefItem, Select, With } from './types';
-import { matchApi, type MatchedOperation } from './api-matcher';
+import type { AST, From, Select, With } from './types';
+import { matchApi } from './api-matcher';
 import { locateApi } from './api-locator';
-
-const SCHEMA_STRING: SchemaObject = {
-  type: 'string',
-};
-
-const SCHEMA_OBJECT: SchemaObject = {
-  type: 'object',
-};
+import {
+  createChildContext,
+  createRootContext,
+  type ResolvedColumn,
+  type ResolvedTable,
+  type VisitContext,
+} from './context';
+import { buildServiceTables } from './service-table';
+import {
+  extractBracketAccessorPath,
+  extractColumnRefs,
+  extractJsonExtractPath,
+  hasFunctionCalls,
+  isBaseFrom,
+  isJoin,
+  isUnnestFrom,
+} from './visitor';
 
 export const ruleId = 'athena';
-const SYNTEXT_ERROR = 'SyntextError';
-const ATHENA_ERROR = 'AthenaError';
+
 const log = debug('eslint-plugin:athena');
 const createRule = ESLintUtils.RuleCreator((name) => name);
 
-interface ResolvedColumn {
-  ast?: object | undefined;
-  name: string;
-  schema: v3.SchemaObject;
-}
-
-interface Table {
-  ast: unknown;
-  name?: string;
-  apiOperation?: MatchedOperation[];
-  columns: Record<string, ResolvedColumn[]>;
-}
-
-export interface AthenaContext {
-  apiSchemas: Record<string, ApiSchemas[]>;
-  tables: Record<string, Table[]>;
-}
-
-function getColumn(name: string, schema: v3.SchemaObject, ast?: object): ResolvedColumn {
-  return {
-    ast,
-    name,
-    schema,
-  };
-}
+const SYNTEXT_ERROR = 'SyntextError';
+const ATHENA_ERROR = 'AthenaError';
 
 class AthenaError extends Error {
   public code: string;
@@ -70,302 +52,332 @@ class AthenaError extends Error {
   }
 }
 
-export function getErrorLocation(ast: object): string {
-  return JSON.stringify(JSONPath({ json: ast, path: '$..loc' }), undefined, 2);
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+function resolvedCol(name: string, schema: SchemaObject, ast?: object): ResolvedColumn {
+  return ast !== undefined ? { name, schema, ast } : { name, schema };
 }
 
-// eslint-disable-next-line sonarjs/cognitive-complexity, max-lines-per-function
-function checkSelect(selectAST: With | Select, context: AthenaContext, withTableName?: string) {
-  log('checking SELECT', selectAST);
+/** Look up (and cache) API schemas for a service table name. */
+function getApiSchemas(serviceName: string, ctx: VisitContext) {
+  let schemas = ctx.apiSchemas.get(serviceName);
+  if (schemas === undefined) {
+    schemas = locateApi(serviceName);
+    ctx.apiSchemas.set(serviceName, schemas);
+  }
+  return schemas;
+}
 
-  // get all tables in the select statement
-  const tableASTs = JSONPath<BaseFrom[]>({ json: selectAST, path: '$.from..[?(@ && @.table && !@.column)]' });
-  log('table ASTs', tableASTs);
-  const allTableNames = tableASTs.map((tableAST) => tableAST.table); /*?*/
+/** Resolve a (possibly aliased) table name to the tables registered in ctx. */
+function lookupTables(nameOrAlias: string, ctx: VisitContext): ResolvedTable[] {
+  const canonical = ctx.aliases.get(nameOrAlias) ?? nameOrAlias;
+  return ctx.tables.get(canonical) ?? [];
+}
 
-  const tableAliases: Record<string, string> = {};
+/** Normalise the FROM clause into a flat array. */
+function fromClauseItems(select: Select): From[] {
+  if (Array.isArray(select.from)) {
+    return select.from;
+  }
+  if (select.from !== null) {
+    return [select.from];
+  }
+  return [];
+}
 
-  const allResolvedTables: Record<string, Table[]> = {};
-  for (const tableAST of tableASTs) {
-    const tableName = tableAST.table; /*?*/
-    const tableAlias = tableAST.as; /*?*/
-    if (tableAlias !== null) {
-      tableAliases[tableAlias] = tableName;
+// ---------------------------------------------------------------------------
+// Pass 1 — Resolve FROM clause: service tables → ctx.tables + ctx.aliases
+// ---------------------------------------------------------------------------
+
+function resolveFromClause(select: Select, ctx: VisitContext): void {
+  for (const item of fromClauseItems(select)) {
+    if (isUnnestFrom(item)) {
+      continue; // UNNEST handled separately
     }
-    if (context.tables[tableName] !== undefined) {
-      log('table already processed', tableName);
-      allResolvedTables[tableName] = context.tables[tableName];
+
+    if (isJoin(item)) {
+      const { table: tableName, as: alias } = item;
+      if (alias !== null) {
+        ctx.aliases.set(alias, tableName);
+      }
+      if (!ctx.tables.has(tableName)) {
+        const apiSchemas = getApiSchemas(tableName, ctx);
+        const operations = matchApi(select, item, apiSchemas) ?? [];
+        ctx.tables.set(tableName, buildServiceTables(tableName, operations));
+      }
       continue;
     }
 
-    // if the table is not processed yet, it has to be an service table
-    const serviceName = tableName;
-    let apiSchemas = context.apiSchemas[serviceName];
-    if (apiSchemas === undefined) {
-      log('getting api schema for table', serviceName);
-      // assuming that the api schema is the same for all tables with the same name
-      apiSchemas = locateApi(serviceName);
-      context.apiSchemas[serviceName] = apiSchemas;
+    if (!isBaseFrom(item)) {
+      continue; // skip subqueries and DUAL
     }
 
-    // [TODO:] do we alert if the multiple api endpoints are matched? it could be a valid use case, but also might be sth the sql should narrow down
-    const tableSchemas = matchApi(selectAST, tableAST, apiSchemas);
-    log('table schemas', tableSchemas);
+    const { table: tableName, as: alias } = item;
 
-    allResolvedTables[tableName] =
-      tableSchemas?.map((tableSchema) => ({
-        ast: tableAST,
-        name: tableName,
-        apiOperation: tableSchemas,
-        columns: {
-          method: [getColumn('method', SCHEMA_STRING)],
-          started: [getColumn('started', SCHEMA_STRING)],
-          ended: [getColumn('ended', SCHEMA_STRING)],
-          url: [getColumn('url', SCHEMA_STRING)],
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
-          requestbody: [getColumn('requestbody', tableSchema.request['properties']?.body ?? SCHEMA_OBJECT)],
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
-          requestheaders: [getColumn('requestheaders', tableSchema.request['properties']?.headers ?? SCHEMA_OBJECT)],
-          responsestatus: [getColumn('responsestatus', SCHEMA_STRING)],
-          responsemessage: [getColumn('responsemessage', SCHEMA_STRING)],
-          responsetype: [getColumn('responsetype', SCHEMA_STRING)],
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
-          responsebody: [getColumn('responsebody', tableSchema.response['properties']?.body ?? SCHEMA_OBJECT)],
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
-          responseheaders: [getColumn('responseheaders', tableSchema.response['properties']?.headers ?? SCHEMA_OBJECT)],
-        },
-      })) ?? [];
+    if (alias !== null) {
+      ctx.aliases.set(alias, tableName);
+    }
+
+    if (ctx.tables.has(tableName)) {
+      continue; // already resolved (CTE or duplicate)
+    }
+
+    // Service table: locate + match API schemas from disk.
+    // matchApi throws when no operation matches, so operations is always defined here.
+    const apiSchemas = getApiSchemas(tableName, ctx);
+    const operations = matchApi(select, item, apiSchemas) ?? [];
+    ctx.tables.set(tableName, buildServiceTables(tableName, operations));
   }
+}
 
-  const tableColumns: Record<string, ResolvedColumn[]> = {};
+// ---------------------------------------------------------------------------
+// UNNEST handling (may run before or after column selection, depending on
+// whether the source column is a service-table column or a computed column).
+// ---------------------------------------------------------------------------
 
-  // extract UNNEST columns
-  const unnestColumns = JSONPath<ColumnRefItem[]>({
-    json: selectAST,
-    path: "$..from[?(@ && @.type === 'unnest')]",
-  });
-  log('unnest columns', unnestColumns);
-  const unnestedColumnsToProcess = new Map<string, string>();
-  for (const unnestColumn of unnestColumns) {
-    const [fromColumn] = JSONPath<string[]>({
-      json: unnestColumn,
-      path: '$.expr.column',
-    }); /*?*/
-    assert.ok(fromColumn !== undefined);
-    const [toColumn] = JSONPath<string[]>({
-      json: unnestColumn,
-      path: '$.as.args.value[0].column',
-    }); /*?*/
-    assert.ok(toColumn !== undefined);
-    unnestedColumnsToProcess.set(fromColumn, toColumn);
-  }
-  log('unnested columns to process', unnestedColumnsToProcess);
+interface UnnestMapping {
+  fromColumn: string;
+  toColumn: string;
+}
 
-  // handle UNNEST columns prior to selected columns processing
-  const unnestedColumnsToProcessPostColumnSelection = new Map<string, string>();
-  for (const [fromColumn, toColumn] of unnestedColumnsToProcess.entries()) {
-    const unnestedInTable = Object.values(allResolvedTables)
-      .flat()
-      .find((table) => table.columns[fromColumn] !== undefined); /*?*/
-    if (unnestedInTable === undefined) {
-      unnestedColumnsToProcessPostColumnSelection.set(fromColumn, toColumn);
+function extractUnnestMappings(select: Select): UnnestMapping[] {
+  const mappings: UnnestMapping[] = [];
+
+  for (const item of fromClauseItems(select)) {
+    if (!isUnnestFrom(item)) {
       continue;
     }
-    const unnestedColumn = unnestedInTable.columns[fromColumn]?.[0]; /*?*/
-    const unnestedColumnSchema = unnestedColumn?.schema; /*?*/
-    assert.ok(unnestedColumnSchema?.type === 'array');
-    const transientUnnestedTableName = `${unnestedInTable.name ?? '<anonymous>'}:<unnested>`;
-    allResolvedTables[transientUnnestedTableName] = [
+
+    const fromColumn = typeof item.expr.column === 'string' ? item.expr.column : undefined;
+    assert.ok(fromColumn !== undefined, 'UNNEST expr must be a column_ref with a string column name');
+
+    // The alias is stored as a func_call node: UNNEST(col) AS t(alias)
+    const toColumn = item.as?.args.value[0];
+    const toColName =
+      toColumn !== undefined && typeof (toColumn as { column?: unknown }).column === 'string'
+        ? (toColumn as { column: string }).column
+        : undefined;
+    assert.ok(toColName !== undefined, 'UNNEST alias must be a column_ref with a string column name');
+
+    mappings.push({ fromColumn, toColumn: toColName });
+  }
+
+  return mappings;
+}
+
+function applyUnnestPre(mappings: UnnestMapping[], ctx: VisitContext): UnnestMapping[] {
+  const deferred: UnnestMapping[] = [];
+
+  for (const { fromColumn, toColumn } of mappings) {
+    // Find the table that owns the source column
+    const ownerTable = [...ctx.tables.values()].flat().find((table) => table.columns.has(fromColumn));
+
+    if (ownerTable === undefined) {
+      deferred.push({ fromColumn, toColumn });
+      continue;
+    }
+
+    const sourceColumns = ownerTable.columns.get(fromColumn) ?? [];
+    const sourceSchema = sourceColumns[0]?.schema;
+    assert.ok(sourceSchema?.type === 'array', `UNNEST source column '${fromColumn}' must be an array schema`);
+
+    const unnestTableName = `${ownerTable.name ?? '<anonymous>'}:<unnested>`;
+    ctx.tables.set(unnestTableName, [
       {
-        ast: unnestedInTable.ast,
-        name: transientUnnestedTableName,
-        apiOperation: unnestedInTable.apiOperation ?? [],
-        columns: {
-          [toColumn]: [getColumn(toColumn, unnestedColumnSchema.items as SchemaObject, unnestedColumn?.ast)],
-        },
+        name: unnestTableName,
+        ...(ownerTable.apiOperation !== undefined ? { apiOperation: ownerTable.apiOperation } : {}),
+        columns: new Map([[toColumn, [resolvedCol(toColumn, sourceSchema.items, sourceColumns[0]?.ast)]]]),
       },
-    ];
+    ]);
   }
 
-  // handle selected columns
-  for (const [index, columnAST] of selectAST.columns?.entries() ?? []) {
-    log('checking column', columnAST);
-    const columnAlias = (columnAST as Column).as as null | string; /*?*/
-    const indexedColumnName = `_col${String(index)}`;
+  return deferred;
+}
 
-    const columnReferences = JSONPath<ColumnRefItem[]>({
-      json: columnAST as object /*?*/,
-      path: "$..[?(@ && @.type === 'column_ref' && @.column)]",
-    }); /*?*/
+function applyUnnestPost(mappings: UnnestMapping[], columns: Map<string, ResolvedColumn[]>): void {
+  for (const { fromColumn, toColumn } of mappings) {
+    const sourceColumns = columns.get(fromColumn);
+    assert.ok(sourceColumns !== undefined, `column ${fromColumn} not found in selected columns`);
+    const sourceSchema = sourceColumns[0]?.schema;
+    assert.ok(sourceSchema?.type === 'array', `UNNEST source column '${fromColumn}' must be an array schema`);
+    columns.set(toColumn, [resolvedCol(toColumn, sourceSchema.items, sourceColumns[0]?.ast)]);
+  }
+}
 
-    if (columnReferences.length !== 1) {
-      const columnNameToUse = columnAlias ?? indexedColumnName; /*?*/
-      if (columnReferences.length === 0) {
-        log('no column references found, keep it as default type');
-      } else if (columnReferences.length > 1) {
-        log('multiple table/column references used in column, defaulting it as default type');
-      }
-      tableColumns[columnNameToUse] = [getColumn(columnNameToUse, SCHEMA_STRING, columnAST as object)];
+// ---------------------------------------------------------------------------
+// Pass 2 — Resolve SELECT columns helpers
+// ---------------------------------------------------------------------------
+
+function resolveDefaultSchemaColumn(
+  columnAlias: string | null,
+  indexedName: string,
+  columnAST: unknown,
+  columns: Map<string, ResolvedColumn[]>,
+): void {
+  const name = columnAlias ?? indexedName;
+  columns.set(name, [resolvedCol(name, { type: 'string' }, columnAST as object)]);
+}
+
+function expandWildcard(referencedTables: ResolvedTable[], columns: Map<string, ResolvedColumn[]>): void {
+  for (const table of referencedTables) {
+    for (const [colName, cols] of table.columns) {
+      columns.set(colName, cols);
+    }
+  }
+}
+
+function navigateSchemaPath(
+  colRef: string,
+  propertyAccessor: string,
+  resolvedColumns: ResolvedColumn[],
+  colName: string,
+  columnAST: unknown,
+  columns: Map<string, ResolvedColumn[]>,
+): void {
+  // Double-dot handles allOf / anyOf / oneOf wrappers that may appear in the schema.
+  // eslint-disable-next-line prefer-named-capture-group
+  const adjustedPath = `$.${propertyAccessor.substring(1).replace(/(\.|\[)/gu, '..properties$1')}`;
+  log('adjusted path', adjustedPath);
+
+  const extractedSchemas = resolvedColumns.flatMap((col) =>
+    JSONPath<SchemaObject[]>({ json: col.schema, path: adjustedPath }),
+  );
+
+  if (extractedSchemas.length === 0) {
+    throw new AthenaError(ATHENA_ERROR, `property not found ${colRef} - ${propertyAccessor}`);
+  }
+
+  columns.set(
+    colName,
+    extractedSchemas.map((schema) => resolvedCol(colName, schema, columnAST as object)),
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Pass 2 — Resolve SELECT columns → Map<name, ResolvedColumn[]>
+// ---------------------------------------------------------------------------
+
+function resolveSelectColumns(select: Select, ctx: VisitContext): Map<string, ResolvedColumn[]> {
+  const allTables = [...ctx.tables.values()].flat();
+  const columns = new Map<string, ResolvedColumn[]>();
+
+  for (const [index, columnAST] of select.columns.entries()) {
+    log('resolving column', columnAST);
+
+    const columnAlias = (columnAST as { as?: string | null }).as ?? null;
+    const indexedName = `_col${String(index)}`;
+    const columnRefs = extractColumnRefs(columnAST);
+
+    if (columnRefs.length !== 1) {
+      resolveDefaultSchemaColumn(columnAlias, indexedName, columnAST, columns);
       continue;
     }
 
-    const columnReference = columnReferences[0]; /*?*/
-    assert.ok(columnReference !== undefined);
+    const [ref] = columnRefs;
+    assert.ok(ref !== undefined);
 
-    const tableReferenceName = columnReference.table ?? undefined;
-    const columnReferenceName = columnReference.column as string; /*?*/
+    const tableRef = ref.table ?? undefined;
+    const colRef = typeof ref.column === 'string' ? ref.column : undefined;
+    assert.ok(colRef !== undefined, 'column_ref must have a string column name');
 
-    const referencedTables =
-      tableReferenceName !== undefined
-        ? (allResolvedTables[tableAliases[tableReferenceName] ?? tableReferenceName] ?? [])
-        : Object.values(allResolvedTables).flat(); //.filter((table): table is Table => table !== undefined); /*?*/ // why do we need this filter? shouldn't it be filtered earlier?
-    // [TODO:] handle repeated tables
-    log('referenced tables', referencedTables);
-    assert.ok(referencedTables.length > 0);
+    const referencedTables = tableRef !== undefined ? lookupTables(tableRef, ctx) : allTables;
+    assert.ok(referencedTables.length > 0, `no tables found for column reference '${colRef}'`);
 
-    if (columnReferenceName === '*') {
-      log('column reference is *, so adding all columns from table');
-      for (const table of referencedTables) {
-        // [TODO:] if multiple endpoints match with the same service table, we need to report conflict
-        for (const [columnName, columns] of Object.entries(table.columns)) {
-          tableColumns[columnName] = columns;
-        }
-      }
+    if (colRef === '*') {
+      expandWildcard(referencedTables, columns);
       continue;
     }
 
-    const functionsUsedInColumn = JSONPath<object[]>({
-      json: columnAST as object,
-      path: "$..[?(@ && @.type === 'function')]",
-    }); /*?*/
-    const columnNameToUse =
-      columnAlias ?? (functionsUsedInColumn.length === 0 ? columnReferenceName : indexedColumnName); /*?*/
-    log('column name to use', columnNameToUse);
+    const withFunctions = hasFunctionCalls(columnAST);
+    const colName = columnAlias ?? (withFunctions ? indexedName : colRef);
 
-    const resolvedColumns = referencedTables
-      .flatMap((table) => {
-        log('resolving column', columnReferenceName, table);
-        return table.columns[columnReferenceName]; /*?*/
-      })
-      .filter((column): column is ResolvedColumn => column !== undefined); /*?*/
+    const resolvedColumns = referencedTables.flatMap((table) => table.columns.get(colRef) ?? []);
+
     if (resolvedColumns.length === 0) {
-      throw new AthenaError(
-        ATHENA_ERROR,
-        `can't found column ${columnReferenceName} in tables: ${allTableNames.toString()}`,
-      );
-    } else if (resolvedColumns.length > 1) {
-      // [TODO:] maybe we should allow this, for now we just delay it until property access happens
-      // throw new AthenaError(ATHENA_ERROR, `column exists in multiple referenced tables ${allTableNames.toString()}`);
+      const tableNames = [...ctx.tables.keys()].join(', ');
+      throw new AthenaError(ATHENA_ERROR, `can't found column ${colRef} in tables: ${tableNames}`);
     }
 
-    let [propertyAccessor] = JSONPath<string[]>({
-      json: columnAST as object,
-      path: "$..[?(@ && @.type === 'function' && @.name && @.name.name && @.name.name[0] && (@.name.name[0].value === 'json_extract_scalar' || @.name.name[0].value === 'json_extract') )].args.value[1].value",
-    }); /*?*/
-    if (propertyAccessor === undefined) {
-      // [TODO:] what if both function and json style property accessor are used?
-      const [jsonStylePropertyAccessor] = JSONPath<string[]>({
-        json: columnAST as object,
-        path: "$..[?(@ && @.type === 'column_ref' && @.array_index)].array_index[0].index.value",
-      }); /*?*/
-      if (jsonStylePropertyAccessor === undefined) {
-        log('no property accessor found, keep it as default type');
-        tableColumns[columnNameToUse] = resolvedColumns.map((column) =>
-          getColumn(columnNameToUse, column.schema, columnAST as object),
-        );
-        continue;
-      }
-      propertyAccessor = `$["${jsonStylePropertyAccessor}"]`;
+    const propertyAccessor = extractJsonExtractPath(columnAST) ?? extractBracketAccessorPath(columnAST);
+
+    if (propertyAccessor !== undefined) {
+      navigateSchemaPath(colRef, propertyAccessor, resolvedColumns, colName, columnAST, columns);
+      continue;
     }
 
-    log('property accessor', propertyAccessor);
-    // [TODO:] note that double-dot is used to access properties in case additional layer of schema definition syntax is used in between, e.g. allOf, etc.
-    // eslint-disable-next-line prefer-named-capture-group
-    const adjustedPropertyAccessor = `$.${propertyAccessor.substring(1).replace(/(\.|\[)/gu, '..properties$1')}`;
-    log('adjusted property accessor', adjustedPropertyAccessor);
-
-    log('resolved columns', resolvedColumns);
-    const extractedSchemas = resolvedColumns
-      .flatMap((column) =>
-        JSONPath<SchemaObject[]>({
-          json: column.schema,
-          path: adjustedPropertyAccessor,
-        }),
-      )
-      .filter(Boolean); /*?*/
-    if (extractedSchemas.length === 0) {
-      throw new AthenaError(ATHENA_ERROR, `property not found ${columnReferenceName} - ${propertyAccessor}`);
-    }
-    // [TODO:] handle potential conflicting schemas
-    // if (new Set(extractedSchemas.map((schema) => JSON.stringify(schema))).size > 1) {
-    //   throw new AthenaError(
-    //     ATHENA_ERROR,
-    //     `conflicting property schemas found ${columnReferenceName} - ${propertyAccessor} : ${extractedSchemas.map((schema) => JSON.stringify(schema)).join(', ')}`,
-    //   );
-    // }
-    tableColumns[columnNameToUse] = extractedSchemas.map((extracedSchema) =>
-      getColumn(columnNameToUse, extracedSchema, columnAST as object),
+    columns.set(
+      colName,
+      resolvedColumns.map((col) => resolvedCol(colName, col.schema, columnAST as object)),
     );
   }
 
-  // handle UNNEST columns post selected columns processing
-  for (const [fromColumn, toColumn] of unnestedColumnsToProcessPostColumnSelection.entries()) {
-    const unnestedColumn = tableColumns[fromColumn]; /*?*/
-    assert.ok(unnestedColumn !== undefined, `column ${fromColumn} not found in selected columns`);
-    const unnestedColumnSchema = unnestedColumn[0]?.schema; /*?*/
-    assert.ok(unnestedColumnSchema?.type === 'array');
-    tableColumns[toColumn] = [getColumn(toColumn, unnestedColumnSchema.items as SchemaObject, unnestedColumn[0]?.ast)];
+  return columns;
+}
+
+// ---------------------------------------------------------------------------
+// Top-level SELECT resolution
+// ---------------------------------------------------------------------------
+
+function checkSelect(selectAST: Select | With, ctx: VisitContext, withTableName?: string): void {
+  // Unwrap CTE wrapper (With → Select)
+  const select = 'stmt' in selectAST ? selectAST.stmt.ast : selectAST;
+
+  // Each SELECT gets a child context that inherits CTE tables from the parent.
+  const selectCtx = createChildContext(ctx);
+
+  // Pass 1: resolve FROM clause → populate selectCtx.tables + selectCtx.aliases
+  resolveFromClause(select, selectCtx);
+
+  // UNNEST pre-pass: mappings whose source is a service-table column
+  const unnestMappings = extractUnnestMappings(select);
+  const deferredUnnest = applyUnnestPre(unnestMappings, selectCtx);
+
+  // Pass 2: resolve SELECT columns
+  const columns = resolveSelectColumns(select, selectCtx);
+
+  // UNNEST post-pass: mappings whose source is a computed SELECT column
+  applyUnnestPost(deferredUnnest, columns);
+
+  log('resolved columns', [...columns.keys()]);
+
+  // UNION ALL — next SELECT in the chain
+  if (select._next !== undefined) {
+    checkSelect(select._next, ctx, withTableName);
   }
 
-  log('resolved columns', tableColumns);
-  log(
-    'resolved columns schemas',
-    Object.entries(tableColumns).map(([name, columns]) =>
-      columns.map((column) => `${name}: ${(column.schema as SchemaObject).$id ?? JSON.stringify(column.schema)}`),
-    ),
-  );
-
-  // eslint-disable-next-line no-underscore-dangle
-  const nextSelect = (selectAST as Select)._next;
-  if (nextSelect !== undefined) {
-    const resolvedNextSelect = checkSelect(nextSelect, context, withTableName);
-    log('next select', resolvedNextSelect);
-    // [TODO:] check to make sure that the next select has the same columns as the current select
-  }
-
-  const resolvedSelect = {
-    ast: selectAST,
-    ...(withTableName === undefined ? {} : { name: withTableName }),
-    columns: tableColumns,
-  };
-
+  // Register CTE result so subsequent SELECTs in the same WITH can reference it
   if (withTableName !== undefined) {
-    context.tables[withTableName] = [resolvedSelect];
+    const resolvedTable: ResolvedTable = { name: withTableName, columns };
+    ctx.tables.set(withTableName, [resolvedTable]);
   }
-
-  return resolvedSelect;
 }
 
-function checkAthenaAst(ast: AST, context: AthenaContext) {
-  assert.equal(ast.type, 'select');
-  log('ast', ast);
+function checkAthenaAst(ast: AST, ctx: VisitContext): void {
+  assert.ok(ast.type === 'select');
+  const select = ast;
 
-  if (ast.with !== null) {
-    for (const withItem of ast.with) {
-      checkSelect(withItem.stmt.ast, context, withItem.name.value);
+  if (select.with !== null) {
+    for (const withItem of select.with) {
+      checkSelect(withItem.stmt.ast, ctx, withItem.name.value);
     }
-    ast.with = null;
+    select.with = null;
   }
 
-  checkSelect(ast, context);
+  checkSelect(select, ctx);
 }
+
+// ---------------------------------------------------------------------------
+// ESLint rule
+// ---------------------------------------------------------------------------
 
 const rule: ESLintUtils.RuleModule<typeof SYNTEXT_ERROR | typeof ATHENA_ERROR> = createRule({
   name: ruleId,
   meta: {
     type: 'problem',
     docs: {
-      description: 'Disallow the use of `enum` in TypeScript',
+      description: 'Validate Athena SQL strings against OpenAPI schemas at lint time',
     },
     schema: [],
     messages: {
@@ -379,41 +391,34 @@ const rule: ESLintUtils.RuleModule<typeof SYNTEXT_ERROR | typeof ATHENA_ERROR> =
       if (!/^SELECT\s+/iu.test(sql) && !/^WITH\s+/iu.test(sql)) {
         return;
       }
+
       let ast: AST;
       try {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         ({ ast } = parse(sql, { includeLocations: true }));
-        // fs.writeFileSync('ast.json', JSON.stringify(ast, undefined, 2));
       } catch (error) {
         context.report({
           node: sqlNode,
           messageId: SYNTEXT_ERROR,
-          data: {
-            errorMessage: JSON.stringify(error, undefined, 2),
-          },
+          data: { errorMessage: JSON.stringify(error, undefined, 2) },
         });
         return;
       }
 
-      const athenaContext: AthenaContext = {
-        apiSchemas: {},
-        tables: {},
-      };
+      const athenaCtx = createRootContext();
       try {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        checkAthenaAst(Array.isArray(ast) ? ast[0] : ast, athenaContext);
+        checkAthenaAst(Array.isArray(ast) ? ast[0] : ast, athenaCtx);
       } catch (error) {
         if (error instanceof AthenaError) {
           context.report({
             node: sqlNode,
             messageId: ATHENA_ERROR,
-            data: {
-              errorMessage: error.message,
-            },
+            data: { errorMessage: error.message },
           });
         } else {
           // eslint-disable-next-line no-console
-          console.error(`Failed to apply ${ruleId} rule for file "${context.filename}":`, error);
+          console.error(`Failed to apply ${ruleId} rule for "${context.filename}":`, error);
           context.report({
             node: sqlNode,
             messageId: ATHENA_ERROR,
@@ -427,11 +432,10 @@ const rule: ESLintUtils.RuleModule<typeof SYNTEXT_ERROR | typeof ATHENA_ERROR> =
 
     return {
       TemplateLiteral(sqlNode) {
-        // 'cook' the original sql as a simplified string by taking out the subsituational expressions
         const sql = sqlNode.quasis
           .map((quasi) => quasi.value.cooked)
           .join('')
-          .trim(); /*?*/
+          .trim();
         checkSql(sql, sqlNode);
       },
       Literal(sqlNode) {

@@ -1,0 +1,396 @@
+{
+  "with": null,
+  "type": "select",
+  "options": null,
+  "distinct": null,
+  "columns": [
+    {
+      "expr": {
+        "type": "column_ref",
+        "table": null,
+        "column": "*"
+      },
+      "as": null
+    }
+  ],
+  "from": [
+    {
+      "db": null,
+      "table": "payment-card",
+      "as": null
+    }
+  ],
+  "where": {
+    "type": "binary_expr",
+    "operator": "AND",
+    "left": {
+      "type": "binary_expr",
+      "operator": "=",
+      "left": {
+        "type": "column_ref",
+        "table": null,
+        "column": "method",
+        "collate": null
+      },
+      "right": {
+        "type": "single_quote_string",
+        "value": "PUT"
+      }
+    },
+    "right": {
+      "type": "binary_expr",
+      "operator": "OR",
+      "left": {
+        "type": "binary_expr",
+        "operator": "AND",
+        "left": {
+          "type": "binary_expr",
+          "operator": "=",
+          "left": {
+            "type": "function",
+            "name": {
+              "name": [
+                {
+                  "type": "default",
+                  "value": "split"
+                }
+              ]
+            },
+            "args": {
+              "type": "expr_list",
+              "value": [
+                {
+                  "type": "column_ref",
+                  "table": null,
+                  "column": "url",
+                  "collate": null
+                },
+                {
+                  "type": "single_quote_string",
+                  "value": "/"
+                }
+              ]
+            },
+            "over": null,
+            "loc": {
+              "start": {
+                "offset": 82,
+                "line": 8,
+                "column": 8
+              },
+              "end": {
+                "offset": 98,
+                "line": 8,
+                "column": 24
+              }
+            },
+            "array_index": [
+              {
+                "brackets": true,
+                "index": {
+                  "type": "number",
+                  "value": 4
+                }
+              }
+            ]
+          },
+          "right": {
+            "type": "single_quote_string",
+            "value": "card"
+          }
+        },
+        "right": {
+          "type": "binary_expr",
+          "operator": "=",
+          "left": {
+            "type": "function",
+            "name": {
+              "name": [
+                {
+                  "type": "default",
+                  "value": "cardinality"
+                }
+              ]
+            },
+            "args": {
+              "type": "expr_list",
+              "value": [
+                {
+                  "type": "function",
+                  "name": {
+                    "name": [
+                      {
+                        "type": "default",
+                        "value": "split"
+                      }
+                    ]
+                  },
+                  "args": {
+                    "type": "expr_list",
+                    "value": [
+                      {
+                        "type": "column_ref",
+                        "table": null,
+                        "column": "url",
+                        "collate": null
+                      },
+                      {
+                        "type": "single_quote_string",
+                        "value": "/"
+                      }
+                    ]
+                  },
+                  "over": null,
+                  "loc": {
+                    "start": {
+                      "offset": 136,
+                      "line": 9,
+                      "column": 24
+                    },
+                    "end": {
+                      "offset": 151,
+                      "line": 9,
+                      "column": 39
+                    }
+                  }
+                }
+              ]
+            },
+            "over": null,
+            "loc": {
+              "start": {
+                "offset": 124,
+                "line": 9,
+                "column": 12
+              },
+              "end": {
+                "offset": 153,
+                "line": 9,
+                "column": 41
+              }
+            }
+          },
+          "right": {
+            "type": "number",
+            "value": 5
+          }
+        },
+        "parentheses": true
+      },
+      "right": {
+        "type": "binary_expr",
+        "operator": "AND",
+        "left": {
+          "type": "binary_expr",
+          "operator": "AND",
+          "left": {
+            "type": "binary_expr",
+            "operator": "=",
+            "left": {
+              "type": "function",
+              "name": {
+                "name": [
+                  {
+                    "type": "default",
+                    "value": "split"
+                  }
+                ]
+              },
+              "args": {
+                "type": "expr_list",
+                "value": [
+                  {
+                    "type": "column_ref",
+                    "table": null,
+                    "column": "url",
+                    "collate": null
+                  },
+                  {
+                    "type": "single_quote_string",
+                    "value": "/"
+                  }
+                ]
+              },
+              "over": null,
+              "loc": {
+                "start": {
+                  "offset": 181,
+                  "line": 12,
+                  "column": 8
+                },
+                "end": {
+                  "offset": 197,
+                  "line": 12,
+                  "column": 24
+                }
+              },
+              "array_index": [
+                {
+                  "brackets": true,
+                  "index": {
+                    "type": "number",
+                    "value": 4
+                  }
+                }
+              ]
+            },
+            "right": {
+              "type": "single_quote_string",
+              "value": "card"
+            }
+          },
+          "right": {
+            "type": "binary_expr",
+            "operator": "=",
+            "left": {
+              "type": "function",
+              "name": {
+                "name": [
+                  {
+                    "type": "default",
+                    "value": "split"
+                  }
+                ]
+              },
+              "args": {
+                "type": "expr_list",
+                "value": [
+                  {
+                    "type": "column_ref",
+                    "table": null,
+                    "column": "url",
+                    "collate": null
+                  },
+                  {
+                    "type": "single_quote_string",
+                    "value": "/"
+                  }
+                ]
+              },
+              "over": null,
+              "loc": {
+                "start": {
+                  "offset": 223,
+                  "line": 13,
+                  "column": 12
+                },
+                "end": {
+                  "offset": 239,
+                  "line": 13,
+                  "column": 28
+                }
+              },
+              "array_index": [
+                {
+                  "brackets": true,
+                  "index": {
+                    "type": "number",
+                    "value": 6
+                  }
+                }
+              ]
+            },
+            "right": {
+              "type": "single_quote_string",
+              "value": "number"
+            }
+          }
+        },
+        "right": {
+          "type": "binary_expr",
+          "operator": "=",
+          "left": {
+            "type": "function",
+            "name": {
+              "name": [
+                {
+                  "type": "default",
+                  "value": "cardinality"
+                }
+              ]
+            },
+            "args": {
+              "type": "expr_list",
+              "value": [
+                {
+                  "type": "function",
+                  "name": {
+                    "name": [
+                      {
+                        "type": "default",
+                        "value": "split"
+                      }
+                    ]
+                  },
+                  "args": {
+                    "type": "expr_list",
+                    "value": [
+                      {
+                        "type": "column_ref",
+                        "table": null,
+                        "column": "url",
+                        "collate": null
+                      },
+                      {
+                        "type": "single_quote_string",
+                        "value": "/"
+                      }
+                    ]
+                  },
+                  "over": null,
+                  "loc": {
+                    "start": {
+                      "offset": 279,
+                      "line": 14,
+                      "column": 24
+                    },
+                    "end": {
+                      "offset": 294,
+                      "line": 14,
+                      "column": 39
+                    }
+                  }
+                }
+              ]
+            },
+            "over": null,
+            "loc": {
+              "start": {
+                "offset": 267,
+                "line": 14,
+                "column": 12
+              },
+              "end": {
+                "offset": 296,
+                "line": 14,
+                "column": 41
+              }
+            }
+          },
+          "right": {
+            "type": "number",
+            "value": 6
+          }
+        },
+        "parentheses": true
+      },
+      "parentheses": true
+    }
+  },
+  "groupby": null,
+  "having": null,
+  "orderby": null,
+  "limit": null,
+  "loc": {
+    "start": {
+      "offset": 0,
+      "line": 1,
+      "column": 1
+    },
+    "end": {
+      "offset": 311,
+      "line": 16,
+      "column": 5
+    }
+  }
+}

@@ -72,6 +72,7 @@ export default [
       'max-statements': 'off',
       'consistent-return': 'off',
       'no-undef': 'off',
+      'no-underscore-dangle': ['error', { allow: ['_next'] }],
       'init-declarations': 'off',
       'no-inline-comments': 'off',
       'line-comment-position': 'off',
