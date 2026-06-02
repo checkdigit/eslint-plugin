@@ -313,32 +313,27 @@ function updateOpenapiSchemaDefinitionsReferences(
   return value;
 }
 
-async function generateEndpointSchemas(
+function buildApiSchemaFromDocument(
+  document: v31.Document,
   organization: string,
   serviceName: string,
-  root: string,
-  endpoint: string,
-): Promise<void> {
-  const swaggerFile = `${root}/${endpoint}/swagger.yml`;
-  const documentContents = await fs.readFile(swaggerFile, 'utf8');
-  // eslint-disable-next-line import/no-named-as-default-member
-  const document = (await jsYaml.load(documentContents)) as v31.Document;
-  if (!document.paths) {
-    return undefined;
+): ApiSchemas | null {
+  if (document.paths === undefined) {
+    return null;
   }
-
-  const apiSchemas: Record<string, Record<string, OperationSchemas>> = {};
-  const allSchemas: ApiSchemas = { apis: apiSchemas };
   const serverUri = document.servers?.[0]?.url;
-  assert.ok(serverUri !== undefined, 'Server URI must be defined');
+  if (serverUri === undefined) {
+    return null;
+  }
   const serverPathname = serverUri.startsWith('http') ? new URL(serverUri).pathname : serverUri;
   const endpointSchemasBaseUri = `https://${serviceName}.${organization}${serverPathname}/schemas`;
   const apiSchemasBaseUri = `${endpointSchemasBaseUri}/api`;
+  const apiSchemas: Record<string, Record<string, OperationSchemas>> = {};
+  const allSchemas: ApiSchemas = { apis: apiSchemas };
   const operationIds = new Set<string>();
 
   for (const [path, pathItems] of Object.entries(document.paths)) {
-    // convert openapi path to koa router path, e.g.
-    //   "/user/{userId}" --> like "/user/:userId"
+    // convert openapi path to koa router path, e.g. "/user/{userId}" --> "/user/:userId"
     // eslint-disable-next-line prefer-named-capture-group
     const koaPath = path.replaceAll(/\{([^}]+)\}/gu, ':$1');
     const pathSchemas: Record<string, OperationSchemas> = {};
@@ -349,48 +344,59 @@ async function generateEndpointSchemas(
       if (operation !== undefined) {
         const operationId = getOperationId(path, method, operation, operationIds);
         operationIds.add(operationId);
-        const requestContextSchema = getRequestContextSchema(
-          method,
-          operation,
-          operationId,
-          document,
-          apiSchemasBaseUri,
-        );
-        const responseContextSchemas = getResponseContextSchemas(operation, operationId, document, apiSchemasBaseUri);
         pathSchemas[method] = {
-          request: requestContextSchema,
-          responses: responseContextSchemas,
+          request: getRequestContextSchema(method, operation, operationId, document, apiSchemasBaseUri),
+          responses: getResponseContextSchemas(operation, operationId, document, apiSchemasBaseUri),
         };
       }
     }
   }
 
-  if (document.components?.schemas) {
+  if (document.components?.schemas !== undefined) {
     allSchemas.definitions = Object.fromEntries(
       Object.entries(document.components.schemas).map(([name, schema]) => [
         name,
-        {
-          $schema: JSON_SCHEMA_META_2020_URL,
-          $id: `${endpointSchemasBaseUri}/definitions/${name}`,
-          ...schema,
-        },
+        { $schema: JSON_SCHEMA_META_2020_URL, $id: `${endpointSchemasBaseUri}/definitions/${name}`, ...schema },
       ]),
     );
   }
 
-  // normalize relative schema reference URIs
   const relativeSchemaDefinitionReferenceUri = `${serverPathname}/schemas/definitions/`;
-  const normalizedApiSchemas = updateOpenapiSchemaDefinitionsReferences(
+  return updateOpenapiSchemaDefinitionsReferences(
     structuredClone(allSchemas),
     relativeSchemaDefinitionReferenceUri,
-  );
+  ) as ApiSchemas;
+}
 
-  // persist the generated schema
-  const schemaContents = JSON.stringify(normalizedApiSchemas, undefined, 2);
+export function buildApiSchemaFromYaml(
+  yamlContent: string,
+  organization: string,
+  serviceName: string,
+): ApiSchemas | null {
+  // eslint-disable-next-line import/no-named-as-default-member
+  const document = jsYaml.load(yamlContent) as v31.Document;
+  return buildApiSchemaFromDocument(document, organization, serviceName);
+}
+
+async function generateEndpointSchemas(
+  organization: string,
+  serviceName: string,
+  root: string,
+  endpoint: string,
+): Promise<void> {
+  const documentContents = await fs.readFile(`${root}/${endpoint}/swagger.yml`, 'utf8');
+  // eslint-disable-next-line import/no-named-as-default-member
+  const document = (await jsYaml.load(documentContents)) as v31.Document;
+  const normalizedApiSchemas = buildApiSchemaFromDocument(document, organization, serviceName);
+  if (normalizedApiSchemas === null) {
+    return;
+  }
   const swaggerSchemaFilename = `${root}/${endpoint}/${SWAGGER_SCHEMA_FILENAME}`;
-  await fs.writeFile(swaggerSchemaFilename, schemaContents);
+  await fs.writeFile(swaggerSchemaFilename, JSON.stringify(normalizedApiSchemas, undefined, 2));
   log(`Generated schema ${swaggerSchemaFilename}`);
 }
+
+export { generateSchemasForService } from './service-schema-generator';
 
 export async function generateSchemas(): Promise<void> {
   const serviceJsonPackageFile = await fs.readFile(`./package.json`, 'utf8');

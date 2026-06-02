@@ -12,11 +12,11 @@ with
        'US' AS p_domestic_country
        */
   ),
-  /* schema version */
+ /* schema version */
   version AS (
     SELECT
       CAST('1.0' AS VARCHAR) AS version
-  ),
+),
   /* general information */
   general AS (
     SELECT
@@ -1277,7 +1277,7 @@ with
   /* Read all the physical cards - emv,contactless */
   physicalCards AS (
     SELECT
-      COUNT(distinct split(tcm.url, '/') [5]) AS cards
+      COUNT(distinct (split(tcm.url, '/') [5])) AS cards
     FROM
       "teampay-card-management" AS tcm,
       parameters AS p

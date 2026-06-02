@@ -4,7 +4,7 @@ import fs from 'node:fs';
 
 import debug from 'debug';
 
-import type { ApiSchemas } from '../openapi/generate-schema';
+import { type ApiSchemas, generateSchemasForService } from '../openapi/generate-schema';
 
 const log = debug('eslint-plugin:athena:api-locator');
 
@@ -27,5 +27,13 @@ export function locateApi(serviceName: string): ApiSchemas[] {
   // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
   log(`${allSchemaFilenames.length} versions of API schemas located for service ${serviceName}`, allSchemaFilenames);
 
-  return allSchemaFilenames.map((schemaFilename) => JSON.parse(fs.readFileSync(schemaFilename, 'utf-8')) as ApiSchemas);
+  if (allSchemaFilenames.length > 0) {
+    return allSchemaFilenames.map(
+      (schemaFilename) => JSON.parse(fs.readFileSync(schemaFilename, 'utf-8')) as ApiSchemas,
+    );
+  }
+
+  log('no pre-generated schemas found, attempting on-demand generation for service', serviceName);
+  const outputDir = `${SERVICES_ROOT_FOLDER}/${camelCaseServiceName}`;
+  return generateSchemasForService(serviceName, outputDir).map(({ schema }) => schema);
 }

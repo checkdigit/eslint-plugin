@@ -1,5 +1,7 @@
 // athena/athena.spec.ts
 
+import fs from 'node:fs';
+
 import createTester from '../ts-tester.test';
 import rule, { ruleId } from './athena';
 // file.only
@@ -143,6 +145,18 @@ AND (
         cardinality(split(l.url, '/')) = 7
         AND l.method = 'PUT'
         AND l.responsestatus = '204'\``,
+    },
+    {
+      name: 'COUNT against array access expression',
+      code: `\`SELECT
+      COUNT(distinct (split(tcm.url, '/') [5])) AS cards
+    FROM
+      "teampay-card-management" AS tcm\``,
+    },
+    {
+      name: 'QMR',
+      code: `\`${fs.readFileSync('qmr.sql', 'utf-8')}\``,
+      only: true,
     },
   ],
   invalid: [
@@ -1692,6 +1706,26 @@ order by
           messageId: 'AthenaError',
           data: {
             errorMessage: 'property not found posting - $["Xcurrency"]',
+          },
+        },
+      ],
+    },
+    {
+      name: 'AND/OR conditions in WHERE',
+      code: `\`select 
+    json_extract(requestbody, '$.encryptedCardNumber') AS encryptedCardNumber,
+    json_extract(requestbody, '$.cardNumberLength') AS cardNumberLength
+    ,json_extract(requestbody, '$.xxx') AS xxx
+  FROM
+    "payment-card"
+  WHERE
+    method = 'PUT'
+\``,
+      errors: [
+        {
+          messageId: 'AthenaError',
+          data: {
+            errorMessage: 'property not found requestbody - $.xxx',
           },
         },
       ],

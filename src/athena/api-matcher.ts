@@ -34,7 +34,7 @@ function getPathPartMatcher(selectAST: object, _tableAST: object): Matcher | und
     json: selectAST,
     path: "$.where..[?(@ && @.type === 'binary_expr' && @.operator === '=' && @.left && @.left.type === 'function' && @.left.name && @.left.name.name && @.left.name.name[0] && @.left.name.name[0].value === 'split' && @.left.args && @.left.args.value && @.left.args.value[0] && @.left.args.value[0].type === 'column_ref' && @.left.args.value[0].column === 'url' && @.left.args.value[1] && @.left.args.value[1].type === 'single_quote_string' && @.left.args.value[1].value === '/' && @.left.array_index && @.left.array_index[0] && @.left.array_index[0].brackets === true && @.left.array_index[0].index && @.left.array_index[0].index.type === 'number')]",
   }); /*?*/
-  log('pathPartCondition', pathPartCondition);
+  // log('pathPartCondition', pathPartCondition);
 
   if (pathPartCondition !== undefined) {
     const [pathPartIndex]: [number] = JSONPath({
@@ -61,7 +61,7 @@ function getPathPartMatcher(selectAST: object, _tableAST: object): Matcher | und
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function getPathPartsCountMatcher(selectAST: object, _tableAST: object): Matcher | undefined {
-  log('getPathPartsCountMatcher', JSON.stringify(selectAST, undefined, 2));
+  // log('getPathPartsCountMatcher', JSON.stringify(selectAST, undefined, 2));
   const [pathPartCount]: number[] = JSONPath({
     json: selectAST,
     path: "$.where..[?(@ && @.type === 'binary_expr' && @.operator === '=' &&  @.left && @.left.type === 'function' && @.left.name && @.left.name.name && @.left.name.name[0] && @.left.name.name[0].value === 'cardinality' && @.right && @.right.type === 'number' && @.left.args && @.left.args.value && @.left.args.value[0] && @.left.args.value[0].type === 'function' && @.left.args.value[0].name && @.left.args.value[0].name.name && @.left.args.value[0].name.name[0] && @.left.args.value[0].name.name[0].value === 'split' && @.left.args.value[0].args && @.left.args.value[0].args.value && @.left.args.value[0].args.value[0] && @.left.args.value[0].args.value[0].type === 'column_ref' && @.left.args.value[0].args.value[0].column === 'url' && @.left.args.value[0].args.value[1] && @.left.args.value[0].args.value[1].type === 'single_quote_string' && @.left.args.value[0].args.value[1].value === '/')].right.value",

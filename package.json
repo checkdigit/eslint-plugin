@@ -78,6 +78,8 @@
     "@checkdigit/jest-config": "^6.0.2",
     "@checkdigit/message": "^3.0.1",
     "@checkdigit/prettier-config": "^6.2.0",
+    "@checkdigit/teampay-approval": "^3.1.1",
+    "@checkdigit/teampay-card-management": "^3.0.0",
     "@checkdigit/typescript-config": "^9.0.0",
     "@eslint/js": "^9.20.0",
     "@types/debug": "^4.1.12",

@@ -1,5 +1,9 @@
 // athena/visitor.ts
 
+import debug from 'debug';
+
+const log = debug('athena:visitor');
+
 import type {
   AggrFunc,
   BaseFrom,
@@ -288,6 +292,7 @@ export function extractJsonExtractPath(expr: unknown): string | undefined {
             path = val;
           }
         }
+        log('extractJsonExtractPath, function:', fnName, path);
       }
     },
   });

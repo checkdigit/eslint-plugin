@@ -1,7 +1,7 @@
 // athena/athena.ts
 
 /*
- * Copyright (c) 2021-2025 Check Digit, LLC
+ * Copyright (c) 2021-2026 Check Digit, LLC
  *
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
@@ -244,6 +244,7 @@ function navigateSchemaPath(
   const extractedSchemas = resolvedColumns.flatMap((col) =>
     JSONPath<SchemaObject[]>({ json: col.schema, path: adjustedPath }),
   );
+  log('extracted schemas', extractedSchemas);
 
   if (extractedSchemas.length === 0) {
     throw new AthenaError(ATHENA_ERROR, `property not found ${colRef} - ${propertyAccessor}`);
@@ -313,6 +314,7 @@ function resolveSelectColumns(select: Select, ctx: VisitContext): Map<string, Re
     );
   }
 
+  // log('===resolved columns', JSON.stringify([...columns], undefined, 2));
   return columns;
 }
 
