@@ -156,7 +156,6 @@ AND (
     {
       name: 'QMR',
       code: `\`${fs.readFileSync('qmr.sql', 'utf-8')}\``,
-      only: true,
     },
   ],
   invalid: [
@@ -1716,6 +1715,46 @@ order by
     json_extract(requestbody, '$.encryptedCardNumber') AS encryptedCardNumber,
     json_extract(requestbody, '$.cardNumberLength') AS cardNumberLength
     ,json_extract(requestbody, '$.xxx') AS xxx
+  FROM
+    "payment-card"
+  WHERE
+    method = 'PUT'
+\``,
+      errors: [
+        {
+          messageId: 'AthenaError',
+          data: {
+            errorMessage: 'property not found requestbody - $.xxx',
+          },
+        },
+      ],
+    },
+    {
+      name: 'schema validation should work for complex column expression - using || operator and invalid property used not as the first part in the expression',
+      code: `\`select 
+    json_extract(requestbody, '$.encryptedCardNumber') || json_extract(requestbody, '$.xxx')
+  FROM
+    "payment-card"
+  WHERE
+    method = 'PUT'
+\``,
+      errors: [
+        {
+          messageId: 'AthenaError',
+          data: {
+            errorMessage: 'property not found requestbody - $.xxx',
+          },
+        },
+      ],
+    },
+    {
+      name: 'schema validation should work for complex column expression - invlidate property used inside IF condition',
+      code: `\`select 
+      IF(
+        json_extract_scalar(requestbody, '$.xxx') = 'XXX',
+        'Domestic',
+        'International'
+      ) AS Domestic
   FROM
     "payment-card"
   WHERE

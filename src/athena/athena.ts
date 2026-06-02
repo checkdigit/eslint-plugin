@@ -28,6 +28,7 @@ import { buildServiceTables } from './service-table';
 import {
   extractBracketAccessorPath,
   extractColumnRefs,
+  extractJsonExtractCalls,
   extractJsonExtractPath,
   hasFunctionCalls,
   isBaseFrom,
@@ -228,14 +229,11 @@ function expandWildcard(referencedTables: ResolvedTable[], columns: Map<string, 
   }
 }
 
-function navigateSchemaPath(
+function resolveSchemaAtPath(
   colRef: string,
   propertyAccessor: string,
   resolvedColumns: ResolvedColumn[],
-  colName: string,
-  columnAST: unknown,
-  columns: Map<string, ResolvedColumn[]>,
-): void {
+): SchemaObject[] {
   // Double-dot handles allOf / anyOf / oneOf wrappers that may appear in the schema.
   // eslint-disable-next-line prefer-named-capture-group
   const adjustedPath = `$.${propertyAccessor.substring(1).replace(/(\.|\[)/gu, '..properties$1')}`;
@@ -249,7 +247,18 @@ function navigateSchemaPath(
   if (extractedSchemas.length === 0) {
     throw new AthenaError(ATHENA_ERROR, `property not found ${colRef} - ${propertyAccessor}`);
   }
+  return extractedSchemas;
+}
 
+function navigateSchemaPath(
+  colRef: string,
+  propertyAccessor: string,
+  resolvedColumns: ResolvedColumn[],
+  colName: string,
+  columnAST: unknown,
+  columns: Map<string, ResolvedColumn[]>,
+): void {
+  const extractedSchemas = resolveSchemaAtPath(colRef, propertyAccessor, resolvedColumns);
   columns.set(
     colName,
     extractedSchemas.map((schema) => resolvedCol(colName, schema, columnAST as object)),
@@ -259,6 +268,65 @@ function navigateSchemaPath(
 // ---------------------------------------------------------------------------
 // Pass 2 — Resolve SELECT columns → Map<name, ResolvedColumn[]>
 // ---------------------------------------------------------------------------
+
+/** Validate all json_extract / json_extract_scalar paths in a complex column expression. */
+function validateComplexColumnExpression(columnAST: unknown, allTables: ResolvedTable[], ctx: VisitContext): void {
+  for (const { ref, path } of extractJsonExtractCalls(columnAST)) {
+    const tableRef = ref.table ?? undefined;
+    const colRef = typeof ref.column === 'string' ? ref.column : undefined;
+    if (colRef === undefined) {
+      continue;
+    }
+    const referencedTables = tableRef !== undefined ? lookupTables(tableRef, ctx) : allTables;
+    const resolvedColumns = referencedTables.flatMap((table) => table.columns.get(colRef) ?? []);
+    if (resolvedColumns.length > 0) {
+      resolveSchemaAtPath(colRef, path, resolvedColumns); // throws if path not found
+    }
+  }
+}
+
+/** Resolve a column expression that has exactly one column_ref. */
+function resolveSingleColumnRef(
+  columnAST: unknown,
+  columnAlias: string | null,
+  indexedName: string,
+  ref: NonNullable<ReturnType<typeof extractColumnRefs>[number]>,
+  allTables: ResolvedTable[],
+  ctx: VisitContext,
+  columns: Map<string, ResolvedColumn[]>,
+): void {
+  const tableRef = ref.table ?? undefined;
+  const colRef = typeof ref.column === 'string' ? ref.column : undefined;
+  assert.ok(colRef !== undefined, 'column_ref must have a string column name');
+
+  const referencedTables = tableRef !== undefined ? lookupTables(tableRef, ctx) : allTables;
+  assert.ok(referencedTables.length > 0, `no tables found for column reference '${colRef}'`);
+
+  if (colRef === '*') {
+    expandWildcard(referencedTables, columns);
+    return;
+  }
+
+  const withFunctions = hasFunctionCalls(columnAST);
+  const colName = columnAlias ?? (withFunctions ? indexedName : colRef);
+  const resolvedColumns = referencedTables.flatMap((table) => table.columns.get(colRef) ?? []);
+
+  if (resolvedColumns.length === 0) {
+    const tableNames = [...ctx.tables.keys()].join(', ');
+    throw new AthenaError(ATHENA_ERROR, `can't found column ${colRef} in tables: ${tableNames}`);
+  }
+
+  const propertyAccessor = extractJsonExtractPath(columnAST) ?? extractBracketAccessorPath(columnAST);
+  if (propertyAccessor !== undefined) {
+    navigateSchemaPath(colRef, propertyAccessor, resolvedColumns, colName, columnAST, columns);
+    return;
+  }
+
+  columns.set(
+    colName,
+    resolvedColumns.map((col) => resolvedCol(colName, col.schema, columnAST as object)),
+  );
+}
 
 function resolveSelectColumns(select: Select, ctx: VisitContext): Map<string, ResolvedColumn[]> {
   const allTables = [...ctx.tables.values()].flat();
@@ -272,49 +340,16 @@ function resolveSelectColumns(select: Select, ctx: VisitContext): Map<string, Re
     const columnRefs = extractColumnRefs(columnAST);
 
     if (columnRefs.length !== 1) {
+      validateComplexColumnExpression(columnAST, allTables, ctx);
       resolveDefaultSchemaColumn(columnAlias, indexedName, columnAST, columns);
       continue;
     }
 
     const [ref] = columnRefs;
     assert.ok(ref !== undefined);
-
-    const tableRef = ref.table ?? undefined;
-    const colRef = typeof ref.column === 'string' ? ref.column : undefined;
-    assert.ok(colRef !== undefined, 'column_ref must have a string column name');
-
-    const referencedTables = tableRef !== undefined ? lookupTables(tableRef, ctx) : allTables;
-    assert.ok(referencedTables.length > 0, `no tables found for column reference '${colRef}'`);
-
-    if (colRef === '*') {
-      expandWildcard(referencedTables, columns);
-      continue;
-    }
-
-    const withFunctions = hasFunctionCalls(columnAST);
-    const colName = columnAlias ?? (withFunctions ? indexedName : colRef);
-
-    const resolvedColumns = referencedTables.flatMap((table) => table.columns.get(colRef) ?? []);
-
-    if (resolvedColumns.length === 0) {
-      const tableNames = [...ctx.tables.keys()].join(', ');
-      throw new AthenaError(ATHENA_ERROR, `can't found column ${colRef} in tables: ${tableNames}`);
-    }
-
-    const propertyAccessor = extractJsonExtractPath(columnAST) ?? extractBracketAccessorPath(columnAST);
-
-    if (propertyAccessor !== undefined) {
-      navigateSchemaPath(colRef, propertyAccessor, resolvedColumns, colName, columnAST, columns);
-      continue;
-    }
-
-    columns.set(
-      colName,
-      resolvedColumns.map((col) => resolvedCol(colName, col.schema, columnAST as object)),
-    );
+    resolveSingleColumnRef(columnAST, columnAlias, indexedName, ref, allTables, ctx, columns);
   }
 
-  // log('===resolved columns', JSON.stringify([...columns], undefined, 2));
   return columns;
 }
 

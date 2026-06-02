@@ -299,6 +299,40 @@ export function extractJsonExtractPath(expr: unknown): string | undefined {
   return path;
 }
 
+export interface JsonExtractCall {
+  ref: ColumnRefItem;
+  path: string;
+}
+
+/** Collect ALL json_extract / json_extract_scalar calls as (source column_ref, path) pairs. */
+export function extractJsonExtractCalls(expr: unknown): JsonExtractCall[] {
+  const calls: JsonExtractCall[] = [];
+  walkExpr(expr, {
+    visitFunction(node) {
+      const fnName = node.name.name[0]?.value;
+      if (fnName !== 'json_extract_scalar' && fnName !== 'json_extract') {
+        return;
+      }
+      const sourceArg = node.args?.value[0];
+      const pathArg = node.args?.value[1];
+      if (sourceArg === undefined || pathArg === undefined) {
+        return;
+      }
+      const sourceRefs = extractColumnRefs(sourceArg);
+      if (sourceRefs.length !== 1) {
+        return;
+      }
+      const [ref] = sourceRefs;
+      const path = (pathArg as unknown as { value?: unknown }).value;
+      if (ref === undefined || typeof path !== 'string') {
+        return;
+      }
+      calls.push({ ref, path });
+    },
+  });
+  return calls;
+}
+
 /** Return the JSONPath-style string from a bracket accessor (col['key']), or undefined. */
 export function extractBracketAccessorPath(expr: unknown): string | undefined {
   let path: string | undefined;
