@@ -7,8 +7,8 @@
  */
 
 import { StatusCodes } from 'http-status-codes';
-import { AST_NODE_TYPES, ESLintUtils, TSESLint, TSESTree } from '@typescript-eslint/utils';
-import getDocumentationUrl from './get-documentation-url';
+import { AST_NODE_TYPES, ESLintUtils, type TSESLint, type TSESTree } from '@typescript-eslint/utils';
+import getDocumentationUrl from './get-documentation-url.ts';
 
 export const ruleId = 'no-status-code-assert';
 const NO_STATUS_CODE_ASSERT = 'NO_STATUS_CODE_ASSERT';

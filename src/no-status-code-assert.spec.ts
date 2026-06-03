@@ -1,7 +1,7 @@
 // no-status-code-assert.spec.ts
 
-import rule, { ruleId } from './no-status-code-assert';
-import createTester from './ts-tester.test';
+import rule, { ruleId } from './no-status-code-assert.ts';
+import createTester from './ts-tester.test.ts';
 
 createTester().run(ruleId, rule, {
   valid: [

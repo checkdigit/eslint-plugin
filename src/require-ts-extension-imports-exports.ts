@@ -51,7 +51,9 @@ const rule: TSESLint.RuleModule<string, unknown[]> = createRule({
   create(context) {
     const filename = context.filename;
 
-    const handleDeclaration = (node: TSESTree.ImportDeclaration | TSESTree.ExportNamedDeclaration) => {
+    const handleDeclaration = (
+      node: TSESTree.ImportDeclaration | TSESTree.ExportNamedDeclaration | TSESTree.ExportAllDeclaration,
+    ) => {
       if (node.source !== null) {
         const importPath = node.source.value;
         const { fixedPath, isFixNeeded } = checkPath(filename, importPath);
@@ -75,6 +77,9 @@ const rule: TSESLint.RuleModule<string, unknown[]> = createRule({
         handleDeclaration(node);
       },
       ExportNamedDeclaration(node) {
+        handleDeclaration(node);
+      },
+      ExportAllDeclaration(node) {
         handleDeclaration(node);
       },
     };

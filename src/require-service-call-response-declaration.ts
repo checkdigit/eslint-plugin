@@ -8,8 +8,8 @@
 
 import { AST_NODE_TYPES, ESLintUtils, TSESTree } from '@typescript-eslint/utils';
 
-import getDocumentationUrl from './get-documentation-url';
-import { isServiceResponse } from './service';
+import getDocumentationUrl from './get-documentation-url.ts';
+import { isServiceResponse } from './service.ts';
 
 export const ruleId = 'require-service-call-response-declaration';
 

@@ -11,6 +11,8 @@ import type { OpenAPIV3_1 as v31 } from 'openapi-types';
 import type { SchemaObject } from 'ajv/dist/2020';
 
 export const commandName = 'generate-schema';
+export { generateSchemasForService } from './service-schema-generator.ts';
+
 const log = debug('openapi-cli:generate-schema');
 
 const ALL_OPERATION_METHODS = ['get', 'put', 'post', 'head', 'trace', 'patch', 'delete', 'options'] as const;
@@ -93,7 +95,6 @@ function getRequestParametersSchema(
   const parametersSchema = Object.fromEntries(
     parameters.map((parameter) => [
       parameterType === 'header' ? parameter.name.toLowerCase() : parameter.name,
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       parameter.schema ?? ({ type: 'string' } as v31.SchemaObject),
     ]),
   );
@@ -201,7 +202,6 @@ function getResponseHeadersSchema(
   const resolvedHeaderSchemas = Object.fromEntries(
     Object.entries(resolvedHeaders).map(([name, header]) => [
       name,
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       header.schema ?? ({ type: 'string' } as v31.SchemaObject),
     ]),
   );
@@ -395,8 +395,6 @@ async function generateEndpointSchemas(
   await fs.writeFile(swaggerSchemaFilename, JSON.stringify(normalizedApiSchemas, undefined, 2));
   log(`Generated schema ${swaggerSchemaFilename}`);
 }
-
-export { generateSchemasForService } from './service-schema-generator';
 
 export async function generateSchemas(): Promise<void> {
   const serviceJsonPackageFile = await fs.readFile(`./package.json`, 'utf8');

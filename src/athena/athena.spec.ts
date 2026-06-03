@@ -2,8 +2,8 @@
 
 import fs from 'node:fs';
 
-import createTester from '../ts-tester.test';
-import rule, { ruleId } from './athena';
+import createTester from '../ts-tester.test.ts';
+import rule, { ruleId } from './athena.ts';
 // file.only
 createTester().run(ruleId, rule, {
   valid: [

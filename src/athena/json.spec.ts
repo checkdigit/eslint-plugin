@@ -3,8 +3,8 @@ import fs from 'node:fs';
 import { describe, it } from '@jest/globals';
 import { JSONPath } from 'jsonpath-plus';
 
-import { generateSchemas } from '../openapi/generate-schema';
-import { derefSchema } from '../openapi/deref-schema';
+import { generateSchemas } from '../openapi/generate-schema.ts';
+import { derefSchema } from '../openapi/deref-schema.ts';
 
 describe('json.spec.ts', () => {
   it.skip('deref schema', async () => {

@@ -5,7 +5,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 
 import debug from 'debug';
 
-import { type ApiSchemas, buildApiSchemaFromYaml } from './generate-schema';
+import { type ApiSchemas, buildApiSchemaFromYaml } from './generate-schema.ts';
 
 const log = debug('eslint-plugin:athena:service-schema-generator');
 

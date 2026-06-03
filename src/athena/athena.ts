@@ -10,21 +10,21 @@ import { strict as assert } from 'node:assert';
 
 import debug from 'debug';
 import { JSONPath } from 'jsonpath-plus';
-import { ESLintUtils, TSESTree } from '@typescript-eslint/utils';
+import { ESLintUtils, type TSESTree } from '@typescript-eslint/utils';
 import type { SchemaObject } from 'ajv/dist/2020';
 
-import { parse } from '../peggy/athena-peggy';
+import { parse } from '../peggy/athena-peggy.ts';
 import type { AST, From, Select, With } from './types';
-import { matchApi } from './api-matcher';
-import { locateApi } from './api-locator';
+import { matchApi } from './api-matcher.ts';
+import { locateApi } from './api-locator.ts';
 import {
   createChildContext,
   createRootContext,
   type ResolvedColumn,
   type ResolvedTable,
   type VisitContext,
-} from './context';
-import { buildServiceTables } from './service-table';
+} from './context.ts';
+import { buildServiceTables } from './service-table.ts';
 import {
   extractBracketAccessorPath,
   extractColumnRefs,
@@ -34,7 +34,7 @@ import {
   isBaseFrom,
   isJoin,
   isUnnestFrom,
-} from './visitor';
+} from './visitor.ts';
 
 export const ruleId = 'athena';
 

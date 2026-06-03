@@ -4,7 +4,7 @@ import fs from 'node:fs';
 
 import debug from 'debug';
 
-import { type ApiSchemas, generateSchemasForService } from '../openapi/generate-schema';
+import { type ApiSchemas, generateSchemasForService } from '../openapi/generate-schema.ts';
 
 const log = debug('eslint-plugin:athena:api-locator');
 

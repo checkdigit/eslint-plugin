@@ -6,7 +6,7 @@
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import createTester from './ts-tester.test';
+import createTester from './ts-tester.test.ts';
 import rule, { ruleId } from './require-service-call-response-declaration.ts';
 
 createTester().run(ruleId, rule, {

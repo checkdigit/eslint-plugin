@@ -9,7 +9,7 @@ import {
   hasFunctionCalls,
   type VisitorMap,
   walk,
-} from './visitor';
+} from './visitor.ts';
 
 describe('visitor walk()', () => {
   const simpleSelect = {

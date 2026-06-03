@@ -1,4 +1,5 @@
 import { promises as fs } from 'node:fs';
+
 import ts from 'typescript-eslint';
 import sonarjs from 'eslint-plugin-sonarjs';
 import importPlugin from 'eslint-plugin-import';
@@ -45,7 +46,11 @@ export default [
     },
     settings: {
       'import/resolver': {
-        typescript: true,
+        typescript: {
+          // unrs-resolver (used by v4) fails to parse @checkdigit/typescript-config's .mjs
+          // file as JSON when following tsconfig `extends`. Use a flat resolver tsconfig instead.
+          tsconfig: { configFile: 'tsconfig.resolver.json' },
+        },
         node: true,
       },
     },

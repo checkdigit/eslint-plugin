@@ -7,6 +7,7 @@
  */
 
 import { strict as assert } from 'node:assert';
+import path from 'node:path';
 
 import { AST_NODE_TYPES, ESLintUtils, TSESTree } from '@typescript-eslint/utils';
 
@@ -40,11 +41,18 @@ const rule: ESLintUtils.RuleModule<
   defaultOptions: [],
   create(context) {
     const importedServiceTypeMapping = new Map<string, string>();
+    const fileFolder = path.dirname(context.filename);
 
     return {
       ImportDeclaration(importDeclaration) {
-        const moduleName = importDeclaration.source.value;
+        const moduleName = importDeclaration.source.value; /*?*/
+        const resolvedModulePath = path.resolve(fileFolder, moduleName); /*?*/
+        if (!resolvedModulePath.includes('src/services')) {
+          return;
+        }
+
         if (SERVICE_TYPINGS_IMPORT_PATH.test(moduleName)) {
+          // make sure that it matches only the src/services path
           const match = SERVICE_TYPINGS_IMPORT_PATH_WITH_VERSION.exec(moduleName);
           if (match?.groups) {
             // need to import the service typings from the fixed path, and also apply the namespace to the referenced types

@@ -14,7 +14,8 @@ jest.unstable_mockModule('fs', () => ({
           path.endsWith('src/bar') ||
           path.endsWith('bar-dir') ||
           path.endsWith('services') ||
-          path.endsWith('.test')),
+          path.endsWith('.test') ||
+          path.endsWith('swagger')),
     ),
     statSync: jest.fn<StatSyncFn>().mockImplementation(((path) => ({
       isDirectory: () => typeof path === 'string' && (path.endsWith('bar-dir') || path.endsWith('services')),
@@ -98,6 +99,12 @@ createTester().run(ruleId, rule, {
       name: 'Invalid import typing from test file without .ts extension',
     },
     {
+      code: `import * as v1 from './api/v1/swagger';`,
+      errors: [{ messageId: 'REQUIRE-TS-EXTENSION-IMPORTS' }],
+      output: `import * as v1 from './api/v1/swagger.ts';`,
+      name: 'Invalid import typing from swagger file without .ts extension',
+    },
+    {
       code: `export { foo } from './bar';`,
       errors: [{ messageId: 'REQUIRE-TS-EXTENSION-EXPORTS' }],
       output: `export { foo } from './bar.ts';`,
@@ -132,6 +139,12 @@ createTester().run(ruleId, rule, {
       errors: [{ messageId: 'REQUIRE-TS-EXTENSION-EXPORTS' }],
       output: `export { bar, foo, foo1 } from './test/bar.test.ts';`,
       name: 'Invalid export typing from test file without .ts extension',
+    },
+    {
+      code: `export * as v1 from './api/v1/swagger';`,
+      errors: [{ messageId: 'REQUIRE-TS-EXTENSION-EXPORTS' }],
+      output: `export * as v1 from './api/v1/swagger.ts';`,
+      name: 'Invalid export typing from swagger file without .ts extension',
     },
   ],
 });

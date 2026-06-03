@@ -26,6 +26,9 @@ import noServeRuntime, { ruleId as noServeRuntimeRuleId } from './no-serve-runti
 import requireServiceCallResponseDeclaration, {
   ruleId as requireServiceCallResponseDeclarationRuleId,
 } from './require-service-call-response-declaration.ts';
+import requireAwsConfig, { ruleId as requireAwsConfigRuleId } from './aws/require-aws-config.ts';
+import requireAWSBareBones, { ruleId as requireAWSBareBonesRuleId } from './aws/require-aws-bare-bones.ts';
+import requireConsistentRead, { ruleId as requireConsistentReadRuleId } from './aws/require-consistent-read.ts';
 import athena, { ruleId as athenaRuleId } from './athena/athena.ts';
 import filePathComment from './file-path-comment.ts';
 import noCardNumbers from './no-card-numbers.ts';
@@ -33,13 +36,17 @@ import noEnum from './no-enum.ts';
 import noSideEffects from './no-side-effects.ts';
 import noRandomV4UUID from './no-random-v4-uuid.ts';
 import noTestImport from './no-test-import.ts';
+import noUtil from './no-util.ts';
 import noUuid from './no-uuid.ts';
 import noWallabyComment from './no-wallaby-comment.ts';
 import objectLiteralResponse from './object-literal-response.ts';
 import regexComment from './regular-expression-comment.ts';
 import requireAssertPredicateRejectsThrows from './require-assert-predicate-rejects-throws.ts';
 import requireStrictAssert from './require-strict-assert.ts';
+import requireAssertMessage from './require-assert-message';
 import requireTsExtensionImportsExports from './require-ts-extension-imports-exports.ts';
+
+export { default as isAwsSdkV3Used } from './aws/is-aws-sdk-v3-used.ts';
 
 const rules: Record<string, TSESLint.LooseRuleDefinition> = {
   'file-path-comment': filePathComment,
@@ -47,7 +54,9 @@ const rules: Record<string, TSESLint.LooseRuleDefinition> = {
   'no-enum': noEnum,
   'no-random-v4-uuid': noRandomV4UUID,
   'no-status-code-assert': noStatusCodeAssert,
+  'no-util': noUtil,
   'no-uuid': noUuid,
+  'require-assert-message': requireAssertMessage,
   'require-strict-assert': requireStrictAssert,
   'require-ts-extension-imports-exports': requireTsExtensionImportsExports,
   'no-test-import': noTestImport,
@@ -63,8 +72,11 @@ const rules: Record<string, TSESLint.LooseRuleDefinition> = {
   [noDuplicatedImportsRuleId]: noDuplicatedImports,
   [noServeRuntimeRuleId]: noServeRuntime,
   [requireServiceCallResponseDeclarationRuleId]: requireServiceCallResponseDeclaration,
+  [requireAwsConfigRuleId]: requireAwsConfig,
   [requireFixedServicesImportRuleId]: requireFixedServicesImport,
   [requireTypeOutOfTypeOnlyImportsRuleId]: requireTypeOutOfTypeOnlyImports,
+  [requireAWSBareBonesRuleId]: requireAWSBareBones,
+  [requireConsistentReadRuleId]: requireConsistentRead,
   [athenaRuleId]: athena,
 };
 
@@ -85,14 +97,13 @@ const configs: Record<string, TSESLint.FlatConfig.Config[]> = {
         '@checkdigit/file-path-comment': 'error',
         '@checkdigit/no-random-v4-uuid': 'error',
         '@checkdigit/no-status-code-assert': 'error',
+        '@checkdigit/no-util': 'error',
         '@checkdigit/no-uuid': 'error',
+        '@checkdigit/require-assert-message': 'error',
         '@checkdigit/require-strict-assert': 'error',
         '@checkdigit/require-ts-extension-imports-exports': 'error',
         '@checkdigit/no-wallaby-comment': 'error',
-        '@checkdigit/no-side-effects': [
-          'error',
-          { excludedIdentifiers: ['assert', 'debug', 'log', 'promisify', 'Symbol.for'] },
-        ],
+        '@checkdigit/no-side-effects': 'error',
         '@checkdigit/regular-expression-comment': 'error',
         '@checkdigit/require-assert-predicate-rejects-throws': 'error',
         '@checkdigit/object-literal-response': 'error',
@@ -106,6 +117,9 @@ const configs: Record<string, TSESLint.FlatConfig.Config[]> = {
         [`@checkdigit/${requireTypeOutOfTypeOnlyImportsRuleId}`]: 'error',
         [`@checkdigit/${noServeRuntimeRuleId}`]: 'error',
         [`@checkdigit/${requireServiceCallResponseDeclarationRuleId}`]: 'error',
+        [`@checkdigit/${requireConsistentReadRuleId}`]: 'error',
+        [`@checkdigit/${requireAwsConfigRuleId}`]: 'error',
+        [`@checkdigit/${requireAWSBareBonesRuleId}`]: 'error',
         [`@checkdigit/${athenaRuleId}`]: 'error',
       },
     },
@@ -122,7 +136,9 @@ const configs: Record<string, TSESLint.FlatConfig.Config[]> = {
         '@checkdigit/file-path-comment': 'off',
         '@checkdigit/no-random-v4-uuid': 'error',
         '@checkdigit/no-status-code-assert': 'error',
+        '@checkdigit/no-util': 'error',
         '@checkdigit/no-uuid': 'error',
+        '@checkdigit/require-assert-message': 'error',
         '@checkdigit/require-strict-assert': 'error',
         '@checkdigit/require-ts-extension-imports-exports': 'error',
         '@checkdigit/no-wallaby-comment': 'off',
@@ -140,6 +156,9 @@ const configs: Record<string, TSESLint.FlatConfig.Config[]> = {
         [`@checkdigit/${requireTypeOutOfTypeOnlyImportsRuleId}`]: 'error',
         [`@checkdigit/${noServeRuntimeRuleId}`]: 'off',
         [`@checkdigit/${requireServiceCallResponseDeclarationRuleId}`]: 'off',
+        [`@checkdigit/${requireConsistentReadRuleId}`]: 'off',
+        [`@checkdigit/${requireAwsConfigRuleId}`]: 'off',
+        [`@checkdigit/${requireAWSBareBonesRuleId}`]: 'off',
         [`@checkdigit/${athenaRuleId}`]: 'off',
       },
     },
