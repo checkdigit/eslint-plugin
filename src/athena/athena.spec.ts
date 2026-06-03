@@ -157,11 +157,15 @@ AND (
       name: 'QMR',
       code: `\`${fs.readFileSync('qmr.sql', 'utf-8')}\``,
     },
+    {
+      name: 'non-sql with similar keywords should not trigger errors',
+      code: `describe('with data set up through API', async () => {});`,
+    },
   ],
   invalid: [
     {
       name: 'invalid sql',
-      code: `\`select foo as bar ffrom link\``,
+      code: `\`select foo as bar from link when 1=1\``,
       errors: [
         {
           messageId: 'SyntextError',

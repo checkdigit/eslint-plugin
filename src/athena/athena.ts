@@ -77,7 +77,7 @@ function lookupTables(nameOrAlias: string, ctx: VisitContext): ResolvedTable[] {
   return ctx.tables.get(canonical) ?? [];
 }
 
-/** Normalise the FROM clause into a flat array. */
+/** Normalize the FROM clause into a flat array. */
 function fromClauseItems(select: Select): From[] {
   if (Array.isArray(select.from)) {
     return select.from;
@@ -425,7 +425,8 @@ const rule: ESLintUtils.RuleModule<typeof SYNTEXT_ERROR | typeof ATHENA_ERROR> =
   defaultOptions: [],
   create(context) {
     function checkSql(sql: string, sqlNode: TSESTree.Node) {
-      if (!/^SELECT\s+/iu.test(sql) && !/^WITH\s+/iu.test(sql)) {
+      if (!/^\s*(?:SELECT\b[\s\S]*\bFROM\b|WITH\b[\s\S]*\bSELECT\b[\s\S]*\b)/iu.test(sql)) {
+        log('skipping non-SELECT SQL string', { sql });
         return;
       }
 
@@ -434,10 +435,11 @@ const rule: ESLintUtils.RuleModule<typeof SYNTEXT_ERROR | typeof ATHENA_ERROR> =
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         ({ ast } = parse(sql, { includeLocations: true }));
       } catch (error) {
+        log('error checking Athena AST', { error, sql });
         context.report({
           node: sqlNode,
           messageId: SYNTEXT_ERROR,
-          data: { errorMessage: JSON.stringify(error, undefined, 2) },
+          data: { errorMessage: JSON.stringify(error, undefined, 2), sql },
         });
         return;
       }
@@ -447,6 +449,7 @@ const rule: ESLintUtils.RuleModule<typeof SYNTEXT_ERROR | typeof ATHENA_ERROR> =
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         checkAthenaAst(Array.isArray(ast) ? ast[0] : ast, athenaCtx);
       } catch (error) {
+        log('error checking Athena AST', { error, sql });
         if (error instanceof AthenaError) {
           context.report({
             node: sqlNode,
