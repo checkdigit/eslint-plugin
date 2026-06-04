@@ -14,7 +14,7 @@ import { AST_NODE_TYPES, ESLintUtils, type TSESTree } from '@typescript-eslint/u
 import type { SchemaObject } from 'ajv/dist/2020';
 
 import { parse } from '../peggy/athena-peggy.ts';
-import type { AST, From, Select, With } from './types';
+import type { AST, BaseFrom, From, Select, With } from './types';
 import { matchApi } from './api-matcher.ts';
 import { locateApi } from './api-locator.ts';
 import {
@@ -141,6 +141,17 @@ function fromClauseItems(select: Select): From[] {
 // Pass 1 — Resolve FROM clause: service tables → ctx.tables + ctx.aliases
 // ---------------------------------------------------------------------------
 
+function resolveServiceTable(select: Select, item: BaseFrom, ctx: VisitContext): void {
+  const { table: tableName } = item;
+  try {
+    const apiSchemas = getApiSchemas(tableName, ctx);
+    const operations = matchApi(select, item, apiSchemas) ?? [];
+    ctx.tables.set(tableName, buildServiceTables(tableName, operations));
+  } catch (error) {
+    throw new AthenaError(ATHENA_ERROR, error instanceof Error ? error.message : String(error), item);
+  }
+}
+
 function resolveFromClause(select: Select, ctx: VisitContext): void {
   for (const item of fromClauseItems(select)) {
     if (isUnnestFrom(item)) {
@@ -153,9 +164,7 @@ function resolveFromClause(select: Select, ctx: VisitContext): void {
         ctx.aliases.set(alias, tableName);
       }
       if (!ctx.tables.has(tableName)) {
-        const apiSchemas = getApiSchemas(tableName, ctx);
-        const operations = matchApi(select, item, apiSchemas) ?? [];
-        ctx.tables.set(tableName, buildServiceTables(tableName, operations));
+        resolveServiceTable(select, item, ctx);
       }
       continue;
     }
@@ -174,11 +183,7 @@ function resolveFromClause(select: Select, ctx: VisitContext): void {
       continue; // already resolved (CTE or duplicate)
     }
 
-    // Service table: locate + match API schemas from disk.
-    // matchApi throws when no operation matches, so operations is always defined here.
-    const apiSchemas = getApiSchemas(tableName, ctx);
-    const operations = matchApi(select, item, apiSchemas) ?? [];
-    ctx.tables.set(tableName, buildServiceTables(tableName, operations));
+    resolveServiceTable(select, item, ctx);
   }
 }
 
@@ -499,21 +504,33 @@ const rule: ESLintUtils.RuleModule<typeof SYNTEXT_ERROR | typeof ATHENA_ERROR> =
         return;
       }
 
+      const sqlMapping = buildSqlMapping(sqlNode);
       let ast: AST;
       try {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         ({ ast } = parse(sql, { includeLocations: true }));
       } catch (error) {
         log('error checking Athena AST', { error, sql });
-        context.report({
-          node: sqlNode,
-          messageId: SYNTEXT_ERROR,
-          data: { errorMessage: JSON.stringify(error, undefined, 2), sql },
-        });
+        const pegLoc = (error as { location?: { start: { offset: number }; end: { offset: number } } }).location;
+        if (pegLoc !== undefined) {
+          const sourceText = context.sourceCode.getText();
+          context.report({
+            loc: {
+              start: offsetToLoc(sourceText, sqlOffsetToSource(pegLoc.start.offset, sqlMapping)),
+              end: offsetToLoc(sourceText, sqlOffsetToSource(pegLoc.end.offset, sqlMapping)),
+            },
+            messageId: SYNTEXT_ERROR,
+            data: { errorMessage: JSON.stringify(error, undefined, 2), sql },
+          });
+        } else {
+          context.report({
+            node: sqlNode,
+            messageId: SYNTEXT_ERROR,
+            data: { errorMessage: JSON.stringify(error, undefined, 2), sql },
+          });
+        }
         return;
       }
-
-      const sqlMapping = buildSqlMapping(sqlNode);
       const athenaCtx = createRootContext();
       try {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument

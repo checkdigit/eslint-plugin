@@ -219,6 +219,39 @@ WHERE method = 'PUT'
       ],
     },
     {
+      // PEG SyntaxError for "WHEN" on line 4; if location is reported correctly the error is on line 4
+      // rather than line 1 (the whole-node fallback).
+      name: 'syntax error location narrows to the offending token, not the whole SQL string',
+      code: `\`SELECT
+  foo AS bar
+FROM link
+WHEN 1=1\``,
+      errors: [
+        {
+          messageId: 'SyntextError',
+          line: 4,
+        },
+      ],
+    },
+    {
+      // "non-existent" at SQL offsets 16–29 (14 chars). end.offset=30 (exclusive).
+      // Source: backtick at 0, srcStart=1.
+      // start: 1+16=17 → line 1, 0-based col 17 → RuleTester col 18.
+      // end:   1+30=31 → line 1, 0-based col 31 → RuleTester endCol 32.
+      name: 'unrecognised table name error location narrows to the table name in FROM',
+      code: `\`SELECT url FROM "non-existent"\``,
+      errors: [
+        {
+          messageId: 'AthenaError',
+          data: { errorMessage: 'no matched api' },
+          line: 1,
+          column: 18,
+          endLine: 1,
+          endColumn: 32,
+        },
+      ],
+    },
+    {
       name: 'non-existing column',
       code: `\`select foo from link\``,
       errors: [

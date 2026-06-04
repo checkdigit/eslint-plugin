@@ -1239,12 +1239,13 @@ table_base
   / t:table_name __ alias:alias_clause? {
       if (t.type === 'var') {
         t.as = alias;
-        return t;
+        return { ...t, ...getLocationObject() };
       } else {
         return {
           db: t.db,
           table: t.table,
-          as: alias
+          as: alias,
+          ...getLocationObject(),
         };
       }
     }

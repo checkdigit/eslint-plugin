@@ -1508,12 +1508,13 @@ function peg$parse(input, options) {
   var peg$f107 = function(t, alias) {
       if (t.type === 'var') {
         t.as = alias;
-        return t;
+        return { ...t, ...getLocationObject() };
       } else {
         return {
           db: t.db,
           table: t.table,
-          as: alias
+          as: alias,
+          ...getLocationObject(),
         };
       }
     };
