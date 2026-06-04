@@ -1874,6 +1874,28 @@ FROM "payment-card" WHERE method = 'GET' AND responsestatus = '200'\``,
       ],
     },
     {
+      // Uses a plain string (not a template literal) so that ${''}  appears as a literal
+      // template expression in the analyzed source rather than being evaluated by the test runner.
+      // quasi[0] cooked = "SELECT " (SQL offsets 0-6, source offsets 1-7).
+      // quasi[1] cooked = "json_extract_scalar(...)" (SQL offset 7 onwards).
+      // quasi[1].range[0] = 12 (the closing } of ${''}) → quasi[1] srcStart = 13.
+      // json_extract_scalar start: SQL offset 7 → source offset 13 → line 1, 0-based col 13 → col 14.
+      // json_extract_scalar end:   SQL offset 63 → source offset 69 → line 1, 0-based col 69 → endCol 70.
+      name: 'error location accounts for template expressions that appear before the error in the SQL',
+      // eslint-disable-next-line no-template-curly-in-string
+      code: "`SELECT ${''}json_extract_scalar(responsebody, '$.nonExistentField') AS x FROM \"payment-card\" WHERE method = 'GET' AND responsestatus = '200'`",
+      errors: [
+        {
+          messageId: 'AthenaError',
+          data: { errorMessage: 'property not found responsebody - $.nonExistentField' },
+          line: 1,
+          column: 14,
+          endLine: 1,
+          endColumn: 70,
+        },
+      ],
+    },
+    {
       name: 'schema validation should work for complex column expression - using || operator and invalid property used not as the first part in the expression',
       code: `\`select 
     json_extract(requestbody, '$.encryptedCardNumber') || json_extract(requestbody, '$.xxx')

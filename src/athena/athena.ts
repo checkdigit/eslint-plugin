@@ -64,15 +64,42 @@ function offsetToLoc(text: string, offset: number): { line: number; column: numb
   return { line: lines.length, column: lines[lines.length - 1]?.length ?? 0 };
 }
 
-// Return the absolute source offset of the first character of the SQL that was passed to the parser.
-// Template literals trim the raw content before parsing; string literals do not.
-function sqlStartOffset(sqlNode: TSESTree.Node): number {
-  const afterQuote = sqlNode.range[0] + 1; // skip the opening backtick or quote
+// Maps a SQL-string offset (as produced by the PEG parser) back to an absolute source offset.
+// Each quasi in a TemplateLiteral contributes a segment; template expressions have no SQL width
+// but do occupy source characters, so a naïve single-offset approach gives wrong results when
+// the error location is in a quasi that follows one or more template expressions.
+interface SqlSourceSegment {
+  sqlStart: number; // offset in the trimmed SQL where this quasi's content begins
+  srcStart: number; // absolute source offset where this quasi's content begins
+}
+
+function buildSqlMapping(sqlNode: TSESTree.Node): SqlSourceSegment[] {
   if (sqlNode.type !== AST_NODE_TYPES.TemplateLiteral) {
-    return afterQuote;
+    // String literals: single segment, content starts one char after the opening quote.
+    return [{ sqlStart: 0, srcStart: sqlNode.range[0] + 1 }];
   }
   const rawSql = sqlNode.quasis.map((quasi) => quasi.value.cooked ?? '').join('');
-  return afterQuote + (rawSql.length - rawSql.trimStart().length);
+  const trimStart = rawSql.length - rawSql.trimStart().length;
+  const segments: SqlSourceSegment[] = [];
+  let sqlCursor = 0;
+  for (const [index, quasi] of sqlNode.quasis.entries()) {
+    const cooked = quasi.value.cooked ?? '';
+    const localTrim = index === 0 ? trimStart : 0;
+    // quasi.range[0] is the opening backtick (index 0) or the closing } of the preceding expression.
+    segments.push({ sqlStart: sqlCursor, srcStart: quasi.range[0] + 1 + localTrim });
+    sqlCursor += cooked.length - localTrim;
+  }
+  return segments;
+}
+
+function sqlOffsetToSource(sqlOffset: number, segments: SqlSourceSegment[]): number {
+  for (let index = segments.length - 1; index >= 0; index--) {
+    const seg = segments[index];
+    if (seg !== undefined && sqlOffset >= seg.sqlStart) {
+      return seg.srcStart + (sqlOffset - seg.sqlStart);
+    }
+  }
+  return segments[0]?.srcStart ?? 0;
 }
 
 // ---------------------------------------------------------------------------
@@ -486,7 +513,7 @@ const rule: ESLintUtils.RuleModule<typeof SYNTEXT_ERROR | typeof ATHENA_ERROR> =
         return;
       }
 
-      const sqlStart = sqlStartOffset(sqlNode);
+      const sqlMapping = buildSqlMapping(sqlNode);
       const athenaCtx = createRootContext();
       try {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
@@ -500,8 +527,8 @@ const rule: ESLintUtils.RuleModule<typeof SYNTEXT_ERROR | typeof ATHENA_ERROR> =
             const sourceText = context.sourceCode.getText();
             context.report({
               loc: {
-                start: offsetToLoc(sourceText, sqlStart + astLoc.start.offset),
-                end: offsetToLoc(sourceText, sqlStart + astLoc.end.offset),
+                start: offsetToLoc(sourceText, sqlOffsetToSource(astLoc.start.offset, sqlMapping)),
+                end: offsetToLoc(sourceText, sqlOffsetToSource(astLoc.end.offset, sqlMapping)),
               },
               messageId: ATHENA_ERROR,
               data: { errorMessage: error.message },
