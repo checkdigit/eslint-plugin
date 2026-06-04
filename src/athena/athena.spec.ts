@@ -136,6 +136,42 @@ AND (
 \``,
     },
     {
+      name: 'multiple AND split conditions narrow to v1 card endpoint',
+      code: `\`SELECT json_extract_scalar(responsebody, '$.card.applicationTransactionCounter') AS atc
+FROM "payment-card"
+WHERE method = 'PUT'
+  AND responsestatus = '200'
+  AND split(url, '/')[3] = 'v1'
+  AND split(url, '/')[4] = 'card'
+  AND cardinality(split(url, '/')) = 5\``,
+    },
+    {
+      name: 'OR path conditions - v2-only field accessible via second OR branch',
+      code: `\`SELECT json_extract_scalar(responsebody, '$.card.pinId') AS pinId
+FROM "payment-card"
+WHERE method = 'PUT'
+  AND responsestatus = '200'
+  AND (
+    (split(url, '/')[4] = 'card' AND cardinality(split(url, '/')) = 5)
+    OR
+    (split(url, '/')[6] = 'card' AND cardinality(split(url, '/')) = 7)
+  )\``,
+    },
+    {
+      name: 'self-join with different aliases for same service table',
+      code: `\`SELECT tcm.url, tcmch.url
+FROM "teampay-card-management" AS tcm,
+     "teampay-card-management" AS tcmch
+WHERE tcm.method = 'PUT'
+  AND cardinality(split(tcm.url, '/')) = 5
+  AND split(tcm.url, '/')[4] = 'card'
+  AND tcm.responsestatus = '200'
+  AND split(tcmch.url, '/')[4] = 'cardholder'
+  AND cardinality(split(tcmch.url, '/')) = 5
+  AND tcmch.responsestatus = '200'
+  AND tcmch.method = 'PUT'\``,
+    },
+    {
       name: 'complex query - only SELECT - 1 table - with alias',
       code: `\`SELECT
         json_extract_scalar(l.responseheaders, '$["created-on"]') AS linkCreatedOn
@@ -1715,7 +1751,7 @@ order by
     },
     {
       name: 'AND/OR conditions in WHERE',
-      code: `\`select 
+      code: `\`select
     json_extract(requestbody, '$.encryptedCardNumber') AS encryptedCardNumber,
     json_extract(requestbody, '$.cardNumberLength') AS cardNumberLength
     ,json_extract(requestbody, '$.xxx') AS xxx
@@ -1729,6 +1765,44 @@ order by
           messageId: 'AthenaError',
           data: {
             errorMessage: 'property not found requestbody - $.xxx',
+          },
+        },
+      ],
+    },
+    {
+      name: 'multiple AND conditions restrict to v2 endpoint - v1-only field is not available',
+      code: `\`SELECT json_extract_scalar(responsebody, '$.card.applicationTransactionCounter') AS atc
+FROM "payment-card"
+WHERE method = 'PUT'
+  AND responsestatus = '200'
+  AND split(url, '/')[3] = 'v2'
+  AND split(url, '/')[6] = 'card'
+  AND cardinality(split(url, '/')) = 7\``,
+      errors: [
+        {
+          messageId: 'AthenaError',
+          data: {
+            errorMessage: 'property not found responsebody - $.card.applicationTransactionCounter',
+          },
+        },
+      ],
+    },
+    {
+      name: 'OR conditions - field absent from all matched endpoints',
+      code: `\`SELECT json_extract_scalar(responsebody, '$.card.nonExistentField') AS x
+FROM "payment-card"
+WHERE method = 'PUT'
+  AND responsestatus = '200'
+  AND (
+    (split(url, '/')[4] = 'card' AND cardinality(split(url, '/')) = 5)
+    OR
+    (split(url, '/')[6] = 'card' AND cardinality(split(url, '/')) = 7)
+  )\``,
+      errors: [
+        {
+          messageId: 'AthenaError',
+          data: {
+            errorMessage: 'property not found responsebody - $.card.nonExistentField',
           },
         },
       ],

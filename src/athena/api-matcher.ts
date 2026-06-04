@@ -1,10 +1,10 @@
 // athena/api-matcher.ts
 
 import debug from 'debug';
-import { JSONPath } from 'jsonpath-plus';
 import type { SchemaObject } from 'ajv/dist/2020';
 
 import type { ApiSchemas, OperationSchemas } from '../openapi/generate-schema';
+import type { Binary, ColumnRefItem, Function as SqlFunction } from './types';
 
 const log = debug('eslint-plugin:athena:api-matcher');
 
@@ -21,105 +21,226 @@ export interface MatchedOperation {
   response: SchemaObject;
 }
 
-type Matcher = (path: string, method: string) => boolean;
+// A predicate over an API operation candidate: (url path, HTTP method, HTTP response code)
+type OperationPredicate = (path: string, method: string, responseCode: string) => boolean;
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function getVersionMatcher(_selectAST: object, _tableAST: object): Matcher | undefined {
+const ALWAYS_TRUE: OperationPredicate = () => true;
+
+// --- AST accessor helpers (use Record<string,unknown> to avoid TypeScript narrowing conflicts) ---
+
+function rec(node: unknown): Record<string, unknown> | undefined {
+  return typeof node === 'object' && node !== null ? (node as Record<string, unknown>) : undefined;
+}
+
+function getFunctionName(node: unknown): string | undefined {
+  const fn = rec(node);
+  if (fn?.['type'] !== 'function') {
+    return undefined;
+  }
+  const name = fn['name'] as SqlFunction['name'] | undefined;
+  const firstName = name?.name[0];
+  return firstName === undefined ? undefined : firstName.value.toLowerCase();
+}
+
+function getColumnName(node: unknown): string | undefined {
+  const col = rec(node);
+  if (col?.['type'] !== 'column_ref') {
+    return undefined;
+  }
+  const column = (node as ColumnRefItem).column;
+  return typeof column === 'string' ? column.toLowerCase() : undefined;
+}
+
+function getColumnTable(node: unknown): string | null | undefined {
+  const col = rec(node);
+  if (col?.['type'] !== 'column_ref') {
+    return undefined;
+  }
+  return (node as ColumnRefItem).table;
+}
+
+function getStringValue(node: unknown): string | undefined {
+  const val = rec(node);
+  if (val?.['type'] !== 'single_quote_string' && val?.['type'] !== 'string') {
+    return undefined;
+  }
+  return typeof val['value'] === 'string' ? val['value'] : undefined;
+}
+
+function getNumberValue(node: unknown): number | undefined {
+  const val = rec(node);
+  return val?.['type'] === 'number' && typeof val['value'] === 'number' ? val['value'] : undefined;
+}
+
+// Matches: split(url, '/')[N]  — a Function node carrying an array_index extension
+interface SplitUrlIndexed extends SqlFunction {
+  array_index: { brackets: true; index: { type: string; value: unknown } }[];
+}
+function isSplitUrlIndexed(node: unknown): node is SplitUrlIndexed {
+  const fn = rec(node);
+  if (fn?.['type'] !== 'function') {
+    return false;
+  }
+  if (getFunctionName(node) !== 'split') {
+    return false;
+  }
+  const args = (fn['args'] as { value?: unknown[] } | undefined)?.value;
+  if (!Array.isArray(args) || args.length < 2) {
+    return false;
+  }
+  if (getColumnName(args[0]) !== 'url') {
+    return false;
+  }
+  if (getStringValue(args[1]) !== '/') {
+    return false;
+  }
+  return Array.isArray(fn['array_index']) && (fn['array_index'] as unknown[]).length > 0;
+}
+
+// Matches: cardinality(split(url, '/'))
+function isCardinalitySplitUrl(node: unknown): node is SqlFunction {
+  const fn = rec(node);
+  if (fn?.['type'] !== 'function') {
+    return false;
+  }
+  if (getFunctionName(node) !== 'cardinality') {
+    return false;
+  }
+  const outerArgs = (fn['args'] as { value?: unknown[] } | undefined)?.value;
+  if (!Array.isArray(outerArgs) || outerArgs.length === 0) {
+    return false;
+  }
+  const innerFn = rec(outerArgs[0]);
+  if (innerFn?.['type'] !== 'function') {
+    return false;
+  }
+  if (getFunctionName(outerArgs[0]) !== 'split') {
+    return false;
+  }
+  const innerArgs = (innerFn['args'] as { value?: unknown[] } | undefined)?.value;
+  if (!Array.isArray(innerArgs) || innerArgs.length < 2) {
+    return false;
+  }
+  return getColumnName(innerArgs[0]) === 'url' && getStringValue(innerArgs[1]) === '/';
+}
+
+// Returns the table qualifier of the left-hand side of a matchable binary condition.
+// null means unqualified (applies to every table); undefined means indeterminate.
+function getConditionTableQualifier(left: unknown): string | null | undefined {
+  const colName = getColumnName(left);
+  if (colName !== undefined) {
+    return getColumnTable(left);
+  }
+
+  if (isSplitUrlIndexed(left)) {
+    const args = (rec(left)?.['args'] as { value?: unknown[] } | undefined)?.value;
+    return getColumnTable(args?.[0]) ?? null;
+  }
+  if (isCardinalitySplitUrl(left)) {
+    const outerArgs = (rec(left)?.['args'] as { value?: unknown[] } | undefined)?.value;
+    const splitFn = rec(outerArgs?.[0]);
+    const innerArgs = (splitFn?.['args'] as { value?: unknown[] } | undefined)?.value;
+    return getColumnTable(innerArgs?.[0]) ?? null;
+  }
   return undefined;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function getPathPartMatcher(selectAST: object, _tableAST: object): Matcher | undefined {
-  const [pathPartCondition]: object[] = JSONPath({
-    json: selectAST,
-    path: "$.where..[?(@ && @.type === 'binary_expr' && @.operator === '=' && @.left && @.left.type === 'function' && @.left.name && @.left.name.name && @.left.name.name[0] && @.left.name.name[0].value === 'split' && @.left.args && @.left.args.value && @.left.args.value[0] && @.left.args.value[0].type === 'column_ref' && @.left.args.value[0].column === 'url' && @.left.args.value[1] && @.left.args.value[1].type === 'single_quote_string' && @.left.args.value[1].value === '/' && @.left.array_index && @.left.array_index[0] && @.left.array_index[0].brackets === true && @.left.array_index[0].index && @.left.array_index[0].index.type === 'number')]",
-  }); /*?*/
-  // log('pathPartCondition', pathPartCondition);
+// --- Predicate builders ---
 
-  if (pathPartCondition !== undefined) {
-    const [pathPartIndex]: [number] = JSONPath({
-      json: pathPartCondition,
-      path: '$.left.array_index[0].index.value',
-    }); /*?*/
-    const [pathPartMatch]: [string] = JSONPath({
-      json: pathPartCondition,
-      path: '$.right.value',
-    }); /*?*/
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    return (path: string, _method: string) => {
-      const parts = path.split('/'); /*?*/
-      const part = parts[pathPartIndex - 1]; //athena index is larger than js index by one /*?*/
-      log(`checking path part`, { path, pathPartIndex, part, pathPartMatch });
-      return part?.startsWith(':') === true
-        ? true // ignore path part if it presents a dynamic input parameter
-        : parts[pathPartIndex - 1] === pathPartMatch; // try to match with static path part
-    };
+// tableAlias: the alias (or null if none) of the FROM-clause item we are currently matching.
+// Conditions that explicitly reference a different alias are skipped (treated as ALWAYS_TRUE).
+function buildLeafPredicate(node: Binary, tableAlias: string | null): OperationPredicate | undefined {
+  if (node.operator !== '=') {
+    return undefined;
+  }
+  const { left, right } = node;
+
+  const conditionTable = getConditionTableQualifier(left);
+  // conditionTable === null  → unqualified, applies to all tables
+  // conditionTable === string → qualified; skip if it names a different alias
+  if (conditionTable !== null && conditionTable !== undefined && tableAlias !== null && conditionTable !== tableAlias) {
+    return undefined;
+  }
+
+  // method = 'GET'
+  if (getColumnName(left) === 'method') {
+    const value = getStringValue(right);
+    if (value !== undefined) {
+      return (_path, method) => method === value;
+    }
+  }
+
+  // responsestatus = '200'
+  if (getColumnName(left) === 'responsestatus') {
+    const value = getStringValue(right);
+    if (value !== undefined) {
+      return (_path, _method, responseCode) => responseCode === value;
+    }
+  }
+
+  // split(url, '/')[N] = 'value'
+  if (isSplitUrlIndexed(left)) {
+    const index = left.array_index[0]?.index.value;
+    const value = getStringValue(right);
+    if (typeof index === 'number' && value !== undefined) {
+      return (path) => {
+        const parts = path.split('/');
+        const part = parts[index - 1]; // athena index is 1-based
+        log(`checking path part`, { path, index, part, value });
+        return part?.startsWith(':') === true ? true : part === value;
+      };
+    }
+  }
+
+  // cardinality(split(url, '/')) = N
+  if (isCardinalitySplitUrl(left)) {
+    const count = getNumberValue(right);
+    if (count !== undefined) {
+      return (path) => path.split('/').length === count;
+    }
   }
 
   return undefined;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function getPathPartsCountMatcher(selectAST: object, _tableAST: object): Matcher | undefined {
-  // log('getPathPartsCountMatcher', JSON.stringify(selectAST, undefined, 2));
-  const [pathPartCount]: number[] = JSONPath({
-    json: selectAST,
-    path: "$.where..[?(@ && @.type === 'binary_expr' && @.operator === '=' &&  @.left && @.left.type === 'function' && @.left.name && @.left.name.name && @.left.name.name[0] && @.left.name.name[0].value === 'cardinality' && @.right && @.right.type === 'number' && @.left.args && @.left.args.value && @.left.args.value[0] && @.left.args.value[0].type === 'function' && @.left.args.value[0].name && @.left.args.value[0].name.name && @.left.args.value[0].name.name[0] && @.left.args.value[0].name.name[0].value === 'split' && @.left.args.value[0].args && @.left.args.value[0].args.value && @.left.args.value[0].args.value[0] && @.left.args.value[0].args.value[0].type === 'column_ref' && @.left.args.value[0].args.value[0].column === 'url' && @.left.args.value[0].args.value[1] && @.left.args.value[0].args.value[1].type === 'single_quote_string' && @.left.args.value[0].args.value[1].value === '/')].right.value",
-  }); /*?*/
-
-  if (pathPartCount !== undefined) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    return (path: string, _method: string) => {
-      const parts = path.split('/');
-      return parts.length === pathPartCount;
-    };
+function buildPredicate(expr: unknown, tableAlias: string | null): OperationPredicate {
+  const node = rec(expr);
+  if (node?.['type'] !== 'binary_expr') {
+    return ALWAYS_TRUE;
   }
 
-  return undefined;
-}
+  const binary = expr as Binary;
 
-function getPathMatchers(selectAST: object, tableAST: object) {
-  return [getPathPartMatcher(selectAST, tableAST), getPathPartsCountMatcher(selectAST, tableAST)];
-}
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function getMethodMatcher(selectAST: object, _tableAST: object): Matcher | undefined {
-  const [methodToMatch]: string[] = JSONPath({
-    json: selectAST,
-    path: "$.where..[?(@ && @.type === 'binary_expr' && @.operator === '=' && @.left && @.left.type === 'column_ref' && @.left.column === 'method' && @.right && @.right.type === 'single_quote_string')].right.value",
-  }); /*?*/
-
-  if (methodToMatch !== undefined) {
-    return (_path: string, method: string) => method === methodToMatch;
+  switch (binary.operator) {
+    case 'AND': {
+      const leftPred = buildPredicate(binary.left, tableAlias);
+      const rightPred = buildPredicate(binary.right, tableAlias);
+      return (path, method, code) => leftPred(path, method, code) && rightPred(path, method, code);
+    }
+    case 'OR': {
+      const leftPred = buildPredicate(binary.left, tableAlias);
+      const rightPred = buildPredicate(binary.right, tableAlias);
+      return (path, method, code) => leftPred(path, method, code) || rightPred(path, method, code);
+    }
+    case 'NOT': {
+      const innerPred = buildPredicate(binary.left, tableAlias);
+      return (path, method, code) => !innerPred(path, method, code);
+    }
+    default: {
+      return buildLeafPredicate(binary, tableAlias) ?? ALWAYS_TRUE;
+    }
   }
-  return undefined;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function getResponseStatusToMatch(selectAST: object, _tableAST: object): string | undefined {
-  const [responseStatus]: string[] = JSONPath({
-    json: selectAST,
-    path: "$.where..[?(@ && @.type === 'binary_expr' && @.operator === '=' && @.left && @.left.type === 'column_ref' && @.left.column === 'responsestatus' && @.right && @.right.type === 'single_quote_string')].right.value",
-  }); /*?*/
-
-  return responseStatus;
-}
-
-// [TODO:] match only relevent table in case multiple tables are joined
 export function matchApi(
   selectAST: object,
   tableAST: object,
   apiSchemas: ApiSchemas[],
 ): MatchedOperation[] | undefined {
-  const schemaMatchers: Matcher[] = [
-    getVersionMatcher(selectAST, tableAST),
-    getPathMatchers(selectAST, tableAST),
-    getMethodMatcher(selectAST, tableAST),
-  ]
-    .flat()
-    .filter<Matcher>((matcher) => matcher !== undefined);
+  const tableAlias = (tableAST as { as?: string | null }).as ?? null;
+  const predicate = buildPredicate((selectAST as { where?: unknown }).where ?? null, tableAlias);
 
-  const allOperationSchemas: OperationToMatch[] = apiSchemas
+  const allOperations: OperationToMatch[] = apiSchemas
     .flatMap((apiSchema) => Object.entries(apiSchema.apis))
     .flatMap(([path, operations]) =>
       Object.entries(operations).map(([method, operationSchemas]) => ({
@@ -128,41 +249,19 @@ export function matchApi(
         operationSchemas,
       })),
     );
-  log('total operation schemas', allOperationSchemas.length);
+  log('total operation schemas', allOperations.length);
 
-  const matchedOperationSchemas = allOperationSchemas.filter(({ path, method }) =>
-    schemaMatchers.every((matcher) => matcher(path, method)),
+  const matchedApis = allOperations.flatMap(({ path, method, operationSchemas }) =>
+    Object.entries(operationSchemas.responses).flatMap(([responseCode, responseSchema]) =>
+      predicate(path, method, responseCode)
+        ? [{ path, method, request: operationSchemas.request, response: responseSchema }]
+        : [],
+    ),
   );
-  log('matched operation schemas', matchedOperationSchemas.length);
+  log('matched apis', matchedApis.length);
 
-  if (matchedOperationSchemas.length === 0) {
-    log('no matched operation schema');
-    throw new Error('no matched operation schema');
-  }
-
-  const matchedResponseStatus = getResponseStatusToMatch(selectAST, tableAST);
-  // [TODO:] should we allow multiple response status?
-  // assert.ok(matchedResponseStatus !== undefined);
-  log('matchedResponseStatus', matchedResponseStatus);
-
-  const matchedApis = matchedOperationSchemas
-    .flatMap((operation) =>
-      Object.entries(operation.operationSchemas.responses).map(([responseCode, responseSchema]) => {
-        const matchedResponseSchema =
-          matchedResponseStatus === undefined || responseCode === matchedResponseStatus ? responseSchema : undefined;
-        return matchedResponseSchema === undefined
-          ? undefined
-          : {
-              path: operation.path,
-              method: operation.method,
-              request: operation.operationSchemas.request,
-              response: matchedResponseSchema,
-            };
-      }),
-    )
-    .filter((api) => api !== undefined);
   if (matchedApis.length === 0) {
-    log('no api satisfy both request and response matchers');
+    log('no matched api');
     throw new Error('no matched api');
   }
   return matchedApis;
