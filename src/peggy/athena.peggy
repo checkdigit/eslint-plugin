@@ -1906,6 +1906,7 @@ column_ref
         table: tbl[3],
         column: col[3],
         collate: ce && ce[1],
+        ...getLocationObject(),
       };
     }
   / tbl:ident __ DOT __ col:column ce:(__ collate_expr)? {
@@ -1915,6 +1916,7 @@ column_ref
         table: tbl,
         column: col,
         collate: ce && ce[1],
+        ...getLocationObject(),
       };
     }
   / col:column ce:(__ collate_expr)? {
@@ -1924,6 +1926,7 @@ column_ref
         table: null,
         column: col,
         collate: ce && ce[1],
+        ...getLocationObject(),
       };
     }
 

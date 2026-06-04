@@ -231,6 +231,25 @@ WHERE method = 'PUT'
       ],
     },
     {
+      // nonExistentCol at SQL offsets 7–21 (exclusive). Source: backtick at 0, srcStart=1.
+      // start: 1+7=8 → line 1, 0-based col 8 → RuleTester col 9.
+      // end:   1+21=22 → line 1, 0-based col 22 → RuleTester endCol 23.
+      name: 'non-existing column with multiple tables lists all tables in error and narrows location to the column_ref',
+      code: `\`SELECT nonExistentCol FROM link, "payment-card"\``,
+      errors: [
+        {
+          messageId: 'AthenaError',
+          data: {
+            errorMessage: "can't found column nonExistentCol in tables: link, payment-card",
+          },
+          line: 1,
+          column: 9,
+          endLine: 1,
+          endColumn: 23,
+        },
+      ],
+    },
+    {
       name: 'query target endpoint - only SELECT - 1 table - without alias',
       code: `\`SELECT
         json_extract_scalar(responseheaders, '$.foo') AS linkCreatedOn
@@ -1892,6 +1911,23 @@ FROM "payment-card" WHERE method = 'GET' AND responsestatus = '200'\``,
           column: 14,
           endLine: 1,
           endColumn: 70,
+        },
+      ],
+    },
+    {
+      // nonExistentCol at SQL offsets 7–21 (exclusive). Source: backtick at 0, srcStart=1.
+      // start: 1+7=8 → line 1, 0-based col 8 → RuleTester col 9.
+      // end:   1+21=22 → line 1, 0-based col 22 → RuleTester endCol 23.
+      name: 'error location is narrowed to the exact column_ref when the column is not found',
+      code: `\`SELECT nonExistentCol FROM "payment-card" WHERE method = 'GET' AND responsestatus = '200'\``,
+      errors: [
+        {
+          messageId: 'AthenaError',
+          data: { errorMessage: "can't found column nonExistentCol in tables: payment-card" },
+          line: 1,
+          column: 9,
+          endLine: 1,
+          endColumn: 23,
         },
       ],
     },

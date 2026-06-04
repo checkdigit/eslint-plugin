@@ -365,7 +365,7 @@ function resolveSingleColumnRef(
 
   if (resolvedColumns.length === 0) {
     const tableNames = [...ctx.tables.keys()].join(', ');
-    throw new AthenaError(ATHENA_ERROR, `can't found column ${colRef} in tables: ${tableNames}`, columnAST as object);
+    throw new AthenaError(ATHENA_ERROR, `can't found column ${colRef} in tables: ${tableNames}`, ref);
   }
 
   const propertyAccessor = extractJsonExtractPath(columnAST) ?? extractBracketAccessorPath(columnAST);
