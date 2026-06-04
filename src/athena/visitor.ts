@@ -302,6 +302,7 @@ export function extractJsonExtractPath(expr: unknown): string | undefined {
 export interface JsonExtractCall {
   ref: ColumnRefItem;
   path: string;
+  fnNode: Function;
 }
 
 /** Collect ALL json_extract / json_extract_scalar calls as (source column_ref, path) pairs. */
@@ -327,7 +328,7 @@ export function extractJsonExtractCalls(expr: unknown): JsonExtractCall[] {
       if (ref === undefined || typeof path !== 'string') {
         return;
       }
-      calls.push({ ref, path });
+      calls.push({ ref, path, fnNode: node });
     },
   });
   return calls;

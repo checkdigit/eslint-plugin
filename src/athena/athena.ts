@@ -10,7 +10,7 @@ import { strict as assert } from 'node:assert';
 
 import debug from 'debug';
 import { JSONPath } from 'jsonpath-plus';
-import { ESLintUtils, type TSESTree } from '@typescript-eslint/utils';
+import { AST_NODE_TYPES, ESLintUtils, type TSESTree } from '@typescript-eslint/utils';
 import type { SchemaObject } from 'ajv/dist/2020';
 
 import { parse } from '../peggy/athena-peggy.ts';
@@ -46,11 +46,33 @@ const ATHENA_ERROR = 'AthenaError';
 
 class AthenaError extends Error {
   public code: string;
-  constructor(code: string, message: string) {
+  public ast?: object;
+  constructor(code: string, message: string, ast?: object) {
     super(message);
     this.code = code;
     this.name = 'AthenaError';
+    if (ast !== undefined) {
+      this.ast = ast;
+    }
   }
+}
+
+// Convert a 0-based character offset in `text` to a 1-based line / 0-based column ESLint location.
+function offsetToLoc(text: string, offset: number): { line: number; column: number } {
+  const prefix = text.slice(0, offset);
+  const lines = prefix.split('\n');
+  return { line: lines.length, column: lines[lines.length - 1]?.length ?? 0 };
+}
+
+// Return the absolute source offset of the first character of the SQL that was passed to the parser.
+// Template literals trim the raw content before parsing; string literals do not.
+function sqlStartOffset(sqlNode: TSESTree.Node): number {
+  const afterQuote = sqlNode.range[0] + 1; // skip the opening backtick or quote
+  if (sqlNode.type !== AST_NODE_TYPES.TemplateLiteral) {
+    return afterQuote;
+  }
+  const rawSql = sqlNode.quasis.map((quasi) => quasi.value.cooked ?? '').join('');
+  return afterQuote + (rawSql.length - rawSql.trimStart().length);
 }
 
 // ---------------------------------------------------------------------------
@@ -233,6 +255,7 @@ function resolveSchemaAtPath(
   colRef: string,
   propertyAccessor: string,
   resolvedColumns: ResolvedColumn[],
+  ast?: object,
 ): SchemaObject[] {
   // Double-dot handles allOf / anyOf / oneOf wrappers that may appear in the schema.
   // eslint-disable-next-line prefer-named-capture-group
@@ -245,7 +268,7 @@ function resolveSchemaAtPath(
   log('extracted schemas', extractedSchemas);
 
   if (extractedSchemas.length === 0) {
-    throw new AthenaError(ATHENA_ERROR, `property not found ${colRef} - ${propertyAccessor}`);
+    throw new AthenaError(ATHENA_ERROR, `property not found ${colRef} - ${propertyAccessor}`, ast);
   }
   return extractedSchemas;
 }
@@ -258,7 +281,9 @@ function navigateSchemaPath(
   columnAST: unknown,
   columns: Map<string, ResolvedColumn[]>,
 ): void {
-  const extractedSchemas = resolveSchemaAtPath(colRef, propertyAccessor, resolvedColumns);
+  // Prefer the inner function/expression node for location: the Column wrapper rarely carries loc.
+  const errorAst = (extractJsonExtractCalls(columnAST)[0]?.fnNode ?? columnAST) as object;
+  const extractedSchemas = resolveSchemaAtPath(colRef, propertyAccessor, resolvedColumns, errorAst);
   columns.set(
     colName,
     extractedSchemas.map((schema) => resolvedCol(colName, schema, columnAST as object)),
@@ -271,7 +296,7 @@ function navigateSchemaPath(
 
 /** Validate all json_extract / json_extract_scalar paths in a complex column expression. */
 function validateComplexColumnExpression(columnAST: unknown, allTables: ResolvedTable[], ctx: VisitContext): void {
-  for (const { ref, path } of extractJsonExtractCalls(columnAST)) {
+  for (const { ref, path, fnNode } of extractJsonExtractCalls(columnAST)) {
     const tableRef = ref.table ?? undefined;
     const colRef = typeof ref.column === 'string' ? ref.column : undefined;
     if (colRef === undefined) {
@@ -280,7 +305,7 @@ function validateComplexColumnExpression(columnAST: unknown, allTables: Resolved
     const referencedTables = tableRef !== undefined ? lookupTables(tableRef, ctx) : allTables;
     const resolvedColumns = referencedTables.flatMap((table) => table.columns.get(colRef) ?? []);
     if (resolvedColumns.length > 0) {
-      resolveSchemaAtPath(colRef, path, resolvedColumns); // throws if path not found
+      resolveSchemaAtPath(colRef, path, resolvedColumns, fnNode); // throws if path not found
     }
   }
 }
@@ -313,7 +338,7 @@ function resolveSingleColumnRef(
 
   if (resolvedColumns.length === 0) {
     const tableNames = [...ctx.tables.keys()].join(', ');
-    throw new AthenaError(ATHENA_ERROR, `can't found column ${colRef} in tables: ${tableNames}`);
+    throw new AthenaError(ATHENA_ERROR, `can't found column ${colRef} in tables: ${tableNames}`, columnAST as object);
   }
 
   const propertyAccessor = extractJsonExtractPath(columnAST) ?? extractBracketAccessorPath(columnAST);
@@ -461,6 +486,7 @@ const rule: ESLintUtils.RuleModule<typeof SYNTEXT_ERROR | typeof ATHENA_ERROR> =
         return;
       }
 
+      const sqlStart = sqlStartOffset(sqlNode);
       const athenaCtx = createRootContext();
       try {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
@@ -468,11 +494,25 @@ const rule: ESLintUtils.RuleModule<typeof SYNTEXT_ERROR | typeof ATHENA_ERROR> =
       } catch (error) {
         log('error checking Athena AST', { error, sql });
         if (error instanceof AthenaError) {
-          context.report({
-            node: sqlNode,
-            messageId: ATHENA_ERROR,
-            data: { errorMessage: error.message },
-          });
+          const astLoc = (error.ast as { loc?: { start: { offset: number }; end: { offset: number } } } | undefined)
+            ?.loc;
+          if (astLoc !== undefined) {
+            const sourceText = context.sourceCode.getText();
+            context.report({
+              loc: {
+                start: offsetToLoc(sourceText, sqlStart + astLoc.start.offset),
+                end: offsetToLoc(sourceText, sqlStart + astLoc.end.offset),
+              },
+              messageId: ATHENA_ERROR,
+              data: { errorMessage: error.message },
+            });
+          } else {
+            context.report({
+              node: sqlNode,
+              messageId: ATHENA_ERROR,
+              data: { errorMessage: error.message },
+            });
+          }
         } else {
           // eslint-disable-next-line no-console
           console.error(`Failed to apply ${ruleId} rule for "${context.filename}":`, error);

@@ -1836,6 +1836,44 @@ WHERE method = 'PUT'
       ],
     },
     {
+      name: 'error location is narrowed to the exact json_extract_scalar call (single-line SQL)',
+      // json_extract_scalar starts at SQL offset 7 (after "SELECT ") and ends at offset 63.
+      // sqlStartOffset = 1 (backtick at code[0], SQL content at code[1]).
+      // start: 1+7=8 → line 1, 0-based col 8 → RuleTester col 9.
+      // end:   1+63=64 → line 1, 0-based col 64 → RuleTester endCol 65.
+      code: `\`SELECT json_extract_scalar(responsebody, '$.nonExistentField') AS x FROM "payment-card" WHERE method = 'GET' AND responsestatus = '200'\``,
+      errors: [
+        {
+          messageId: 'AthenaError',
+          data: { errorMessage: 'property not found responsebody - $.nonExistentField' },
+          line: 1,
+          column: 9,
+          endLine: 1,
+          endColumn: 65,
+        },
+      ],
+    },
+    {
+      name: 'error location is narrowed to the exact json_extract_scalar call (multi-line SQL, call on line 2)',
+      // json_extract_scalar starts at SQL offset 9 (SELECT\n + 2 spaces) and ends at offset 65.
+      // sqlStartOffset = 1.
+      // start: 1+9=10  → splits to line 2, 0-based col 2 → RuleTester line 2, col 3.
+      // end:   1+65=66 → splits to line 2, 0-based col 58 → RuleTester endLine 2, endCol 59.
+      code: `\`SELECT
+  json_extract_scalar(responsebody, '$.nonExistentField') AS x
+FROM "payment-card" WHERE method = 'GET' AND responsestatus = '200'\``,
+      errors: [
+        {
+          messageId: 'AthenaError',
+          data: { errorMessage: 'property not found responsebody - $.nonExistentField' },
+          line: 2,
+          column: 3,
+          endLine: 2,
+          endColumn: 59,
+        },
+      ],
+    },
+    {
       name: 'schema validation should work for complex column expression - using || operator and invalid property used not as the first part in the expression',
       code: `\`select 
     json_extract(requestbody, '$.encryptedCardNumber') || json_extract(requestbody, '$.xxx')
