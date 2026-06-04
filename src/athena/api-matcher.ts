@@ -97,6 +97,25 @@ function isSplitUrlIndexed(node: unknown): node is SplitUrlIndexed {
   return Array.isArray(fn['array_index']) && (fn['array_index'] as unknown[]).length > 0;
 }
 
+// Matches: split_part(url, '/', N)  — Presto-style, index in args[2] (1-based)
+function isSplitPartUrl(node: unknown): node is SqlFunction {
+  const fn = rec(node);
+  if (fn?.['type'] !== 'function') {
+    return false;
+  }
+  if (getFunctionName(node) !== 'split_part') {
+    return false;
+  }
+  const args = (fn['args'] as { value?: unknown[] } | undefined)?.value;
+  if (!Array.isArray(args) || args[2] === undefined) {
+    return false;
+  }
+  if (getColumnName(args[0]) !== 'url') {
+    return false;
+  }
+  return getStringValue(args[1]) === '/' && getNumberValue(args[2]) !== undefined;
+}
+
 // Matches: cardinality(split(url, '/'))
 function isCardinalitySplitUrl(node: unknown): node is SqlFunction {
   const fn = rec(node);
@@ -133,6 +152,10 @@ function getConditionTableQualifier(left: unknown): string | null | undefined {
   }
 
   if (isSplitUrlIndexed(left)) {
+    const args = (rec(left)?.['args'] as { value?: unknown[] } | undefined)?.value;
+    return getColumnTable(args?.[0]) ?? null;
+  }
+  if (isSplitPartUrl(left)) {
     const args = (rec(left)?.['args'] as { value?: unknown[] } | undefined)?.value;
     return getColumnTable(args?.[0]) ?? null;
   }
@@ -187,6 +210,21 @@ function buildLeafPredicate(node: Binary, tableAlias: string | null): OperationP
         const parts = path.split('/');
         const part = parts[index - 1]; // athena index is 1-based
         log(`checking path part`, { path, index, part, value });
+        return part?.startsWith(':') === true ? true : part === value;
+      };
+    }
+  }
+
+  // split_part(url, '/', N) = 'value'
+  if (isSplitPartUrl(left)) {
+    const args = (rec(left)?.['args'] as { value?: unknown[] } | undefined)?.value;
+    const index = getNumberValue(args?.[2]);
+    const value = getStringValue(right);
+    if (index !== undefined && value !== undefined) {
+      return (path) => {
+        const parts = path.split('/');
+        const part = parts[index - 1]; // 1-based
+        log('checking split_part path part', { path, index, part, value });
         return part?.startsWith(':') === true ? true : part === value;
       };
     }

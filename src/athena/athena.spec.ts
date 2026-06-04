@@ -172,6 +172,16 @@ WHERE tcm.method = 'PUT'
   AND tcmch.method = 'PUT'\``,
     },
     {
+      name: 'split_part conditions narrow to v1 card endpoint',
+      code: `\`SELECT json_extract_scalar(responsebody, '$.card.applicationTransactionCounter') AS atc
+FROM "payment-card"
+WHERE method = 'PUT'
+  AND responsestatus = '200'
+  AND split_part(url, '/', 3) = 'v1'
+  AND split_part(url, '/', 4) = 'card'
+  AND cardinality(split(url, '/')) = 5\``,
+    },
+    {
       name: 'complex query - only SELECT - 1 table - with alias',
       code: `\`SELECT
         json_extract_scalar(l.responseheaders, '$["created-on"]') AS linkCreatedOn
@@ -1803,6 +1813,24 @@ WHERE method = 'PUT'
           messageId: 'AthenaError',
           data: {
             errorMessage: 'property not found responsebody - $.card.nonExistentField',
+          },
+        },
+      ],
+    },
+    {
+      name: 'split_part conditions restrict to v2 endpoint - v1-only field is not available',
+      code: `\`SELECT json_extract_scalar(responsebody, '$.card.applicationTransactionCounter') AS atc
+FROM "payment-card"
+WHERE method = 'PUT'
+  AND responsestatus = '200'
+  AND split_part(url, '/', 3) = 'v2'
+  AND split_part(url, '/', 6) = 'card'
+  AND cardinality(split(url, '/')) = 7\``,
+      errors: [
+        {
+          messageId: 'AthenaError',
+          data: {
+            errorMessage: 'property not found responsebody - $.card.applicationTransactionCounter',
           },
         },
       ],
