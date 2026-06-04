@@ -1773,5 +1773,74 @@ order by
         },
       ],
     },
+    {
+      name: 'schema validation should work inside WHERE conditions as well',
+      code: `\`select * FROM
+    "payment-card"
+  WHERE
+    method = 'PUT'
+    and json_extract_scalar(requestbody, '$.xxx') = 'XXX'
+\``,
+      errors: [
+        {
+          messageId: 'AthenaError',
+          data: {
+            errorMessage: 'property not found requestbody - $.xxx',
+          },
+        },
+      ],
+    },
+    {
+      name: 'schema validation should work inside GROUP BY as well',
+      code: `\`select count(*) FROM
+    "payment-card"
+  WHERE
+    method = 'PUT'
+  GROUP BY json_extract_scalar(requestbody, '$.xxx')
+\``,
+      errors: [
+        {
+          messageId: 'AthenaError',
+          data: {
+            errorMessage: 'property not found requestbody - $.xxx',
+          },
+        },
+      ],
+    },
+    {
+      name: 'schema validation should work inside HAVING as well',
+      code: `\`select count(*) FROM
+    "payment-card"
+  WHERE
+    method = 'PUT'
+  GROUP BY method
+  HAVING json_extract_scalar(requestbody, '$.xxx') = 'XXX'
+\``,
+      errors: [
+        {
+          messageId: 'AthenaError',
+          data: {
+            errorMessage: 'property not found requestbody - $.xxx',
+          },
+        },
+      ],
+    },
+    {
+      name: 'schema validation should work inside ORDER BY as well',
+      code: `\`select * FROM
+    "payment-card"
+  WHERE
+    method = 'PUT'
+  ORDER BY json_extract_scalar(requestbody, '$.xxx')
+\``,
+      errors: [
+        {
+          messageId: 'AthenaError',
+          data: {
+            errorMessage: 'property not found requestbody - $.xxx',
+          },
+        },
+      ],
+    },
   ],
 });

@@ -379,6 +379,23 @@ function checkSelect(selectAST: Select | With, ctx: VisitContext, withTableName?
 
   log('resolved columns', [...columns.keys()]);
 
+  // Pass 3: validate JSON paths in WHERE / HAVING / GROUP BY / ORDER BY
+  const allTables = [...selectCtx.tables.values()].flat();
+  if (select.where !== null) {
+    validateComplexColumnExpression(select.where, allTables, selectCtx);
+  }
+  if (select.having !== null) {
+    validateComplexColumnExpression(select.having, allTables, selectCtx);
+  }
+  for (const orderItem of select.orderby ?? []) {
+    validateComplexColumnExpression(orderItem.expr, allTables, selectCtx);
+  }
+  if (select.groupby?.columns !== undefined) {
+    for (const groupCol of select.groupby.columns) {
+      validateComplexColumnExpression(groupCol, allTables, selectCtx);
+    }
+  }
+
   // UNION ALL — next SELECT in the chain
   if (select._next !== undefined) {
     checkSelect(select._next, ctx, withTableName);

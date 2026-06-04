@@ -268,7 +268,7 @@ export interface Select {
   columns: any[] | Column[];
   from: From[] | TableExpr | null;
   where: Binary | Function | null;
-  groupby: { columns: ColumnRef[] | null; modifiers: ValueExpr<string>[] };
+  groupby: { columns: ColumnRef[] | undefined; modifiers: ValueExpr<string>[] } | undefined;
   having: any[] | null;
   orderby: OrderBy[] | null;
   limit: Limit | null;
