@@ -14,7 +14,7 @@ function peg$subclass(child, parent) {
   child.prototype = new C();
 }
 
-function peg$SyntaxError(message, expected, found, location) {
+function peg$SyntaxError(message: any, expected: any, found: any, location: any): Error {
   var self = Error.call(this, message);
   // istanbul ignore next Check is a necessary evil to support older environments
   if (Object.setPrototypeOf) {
@@ -25,6 +25,15 @@ function peg$SyntaxError(message, expected, found, location) {
   self.location = location;
   self.name = 'SyntaxError';
   return self;
+}
+declare namespace peg$SyntaxError {
+  export var buildMessage: (expected: any, found: any) => string;
+}
+declare namespace peg$SyntaxError {
+  export var buildMessage: (expected: any, found: any) => string;
+}
+declare namespace peg$SyntaxError {
+  export var buildMessage: (expected: any, found: any) => string;
 }
 
 peg$subclass(peg$SyntaxError, Error);
@@ -81,7 +90,7 @@ peg$SyntaxError.prototype.format = function (sources) {
   return str;
 };
 
-peg$SyntaxError.buildMessage = function (expected, found) {
+peg$SyntaxError.buildMessage = function (expected, found): string {
   var DESCRIBE_EXPECTATION_FNS = {
     literal: function (expectation) {
       return '"' + literalEscape(expectation.text) + '"';
@@ -185,7 +194,7 @@ peg$SyntaxError.buildMessage = function (expected, found) {
   return 'Expected ' + describeExpected(expected) + ' but ' + describeFound(found) + ' found.';
 };
 
-function peg$parse(input, options) {
+function peg$parse(input: any, options: any): any {
   options = options !== undefined ? options : {};
 
   var peg$FAILED = {};
@@ -22068,6 +22077,6 @@ function peg$parse(input, options) {
   }
 }
 
-const peg$allowedStartRules = ['start'];
+const peg$allowedStartRules: string[] = ['start'];
 
 export { peg$allowedStartRules as StartRules, peg$SyntaxError as SyntaxError, peg$parse as parse };
