@@ -283,6 +283,28 @@ function expandWildcard(referencedTables: ResolvedTable[], columns: Map<string, 
   }
 }
 
+// If every resolved column shares the same object schema, return a hint listing its top-level
+// properties. Returns '' when schemas differ across matched operations or the schema isn't an object.
+function schemaPropertyHint(resolvedColumns: ResolvedColumn[]): string {
+  if (resolvedColumns.length === 0) {
+    return '';
+  }
+  const first = JSON.stringify(resolvedColumns[0]?.schema);
+  if (!resolvedColumns.every((col) => JSON.stringify(col.schema) === first)) {
+    return '';
+  }
+  const schema = resolvedColumns[0]?.schema;
+  if (schema?.type !== 'object') {
+    return '';
+  }
+  const properties = schema.properties;
+  if (properties === undefined) {
+    return '';
+  }
+  const propNames = Object.keys(properties);
+  return propNames.length > 0 ? `; available properties: ${propNames.join(', ')}` : '';
+}
+
 function resolveSchemaAtPath(
   colRef: string,
   propertyAccessor: string,
@@ -300,7 +322,11 @@ function resolveSchemaAtPath(
   log('extracted schemas', extractedSchemas);
 
   if (extractedSchemas.length === 0) {
-    throw new AthenaError(ATHENA_ERROR, `property not found ${colRef} - ${propertyAccessor}`, ast);
+    throw new AthenaError(
+      ATHENA_ERROR,
+      `property not found ${colRef} - ${propertyAccessor}${schemaPropertyHint(resolvedColumns)}`,
+      ast,
+    );
   }
   return extractedSchemas;
 }
@@ -370,7 +396,12 @@ function resolveSingleColumnRef(
 
   if (resolvedColumns.length === 0) {
     const tableNames = [...ctx.tables.keys()].join(', ');
-    throw new AthenaError(ATHENA_ERROR, `can't found column ${colRef} in tables: ${tableNames}`, ref);
+    const availableCols = [...new Set(referencedTables.flatMap((table) => [...table.columns.keys()]))].join(', ');
+    throw new AthenaError(
+      ATHENA_ERROR,
+      `can't found column ${colRef} in tables: ${tableNames}; available columns: ${availableCols}`,
+      ref,
+    );
   }
 
   const propertyAccessor = extractJsonExtractPath(columnAST) ?? extractBracketAccessorPath(columnAST);

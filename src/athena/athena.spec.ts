@@ -258,7 +258,8 @@ WHEN 1=1\``,
         {
           messageId: 'AthenaError',
           data: {
-            errorMessage: "can't found column foo in tables: link",
+            errorMessage:
+              "can't found column foo in tables: link; available columns: method, started, ended, url, requestbody, requestheaders, responsestatus, responsemessage, responsetype, responsebody, responseheaders",
           },
         },
       ],
@@ -273,7 +274,8 @@ WHEN 1=1\``,
         {
           messageId: 'AthenaError',
           data: {
-            errorMessage: "can't found column nonExistentCol in tables: link, payment-card",
+            errorMessage:
+              "can't found column nonExistentCol in tables: link, payment-card; available columns: method, started, ended, url, requestbody, requestheaders, responsestatus, responsemessage, responsetype, responsebody, responseheaders",
           },
           line: 1,
           column: 9,
@@ -296,7 +298,8 @@ WHEN 1=1\``,
         {
           messageId: 'AthenaError',
           data: {
-            errorMessage: 'property not found responseheaders - $.foo',
+            errorMessage:
+              'property not found responseheaders - $.foo; available properties: last-modified, created-on, updated-on',
           },
         },
       ],
@@ -326,7 +329,8 @@ WHEN 1=1\``,
         {
           messageId: 'AthenaError',
           data: {
-            errorMessage: 'property not found responseheaders - $["Xupdated-on"]',
+            errorMessage:
+              'property not found responseheaders - $["Xupdated-on"]; available properties: last-modified, created-on, updated-on',
           },
         },
       ],
@@ -357,7 +361,8 @@ WHEN 1=1\``,
         {
           messageId: 'AthenaError',
           data: {
-            errorMessage: 'property not found posting - $["XaccountId"]',
+            errorMessage:
+              'property not found posting - $["XaccountId"]; available properties: amount, currency, type, createdOn, accountId',
           },
         },
       ],
@@ -540,7 +545,8 @@ ORDER BY
         {
           messageId: 'AthenaError',
           data: {
-            errorMessage: 'property not found person - $.XtimeZone',
+            errorMessage:
+              'property not found person - $.XtimeZone; available properties: company, title, firstName, middleName, lastName, addresses, phones, email, language, timeZone',
           },
         },
       ],
@@ -1376,7 +1382,7 @@ ORDER BY
         {
           messageId: 'AthenaError',
           data: {
-            errorMessage: `can't found column XpersonId in tables: parameters, card_creation, card_update, matching_cards, combined_card_history, merged_card_data, link_data`,
+            errorMessage: `can't found column XpersonId in tables: parameters, card_creation, card_update, matching_cards, combined_card_history, merged_card_data, link_data; available columns: cardId, personId`,
           },
         },
       ],
@@ -1589,7 +1595,8 @@ FROM
         {
           messageId: 'AthenaError',
           data: {
-            errorMessage: 'property not found requestbody - $.interchangeFeeAmountExtended.XamountDecimalPosition',
+            errorMessage:
+              'property not found requestbody - $.interchangeFeeAmountExtended.XamountDecimalPosition; available properties: file, matchedMessageId, cardId, transmissionDateTime, referenceNumber, categorization, systemTraceAuditNumber, merchant, adviceResponse, settlementAmount, isCrossBorder, issuerInterchangeGroupId, interchangeFeeAmount, interchangeDebitCredit, interchangeFeeAmountExtended',
           },
         },
       ],
@@ -1806,7 +1813,8 @@ order by
         {
           messageId: 'AthenaError',
           data: {
-            errorMessage: 'property not found posting - $["Xcurrency"]',
+            errorMessage:
+              'property not found posting - $["Xcurrency"]; available properties: amount, currency, type, createdOn, accountId',
           },
         },
       ],
@@ -1844,7 +1852,8 @@ WHERE method = 'PUT'
         {
           messageId: 'AthenaError',
           data: {
-            errorMessage: 'property not found responsebody - $.card.applicationTransactionCounter',
+            errorMessage:
+              'property not found responsebody - $.card.applicationTransactionCounter; available properties: dataEncryptionKeyId, storageKeyId, encryptedDataEncryptionKey, card',
           },
         },
       ],
@@ -1882,7 +1891,8 @@ WHERE method = 'PUT'
         {
           messageId: 'AthenaError',
           data: {
-            errorMessage: 'property not found responsebody - $.card.applicationTransactionCounter',
+            errorMessage:
+              'property not found responsebody - $.card.applicationTransactionCounter; available properties: dataEncryptionKeyId, storageKeyId, encryptedDataEncryptionKey, card',
           },
         },
       ],
@@ -1956,7 +1966,10 @@ FROM "payment-card" WHERE method = 'GET' AND responsestatus = '200'\``,
       errors: [
         {
           messageId: 'AthenaError',
-          data: { errorMessage: "can't found column nonExistentCol in tables: payment-card" },
+          data: {
+            errorMessage:
+              "can't found column nonExistentCol in tables: payment-card; available columns: method, started, ended, url, requestbody, requestheaders, responsestatus, responsemessage, responsetype, responsebody, responseheaders",
+          },
           line: 1,
           column: 9,
           endLine: 1,
