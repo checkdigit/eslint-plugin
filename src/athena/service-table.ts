@@ -50,6 +50,7 @@ export function buildServiceTables(tableName: string, operations: MatchedOperati
       ['responsetype', [col('responsetype', SCHEMA_STRING)]],
       ['responsebody', [col('responsebody', bodySchema(operation.response, 'body'))]],
       ['responseheaders', [col('responseheaders', bodySchema(operation.response, 'headers'))]],
+      ['partition_date', [col('partition_date', SCHEMA_STRING)]],
     ]),
   }));
 }

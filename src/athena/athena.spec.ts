@@ -215,6 +215,16 @@ WHERE method = 'PUT'
       name: 'non-sql with similar keywords should not trigger errors',
       code: `describe('with data set up through API', async () => {});`,
     },
+    {
+      name: 'access to internal partition_date column is allowed',
+      code: `\`SELECT
+      tcm.url
+    FROM
+      "teampay-card-management" AS tcm
+    WHERE
+      partition_date > '2020-01-01'
+      \``,
+    },
   ],
   invalid: [
     {
@@ -270,7 +280,7 @@ WHEN 1=1\``,
           messageId: 'AthenaError',
           data: {
             errorMessage:
-              "can't found column foo in tables: link; available columns: method, started, ended, url, requestbody, requestheaders, responsestatus, responsemessage, responsetype, responsebody, responseheaders",
+              "can't found column foo in tables: link; available columns: method, started, ended, url, requestbody, requestheaders, responsestatus, responsemessage, responsetype, responsebody, responseheaders, partition_date",
           },
         },
       ],
@@ -286,7 +296,7 @@ WHEN 1=1\``,
           messageId: 'AthenaError',
           data: {
             errorMessage:
-              "can't found column nonExistentCol in tables: link, payment-card; available columns: method, started, ended, url, requestbody, requestheaders, responsestatus, responsemessage, responsetype, responsebody, responseheaders",
+              "can't found column nonExistentCol in tables: link, payment-card; available columns: method, started, ended, url, requestbody, requestheaders, responsestatus, responsemessage, responsetype, responsebody, responseheaders, partition_date",
           },
           line: 1,
           column: 9,
@@ -2009,7 +2019,7 @@ FROM "payment-card" WHERE method = 'GET' AND responsestatus = '200'\``,
           messageId: 'AthenaError',
           data: {
             errorMessage:
-              "can't found column nonExistentCol in tables: payment-card; available columns: method, started, ended, url, requestbody, requestheaders, responsestatus, responsemessage, responsetype, responsebody, responseheaders",
+              "can't found column nonExistentCol in tables: payment-card; available columns: method, started, ended, url, requestbody, requestheaders, responsestatus, responsemessage, responsetype, responsebody, responseheaders, partition_date",
           },
           line: 1,
           column: 9,
@@ -2065,7 +2075,7 @@ FROM "payment-card" WHERE method = 'GET' AND responsestatus = '200'\``,
         {
           messageId: 'AthenaError',
           data: {
-            errorMessage: `can't found column nonExistentCol in tables: link; available columns: method, started, ended, url, requestbody, requestheaders, responsestatus, responsemessage, responsetype, responsebody, responseheaders`,
+            errorMessage: `can't found column nonExistentCol in tables: link; available columns: method, started, ended, url, requestbody, requestheaders, responsestatus, responsemessage, responsetype, responsebody, responseheaders, partition_date`,
           },
           line: 1,
           column: 50,
@@ -2150,7 +2160,7 @@ FROM "payment-card" WHERE method = 'GET' AND responsestatus = '200'\``,
         {
           messageId: 'AthenaError',
           data: {
-            errorMessage: `can't found column nonExistentCol in tables: link; available columns: method, started, ended, url, requestbody, requestheaders, responsestatus, responsemessage, responsetype, responsebody, responseheaders`,
+            errorMessage: `can't found column nonExistentCol in tables: link; available columns: method, started, ended, url, requestbody, requestheaders, responsestatus, responsemessage, responsetype, responsebody, responseheaders, partition_date`,
           },
         },
       ],
@@ -2174,7 +2184,7 @@ FROM "payment-card" WHERE method = 'GET' AND responsestatus = '200'\``,
         {
           messageId: 'AthenaError',
           data: {
-            errorMessage: `can't found column nonExistentCol in tables: link; available columns: method, started, ended, url, requestbody, requestheaders, responsestatus, responsemessage, responsetype, responsebody, responseheaders`,
+            errorMessage: `can't found column nonExistentCol in tables: link; available columns: method, started, ended, url, requestbody, requestheaders, responsestatus, responsemessage, responsetype, responsebody, responseheaders, partition_date`,
           },
         },
       ],
