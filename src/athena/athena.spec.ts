@@ -215,6 +215,9 @@ WHERE method = 'PUT'
       errors: [
         {
           messageId: 'SyntextError',
+          data: { errorMessage: 'Expected [A-Za-z0-9_] but " " found.' },
+          line: 1,
+          column: 34,
         },
       ],
     },
@@ -243,7 +246,7 @@ WHEN 1=1\``,
       errors: [
         {
           messageId: 'AthenaError',
-          data: { errorMessage: 'no matched api' },
+          data: { errorMessage: 'service not found: "non-existent" (no swagger schema located)' },
           line: 1,
           column: 18,
           endLine: 1,

@@ -145,9 +145,15 @@ function resolveServiceTable(select: Select, item: BaseFrom, ctx: VisitContext):
   const { table: tableName } = item;
   try {
     const apiSchemas = getApiSchemas(tableName, ctx);
+    if (apiSchemas.length === 0) {
+      throw new AthenaError(ATHENA_ERROR, `service not found: "${tableName}" (no swagger schema located)`, item);
+    }
     const operations = matchApi(select, item, apiSchemas) ?? [];
     ctx.tables.set(tableName, buildServiceTables(tableName, operations));
   } catch (error) {
+    if (error instanceof AthenaError) {
+      throw error;
+    }
     throw new AthenaError(ATHENA_ERROR, error instanceof Error ? error.message : String(error), item);
   }
 }
@@ -541,7 +547,7 @@ const rule: ESLintUtils.RuleModule<typeof SYNTEXT_ERROR | typeof ATHENA_ERROR> =
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         ({ ast } = parse(sql, { includeLocations: true }));
       } catch (error) {
-        log('error checking Athena AST', { error, sql });
+        log('error parsing Athena SQL', { error, sql });
         const pegLoc = (error as { location?: { start: { offset: number }; end: { offset: number } } }).location;
         if (pegLoc !== undefined) {
           const sourceText = context.sourceCode.getText();
@@ -551,13 +557,13 @@ const rule: ESLintUtils.RuleModule<typeof SYNTEXT_ERROR | typeof ATHENA_ERROR> =
               end: offsetToLoc(sourceText, sqlOffsetToSource(pegLoc.end.offset, sqlMapping)),
             },
             messageId: SYNTEXT_ERROR,
-            data: { errorMessage: JSON.stringify(error, undefined, 2), sql },
+            data: { errorMessage: (error as Error).message },
           });
         } else {
           context.report({
             node: sqlNode,
             messageId: SYNTEXT_ERROR,
-            data: { errorMessage: JSON.stringify(error, undefined, 2), sql },
+            data: { errorMessage: (error as Error).message },
           });
         }
         return;
