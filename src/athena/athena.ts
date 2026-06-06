@@ -1,5 +1,7 @@
 // athena/athena.ts
 
+/* eslint-disable max-lines */
+
 /*
  * Copyright (c) 2021-2026 Check Digit, LLC
  *
@@ -26,6 +28,7 @@ import {
 } from './context.ts';
 import { buildServiceTables } from './service-table.ts';
 import {
+  containsLambda,
   extractBracketAccessorPath,
   extractColumnRefs,
   extractJsonExtractCalls,
@@ -358,6 +361,41 @@ function navigateSchemaPath(
 // Pass 2 — Resolve SELECT columns → Map<name, ResolvedColumn[]>
 // ---------------------------------------------------------------------------
 
+/** Resolve a column by name against `referencedTables`, throwing if not found. */
+function lookupColumnOrThrow(
+  colRef: string,
+  ref: object,
+  referencedTables: ResolvedTable[],
+  ctx: VisitContext,
+): ResolvedColumn[] {
+  const resolvedColumns = referencedTables.flatMap((table) => table.columns.get(colRef) ?? []);
+  if (resolvedColumns.length === 0) {
+    const tableNames = [...ctx.tables.keys()].join(', ');
+    const availableCols = [...new Set(referencedTables.flatMap((table) => [...table.columns.keys()]))].join(', ');
+    throw new AthenaError(
+      ATHENA_ERROR,
+      `can't found column ${colRef} in tables: ${tableNames}; available columns: ${availableCols}`,
+      ref,
+    );
+  }
+  return resolvedColumns;
+}
+
+/** Check all column_refs in `ast` exist in scope. Skips lambda expressions (lambda params look like column_refs). */
+function checkColumnRefsExist(ast: unknown, allTables: ResolvedTable[], ctx: VisitContext): void {
+  if (containsLambda(ast)) {
+    return;
+  }
+  for (const ref of extractColumnRefs(ast)) {
+    const colRef = typeof ref.column === 'string' ? ref.column : undefined;
+    if (colRef === undefined || colRef === '*') {
+      continue;
+    }
+    const tableRef = ref.table ?? undefined;
+    lookupColumnOrThrow(colRef, ref, tableRef !== undefined ? lookupTables(tableRef, ctx) : allTables, ctx);
+  }
+}
+
 /** Validate all json_extract / json_extract_scalar paths in a complex column expression. */
 function validateComplexColumnExpression(columnAST: unknown, allTables: ResolvedTable[], ctx: VisitContext): void {
   for (const { ref, path, fnNode } of extractJsonExtractCalls(columnAST)) {
@@ -398,17 +436,7 @@ function resolveSingleColumnRef(
 
   const withFunctions = hasFunctionCalls(columnAST);
   const colName = columnAlias ?? (withFunctions ? indexedName : colRef);
-  const resolvedColumns = referencedTables.flatMap((table) => table.columns.get(colRef) ?? []);
-
-  if (resolvedColumns.length === 0) {
-    const tableNames = [...ctx.tables.keys()].join(', ');
-    const availableCols = [...new Set(referencedTables.flatMap((table) => [...table.columns.keys()]))].join(', ');
-    throw new AthenaError(
-      ATHENA_ERROR,
-      `can't found column ${colRef} in tables: ${tableNames}; available columns: ${availableCols}`,
-      ref,
-    );
-  }
+  const resolvedColumns = lookupColumnOrThrow(colRef, ref, referencedTables, ctx);
 
   const propertyAccessor = extractJsonExtractPath(columnAST) ?? extractBracketAccessorPath(columnAST);
   if (propertyAccessor !== undefined) {
@@ -434,6 +462,7 @@ function resolveSelectColumns(select: Select, ctx: VisitContext): Map<string, Re
     const columnRefs = extractColumnRefs(columnAST);
 
     if (columnRefs.length !== 1) {
+      checkColumnRefsExist(columnAST, allTables, ctx);
       validateComplexColumnExpression(columnAST, allTables, ctx);
       resolveDefaultSchemaColumn(columnAlias, indexedName, columnAST, columns);
       continue;
@@ -627,3 +656,5 @@ const rule: ESLintUtils.RuleModule<typeof SYNTEXT_ERROR | typeof ATHENA_ERROR> =
 });
 
 export default rule;
+
+/* eslint-enable max-lines */

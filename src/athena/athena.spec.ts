@@ -288,6 +288,20 @@ WHEN 1=1\``,
       ],
     },
     {
+      // nonExistentCol appears inside a concat (2 column_refs → multi-col branch).
+      // The fix: checkColumnRefsExist now validates each ref even in multi-ref expressions.
+      name: 'non-existing column in multi-column expression inside CTE outer SELECT is reported',
+      code: `\`WITH m AS (SELECT url FROM "link" WHERE method = 'GET') SELECT nonExistentCol || url FROM m\``,
+      errors: [
+        {
+          messageId: 'AthenaError',
+          data: {
+            errorMessage: `can't found column nonExistentCol in tables: m; available columns: url`,
+          },
+        },
+      ],
+    },
+    {
       name: 'query target endpoint - only SELECT - 1 table - without alias',
       code: `\`SELECT
         json_extract_scalar(responseheaders, '$.foo') AS linkCreatedOn

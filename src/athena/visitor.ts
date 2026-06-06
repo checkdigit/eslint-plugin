@@ -264,6 +264,19 @@ export function walk(node: unknown, visitor: VisitorMap): void {
 // Convenience extractors — replace ad-hoc JSONPath queries.
 // -------------------------------------------------------------------
 
+/** Return true if the expression contains a lambda (`->`) subexpression. */
+export function containsLambda(expr: unknown): boolean {
+  let found = false;
+  walkExpr(expr, {
+    visitBinary(node) {
+      if (node.operator === '->') {
+        found = true;
+      }
+    },
+  });
+  return found;
+}
+
 /** Collect all column_ref nodes within an expression subtree. */
 export function extractColumnRefs(expr: unknown): ColumnRefItem[] {
   const refs: ColumnRefItem[] = [];
