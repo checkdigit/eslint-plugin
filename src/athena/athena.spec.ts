@@ -2203,5 +2203,40 @@ FROM "payment-card" WHERE method = 'GET' AND responsestatus = '200'\``,
         },
       ],
     },
+    {
+      name: 'invalid column in MAP() expression is reported',
+      code: `\`
+  WITH request_message AS (
+    SELECT
+      DISTINCT requestbody AS message
+    FROM
+      message
+    WHERE
+      method = 'PUT'
+      AND responsestatus = '204'
+      AND json_extract_scalar(requestbody, '$.responseCode') IS NULL
+  )
+  SELECT
+    CAST(
+      MAP(
+        ARRAY [ 'message', 'responseCode', 'updatedOn'],
+        ARRAY [ message,
+          nonExistentCol,
+          CAST('"' || updatedOn || '"' AS JSON) ]
+      ) AS JSON
+    ) AS Report,
+    updatedOn
+  FROM
+    request_message req
+\``,
+      errors: [
+        {
+          messageId: 'AthenaError',
+          data: {
+            errorMessage: `can't found column nonExistentCol in tables: request_message; available columns: message`,
+          },
+        },
+      ],
+    },
   ],
 });

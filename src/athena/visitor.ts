@@ -182,6 +182,11 @@ function walkExpr(node: unknown, visitor: VisitorMap): void {
       }
       break;
     }
+    case 'array': {
+      // ARRAY [...] nodes nest their items inside an expr_list property, not args/value.
+      walkExpr((node as { expr_list?: unknown }).expr_list, visitor);
+      break;
+    }
     default: {
       // Column wrapper nodes (e.g. bare `SELECT *`) may lack a 'type' field but carry an 'expr'.
       if (typed['type'] === undefined && 'expr' in typed) {
