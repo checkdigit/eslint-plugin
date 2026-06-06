@@ -427,7 +427,14 @@ function resolveSingleColumnRef(
   assert.ok(colRef !== undefined, 'column_ref must have a string column name');
 
   const referencedTables = tableRef !== undefined ? lookupTables(tableRef, ctx) : allTables;
-  assert.ok(referencedTables.length > 0, `no tables found for column reference '${colRef}'`);
+  if (referencedTables.length === 0) {
+    const tableNames = [...ctx.tables.keys()].join(', ');
+    throw new AthenaError(
+      ATHENA_ERROR,
+      `unknown table or alias '${tableRef ?? colRef}'; known tables: ${tableNames}`,
+      ref,
+    );
+  }
 
   if (colRef === '*') {
     expandWildcard(referencedTables, columns);

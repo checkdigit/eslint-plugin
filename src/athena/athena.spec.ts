@@ -288,6 +288,22 @@ WHEN 1=1\``,
       ],
     },
     {
+      // x.url has tableRef = "x" which is not a known table or alias in the FROM clause.
+      // Previously threw AssertionError (whole-node fallback); now AthenaError pinned to the column_ref.
+      name: 'unknown table alias in SELECT narrows error location to the column_ref',
+      code: `\`SELECT x.url FROM "link" WHERE method = 'GET'\``,
+      errors: [
+        {
+          messageId: 'AthenaError',
+          data: { errorMessage: `unknown table or alias 'x'; known tables: link` },
+          line: 1,
+          column: 9,
+          endLine: 1,
+          endColumn: 14,
+        },
+      ],
+    },
+    {
       // nonExistentCol appears inside a concat (2 column_refs → multi-col branch).
       // The fix: checkColumnRefsExist now validates each ref even in multi-ref expressions.
       name: 'non-existing column in multi-column expression inside CTE outer SELECT is reported',
