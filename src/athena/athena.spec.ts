@@ -203,7 +203,7 @@ WHERE method = 'PUT'
     {
       name: 'COUNT against array access expression',
       code: `\`SELECT
-      COUNT(distinct (split(tcm.url, '/') [5])) AS cards
+      COUNT(distinct split(tcm.url, '/') [5]) AS cards
     FROM
       "teampay-card-management" AS tcm\``,
     },

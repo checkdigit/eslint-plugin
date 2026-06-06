@@ -11757,10 +11757,7 @@ function peg$parse(input: any, options: any): any {
         s1 = null;
       }
       s2 = peg$parse__();
-      s3 = peg$parsecolumn_ref();
-      if (s3 === peg$FAILED) {
-        s3 = peg$parseor_and_expr();
-      }
+      s3 = peg$parseor_and_expr();
       if (s3 !== peg$FAILED) {
         s4 = peg$parse__();
         s5 = [];

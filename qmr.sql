@@ -1277,7 +1277,7 @@ with
   /* Read all the physical cards - emv,contactless */
   physicalCards AS (
     SELECT
-      COUNT(distinct (split(tcm.url, '/') [5])) AS cards
+      COUNT(distinct split(tcm.url, '/') [5]) AS cards
     FROM
       "teampay-card-management" AS tcm,
       parameters AS p

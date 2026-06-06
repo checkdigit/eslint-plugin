@@ -2111,7 +2111,7 @@ distinct_args
       orderby: or,
     };
   }
-  / d:KW_DISTINCT? __ c:(column_ref / or_and_expr) __ tail:(__ (COMMA / OPERATOR_CONCATENATION) __ expr)* __ or:order_by_clause? {
+  / d:KW_DISTINCT? __ c:or_and_expr __ tail:(__ (COMMA / OPERATOR_CONCATENATION) __ expr)* __ or:order_by_clause? {
     const len = tail.length
     let result = c
     for (let i = 0; i < len; ++i) {
