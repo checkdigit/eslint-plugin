@@ -36,6 +36,7 @@ import {
   hasFunctionCalls,
   isBaseFrom,
   isJoin,
+  isTableExpr,
   isUnnestFrom,
 } from './visitor.ts';
 
@@ -165,6 +166,13 @@ function resolveFromClause(select: Select, ctx: VisitContext): void {
   for (const item of fromClauseItems(select)) {
     if (isUnnestFrom(item)) {
       continue; // UNNEST handled separately
+    }
+
+    if (isTableExpr(item)) {
+      const alias = typeof item.as === 'string' ? item.as : '<subquery>';
+      // eslint-disable-next-line no-use-before-define
+      checkSelect(item.expr.ast, ctx, alias);
+      continue;
     }
 
     if (isJoin(item)) {
@@ -362,15 +370,12 @@ function navigateSchemaPath(
 // ---------------------------------------------------------------------------
 
 /** Resolve a column by name against `referencedTables`, throwing if not found. */
-function lookupColumnOrThrow(
-  colRef: string,
-  ref: object,
-  referencedTables: ResolvedTable[],
-  ctx: VisitContext,
-): ResolvedColumn[] {
+function lookupColumnOrThrow(colRef: string, ref: object, referencedTables: ResolvedTable[]): ResolvedColumn[] {
   const resolvedColumns = referencedTables.flatMap((table) => table.columns.get(colRef) ?? []);
   if (resolvedColumns.length === 0) {
-    const tableNames = [...ctx.tables.keys()].join(', ');
+    const tableNames = [
+      ...new Set(referencedTables.map((referenceTable) => referenceTable.name ?? '<anonymous>')),
+    ].join(', ');
     const availableCols = [...new Set(referencedTables.flatMap((table) => [...table.columns.keys()]))].join(', ');
     throw new AthenaError(
       ATHENA_ERROR,
@@ -408,7 +413,7 @@ function checkColumnRefsExist(
         ref,
       );
     }
-    lookupColumnOrThrow(colRef, ref, referencedTables, ctx);
+    lookupColumnOrThrow(colRef, ref, referencedTables);
   }
 }
 
@@ -459,7 +464,7 @@ function resolveSingleColumnRef(
 
   const withFunctions = hasFunctionCalls(columnAST);
   const colName = columnAlias ?? (withFunctions ? indexedName : colRef);
-  const resolvedColumns = lookupColumnOrThrow(colRef, ref, referencedTables, ctx);
+  const resolvedColumns = lookupColumnOrThrow(colRef, ref, referencedTables);
 
   const propertyAccessor = extractJsonExtractPath(columnAST) ?? extractBracketAccessorPath(columnAST);
   if (propertyAccessor !== undefined) {
@@ -528,9 +533,10 @@ function checkSelect(selectAST: Select | With, ctx: VisitContext, withTableName?
   // Pass 3: validate column refs and JSON paths in JOIN ON / WHERE / HAVING / GROUP BY / ORDER BY
   const allTables = [...selectCtx.tables.values()].flat();
   for (const item of fromClauseItems(select)) {
-    if (isJoin(item) && item.on !== undefined) {
-      checkColumnRefsExist(item.on, allTables, selectCtx);
-      validateComplexColumnExpression(item.on, allTables, selectCtx);
+    const onExpr = (item as { on?: unknown }).on;
+    if (onExpr !== undefined) {
+      checkColumnRefsExist(onExpr, allTables, selectCtx);
+      validateComplexColumnExpression(onExpr, allTables, selectCtx);
     }
   }
   if (select.where !== null) {

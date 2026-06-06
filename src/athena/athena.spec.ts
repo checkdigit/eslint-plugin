@@ -54,6 +54,14 @@ createTester().run(ruleId, rule, {
       code: `\`WITH m AS (select * from link) select requestbody from m\``,
     },
     {
+      name: 'outer SELECT can reference columns produced by an inline subquery',
+      code: `\`SELECT s.url FROM (SELECT url FROM link WHERE method = 'GET') AS s\``,
+    },
+    {
+      name: 'outer SELECT can reference columns produced by a JOIN subquery',
+      code: `\`SELECT l.url, c.url FROM link AS l JOIN (SELECT url FROM link) AS c ON c.url = l.url\``,
+    },
+    {
       name: 'parse function expression with array access - in column',
       code: `\`WITH m AS (select * from link) 
         select DISTINCT split(url, '/') [5] as linkId FROM m\``,
@@ -1415,7 +1423,7 @@ ORDER BY
         {
           messageId: 'AthenaError',
           data: {
-            errorMessage: `can't found column XpersonId in tables: parameters, card_creation, card_update, matching_cards, combined_card_history, merged_card_data, link_data; available columns: cardId, personId`,
+            errorMessage: `can't found column XpersonId in tables: link_data; available columns: cardId, personId`,
           },
         },
       ],
@@ -2155,6 +2163,42 @@ FROM "payment-card" WHERE method = 'GET' AND responsestatus = '200'\``,
           messageId: 'AthenaError',
           data: {
             errorMessage: `unknown table or alias 'x'; known tables: link`,
+          },
+        },
+      ],
+    },
+    {
+      name: 'invalid column inside inline subquery inner SELECT is reported',
+      code: `\`SELECT s.url FROM (SELECT nonExistentCol FROM link WHERE method = 'GET') AS s\``,
+      errors: [
+        {
+          messageId: 'AthenaError',
+          data: {
+            errorMessage: `can't found column nonExistentCol in tables: link; available columns: method, started, ended, url, requestbody, requestheaders, responsestatus, responsemessage, responsetype, responsebody, responseheaders`,
+          },
+        },
+      ],
+    },
+    {
+      name: 'invalid column in outer SELECT referencing inline subquery is reported',
+      code: `\`SELECT s.nonExistentCol FROM (SELECT url FROM link WHERE method = 'GET') AS s\``,
+      errors: [
+        {
+          messageId: 'AthenaError',
+          data: {
+            errorMessage: `can't found column nonExistentCol in tables: s; available columns: url`,
+          },
+        },
+      ],
+    },
+    {
+      name: 'invalid column in JOIN subquery ON condition is reported',
+      code: `\`SELECT l.url, c.url FROM link AS l JOIN (SELECT url FROM link) AS c ON c.nonExistentCol = l.url\``,
+      errors: [
+        {
+          messageId: 'AthenaError',
+          data: {
+            errorMessage: `can't found column nonExistentCol in tables: c; available columns: url`,
           },
         },
       ],
