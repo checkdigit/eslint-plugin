@@ -356,6 +356,38 @@ WHEN 1=1\``,
       ],
     },
     {
+      name: 'UNION ALL - mismatched column names are reported',
+      code: `\`
+      SELECT
+        json_extract_scalar(responseheaders, '$["created-on"]') AS linkChangedOn,
+        url AS linkUrl
+      FROM
+        link
+      WHERE
+        cardinality(split(url, '/')) = 7
+        AND method = 'PUT'
+        AND responsestatus = '204'
+      UNION ALL
+      SELECT
+        json_extract_scalar(responseheaders, '$["created-on"]') AS linkChangedOn,
+        url AS linkHref
+      FROM
+        link
+      WHERE
+        cardinality(split(url, '/')) = 7
+        AND method = 'PUT'
+        AND responsestatus = '204'
+      \``,
+      errors: [
+        {
+          messageId: 'AthenaError',
+          data: {
+            errorMessage: `UNION ALL parts have different columns: [linkChangedOn, linkUrl] vs [linkChangedOn, linkHref]`,
+          },
+        },
+      ],
+    },
+    {
       name: 'UNION ALL - some selects are invalid',
       code: `\`
       SELECT

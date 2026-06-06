@@ -525,7 +525,11 @@ function resolveSelectColumns(select: Select, ctx: VisitContext): Map<string, Re
 // Top-level SELECT resolution
 // ---------------------------------------------------------------------------
 
-function checkSelect(selectAST: Select | With, ctx: VisitContext, withTableName?: string): void {
+function checkSelect(
+  selectAST: Select | With,
+  ctx: VisitContext,
+  withTableName?: string,
+): Map<string, ResolvedColumn[]> {
   // Unwrap CTE wrapper (With → Select)
   const select = 'stmt' in selectAST ? selectAST.stmt.ast : selectAST;
 
@@ -579,7 +583,16 @@ function checkSelect(selectAST: Select | With, ctx: VisitContext, withTableName?
 
   // UNION ALL — next SELECT in the chain
   if (select._next !== undefined) {
-    checkSelect(select._next, ctx, withTableName);
+    const nextColumns = checkSelect(select._next, ctx, withTableName);
+    const currentKeys = [...columns.keys()].sort();
+    const nextKeys = [...nextColumns.keys()].sort();
+    if (currentKeys.join(',') !== nextKeys.join(',')) {
+      throw new AthenaError(
+        ATHENA_ERROR,
+        `UNION ALL parts have different columns: [${currentKeys.join(', ')}] vs [${nextKeys.join(', ')}]`,
+        select._next,
+      );
+    }
   }
 
   // Register CTE result so subsequent SELECTs in the same WITH can reference it
@@ -587,6 +600,8 @@ function checkSelect(selectAST: Select | With, ctx: VisitContext, withTableName?
     const resolvedTable: ResolvedTable = { name: withTableName, columns };
     ctx.tables.set(withTableName, [resolvedTable]);
   }
+
+  return columns;
 }
 
 function checkAthenaAst(ast: AST, ctx: VisitContext): void {
