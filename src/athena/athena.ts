@@ -525,8 +525,14 @@ function checkSelect(selectAST: Select | With, ctx: VisitContext, withTableName?
 
   log('resolved columns', [...columns.keys()]);
 
-  // Pass 3: validate column refs and JSON paths in WHERE / HAVING / GROUP BY / ORDER BY
+  // Pass 3: validate column refs and JSON paths in JOIN ON / WHERE / HAVING / GROUP BY / ORDER BY
   const allTables = [...selectCtx.tables.values()].flat();
+  for (const item of fromClauseItems(select)) {
+    if (isJoin(item) && item.on !== undefined) {
+      checkColumnRefsExist(item.on, allTables, selectCtx);
+      validateComplexColumnExpression(item.on, allTables, selectCtx);
+    }
+  }
   if (select.where !== null) {
     checkColumnRefsExist(select.where, allTables, selectCtx);
     validateComplexColumnExpression(select.where, allTables, selectCtx);

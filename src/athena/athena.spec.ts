@@ -2135,5 +2135,29 @@ FROM "payment-card" WHERE method = 'GET' AND responsestatus = '200'\``,
         },
       ],
     },
+    {
+      name: 'invalid column in JOIN ON condition is reported',
+      code: `\`SELECT l.url FROM link AS l JOIN link AS r ON r.nonExistentCol = l.url\``,
+      errors: [
+        {
+          messageId: 'AthenaError',
+          data: {
+            errorMessage: `can't found column nonExistentCol in tables: link; available columns: method, started, ended, url, requestbody, requestheaders, responsestatus, responsemessage, responsetype, responsebody, responseheaders`,
+          },
+        },
+      ],
+    },
+    {
+      name: 'invalid table alias in JOIN ON condition is reported',
+      code: `\`SELECT l.url FROM link AS l JOIN link AS r ON x.url = l.url\``,
+      errors: [
+        {
+          messageId: 'AthenaError',
+          data: {
+            errorMessage: `unknown table or alias 'x'; known tables: link`,
+          },
+        },
+      ],
+    },
   ],
 });
