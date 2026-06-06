@@ -162,6 +162,23 @@ function resolveServiceTable(select: Select, item: BaseFrom, ctx: VisitContext):
   }
 }
 
+/** Remove inherited CTE tables that are not referenced in this SELECT's FROM clause. */
+function restrictToFromClause(select: Select, ctx: VisitContext): void {
+  const fromNames = new Set<string>();
+  for (const item of fromClauseItems(select)) {
+    if (isBaseFrom(item) || isJoin(item)) {
+      fromNames.add(item.table);
+    } else if (isTableExpr(item)) {
+      fromNames.add(typeof item.as === 'string' ? item.as : '<subquery>');
+    }
+  }
+  for (const name of [...ctx.tables.keys()]) {
+    if (!fromNames.has(name)) {
+      ctx.tables.delete(name);
+    }
+  }
+}
+
 function resolveFromClause(select: Select, ctx: VisitContext): void {
   for (const item of fromClauseItems(select)) {
     if (isUnnestFrom(item)) {
@@ -517,6 +534,8 @@ function checkSelect(selectAST: Select | With, ctx: VisitContext, withTableName?
 
   // Pass 1: resolve FROM clause → populate selectCtx.tables + selectCtx.aliases
   resolveFromClause(select, selectCtx);
+  // Drop inherited CTE tables not referenced in FROM so allTables stays scoped to this SELECT.
+  restrictToFromClause(select, selectCtx);
 
   // UNNEST pre-pass: mappings whose source is a service-table column
   const unnestMappings = extractUnnestMappings(select);

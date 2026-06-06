@@ -2208,32 +2208,67 @@ FROM "payment-card" WHERE method = 'GET' AND responsestatus = '200'\``,
       code: `\`
   WITH request_message AS (
     SELECT
-      DISTINCT requestbody AS message
+      DISTINCT url, requestbody AS message
     FROM
       message
     WHERE
       method = 'PUT'
       AND responsestatus = '204'
-      AND json_extract_scalar(requestbody, '$.responseCode') IS NULL
   )
   SELECT
     CAST(
       MAP(
-        ARRAY [ 'message', 'responseCode', 'updatedOn'],
-        ARRAY [ message,
+        ARRAY [ 'url', 'message'],
+        ARRAY [ url,
           nonExistentCol,
           CAST('"' || updatedOn || '"' AS JSON) ]
       ) AS JSON
-    ) AS Report,
-    updatedOn
+    ) AS Report
   FROM
-    request_message req
+    request_message
 \``,
       errors: [
         {
           messageId: 'AthenaError',
           data: {
-            errorMessage: `can't found column nonExistentCol in tables: request_message; available columns: message`,
+            errorMessage: `can't found column nonExistentCol in tables: request_message; available columns: url, message`,
+          },
+        },
+      ],
+    },
+    {
+      name: 'MAP() expression should result in a newly structured column rather than simply carrying over all the referenced columns from the source table',
+      code: `\`
+  WITH request_message AS (
+    SELECT
+      DISTINCT url, requestbody AS message
+    FROM
+      message
+    WHERE
+      method = 'PUT'
+      AND responsestatus = '204'
+  ),
+  report AS (
+    SELECT
+      CAST(
+        MAP(
+          ARRAY [ 'url', 'message'],
+          ARRAY [ url, message ]
+        ) AS JSON
+      ) AS Report
+    FROM
+      request_message
+  )
+  SELECT
+    ReportXXX
+  FROM
+    report
+\``,
+      errors: [
+        {
+          messageId: 'AthenaError',
+          data: {
+            errorMessage: `can't found column ReportXXX in tables: report; available columns: Report`,
           },
         },
       ],
