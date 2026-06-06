@@ -2051,6 +2051,22 @@ FROM "payment-card" WHERE method = 'GET' AND responsestatus = '200'\``,
       ],
     },
     {
+      name: 'non-existing column in WHERE is reported with precise location',
+      code: `\`SELECT url FROM "link" WHERE method = 'GET' AND nonExistentCol = 'foo'\``,
+      errors: [
+        {
+          messageId: 'AthenaError',
+          data: {
+            errorMessage: `can't found column nonExistentCol in tables: link; available columns: method, started, ended, url, requestbody, requestheaders, responsestatus, responsemessage, responsetype, responsebody, responseheaders`,
+          },
+          line: 1,
+          column: 50,
+          endLine: 1,
+          endColumn: 64,
+        },
+      ],
+    },
+    {
       name: 'schema validation should work inside WHERE conditions as well',
       code: `\`select * FROM
     "payment-card"

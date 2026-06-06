@@ -382,7 +382,12 @@ function lookupColumnOrThrow(
 }
 
 /** Check all column_refs in `ast` exist in scope. Skips lambda expressions (lambda params look like column_refs). */
-function checkColumnRefsExist(ast: unknown, allTables: ResolvedTable[], ctx: VisitContext): void {
+function checkColumnRefsExist(
+  ast: unknown,
+  allTables: ResolvedTable[],
+  ctx: VisitContext,
+  selectColumns?: Map<string, ResolvedColumn[]>,
+): void {
   if (containsLambda(ast)) {
     return;
   }
@@ -392,7 +397,18 @@ function checkColumnRefsExist(ast: unknown, allTables: ResolvedTable[], ctx: Vis
       continue;
     }
     const tableRef = ref.table ?? undefined;
-    lookupColumnOrThrow(colRef, ref, tableRef !== undefined ? lookupTables(tableRef, ctx) : allTables, ctx);
+    if (tableRef === undefined && selectColumns?.has(colRef) === true) {
+      continue; // SELECT alias used in GROUP BY / ORDER BY / HAVING — valid
+    }
+    const referencedTables = tableRef !== undefined ? lookupTables(tableRef, ctx) : allTables;
+    if (referencedTables.length === 0) {
+      throw new AthenaError(
+        ATHENA_ERROR,
+        `unknown table or alias '${tableRef ?? colRef}'; known tables: ${[...ctx.tables.keys()].join(', ')}`,
+        ref,
+      );
+    }
+    lookupColumnOrThrow(colRef, ref, referencedTables, ctx);
   }
 }
 
@@ -509,19 +525,23 @@ function checkSelect(selectAST: Select | With, ctx: VisitContext, withTableName?
 
   log('resolved columns', [...columns.keys()]);
 
-  // Pass 3: validate JSON paths in WHERE / HAVING / GROUP BY / ORDER BY
+  // Pass 3: validate column refs and JSON paths in WHERE / HAVING / GROUP BY / ORDER BY
   const allTables = [...selectCtx.tables.values()].flat();
   if (select.where !== null) {
+    checkColumnRefsExist(select.where, allTables, selectCtx);
     validateComplexColumnExpression(select.where, allTables, selectCtx);
   }
   if (select.having !== null) {
+    checkColumnRefsExist(select.having, allTables, selectCtx, columns);
     validateComplexColumnExpression(select.having, allTables, selectCtx);
   }
   for (const orderItem of select.orderby ?? []) {
+    checkColumnRefsExist(orderItem.expr, allTables, selectCtx, columns);
     validateComplexColumnExpression(orderItem.expr, allTables, selectCtx);
   }
   if (select.groupby?.columns !== undefined) {
     for (const groupCol of select.groupby.columns) {
+      checkColumnRefsExist(groupCol, allTables, selectCtx, columns);
       validateComplexColumnExpression(groupCol, allTables, selectCtx);
     }
   }
