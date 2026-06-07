@@ -111,6 +111,19 @@ createTester().run(ruleId, rule, {
         \``,
     },
     {
+      name: 'CROSS JOIN UNNEST - referenced',
+      code: `\`WITH unnested as (SELECT url, json_extract(requestbody, '$.feeDetails') as parts
+        FROM message
+          CROSS JOIN UNNEST(parts) AS t (part)
+        WHERE
+          cardinality(split(url, '/')) = 5
+          AND split(url, '/')[4] = 'request'
+          AND method = 'PUT'
+          AND responsestatus = '204')
+        select part from unnested;
+        \``,
+    },
+    {
       name: 'CROSS JOIN UNNEST - array type casting should work',
       code: `\`WITH unique_postings AS (
     SELECT lastModified,
@@ -165,16 +178,28 @@ SELECT * from unique_postings
         \``,
     },
     {
-      name: 'CROSS JOIN UNNEST - referenced',
-      code: `\`WITH unnested as (SELECT url, json_extract(requestbody, '$.feeDetails') as parts
-        FROM message
-          CROSS JOIN UNNEST(parts) AS t (part)
-        WHERE
-          cardinality(split(url, '/')) = 5
-          AND split(url, '/')[4] = 'request'
-          AND method = 'PUT'
-          AND responsestatus = '204')
-        select part from unnested;
+      name: 'CROSS JOIN UNNEST - array type casting should work if it is not the outer most expression',
+      code: `\`
+	select
+    split(url, '/') [ 5 ] as entryId,
+		json_extract_scalar(responseheaders, '$["created-on"]') as entryCreatedOn,
+		min_by(
+      cast(
+        json_extract(requestbody, '$.postings') as array(map(varchar, varchar))
+      ),
+      ended
+    ) as postings,
+    min(ended) as entryPutEnded
+  from ledger
+	  cross join unnest(postings) as t(posting)
+	where
+    method = 'PUT'
+		and responsestatus = '204'
+		and cardinality(split(url, '/')) = 5
+		and split(url, '/') [ 4 ] = 'entry'
+  group by
+    split(url, '/') [ 5 ],
+    json_extract_scalar(responseheaders, '$["created-on"]')
         \``,
     },
     {

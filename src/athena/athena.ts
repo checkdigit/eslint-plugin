@@ -28,6 +28,7 @@ import {
 } from './context.ts';
 import { buildServiceTables } from './service-table.ts';
 import {
+  containsCastToArray,
   containsLambda,
   extractBracketAccessorPath,
   extractColumnRefs,
@@ -502,21 +503,6 @@ function resolveSingleColumnRef(
   );
 }
 
-/** Return true when the column expression is a CAST / TRY_CAST to ARRAY<…>. */
-function isCastToArray(node: unknown): boolean {
-  if (typeof node !== 'object' || node === null) {
-    return false;
-  }
-  const typed = node as Record<string, unknown>;
-  if (typed['type'] === 'cast') {
-    const target = (typed['target'] as { dataType?: string }[] | undefined)?.[0];
-    return target?.dataType === 'ARRAY';
-  }
-  if (typed['type'] === 'expr') {
-    return isCastToArray(typed['expr']);
-  }
-  return false;
-}
 
 function resolveSelectColumns(select: Select, ctx: VisitContext): Map<string, ResolvedColumn[]> {
   const allTables = [...ctx.tables.values()].flat();
@@ -544,7 +530,7 @@ function resolveSelectColumns(select: Select, ctx: VisitContext): Map<string, Re
     // the inner expression (e.g. json_parse) has no schema-aware path to navigate.
     // Skip when the inner expression already resolved to an array (e.g. json_extract on an
     // array-typed property): overriding would strip the items schema and break UNNEST typing.
-    if (isCastToArray(columnAST)) {
+    if (containsCastToArray(columnAST)) {
       const colName = columnAlias ?? indexedName;
       const existing = columns.get(colName);
       if (existing !== undefined && existing[0]?.schema.type !== 'array') {
