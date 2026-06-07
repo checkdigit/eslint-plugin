@@ -356,7 +356,7 @@ WHEN 1=1\``,
       ],
     },
     {
-      name: 'UNION ALL - mismatched column names are reported',
+      name: 'UNION ALL - mismatched number of columns are reported',
       code: `\`
       SELECT
         json_extract_scalar(responseheaders, '$["created-on"]') AS linkChangedOn,
@@ -369,8 +369,7 @@ WHEN 1=1\``,
         AND responsestatus = '204'
       UNION ALL
       SELECT
-        json_extract_scalar(responseheaders, '$["created-on"]') AS linkChangedOn,
-        url AS linkHref
+        json_extract_scalar(responseheaders, '$["created-on"]') AS linkChangedOn
       FROM
         link
       WHERE
@@ -382,7 +381,7 @@ WHEN 1=1\``,
         {
           messageId: 'AthenaError',
           data: {
-            errorMessage: `UNION ALL parts have different columns: [linkChangedOn, linkUrl] vs [linkChangedOn, linkHref]`,
+            errorMessage: `UNION ALL parts have different number of columns: 2 vs 1`,
           },
         },
       ],

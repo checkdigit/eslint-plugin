@@ -584,12 +584,12 @@ function checkSelect(
   // UNION ALL — next SELECT in the chain
   if (select._next !== undefined) {
     const nextColumns = checkSelect(select._next, ctx, withTableName);
-    const currentKeys = [...columns.keys()].sort();
-    const nextKeys = [...nextColumns.keys()].sort();
-    if (currentKeys.join(',') !== nextKeys.join(',')) {
+    const currentNumberOfKeys = columns.size;
+    const nextNumberOfKeys = nextColumns.size;
+    if (currentNumberOfKeys !== nextNumberOfKeys) {
       throw new AthenaError(
         ATHENA_ERROR,
-        `UNION ALL parts have different columns: [${currentKeys.join(', ')}] vs [${nextKeys.join(', ')}]`,
+        `UNION ALL parts have different number of columns: ${currentNumberOfKeys.toString()} vs ${nextNumberOfKeys.toString()}`,
         select._next,
       );
     }
