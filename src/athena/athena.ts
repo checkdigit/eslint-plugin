@@ -29,6 +29,7 @@ import {
 import { buildServiceTables } from './service-table.ts';
 import {
   containsCastToArray,
+  containsCastToMap,
   containsLambda,
   extractBracketAccessorPath,
   extractColumnRefs,
@@ -229,7 +230,7 @@ function resolveFromClause(select: Select, ctx: VisitContext): void {
 
 interface UnnestMapping {
   fromColumn: string;
-  toColumn: string;
+  toColumns: string[]; // 1 item for array UNNEST, 2 items for map UNNEST (key, value)
   ast: object;
 }
 
@@ -244,15 +245,17 @@ function extractUnnestMappings(select: Select): UnnestMapping[] {
     const fromColumn = typeof item.expr.column === 'string' ? item.expr.column : undefined;
     assert.ok(fromColumn !== undefined, 'UNNEST expr must be a column_ref with a string column name');
 
-    // The alias is stored as a func_call node: UNNEST(col) AS t(alias)
-    const toColumn = item.as?.args.value[0];
-    const toColName =
-      toColumn !== undefined && typeof (toColumn as { column?: unknown }).column === 'string'
-        ? (toColumn as { column: string }).column
-        : undefined;
-    assert.ok(toColName !== undefined, 'UNNEST alias must be a column_ref with a string column name');
+    // The alias is stored as a func_call node: UNNEST(col) AS t(alias1[, alias2])
+    const aliasArgs = item.as?.args.value ?? [];
+    const toColumns: string[] = [];
+    for (const col of aliasArgs) {
+      if (typeof (col as { column?: unknown }).column === 'string') {
+        toColumns.push((col as { column: string }).column);
+      }
+    }
+    assert.ok(toColumns.length > 0, 'UNNEST alias must have at least one column name');
 
-    mappings.push({ fromColumn, toColumn: toColName, ast: item.expr });
+    mappings.push({ fromColumn, toColumns, ast: item.expr });
   }
 
   return mappings;
@@ -261,45 +264,93 @@ function extractUnnestMappings(select: Select): UnnestMapping[] {
 function applyUnnestPre(mappings: UnnestMapping[], ctx: VisitContext): UnnestMapping[] {
   const deferred: UnnestMapping[] = [];
 
-  for (const { fromColumn, toColumn, ast } of mappings) {
+  for (const { fromColumn, toColumns, ast } of mappings) {
     // Find the table that owns the source column
     const ownerTable = [...ctx.tables.values()].flat().find((table) => table.columns.has(fromColumn));
 
     if (ownerTable === undefined) {
-      deferred.push({ fromColumn, toColumn, ast });
+      deferred.push({ fromColumn, toColumns, ast });
       continue;
     }
 
     const sourceColumns = ownerTable.columns.get(fromColumn) ?? [];
     const sourceSchema = sourceColumns[0]?.schema;
-    if (sourceSchema?.type !== 'array') {
-      throw new AthenaError(ATHENA_ERROR, `UNNEST source column '${fromColumn}' must resolve to an array schema`, ast);
-    }
-
     const unnestTableName = `${ownerTable.name ?? '<anonymous>'}:<unnested>`;
-    ctx.tables.set(unnestTableName, [
-      {
-        name: unnestTableName,
-        ...(ownerTable.apiOperation !== undefined ? { apiOperation: ownerTable.apiOperation } : {}),
-        columns: new Map([[toColumn, [resolvedCol(toColumn, sourceSchema.items, sourceColumns[0]?.ast)]]]),
-      },
-    ]);
+    const apiOperation = ownerTable.apiOperation !== undefined ? { apiOperation: ownerTable.apiOperation } : {};
+
+    if (sourceSchema?.type === 'array') {
+      const [toColumn] = toColumns;
+      assert.ok(toColumn !== undefined);
+      ctx.tables.set(unnestTableName, [
+        {
+          name: unnestTableName,
+          ...apiOperation,
+          columns: new Map([[toColumn, [resolvedCol(toColumn, sourceSchema.items, sourceColumns[0]?.ast)]]]),
+        },
+      ]);
+    } else if (sourceSchema?.type === 'object') {
+      // MAP UNNEST: UNNEST(map_col) AS t(key_col, value_col)
+      const [keyColumn, valueColumn] = toColumns;
+      assert.ok(
+        keyColumn !== undefined && valueColumn !== undefined,
+        `UNNEST of map column '${fromColumn}' requires exactly two alias columns (key, value)`,
+      );
+      const addlProps = (sourceSchema as SchemaObject)['additionalProperties'] as unknown;
+      const valueSchema: SchemaObject =
+        typeof addlProps === 'object' && addlProps !== null ? addlProps : { type: 'string' };
+      ctx.tables.set(unnestTableName, [
+        {
+          name: unnestTableName,
+          ...apiOperation,
+          columns: new Map([
+            [keyColumn, [resolvedCol(keyColumn, { type: 'string' }, sourceColumns[0]?.ast)]],
+            [valueColumn, [resolvedCol(valueColumn, valueSchema, sourceColumns[0]?.ast)]],
+          ]),
+        },
+      ]);
+    } else {
+      throw new AthenaError(
+        ATHENA_ERROR,
+        `UNNEST source column '${fromColumn}' must resolve to an array or map schema`,
+        ast,
+      );
+    }
   }
 
   return deferred;
 }
 
 function applyUnnestPost(mappings: UnnestMapping[], columns: Map<string, ResolvedColumn[]>): void {
-  for (const { fromColumn, toColumn, ast } of mappings) {
+  for (const { fromColumn, toColumns, ast } of mappings) {
     const sourceColumns = columns.get(fromColumn);
     if (sourceColumns === undefined) {
       throw new AthenaError(ATHENA_ERROR, `UNNEST source column '${fromColumn}' not found in SELECT`, ast);
     }
     const sourceSchema = sourceColumns[0]?.schema;
-    if (sourceSchema?.type !== 'array') {
-      throw new AthenaError(ATHENA_ERROR, `UNNEST source column '${fromColumn}' must resolve to an array schema`, ast);
+
+    if (sourceSchema?.type === 'array') {
+      const [toColumn] = toColumns;
+      assert.ok(toColumn !== undefined);
+      columns.set(toColumn, [resolvedCol(toColumn, sourceSchema.items, sourceColumns[0]?.ast)]);
+    } else if (sourceSchema?.type === 'object') {
+      // MAP UNNEST: produces key column and value column
+      const [keyColumn, valueColumn] = toColumns;
+      assert.ok(
+        keyColumn !== undefined && valueColumn !== undefined,
+        `UNNEST of map column '${fromColumn}' requires exactly two alias columns (key, value)`,
+      );
+      const addlProps = (sourceSchema as SchemaObject)['additionalProperties'] as unknown;
+      const valueSchema: SchemaObject =
+        typeof addlProps === 'object' && addlProps !== null ? addlProps : { type: 'string' };
+      columns.set(keyColumn, [resolvedCol(keyColumn, { type: 'string' }, sourceColumns[0]?.ast)]);
+      columns.set(valueColumn, [resolvedCol(valueColumn, valueSchema, sourceColumns[0]?.ast)]);
+    } else {
+      throw new AthenaError(
+        ATHENA_ERROR,
+        `UNNEST source column '${fromColumn}' must resolve to an array or map schema`,
+        ast,
+      );
     }
-    columns.set(toColumn, [resolvedCol(toColumn, sourceSchema.items, sourceColumns[0]?.ast)]);
   }
 }
 
@@ -503,7 +554,6 @@ function resolveSingleColumnRef(
   );
 }
 
-
 function resolveSelectColumns(select: Select, ctx: VisitContext): Map<string, ResolvedColumn[]> {
   const allTables = [...ctx.tables.values()].flat();
   const columns = new Map<string, ResolvedColumn[]>();
@@ -537,6 +587,20 @@ function resolveSelectColumns(select: Select, ctx: VisitContext): Map<string, Re
         columns.set(
           colName,
           existing.map((col) => resolvedCol(col.name, { type: 'array' }, col.ast)),
+        );
+      }
+    }
+
+    // Same for CAST/TRY_CAST to MAP<…>: honour the declared map type when the inner
+    // expression (e.g. split_to_map) has no schema-aware navigation available.
+    // Skip when the schema is already an object to preserve additionalProperties.
+    if (containsCastToMap(columnAST)) {
+      const colName = columnAlias ?? indexedName;
+      const existing = columns.get(colName);
+      if (existing !== undefined && existing[0]?.schema.type !== 'object') {
+        columns.set(
+          colName,
+          existing.map((col) => resolvedCol(col.name, { type: 'object' }, col.ast)),
         );
       }
     }

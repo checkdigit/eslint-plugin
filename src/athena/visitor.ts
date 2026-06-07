@@ -396,3 +396,17 @@ export function containsCastToArray(expr: unknown): boolean {
   });
   return found;
 }
+
+/** Return true when the expression tree contains any CAST / TRY_CAST to MAP<…>. */
+export function containsCastToMap(expr: unknown): boolean {
+  let found = false;
+  walkExpr(expr, {
+    visitCast(node) {
+      const target = (node as unknown as { target?: { dataType?: string }[] }).target?.[0];
+      if (target?.dataType === 'MAP') {
+        found = true;
+      }
+    },
+  });
+  return found;
+}

@@ -203,6 +203,47 @@ SELECT * from unique_postings
         \``,
     },
     {
+      name: 'CROSS JOIN UNNEST - support Map type as well',
+      code: `\`
+SELECT postingGroupId || ':deleted' as postingGroupId,
+        'pending' as postingGroupType,
+        statusCode,
+        NULL as lastModified,
+        map(
+            ARRAY ['accountId', 'type', 'amount'],
+            ARRAY [accountId, '', '']
+        ) AS posting
+    FROM (
+            SELECT DISTINCT split(a.url, '/') [5] AS postingGroupId,
+                a.responsestatus as statusCode,
+                try_cast(
+                    split_to_map(
+                        json_extract_scalar(a.responseheaders, '$.etag'),
+                        ',',
+                        '='
+                    ) as MAP < VARCHAR,
+                    VARCHAR >
+                ) as accountUpdates
+            FROM account_logs AS a
+            WHERE (
+                    strpos(a.url, '/account/v2/pending/') = 1
+                    OR strpos(a.url, '/account/v1/pending/') = 1
+                )
+                AND a.method = 'DELETE'
+            GROUP BY split(a.url, '/') [5],
+                a.responsestatus,
+                try_cast(
+                    split_to_map(
+                        json_extract_scalar(a.responseheaders, '$.etag'),
+                        ',',
+                        '='
+                    ) as MAP < VARCHAR,
+                    VARCHAR >
+                )
+        )
+        CROSS JOIN unnest(accountUpdates) AS accountUpdates(accountId, accountVersion)        \``,
+    },
+    {
       name: 'AND/OR conditions in WHERE',
       code: `\` select *
   FROM
