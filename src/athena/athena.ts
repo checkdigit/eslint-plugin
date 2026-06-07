@@ -229,6 +229,7 @@ function resolveFromClause(select: Select, ctx: VisitContext): void {
 interface UnnestMapping {
   fromColumn: string;
   toColumn: string;
+  ast: object;
 }
 
 function extractUnnestMappings(select: Select): UnnestMapping[] {
@@ -250,7 +251,7 @@ function extractUnnestMappings(select: Select): UnnestMapping[] {
         : undefined;
     assert.ok(toColName !== undefined, 'UNNEST alias must be a column_ref with a string column name');
 
-    mappings.push({ fromColumn, toColumn: toColName });
+    mappings.push({ fromColumn, toColumn: toColName, ast: item.expr });
   }
 
   return mappings;
@@ -259,18 +260,20 @@ function extractUnnestMappings(select: Select): UnnestMapping[] {
 function applyUnnestPre(mappings: UnnestMapping[], ctx: VisitContext): UnnestMapping[] {
   const deferred: UnnestMapping[] = [];
 
-  for (const { fromColumn, toColumn } of mappings) {
+  for (const { fromColumn, toColumn, ast } of mappings) {
     // Find the table that owns the source column
     const ownerTable = [...ctx.tables.values()].flat().find((table) => table.columns.has(fromColumn));
 
     if (ownerTable === undefined) {
-      deferred.push({ fromColumn, toColumn });
+      deferred.push({ fromColumn, toColumn, ast });
       continue;
     }
 
     const sourceColumns = ownerTable.columns.get(fromColumn) ?? [];
     const sourceSchema = sourceColumns[0]?.schema;
-    assert.ok(sourceSchema?.type === 'array', `UNNEST source column '${fromColumn}' must be an array schema`);
+    if (sourceSchema?.type !== 'array') {
+      throw new AthenaError(ATHENA_ERROR, `UNNEST source column '${fromColumn}' must resolve to an array schema`, ast);
+    }
 
     const unnestTableName = `${ownerTable.name ?? '<anonymous>'}:<unnested>`;
     ctx.tables.set(unnestTableName, [
@@ -286,11 +289,15 @@ function applyUnnestPre(mappings: UnnestMapping[], ctx: VisitContext): UnnestMap
 }
 
 function applyUnnestPost(mappings: UnnestMapping[], columns: Map<string, ResolvedColumn[]>): void {
-  for (const { fromColumn, toColumn } of mappings) {
+  for (const { fromColumn, toColumn, ast } of mappings) {
     const sourceColumns = columns.get(fromColumn);
-    assert.ok(sourceColumns !== undefined, `column ${fromColumn} not found in selected columns`);
+    if (sourceColumns === undefined) {
+      throw new AthenaError(ATHENA_ERROR, `UNNEST source column '${fromColumn}' not found in SELECT`, ast);
+    }
     const sourceSchema = sourceColumns[0]?.schema;
-    assert.ok(sourceSchema?.type === 'array', `UNNEST source column '${fromColumn}' must be an array schema`);
+    if (sourceSchema?.type !== 'array') {
+      throw new AthenaError(ATHENA_ERROR, `UNNEST source column '${fromColumn}' must resolve to an array schema`, ast);
+    }
     columns.set(toColumn, [resolvedCol(toColumn, sourceSchema.items, sourceColumns[0]?.ast)]);
   }
 }
@@ -495,6 +502,22 @@ function resolveSingleColumnRef(
   );
 }
 
+/** Return true when the column expression is a CAST / TRY_CAST to ARRAY<…>. */
+function isCastToArray(node: unknown): boolean {
+  if (typeof node !== 'object' || node === null) {
+    return false;
+  }
+  const typed = node as Record<string, unknown>;
+  if (typed['type'] === 'cast') {
+    const target = (typed['target'] as { dataType?: string }[] | undefined)?.[0];
+    return target?.dataType === 'ARRAY';
+  }
+  if (typed['type'] === 'expr') {
+    return isCastToArray(typed['expr']);
+  }
+  return false;
+}
+
 function resolveSelectColumns(select: Select, ctx: VisitContext): Map<string, ResolvedColumn[]> {
   const allTables = [...ctx.tables.values()].flat();
   const columns = new Map<string, ResolvedColumn[]>();
@@ -510,12 +533,27 @@ function resolveSelectColumns(select: Select, ctx: VisitContext): Map<string, Re
       checkColumnRefsExist(columnAST, allTables, ctx);
       validateComplexColumnExpression(columnAST, allTables, ctx);
       resolveDefaultSchemaColumn(columnAlias, indexedName, columnAST, columns);
-      continue;
+    } else {
+      const [ref] = columnRefs;
+      assert.ok(ref !== undefined);
+      resolveSingleColumnRef(columnAST, columnAlias, indexedName, ref, allTables, ctx, columns);
     }
 
-    const [ref] = columnRefs;
-    assert.ok(ref !== undefined);
-    resolveSingleColumnRef(columnAST, columnAlias, indexedName, ref, allTables, ctx, columns);
+    // When the outermost expression is a CAST/TRY_CAST to ARRAY<…>, honour the declared
+    // array type regardless of what the inner expression resolves to.  This is needed when
+    // the inner expression (e.g. json_parse) has no schema-aware path to navigate.
+    // Skip when the inner expression already resolved to an array (e.g. json_extract on an
+    // array-typed property): overriding would strip the items schema and break UNNEST typing.
+    if (isCastToArray(columnAST)) {
+      const colName = columnAlias ?? indexedName;
+      const existing = columns.get(colName);
+      if (existing !== undefined && existing[0]?.schema.type !== 'array') {
+        columns.set(
+          colName,
+          existing.map((col) => resolvedCol(col.name, { type: 'array' }, col.ast)),
+        );
+      }
+    }
   }
 
   return columns;

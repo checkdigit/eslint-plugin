@@ -111,6 +111,60 @@ createTester().run(ruleId, rule, {
         \``,
     },
     {
+      name: 'CROSS JOIN UNNEST - array type casting should work',
+      code: `\`WITH unique_postings AS (
+    SELECT lastModified,
+        posting,
+        entryId
+    FROM (
+            SELECT DISTINCT split(a.url, '/') [5] AS entryId,
+                try_cast(
+                    json_extract(a.requestbody, '$.postings') AS ARRAY < MAP < VARCHAR,
+                    VARCHAR >>
+                ) AS postings,
+                min(
+                    json_extract_scalar(a.responseheaders, '$["last-modified"]')
+                ) as lastModified
+            FROM account_logs AS a
+            WHERE strpos(a.url, '/account/v2/entry/') = 1
+                AND a.method = 'PUT'
+                AND a.responsestatus = '204'
+            GROUP BY split(a.url, '/') [5],
+                try_cast(
+                    json_extract(a.requestbody, '$.postings') AS ARRAY < MAP < VARCHAR,
+                    VARCHAR >>
+                )
+        )
+        CROSS JOIN unnest(postings) AS postings(posting) -- this works fine
+    UNION ALL
+    SELECT lastModified,
+        posting,
+        entryId
+    FROM (
+            SELECT DISTINCT split(a.url, '/') [5] AS entryId,
+                try_cast(
+                    json_parse(a.requestbody) AS ARRAY < MAP < VARCHAR,
+                    VARCHAR >>
+                ) AS postings,
+                min(
+                    json_extract_scalar(a.responseheaders, '$["last-modified"]')
+                ) as lastModified
+            FROM account_logs AS a
+            WHERE strpos(a.url, '/account/v1/entry/') = 1
+                AND a.method = 'PUT'
+                AND a.responsestatus = '204'
+            GROUP BY split(a.url, '/') [5],
+                try_cast(
+                    json_parse(a.requestbody) AS ARRAY < MAP < VARCHAR,
+                    VARCHAR >>
+                )
+        )
+        CROSS JOIN unnest(postings) AS postings(posting) -- this works only if try_cast is applied with correct type. v1 has been removed so typing of responsebody falls back to Object?
+)
+SELECT * from unique_postings
+        \``,
+    },
+    {
       name: 'CROSS JOIN UNNEST - referenced',
       code: `\`WITH unnested as (SELECT url, json_extract(requestbody, '$.feeDetails') as parts
         FROM message
