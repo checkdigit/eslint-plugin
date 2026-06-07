@@ -1,0 +1,2048 @@
+{
+  "apis": {
+    "/vault/v2/ping": {},
+    "/vault/v2/card/:cardId": {
+      "put": {
+        "request": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://vault.checkdigit/vault/v2/schemas/api/CreateCardRequestContext",
+          "type": "object",
+          "properties": {
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "cardId": {
+                  "type": "string"
+                }
+              },
+              "required": ["cardId"]
+            },
+            "headers": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "body": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$id": "https://vault.checkdigit/vault/v2/schemas/definitions/CardCreationData",
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["bin", "expirationDate", "programId"],
+              "properties": {
+                "bin": {
+                  "type": "string",
+                  "pattern": "^\\d+$",
+                  "description": "Bin in which to create the new card",
+                  "minLength": 6,
+                  "maxLength": 6
+                },
+                "cardNumberLength": {
+                  "type": "number",
+                  "description": "The length of the card number that should be created",
+                  "minimum": 15,
+                  "maximum": 19
+                },
+                "programId": {
+                  "type": "string",
+                  "description": "Identifier for the program configration under which this card belongs"
+                },
+                "profileId": {
+                  "type": "string",
+                  "description": "The user that is asociated with the newly created card"
+                },
+                "expirationDate": {
+                  "type": "string",
+                  "description": "Expiration date for the card and will be assumed to be the last millisecond of the month",
+                  "minLength": 4,
+                  "maxLength": 4
+                },
+                "serviceCode": {
+                  "type": "string",
+                  "pattern": "^\\d+$",
+                  "description": "Service code for the card",
+                  "minLength": 3,
+                  "maxLength": 3
+                },
+                "state": {
+                  "type": "string",
+                  "description": "The current state of the card",
+                  "enum": ["CURRENT", "REISSUED", "RETIRED"]
+                },
+                "active": {
+                  "type": "string",
+                  "description": "The active/inactive status for the card",
+                  "enum": ["INACTIVE", "ACTIVE"]
+                },
+                "block": {
+                  "type": "string",
+                  "description": "Whether the card is open or blocked for various reasons",
+                  "enum": ["OPEN", "BLOCKED NO FRAUD", "BLOCKED WITH FRAUD"]
+                },
+                "reuseCardNumberForCardId": {
+                  "type": "string",
+                  "description": "Indicates that the newly created card should have the same card number as the card associated with the supplied token"
+                }
+              }
+            }
+          },
+          "required": ["params", "body"],
+          "additionalProperties": false
+        },
+        "responses": {
+          "200": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://vault.checkdigit/vault/v2/schemas/api/CreateCardResponseOK",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "properties": {
+                  "location": {
+                    "type": "string"
+                  },
+                  "last-modified": {
+                    "type": "string"
+                  },
+                  "etag": {
+                    "type": "string"
+                  }
+                }
+              },
+              "body": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://vault.checkdigit/vault/v2/schemas/definitions/Card",
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "cardId",
+                  "bin",
+                  "last4Digits",
+                  "expirationDate",
+                  "sequenceNumber",
+                  "pinOffset",
+                  "state",
+                  "active",
+                  "block",
+                  "capture",
+                  "createdOn"
+                ],
+                "properties": {
+                  "cardId": {
+                    "type": "string",
+                    "description": "Token used to represent a card outside of the vault"
+                  },
+                  "programId": {
+                    "type": "string",
+                    "description": "Identifier for the program configration under which this card belongs"
+                  },
+                  "bin": {
+                    "type": "string",
+                    "pattern": "^\\d+$",
+                    "description": "Bin number for the card",
+                    "minLength": 1,
+                    "maxLength": 6
+                  },
+                  "last4Digits": {
+                    "type": "string",
+                    "description": "Last four digits of the card number"
+                  },
+                  "profileId": {
+                    "type": "string"
+                  },
+                  "expirationDate": {
+                    "type": "string",
+                    "description": "Expiration date for the card as YYMM and will be assumed to be the last millisecond of the month"
+                  },
+                  "serviceCode": {
+                    "type": "string",
+                    "pattern": "^\\d+$",
+                    "description": "Service code for the card"
+                  },
+                  "sequenceNumber": {
+                    "type": "number",
+                    "description": "Used to differentiate issuing the same card and expiration date on multiple plastics"
+                  },
+                  "pinOffset": {
+                    "type": "string",
+                    "description": "User defined PIN offset from the card number's natural PIN"
+                  },
+                  "state": {
+                    "type": "string",
+                    "description": "The current state of the card",
+                    "enum": ["CURRENT", "REISSUED", "RETIRED", "FORCED"]
+                  },
+                  "active": {
+                    "type": "string",
+                    "description": "The active/inactive status for the card",
+                    "enum": ["INACTIVE", "ACTIVE"]
+                  },
+                  "block": {
+                    "type": "string",
+                    "description": "Whether the card is open or blocked for various reasons",
+                    "enum": ["OPEN", "BLOCKED NO FRAUD", "BLOCKED WITH FRAUD"]
+                  },
+                  "capture": {
+                    "type": "boolean",
+                    "description": "Whether the card should be captured at next use"
+                  },
+                  "createdOn": {
+                    "type": "string",
+                    "description": "When the card was created",
+                    "format": "date-time"
+                  }
+                }
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          },
+          "409": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://vault.checkdigit/vault/v2/schemas/api/CreateCardResponseConflict",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "default": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://vault.checkdigit/vault/v2/schemas/api/CreateCardResponseDefault",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://vault.checkdigit/vault/v2/schemas/definitions/Error",
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Error message",
+                "required": ["message"],
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "/vault/v2/card/:cardId/history": {},
+    "/vault/v2/card/:cardId/number": {
+      "put": {
+        "request": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://vault.checkdigit/vault/v2/schemas/api/CreateCardWithNumberRequestContext",
+          "type": "object",
+          "properties": {
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "cardId": {
+                  "type": "string"
+                }
+              },
+              "required": ["cardId"]
+            },
+            "headers": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "body": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$id": "https://vault.checkdigit/vault/v2/schemas/definitions/CardCreationDataWithCardNumber",
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["cardNumber", "expirationDate", "programId"],
+              "properties": {
+                "bin": {
+                  "type": "string",
+                  "pattern": "^\\d+$",
+                  "description": "Bin in which to create the new card",
+                  "minLength": 6,
+                  "maxLength": 6
+                },
+                "cardNumber": {
+                  "type": "string",
+                  "description": "Fifteen to nineteen digit card number",
+                  "minLength": 15,
+                  "maxLength": 19
+                },
+                "cardNumberLength": {
+                  "type": "number",
+                  "description": "The length of the card number that should be created"
+                },
+                "programId": {
+                  "type": "string",
+                  "description": "Identifier for the program configration under which this card belongs"
+                },
+                "profileId": {
+                  "type": "string",
+                  "description": "The user that is asociated with the newly created card"
+                },
+                "expirationDate": {
+                  "type": "string",
+                  "description": "Expiration date for the card and will be assumed to be the last millisecond of the month",
+                  "minLength": 4,
+                  "maxLength": 4
+                },
+                "serviceCode": {
+                  "type": "string",
+                  "pattern": "^\\d+$",
+                  "description": "Service code for the card",
+                  "minLength": 3,
+                  "maxLength": 3
+                },
+                "state": {
+                  "type": "string",
+                  "description": "The current state of the card",
+                  "enum": ["CURRENT", "REISSUED", "RETIRED"]
+                },
+                "active": {
+                  "type": "string",
+                  "description": "The active/inactive status for the card",
+                  "enum": ["INACTIVE", "ACTIVE"]
+                },
+                "block": {
+                  "type": "string",
+                  "description": "Whether the card is open or blocked for various reasons",
+                  "enum": ["OPEN", "BLOCKED NO FRAUD", "BLOCKED WITH FRAUD"]
+                }
+              }
+            }
+          },
+          "required": ["params", "body"],
+          "additionalProperties": false
+        },
+        "responses": {
+          "200": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://vault.checkdigit/vault/v2/schemas/api/CreateCardWithNumberResponseOK",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "properties": {
+                  "location": {
+                    "type": "string"
+                  },
+                  "last-modified": {
+                    "type": "string"
+                  },
+                  "etag": {
+                    "type": "string"
+                  }
+                }
+              },
+              "body": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://vault.checkdigit/vault/v2/schemas/definitions/Card",
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "cardId",
+                  "bin",
+                  "last4Digits",
+                  "expirationDate",
+                  "sequenceNumber",
+                  "pinOffset",
+                  "state",
+                  "active",
+                  "block",
+                  "capture",
+                  "createdOn"
+                ],
+                "properties": {
+                  "cardId": {
+                    "type": "string",
+                    "description": "Token used to represent a card outside of the vault"
+                  },
+                  "programId": {
+                    "type": "string",
+                    "description": "Identifier for the program configration under which this card belongs"
+                  },
+                  "bin": {
+                    "type": "string",
+                    "pattern": "^\\d+$",
+                    "description": "Bin number for the card",
+                    "minLength": 1,
+                    "maxLength": 6
+                  },
+                  "last4Digits": {
+                    "type": "string",
+                    "description": "Last four digits of the card number"
+                  },
+                  "profileId": {
+                    "type": "string"
+                  },
+                  "expirationDate": {
+                    "type": "string",
+                    "description": "Expiration date for the card as YYMM and will be assumed to be the last millisecond of the month"
+                  },
+                  "serviceCode": {
+                    "type": "string",
+                    "pattern": "^\\d+$",
+                    "description": "Service code for the card"
+                  },
+                  "sequenceNumber": {
+                    "type": "number",
+                    "description": "Used to differentiate issuing the same card and expiration date on multiple plastics"
+                  },
+                  "pinOffset": {
+                    "type": "string",
+                    "description": "User defined PIN offset from the card number's natural PIN"
+                  },
+                  "state": {
+                    "type": "string",
+                    "description": "The current state of the card",
+                    "enum": ["CURRENT", "REISSUED", "RETIRED", "FORCED"]
+                  },
+                  "active": {
+                    "type": "string",
+                    "description": "The active/inactive status for the card",
+                    "enum": ["INACTIVE", "ACTIVE"]
+                  },
+                  "block": {
+                    "type": "string",
+                    "description": "Whether the card is open or blocked for various reasons",
+                    "enum": ["OPEN", "BLOCKED NO FRAUD", "BLOCKED WITH FRAUD"]
+                  },
+                  "capture": {
+                    "type": "boolean",
+                    "description": "Whether the card should be captured at next use"
+                  },
+                  "createdOn": {
+                    "type": "string",
+                    "description": "When the card was created",
+                    "format": "date-time"
+                  }
+                }
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          },
+          "default": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://vault.checkdigit/vault/v2/schemas/api/CreateCardWithNumberResponseDefault",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://vault.checkdigit/vault/v2/schemas/definitions/Error",
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Error message",
+                "required": ["message"],
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "/vault/v2/card": {},
+    "/vault/v2/card/pan/:cardNumber": {},
+    "/vault/v2/card/:cardId/state/:stateStatus": {
+      "put": {
+        "request": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://vault.checkdigit/vault/v2/schemas/api/UpdateStateStatusRequestContext",
+          "type": "object",
+          "properties": {
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "cardId": {
+                  "type": "string"
+                },
+                "stateStatus": {
+                  "type": "string"
+                }
+              },
+              "required": ["cardId", "stateStatus"]
+            },
+            "headers": {
+              "type": "object",
+              "additionalProperties": true,
+              "properties": {
+                "if-match": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "required": ["params"],
+          "additionalProperties": false
+        },
+        "responses": {
+          "204": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://vault.checkdigit/vault/v2/schemas/api/UpdateStateStatusResponseNoContent",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "properties": {
+                  "last-modified": {
+                    "type": "string"
+                  },
+                  "etag": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "404": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://vault.checkdigit/vault/v2/schemas/api/UpdateStateStatusResponseNotFound",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "409": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://vault.checkdigit/vault/v2/schemas/api/UpdateStateStatusResponseConflict",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "default": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://vault.checkdigit/vault/v2/schemas/api/UpdateStateStatusResponseDefault",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://vault.checkdigit/vault/v2/schemas/definitions/Error",
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Error message",
+                "required": ["message"],
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "/vault/v2/card/:cardId/active/:activeStatus": {
+      "put": {
+        "request": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://vault.checkdigit/vault/v2/schemas/api/UpdateActiveStatusRequestContext",
+          "type": "object",
+          "properties": {
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "cardId": {
+                  "type": "string"
+                },
+                "activeStatus": {
+                  "type": "string"
+                }
+              },
+              "required": ["cardId", "activeStatus"]
+            },
+            "headers": {
+              "type": "object",
+              "additionalProperties": true,
+              "properties": {
+                "if-match": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "required": ["params"],
+          "additionalProperties": false
+        },
+        "responses": {
+          "204": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://vault.checkdigit/vault/v2/schemas/api/UpdateActiveStatusResponseNoContent",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "properties": {
+                  "last-modified": {
+                    "type": "string"
+                  },
+                  "etag": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "404": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://vault.checkdigit/vault/v2/schemas/api/UpdateActiveStatusResponseNotFound",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "409": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://vault.checkdigit/vault/v2/schemas/api/UpdateActiveStatusResponseConflict",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "default": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://vault.checkdigit/vault/v2/schemas/api/UpdateActiveStatusResponseDefault",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://vault.checkdigit/vault/v2/schemas/definitions/Error",
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Error message",
+                "required": ["message"],
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "/vault/v2/card/:cardId/block/:blockStatus": {
+      "put": {
+        "request": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://vault.checkdigit/vault/v2/schemas/api/UpdateBlockStatusRequestContext",
+          "type": "object",
+          "properties": {
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "cardId": {
+                  "type": "string"
+                },
+                "blockStatus": {
+                  "type": "string"
+                }
+              },
+              "required": ["cardId", "blockStatus"]
+            },
+            "headers": {
+              "type": "object",
+              "additionalProperties": true,
+              "properties": {
+                "if-match": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "required": ["params"],
+          "additionalProperties": false
+        },
+        "responses": {
+          "204": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://vault.checkdigit/vault/v2/schemas/api/UpdateBlockStatusResponseNoContent",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "properties": {
+                  "last-modified": {
+                    "type": "string"
+                  },
+                  "etag": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "404": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://vault.checkdigit/vault/v2/schemas/api/UpdateBlockStatusResponseNotFound",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "409": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://vault.checkdigit/vault/v2/schemas/api/UpdateBlockStatusResponseConflict",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "default": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://vault.checkdigit/vault/v2/schemas/api/UpdateBlockStatusResponseDefault",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://vault.checkdigit/vault/v2/schemas/definitions/Error",
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Error message",
+                "required": ["message"],
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "/vault/v2/card/:cardId/capture/:captureStatus": {
+      "put": {
+        "request": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://vault.checkdigit/vault/v2/schemas/api/UpdateCaptureStatusRequestContext",
+          "type": "object",
+          "properties": {
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "cardId": {
+                  "type": "string"
+                },
+                "captureStatus": {
+                  "type": "string"
+                }
+              },
+              "required": ["cardId", "captureStatus"]
+            },
+            "headers": {
+              "type": "object",
+              "additionalProperties": true,
+              "properties": {
+                "if-match": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "required": ["params"],
+          "additionalProperties": false
+        },
+        "responses": {
+          "204": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://vault.checkdigit/vault/v2/schemas/api/UpdateCaptureStatusResponseNoContent",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "properties": {
+                  "last-modified": {
+                    "type": "string"
+                  },
+                  "etag": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "404": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://vault.checkdigit/vault/v2/schemas/api/UpdateCaptureStatusResponseNotFound",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "409": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://vault.checkdigit/vault/v2/schemas/api/UpdateCaptureStatusResponseConflict",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "default": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://vault.checkdigit/vault/v2/schemas/api/UpdateCaptureStatusResponseDefault",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://vault.checkdigit/vault/v2/schemas/definitions/Error",
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Error message",
+                "required": ["message"],
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "/vault/v2/card/:cardId/pinOffset": {
+      "put": {
+        "request": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://vault.checkdigit/vault/v2/schemas/api/CardPinOffsetPutRequestContext",
+          "type": "object",
+          "properties": {
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "cardId": {
+                  "type": "string"
+                }
+              },
+              "required": ["cardId"]
+            },
+            "headers": {
+              "type": "object",
+              "additionalProperties": true,
+              "properties": {
+                "if-match": {
+                  "type": "string"
+                }
+              }
+            },
+            "body": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$id": "https://vault.checkdigit/vault/v2/schemas/definitions/EncryptedUserDefinedPinData",
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["encryptedUserDefinedPin", "keyId"],
+              "properties": {
+                "encryptedUserDefinedPin": {
+                  "type": "string",
+                  "description": "Public Key that needs to be imported into Vault"
+                },
+                "keyId": {
+                  "description": "A unique identifier for the key that is supplied on future api calls involving data encrypted with this public key",
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "required": ["params", "body"],
+          "additionalProperties": false
+        },
+        "responses": {
+          "204": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://vault.checkdigit/vault/v2/schemas/api/CardPinOffsetPutResponseNoContent",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "404": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://vault.checkdigit/vault/v2/schemas/api/CardPinOffsetPutResponseNotFound",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "default": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://vault.checkdigit/vault/v2/schemas/api/CardPinOffsetPutResponseDefault",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://vault.checkdigit/vault/v2/schemas/definitions/Error",
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Error message",
+                "required": ["message"],
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "/vault/v2/card/:cardId/key/:publicKeyHash": {
+      "put": {
+        "request": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://vault.checkdigit/vault/v2/schemas/api/CardKeyPutRequestContext",
+          "type": "object",
+          "properties": {
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "cardId": {
+                  "type": "string"
+                },
+                "publicKeyHash": {
+                  "type": "string"
+                }
+              },
+              "required": ["cardId", "publicKeyHash"]
+            },
+            "headers": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "body": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$id": "https://vault.checkdigit/vault/v2/schemas/definitions/CardInformationRequestBody",
+              "required": ["publicKey"],
+              "additionalProperties": false,
+              "properties": {
+                "publicKey": {
+                  "type": "string",
+                  "description": "PGP public key in PEM format."
+                }
+              }
+            }
+          },
+          "required": ["params", "body"],
+          "additionalProperties": false
+        },
+        "responses": {
+          "200": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://vault.checkdigit/vault/v2/schemas/api/CardKeyPutResponseOK",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://vault.checkdigit/vault/v2/schemas/definitions/EncryptedCardInformation",
+                "description": "Encrypted card information",
+                "type": "object",
+                "required": ["cardNumber", "cvc2"],
+                "additionalProperties": false,
+                "properties": {
+                  "cardNumber": {
+                    "type": "string",
+                    "description": "PGP encrypted card number"
+                  },
+                  "cvc2": {
+                    "type": "string",
+                    "description": "PGP encrypted cvc2"
+                  }
+                }
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          },
+          "404": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://vault.checkdigit/vault/v2/schemas/api/CardKeyPutResponseNotFound",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "default": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://vault.checkdigit/vault/v2/schemas/api/CardKeyPutResponseDefault",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://vault.checkdigit/vault/v2/schemas/definitions/Error",
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Error message",
+                "required": ["message"],
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "/vault/v2/detokenize/:cardId": {},
+    "/vault/v2/tokenize/:messageId": {},
+    "/vault/v2/outbound/:transformId": {},
+    "/vault/v2/inbound/:transformId": {},
+    "/vault/v2/pgp/generate/:keyName": {},
+    "/vault/v2/pgp/key/:keyId": {},
+    "/vault/v2/pgp/publicKey/:keyName": {},
+    "/vault/v2/pgp/card/:cardId/request/:requestId": {},
+    "/vault/v2/card/key/:keyId/encryptedCardNumber/:encryptedCardNumber": {
+      "get": {
+        "request": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://vault.checkdigit/vault/v2/schemas/api/GetCardsByEncryptedCardNumberRequestContext",
+          "type": "object",
+          "properties": {
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "keyId": {
+                  "type": "string"
+                },
+                "encryptedCardNumber": {
+                  "type": "string"
+                }
+              },
+              "required": ["keyId", "encryptedCardNumber"]
+            },
+            "headers": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "required": ["params"],
+          "additionalProperties": false
+        },
+        "responses": {
+          "200": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://vault.checkdigit/vault/v2/schemas/api/GetCardsByEncryptedCardNumberResponseOK",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://vault.checkdigit/vault/v2/schemas/definitions/Cards",
+                "type": "array",
+                "items": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://vault.checkdigit/vault/v2/schemas/definitions/Card",
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "cardId",
+                    "bin",
+                    "last4Digits",
+                    "expirationDate",
+                    "sequenceNumber",
+                    "pinOffset",
+                    "state",
+                    "active",
+                    "block",
+                    "capture",
+                    "createdOn"
+                  ],
+                  "properties": {
+                    "cardId": {
+                      "type": "string",
+                      "description": "Token used to represent a card outside of the vault"
+                    },
+                    "programId": {
+                      "type": "string",
+                      "description": "Identifier for the program configration under which this card belongs"
+                    },
+                    "bin": {
+                      "type": "string",
+                      "pattern": "^\\d+$",
+                      "description": "Bin number for the card",
+                      "minLength": 1,
+                      "maxLength": 6
+                    },
+                    "last4Digits": {
+                      "type": "string",
+                      "description": "Last four digits of the card number"
+                    },
+                    "profileId": {
+                      "type": "string"
+                    },
+                    "expirationDate": {
+                      "type": "string",
+                      "description": "Expiration date for the card as YYMM and will be assumed to be the last millisecond of the month"
+                    },
+                    "serviceCode": {
+                      "type": "string",
+                      "pattern": "^\\d+$",
+                      "description": "Service code for the card"
+                    },
+                    "sequenceNumber": {
+                      "type": "number",
+                      "description": "Used to differentiate issuing the same card and expiration date on multiple plastics"
+                    },
+                    "pinOffset": {
+                      "type": "string",
+                      "description": "User defined PIN offset from the card number's natural PIN"
+                    },
+                    "state": {
+                      "type": "string",
+                      "description": "The current state of the card",
+                      "enum": ["CURRENT", "REISSUED", "RETIRED", "FORCED"]
+                    },
+                    "active": {
+                      "type": "string",
+                      "description": "The active/inactive status for the card",
+                      "enum": ["INACTIVE", "ACTIVE"]
+                    },
+                    "block": {
+                      "type": "string",
+                      "description": "Whether the card is open or blocked for various reasons",
+                      "enum": ["OPEN", "BLOCKED NO FRAUD", "BLOCKED WITH FRAUD"]
+                    },
+                    "capture": {
+                      "type": "boolean",
+                      "description": "Whether the card should be captured at next use"
+                    },
+                    "createdOn": {
+                      "type": "string",
+                      "description": "When the card was created",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          },
+          "404": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://vault.checkdigit/vault/v2/schemas/api/GetCardsByEncryptedCardNumberResponseNotFound",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://vault.checkdigit/vault/v2/schemas/definitions/Error",
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Error message",
+                "required": ["message"],
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          },
+          "default": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://vault.checkdigit/vault/v2/schemas/api/GetCardsByEncryptedCardNumberResponseDefault",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://vault.checkdigit/vault/v2/schemas/definitions/Error",
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Error message",
+                "required": ["message"],
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "DetokenizationResult": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://vault.checkdigit/vault/v2/schemas/definitions/DetokenizationResult",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cardNumber"],
+      "properties": {
+        "cardNumber": {
+          "type": "string",
+          "description": "Fifteen to nineteen digit card number"
+        }
+      }
+    },
+    "Card": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://vault.checkdigit/vault/v2/schemas/definitions/Card",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cardId",
+        "bin",
+        "last4Digits",
+        "expirationDate",
+        "sequenceNumber",
+        "pinOffset",
+        "state",
+        "active",
+        "block",
+        "capture",
+        "createdOn"
+      ],
+      "properties": {
+        "cardId": {
+          "type": "string",
+          "description": "Token used to represent a card outside of the vault"
+        },
+        "programId": {
+          "type": "string",
+          "description": "Identifier for the program configration under which this card belongs"
+        },
+        "bin": {
+          "type": "string",
+          "pattern": "^\\d+$",
+          "description": "Bin number for the card",
+          "minLength": 1,
+          "maxLength": 6
+        },
+        "last4Digits": {
+          "type": "string",
+          "description": "Last four digits of the card number"
+        },
+        "profileId": {
+          "type": "string"
+        },
+        "expirationDate": {
+          "type": "string",
+          "description": "Expiration date for the card as YYMM and will be assumed to be the last millisecond of the month"
+        },
+        "serviceCode": {
+          "type": "string",
+          "pattern": "^\\d+$",
+          "description": "Service code for the card"
+        },
+        "sequenceNumber": {
+          "type": "number",
+          "description": "Used to differentiate issuing the same card and expiration date on multiple plastics"
+        },
+        "pinOffset": {
+          "type": "string",
+          "description": "User defined PIN offset from the card number's natural PIN"
+        },
+        "state": {
+          "type": "string",
+          "description": "The current state of the card",
+          "enum": ["CURRENT", "REISSUED", "RETIRED", "FORCED"]
+        },
+        "active": {
+          "type": "string",
+          "description": "The active/inactive status for the card",
+          "enum": ["INACTIVE", "ACTIVE"]
+        },
+        "block": {
+          "type": "string",
+          "description": "Whether the card is open or blocked for various reasons",
+          "enum": ["OPEN", "BLOCKED NO FRAUD", "BLOCKED WITH FRAUD"]
+        },
+        "capture": {
+          "type": "boolean",
+          "description": "Whether the card should be captured at next use"
+        },
+        "createdOn": {
+          "type": "string",
+          "description": "When the card was created",
+          "format": "date-time"
+        }
+      }
+    },
+    "Cards": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://vault.checkdigit/vault/v2/schemas/definitions/Cards",
+      "type": "array",
+      "items": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$id": "https://vault.checkdigit/vault/v2/schemas/definitions/Card",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "cardId",
+          "bin",
+          "last4Digits",
+          "expirationDate",
+          "sequenceNumber",
+          "pinOffset",
+          "state",
+          "active",
+          "block",
+          "capture",
+          "createdOn"
+        ],
+        "properties": {
+          "cardId": {
+            "type": "string",
+            "description": "Token used to represent a card outside of the vault"
+          },
+          "programId": {
+            "type": "string",
+            "description": "Identifier for the program configration under which this card belongs"
+          },
+          "bin": {
+            "type": "string",
+            "pattern": "^\\d+$",
+            "description": "Bin number for the card",
+            "minLength": 1,
+            "maxLength": 6
+          },
+          "last4Digits": {
+            "type": "string",
+            "description": "Last four digits of the card number"
+          },
+          "profileId": {
+            "type": "string"
+          },
+          "expirationDate": {
+            "type": "string",
+            "description": "Expiration date for the card as YYMM and will be assumed to be the last millisecond of the month"
+          },
+          "serviceCode": {
+            "type": "string",
+            "pattern": "^\\d+$",
+            "description": "Service code for the card"
+          },
+          "sequenceNumber": {
+            "type": "number",
+            "description": "Used to differentiate issuing the same card and expiration date on multiple plastics"
+          },
+          "pinOffset": {
+            "type": "string",
+            "description": "User defined PIN offset from the card number's natural PIN"
+          },
+          "state": {
+            "type": "string",
+            "description": "The current state of the card",
+            "enum": ["CURRENT", "REISSUED", "RETIRED", "FORCED"]
+          },
+          "active": {
+            "type": "string",
+            "description": "The active/inactive status for the card",
+            "enum": ["INACTIVE", "ACTIVE"]
+          },
+          "block": {
+            "type": "string",
+            "description": "Whether the card is open or blocked for various reasons",
+            "enum": ["OPEN", "BLOCKED NO FRAUD", "BLOCKED WITH FRAUD"]
+          },
+          "capture": {
+            "type": "boolean",
+            "description": "Whether the card should be captured at next use"
+          },
+          "createdOn": {
+            "type": "string",
+            "description": "When the card was created",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    "TokenizationData": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://vault.checkdigit/vault/v2/schemas/definitions/TokenizationData",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "cardNumber": {
+          "type": "string",
+          "description": "Fifteen to nineteen digit card number",
+          "minLength": 15,
+          "maxLength": 19
+        },
+        "expirationDate": {
+          "type": "string",
+          "description": "Expiration date for the card as YYMM and will be assumed to be the last millisecond of the month",
+          "minLength": 4,
+          "maxLength": 4
+        },
+        "serviceCode": {
+          "type": "string",
+          "description": "Service code for the card",
+          "minLength": 3,
+          "maxLength": 3
+        },
+        "sequenceNumber": {
+          "type": "number",
+          "description": "Optional sequence number for identifying the specific card"
+        },
+        "track1Data": {
+          "type": "string",
+          "description": "Track 1 data for the message"
+        },
+        "track2Data": {
+          "type": "string",
+          "description": "Track 2 data for the message"
+        },
+        "pinBlock": {
+          "type": "string",
+          "description": "PIN block that needs to be validated"
+        },
+        "pinBlockKeyId": {
+          "type": "string",
+          "description": "Identifier for the PIN block established for the connection"
+        },
+        "verificationValue2": {
+          "type": "string",
+          "description": "Verification value 2 supplied with the message"
+        }
+      }
+    },
+    "TokenizationResult": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://vault.checkdigit/vault/v2/schemas/definitions/TokenizationResult",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "bin": {
+          "type": "string",
+          "pattern": "^\\d+$",
+          "description": "Bin in which to create the new card"
+        },
+        "card": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://vault.checkdigit/vault/v2/schemas/definitions/Card",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "cardId",
+            "bin",
+            "last4Digits",
+            "expirationDate",
+            "sequenceNumber",
+            "pinOffset",
+            "state",
+            "active",
+            "block",
+            "capture",
+            "createdOn"
+          ],
+          "properties": {
+            "cardId": {
+              "type": "string",
+              "description": "Token used to represent a card outside of the vault"
+            },
+            "programId": {
+              "type": "string",
+              "description": "Identifier for the program configration under which this card belongs"
+            },
+            "bin": {
+              "type": "string",
+              "pattern": "^\\d+$",
+              "description": "Bin number for the card",
+              "minLength": 1,
+              "maxLength": 6
+            },
+            "last4Digits": {
+              "type": "string",
+              "description": "Last four digits of the card number"
+            },
+            "profileId": {
+              "type": "string"
+            },
+            "expirationDate": {
+              "type": "string",
+              "description": "Expiration date for the card as YYMM and will be assumed to be the last millisecond of the month"
+            },
+            "serviceCode": {
+              "type": "string",
+              "pattern": "^\\d+$",
+              "description": "Service code for the card"
+            },
+            "sequenceNumber": {
+              "type": "number",
+              "description": "Used to differentiate issuing the same card and expiration date on multiple plastics"
+            },
+            "pinOffset": {
+              "type": "string",
+              "description": "User defined PIN offset from the card number's natural PIN"
+            },
+            "state": {
+              "type": "string",
+              "description": "The current state of the card",
+              "enum": ["CURRENT", "REISSUED", "RETIRED", "FORCED"]
+            },
+            "active": {
+              "type": "string",
+              "description": "The active/inactive status for the card",
+              "enum": ["INACTIVE", "ACTIVE"]
+            },
+            "block": {
+              "type": "string",
+              "description": "Whether the card is open or blocked for various reasons",
+              "enum": ["OPEN", "BLOCKED NO FRAUD", "BLOCKED WITH FRAUD"]
+            },
+            "capture": {
+              "type": "boolean",
+              "description": "Whether the card should be captured at next use"
+            },
+            "createdOn": {
+              "type": "string",
+              "description": "When the card was created",
+              "format": "date-time"
+            }
+          }
+        },
+        "cardSearchResult": {
+          "type": "string",
+          "description": "Whether the card already existed or was needing to be created",
+          "enum": ["FOUND", "CREATED"]
+        },
+        "track1DataResult": {
+          "type": "string",
+          "description": "Whether the track 1 data supplied validated or not; will only be included if track 1 data is included in the request",
+          "enum": ["VALID", "MISMATCHED", "NOT PROVIDED"]
+        },
+        "track2DataResult": {
+          "type": "string",
+          "description": "Whether the track 2 data supplied validated or not; will only be included if track 2 data is included in the request",
+          "enum": ["VALID", "MISMATCHED", "NOT PROVIDED"]
+        },
+        "pinValidationResult": {
+          "type": "string",
+          "description": "Whether the pin block successfully validated or not; will only be included if a pin block is included in the request",
+          "enum": ["VALID", "INVALID", "INVALID KEY", "UNAVAILABLE", "NOT PROVIDED"]
+        },
+        "verificationValueValidationResult": {
+          "type": "string",
+          "description": "Whether the supplied verification value was valid or not; will only be included if either track 1 or track 2 data is included in the request",
+          "enum": ["VALID", "INVALID", "UNAVAILABLE", "NOT PROVIDED"]
+        },
+        "verificationValue2ValidationResult": {
+          "type": "string",
+          "description": "Whether the supplied verification value 2 was valid or not; will only be included if verification value 2 data is included in the request",
+          "enum": ["VALID", "INVALID", "UNAVAILABLE", "NOT PROVIDED"]
+        }
+      }
+    },
+    "CardCreationDataWithCardNumber": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://vault.checkdigit/vault/v2/schemas/definitions/CardCreationDataWithCardNumber",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cardNumber", "expirationDate", "programId"],
+      "properties": {
+        "bin": {
+          "type": "string",
+          "pattern": "^\\d+$",
+          "description": "Bin in which to create the new card",
+          "minLength": 6,
+          "maxLength": 6
+        },
+        "cardNumber": {
+          "type": "string",
+          "description": "Fifteen to nineteen digit card number",
+          "minLength": 15,
+          "maxLength": 19
+        },
+        "cardNumberLength": {
+          "type": "number",
+          "description": "The length of the card number that should be created"
+        },
+        "programId": {
+          "type": "string",
+          "description": "Identifier for the program configration under which this card belongs"
+        },
+        "profileId": {
+          "type": "string",
+          "description": "The user that is asociated with the newly created card"
+        },
+        "expirationDate": {
+          "type": "string",
+          "description": "Expiration date for the card and will be assumed to be the last millisecond of the month",
+          "minLength": 4,
+          "maxLength": 4
+        },
+        "serviceCode": {
+          "type": "string",
+          "pattern": "^\\d+$",
+          "description": "Service code for the card",
+          "minLength": 3,
+          "maxLength": 3
+        },
+        "state": {
+          "type": "string",
+          "description": "The current state of the card",
+          "enum": ["CURRENT", "REISSUED", "RETIRED"]
+        },
+        "active": {
+          "type": "string",
+          "description": "The active/inactive status for the card",
+          "enum": ["INACTIVE", "ACTIVE"]
+        },
+        "block": {
+          "type": "string",
+          "description": "Whether the card is open or blocked for various reasons",
+          "enum": ["OPEN", "BLOCKED NO FRAUD", "BLOCKED WITH FRAUD"]
+        }
+      }
+    },
+    "CardCreationData": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://vault.checkdigit/vault/v2/schemas/definitions/CardCreationData",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["bin", "expirationDate", "programId"],
+      "properties": {
+        "bin": {
+          "type": "string",
+          "pattern": "^\\d+$",
+          "description": "Bin in which to create the new card",
+          "minLength": 6,
+          "maxLength": 6
+        },
+        "cardNumberLength": {
+          "type": "number",
+          "description": "The length of the card number that should be created",
+          "minimum": 15,
+          "maximum": 19
+        },
+        "programId": {
+          "type": "string",
+          "description": "Identifier for the program configration under which this card belongs"
+        },
+        "profileId": {
+          "type": "string",
+          "description": "The user that is asociated with the newly created card"
+        },
+        "expirationDate": {
+          "type": "string",
+          "description": "Expiration date for the card and will be assumed to be the last millisecond of the month",
+          "minLength": 4,
+          "maxLength": 4
+        },
+        "serviceCode": {
+          "type": "string",
+          "pattern": "^\\d+$",
+          "description": "Service code for the card",
+          "minLength": 3,
+          "maxLength": 3
+        },
+        "state": {
+          "type": "string",
+          "description": "The current state of the card",
+          "enum": ["CURRENT", "REISSUED", "RETIRED"]
+        },
+        "active": {
+          "type": "string",
+          "description": "The active/inactive status for the card",
+          "enum": ["INACTIVE", "ACTIVE"]
+        },
+        "block": {
+          "type": "string",
+          "description": "Whether the card is open or blocked for various reasons",
+          "enum": ["OPEN", "BLOCKED NO FRAUD", "BLOCKED WITH FRAUD"]
+        },
+        "reuseCardNumberForCardId": {
+          "type": "string",
+          "description": "Indicates that the newly created card should have the same card number as the card associated with the supplied token"
+        }
+      }
+    },
+    "Out": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://vault.checkdigit/vault/v2/schemas/definitions/Out",
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Outbound transform parameters",
+      "required": ["sourceFileUrl", "destinationFileUrl", "pgpKeyName"],
+      "properties": {
+        "sourceFileUrl": {
+          "type": "string",
+          "description": "S3 URL of bucket/location for the source file to translate"
+        },
+        "destinationFileUrl": {
+          "type": "string",
+          "description": "S3 URL of bucket/location for where to put the resulting file"
+        },
+        "pgpKeyName": {
+          "type": "string",
+          "description": "PGP key name"
+        },
+        "encodingFormat": {
+          "type": "string",
+          "description": "The encoding of which the output of the file will be in (If not specified defaults to utf8)",
+          "enum": ["UTF8", "WIN1252"]
+        },
+        "compress": {
+          "type": "boolean",
+          "description": "Whether the file should be compressed, default false"
+        }
+      }
+    },
+    "In": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://vault.checkdigit/vault/v2/schemas/definitions/In",
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Inbound transform parameters",
+      "required": ["sourceFileUrl", "destinationFileUrl", "regexType", "expression", "groups", "pgpKeyName"],
+      "properties": {
+        "sourceFileUrl": {
+          "type": "string",
+          "description": "S3 URL of bucket/location for the source file to translate"
+        },
+        "destinationFileUrl": {
+          "type": "string",
+          "description": "S3 URL of bucket/location for where to put the resulting file"
+        },
+        "regexType": {
+          "type": "string",
+          "description": "The type of regular expression used to match",
+          "enum": ["FLAT FILE"]
+        },
+        "expression": {
+          "type": "string",
+          "description": "A regular expression for finding where the card number is on the line"
+        },
+        "groups": {
+          "type": "array",
+          "description": "List of groups associated with the regular expression parts",
+          "minItems": 1,
+          "items": {
+            "description": "Regular expression group",
+            "type": "string"
+          }
+        },
+        "pgpKeyName": {
+          "type": "string",
+          "description": "PGP key name"
+        },
+        "encodingFormat": {
+          "type": "string",
+          "description": "The encoding of which we expect the file we are reading in will be in (If not specified defaults to utf8)",
+          "enum": ["UTF8", "WIN1252"]
+        },
+        "encrypt": {
+          "type": "boolean",
+          "description": "Whether to encrypt the destination file, defaults to false"
+        },
+        "encryptPGPKeyName": {
+          "type": "string",
+          "description": "PGP Key to be used for encrypting the destination file"
+        }
+      }
+    },
+    "PGPKeyData": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://vault.checkdigit/vault/v2/schemas/definitions/PGPKeyData",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "keySize": {
+          "type": "number",
+          "description": "Key size to be used while generating the RSA key pair."
+        },
+        "passphrase": {
+          "type": "string",
+          "description": "Passphrase to be used while generating the RSA key pair."
+        }
+      }
+    },
+    "PGPPublicKey": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://vault.checkdigit/vault/v2/schemas/definitions/PGPPublicKey",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "pgpPublicKey": {
+          "type": "string",
+          "description": "public key specified by the keyName"
+        }
+      }
+    },
+    "NewPGPKey": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://vault.checkdigit/vault/v2/schemas/definitions/NewPGPKey",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["pgpPublicKey"],
+      "properties": {
+        "pgpPublicKey": {
+          "type": "string",
+          "description": "Public Key that needs to be imported into Vault"
+        },
+        "pgpPrivateKey": {
+          "type": "string",
+          "description": "Private Key that needs to be imported into Vault"
+        },
+        "pgpKeyPassword": {
+          "type": "string",
+          "description": "Private key password"
+        }
+      }
+    },
+    "KeyData": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://vault.checkdigit/vault/v2/schemas/definitions/KeyData",
+      "type": "object",
+      "additionalProperties": false,
+      "description": "New key data created specific to the token",
+      "required": ["keyId", "pgpPublicKey"],
+      "properties": {
+        "keyId": {
+          "description": "A unique identifier for the key that is supplied on future api calls involving data encrypted with this public key",
+          "type": "string"
+        },
+        "pgpPublicKey": {
+          "type": "string"
+        }
+      }
+    },
+    "EncryptedUserDefinedPinData": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://vault.checkdigit/vault/v2/schemas/definitions/EncryptedUserDefinedPinData",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["encryptedUserDefinedPin", "keyId"],
+      "properties": {
+        "encryptedUserDefinedPin": {
+          "type": "string",
+          "description": "Public Key that needs to be imported into Vault"
+        },
+        "keyId": {
+          "description": "A unique identifier for the key that is supplied on future api calls involving data encrypted with this public key",
+          "type": "string"
+        }
+      }
+    },
+    "Error": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://vault.checkdigit/vault/v2/schemas/definitions/Error",
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Error message",
+      "required": ["message"],
+      "properties": {
+        "message": {
+          "type": "string"
+        },
+        "code": {
+          "type": "string"
+        }
+      }
+    },
+    "EncryptedCardInformation": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://vault.checkdigit/vault/v2/schemas/definitions/EncryptedCardInformation",
+      "description": "Encrypted card information",
+      "type": "object",
+      "required": ["cardNumber", "cvc2"],
+      "additionalProperties": false,
+      "properties": {
+        "cardNumber": {
+          "type": "string",
+          "description": "PGP encrypted card number"
+        },
+        "cvc2": {
+          "type": "string",
+          "description": "PGP encrypted cvc2"
+        }
+      }
+    },
+    "CardInformationRequestBody": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://vault.checkdigit/vault/v2/schemas/definitions/CardInformationRequestBody",
+      "required": ["publicKey"],
+      "additionalProperties": false,
+      "properties": {
+        "publicKey": {
+          "type": "string",
+          "description": "PGP public key in PEM format."
+        }
+      }
+    }
+  }
+}

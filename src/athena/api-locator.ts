@@ -9,14 +9,21 @@ import { type ApiSchemas, generateSchemasForService } from '../openapi/generate-
 const log = debug('eslint-plugin:athena:api-locator');
 
 const SERVICES_ROOT_FOLDER = 'src/services';
+const LEGACY_TABLE_SUFFIX = '_logs';
 
 function upperCaseFirstCharacter(value: string): string {
   // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
   return `${value[0]?.toUpperCase()}${value.slice(1)}`;
 }
 
-export function locateApi(serviceName: string): ApiSchemas[] {
-  log('locating API for service', serviceName);
+export function locateApi(originalServiceName: string): ApiSchemas[] {
+  log('locating API for service', originalServiceName);
+
+  let serviceName = originalServiceName;
+  if (serviceName.endsWith(LEGACY_TABLE_SUFFIX)) {
+    log('service table is a legacy table name, looking for API schemas after removing "_logs" suffix', serviceName);
+    serviceName = serviceName.slice(0, -LEGACY_TABLE_SUFFIX.length);
+  }
 
   const serviceNameParts = serviceName.split('-');
   const camelCaseServiceName = [serviceNameParts[0], ...serviceNameParts.slice(1).map(upperCaseFirstCharacter)].join(

@@ -114,12 +114,5 @@
         "api/v1"
       ]
     }
-  },
-  "wallaby": {
-    "env": {
-      "params": {
-        "runner": "--experimental-vm-modules"
-      }
-    }
   }
 }

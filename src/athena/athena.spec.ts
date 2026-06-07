@@ -216,6 +216,13 @@ WHERE method = 'PUT'
       code: `describe('with data set up through API', async () => {});`,
     },
     {
+      name: 'compatible with legacy table names with _logs suffix',
+      code: `\`SELECT v.*, 
+          json_extract_scalar(v.requestbody, '$.programId') AS programId
+        FROM bank_dev.vault_logs AS v
+      \``,
+    },
+    {
       name: 'access to internal partition_date column is allowed',
       code: `\`SELECT
       tcm.url
