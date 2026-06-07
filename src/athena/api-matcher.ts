@@ -300,7 +300,9 @@ export function matchApi(
 
   if (matchedApis.length === 0) {
     log('no matched api');
-    throw new Error('no matched api');
+    throw new Error(
+      'No matched api, please adjust your query conditions to match with at least one API endpoints with firehose enabled.',
+    );
   }
   return matchedApis;
 }

@@ -223,6 +223,10 @@ WHERE method = 'PUT'
       \``,
     },
     {
+      name: 'service should be able to query its own athena table',
+      code: `\`SELECT url FROM "eslint-plugin"\``,
+    },
+    {
       name: 'access to internal partition_date column is allowed',
       code: `\`SELECT
       tcm.url

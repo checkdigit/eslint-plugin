@@ -84,30 +84,56 @@ function readServiceConfig(
   return { organization: pkgOrg, serviceName: pkgServiceName, apiRoot, endpoints: apiEndpoints };
 }
 
+function findServiceLocally(serviceFolder: string, org: string, serviceName: string): ServiceSource | null {
+  const config = readServiceConfig(readFileSync(`${serviceFolder}/package.json`, 'utf-8'), org, serviceName);
+  if (config === null) {
+    return null;
+  }
+
+  const endpoints: ServiceEndpoint[] = [];
+  for (const endpoint of config.endpoints) {
+    const swaggerPath = `${serviceFolder}/${config.apiRoot}/${endpoint}/swagger.yml`;
+    if (existsSync(swaggerPath)) {
+      endpoints.push({ path: endpoint, yamlContent: readFileSync(swaggerPath, 'utf-8') });
+    }
+  }
+
+  if (endpoints.length > 0) {
+    return { organization: config.organization, serviceName: config.serviceName, endpoints };
+  }
+  return null;
+}
+
+function findServiceInProject(serviceName: string): ServiceSource | null {
+  const packageJsonString = readFileSync(`./package.json`, 'utf-8');
+  const packageJson = JSON.parse(packageJsonString) as unknown as { name: string };
+  const [org, projectName] = packageJson.name.slice(1).split('/');
+  if (org === undefined) {
+    return null;
+  }
+
+  if (projectName === serviceName) {
+    log('service is the current project, looking for API schemas locally', serviceName);
+    const serviceSource = findServiceLocally('.', org, serviceName);
+    if (serviceSource !== null) {
+      return serviceSource;
+    }
+  }
+
+  return null;
+}
+
 function findServiceInNodeModules(serviceName: string): ServiceSource | null {
   for (const org of GITHUB_ORGANIZATIONS) {
-    const packageDir = `node_modules/@${org}/${serviceName}`;
-    const packageJsonPath = `${packageDir}/package.json`;
-    if (!existsSync(packageJsonPath)) {
+    const serviceFolder = `node_modules/@${org}/${serviceName}`;
+    if (!existsSync(serviceFolder)) {
       continue;
     }
 
     try {
-      const config = readServiceConfig(readFileSync(packageJsonPath, 'utf-8'), org, serviceName);
-      if (config === null) {
-        continue;
-      }
-
-      const endpoints: ServiceEndpoint[] = [];
-      for (const endpoint of config.endpoints) {
-        const swaggerPath = `${packageDir}/${config.apiRoot}/${endpoint}/swagger.yml`;
-        if (existsSync(swaggerPath)) {
-          endpoints.push({ path: endpoint, yamlContent: readFileSync(swaggerPath, 'utf-8') });
-        }
-      }
-
-      if (endpoints.length > 0) {
-        return { organization: config.organization, serviceName: config.serviceName, endpoints };
+      const serviceSource = findServiceLocally(serviceFolder, org, serviceName);
+      if (serviceSource !== null) {
+        return serviceSource;
       }
     } catch {
       // continue to next org
@@ -157,7 +183,8 @@ export function generateSchemasForService(
 ): { schema: ApiSchemas; endpoint: string }[] {
   log('generating schemas for service', serviceName);
 
-  const source = findServiceInNodeModules(serviceName) ?? findServiceOnGitHub(serviceName);
+  const source =
+    findServiceInProject(serviceName) ?? findServiceInNodeModules(serviceName) ?? findServiceOnGitHub(serviceName);
   if (source === null) {
     log('no swagger source found for service', serviceName);
     return [];

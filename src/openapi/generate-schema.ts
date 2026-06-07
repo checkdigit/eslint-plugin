@@ -333,7 +333,10 @@ function buildApiSchemaFromDocument(
   const apiSchemas: Record<string, Record<string, OperationSchemas>> = {};
   const allSchemas: ApiSchemas = { apis: apiSchemas };
   const operationIds = new Set<string>();
-  const documentFirehoseLogged = (document as Record<string, unknown>)['x-firehose-logged'];
+  const documentFirehoseLogged =
+    (document as Record<string, unknown>)['x-firehose-logged'] ??
+    (document as Record<string, unknown>)['x-firehoseLogged'];
+  log('document firehose logged value', documentFirehoseLogged);
 
   for (const [path, pathItems] of Object.entries(document.paths)) {
     // convert openapi path to koa router path, e.g. "/user/{userId}" --> "/user/:userId"
@@ -345,7 +348,10 @@ function buildApiSchemaFromDocument(
     for (const method of ALL_OPERATION_METHODS) {
       const operation = pathItems?.[method];
       if (operation !== undefined) {
-        const operationFirehoseLogged = (operation as Record<string, unknown>)['x-firehose-logged'];
+        const operationFirehoseLogged =
+          (operation as Record<string, unknown>)['x-firehose-logged'] ??
+          (operation as Record<string, unknown>)['x-firehoseLogged'];
+        log('operation firehose logged value', operationFirehoseLogged);
         const effectiveFirehoseLogged = operationFirehoseLogged ?? documentFirehoseLogged;
         if (effectiveFirehoseLogged !== true) {
           continue;
