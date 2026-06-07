@@ -34,7 +34,7 @@ createTester().run(ruleId, rule, {
         from link
         where
           json_extract_scalar(responseheaders, '$["created-on"]') < '\${new Date().toISOString()}'
-          and method = 'GET'
+          and method = 'PUT'
       \``,
     },
     {
@@ -55,7 +55,7 @@ createTester().run(ruleId, rule, {
     },
     {
       name: 'outer SELECT can reference columns produced by an inline subquery',
-      code: `\`SELECT s.url FROM (SELECT url FROM link WHERE method = 'GET') AS s\``,
+      code: `\`SELECT s.url FROM (SELECT url FROM link WHERE method = 'PUT') AS s\``,
     },
     {
       name: 'outer SELECT can reference columns produced by a JOIN subquery',
@@ -100,27 +100,27 @@ createTester().run(ruleId, rule, {
     },
     {
       name: 'CROSS JOIN UNNEST - not referenced',
-      // [TODO:] handle array item type extraction using schema dereferencing
-      code: `\`SELECT url, cast(json_extract(responsebody, '$.links') as ARRAY<VARCHAR>) as linkages
-        FROM link
-          CROSS JOIN UNNEST(linkages) AS t (linkage)
+      code: `\`SELECT url, json_extract(requestbody, '$.feeDetails') as parts
+        FROM message
+          CROSS JOIN UNNEST(parts) AS t (part)
         WHERE
           cardinality(split(url, '/')) = 5
-          AND method = 'GET'
-          AND responsestatus = '200';
+          AND split(url, '/')[4] = 'request'
+          AND method = 'PUT'
+          AND responsestatus = '204';
         \``,
     },
     {
       name: 'CROSS JOIN UNNEST - referenced',
-      // [TODO:] handle array item type extraction using schema dereferencing
-      code: `\`WITH unnested as (SELECT url, cast(json_extract(responsebody, '$.links') as ARRAY<MAP<VARCHAR,VARCHAR>>) as linkages
-        FROM link
-          CROSS JOIN UNNEST(linkages) AS t (linkage)
+      code: `\`WITH unnested as (SELECT url, json_extract(requestbody, '$.feeDetails') as parts
+        FROM message
+          CROSS JOIN UNNEST(parts) AS t (part)
         WHERE
           cardinality(split(url, '/')) = 5
-          AND method = 'GET'
-          AND responsestatus = '200')
-        select json_extract(linkage, '$.subjectId') from unnested;
+          AND split(url, '/')[4] = 'request'
+          AND method = 'PUT'
+          AND responsestatus = '204')
+        select part from unnested;
         \``,
     },
     {
@@ -309,7 +309,7 @@ WHEN 1=1\``,
       // x.url has tableRef = "x" which is not a known table or alias in the FROM clause.
       // Previously threw AssertionError (whole-node fallback); now AthenaError pinned to the column_ref.
       name: 'unknown table alias in SELECT narrows error location to the column_ref',
-      code: `\`SELECT x.url FROM "link" WHERE method = 'GET'\``,
+      code: `\`SELECT x.url FROM "link" WHERE method = 'PUT'\``,
       errors: [
         {
           messageId: 'AthenaError',
@@ -325,7 +325,7 @@ WHEN 1=1\``,
       // nonExistentCol appears inside a concat (2 column_refs → multi-col branch).
       // The fix: checkColumnRefsExist now validates each ref even in multi-ref expressions.
       name: 'non-existing column in multi-column expression inside CTE outer SELECT is reported',
-      code: `\`WITH m AS (SELECT url FROM "link" WHERE method = 'GET') SELECT nonExistentCol || url FROM m\``,
+      code: `\`WITH m AS (SELECT url FROM "link" WHERE method = 'PUT') SELECT nonExistentCol || url FROM m\``,
       errors: [
         {
           messageId: 'AthenaError',
@@ -1986,7 +1986,7 @@ WHERE method = 'PUT'
       // sqlStartOffset = 1 (backtick at code[0], SQL content at code[1]).
       // start: 1+7=8 → line 1, 0-based col 8 → RuleTester col 9.
       // end:   1+63=64 → line 1, 0-based col 64 → RuleTester endCol 65.
-      code: `\`SELECT json_extract_scalar(responsebody, '$.nonExistentField') AS x FROM "payment-card" WHERE method = 'GET' AND responsestatus = '200'\``,
+      code: `\`SELECT json_extract_scalar(responsebody, '$.nonExistentField') AS x FROM "payment-card" WHERE method = 'PUT' AND responsestatus = '200'\``,
       errors: [
         {
           messageId: 'AthenaError',
@@ -2006,7 +2006,7 @@ WHERE method = 'PUT'
       // end:   1+65=66 → splits to line 2, 0-based col 58 → RuleTester endLine 2, endCol 59.
       code: `\`SELECT
   json_extract_scalar(responsebody, '$.nonExistentField') AS x
-FROM "payment-card" WHERE method = 'GET' AND responsestatus = '200'\``,
+FROM "payment-card" WHERE method = 'PUT' AND responsestatus = '200'\``,
       errors: [
         {
           messageId: 'AthenaError',
@@ -2028,7 +2028,7 @@ FROM "payment-card" WHERE method = 'GET' AND responsestatus = '200'\``,
       // json_extract_scalar end:   SQL offset 63 → source offset 69 → line 1, 0-based col 69 → endCol 70.
       name: 'error location accounts for template expressions that appear before the error in the SQL',
       // eslint-disable-next-line no-template-curly-in-string
-      code: "`SELECT ${''}json_extract_scalar(responsebody, '$.nonExistentField') AS x FROM \"payment-card\" WHERE method = 'GET' AND responsestatus = '200'`",
+      code: "`SELECT ${''}json_extract_scalar(responsebody, '$.nonExistentField') AS x FROM \"payment-card\" WHERE method = 'PUT' AND responsestatus = '200'`",
       errors: [
         {
           messageId: 'AthenaError',
@@ -2045,7 +2045,7 @@ FROM "payment-card" WHERE method = 'GET' AND responsestatus = '200'\``,
       // start: 1+7=8 → line 1, 0-based col 8 → RuleTester col 9.
       // end:   1+21=22 → line 1, 0-based col 22 → RuleTester endCol 23.
       name: 'error location is narrowed to the exact column_ref when the column is not found',
-      code: `\`SELECT nonExistentCol FROM "payment-card" WHERE method = 'GET' AND responsestatus = '200'\``,
+      code: `\`SELECT nonExistentCol FROM "payment-card" WHERE method = 'PUT' AND responsestatus = '200'\``,
       errors: [
         {
           messageId: 'AthenaError',
@@ -2102,7 +2102,7 @@ FROM "payment-card" WHERE method = 'GET' AND responsestatus = '200'\``,
     },
     {
       name: 'non-existing column in WHERE is reported with precise location',
-      code: `\`SELECT url FROM "link" WHERE method = 'GET' AND nonExistentCol = 'foo'\``,
+      code: `\`SELECT url FROM "link" WHERE method = 'PUT' AND nonExistentCol = 'foo'\``,
       errors: [
         {
           messageId: 'AthenaError',
@@ -2211,7 +2211,7 @@ FROM "payment-card" WHERE method = 'GET' AND responsestatus = '200'\``,
     },
     {
       name: 'invalid column inside inline subquery inner SELECT is reported',
-      code: `\`SELECT s.url FROM (SELECT nonExistentCol FROM link WHERE method = 'GET') AS s\``,
+      code: `\`SELECT s.url FROM (SELECT nonExistentCol FROM link WHERE method = 'PUT') AS s\``,
       errors: [
         {
           messageId: 'AthenaError',
@@ -2223,7 +2223,7 @@ FROM "payment-card" WHERE method = 'GET' AND responsestatus = '200'\``,
     },
     {
       name: 'invalid column in outer SELECT referencing inline subquery is reported',
-      code: `\`SELECT s.nonExistentCol FROM (SELECT url FROM link WHERE method = 'GET') AS s\``,
+      code: `\`SELECT s.nonExistentCol FROM (SELECT url FROM link WHERE method = 'PUT') AS s\``,
       errors: [
         {
           messageId: 'AthenaError',
