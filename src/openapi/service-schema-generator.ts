@@ -103,7 +103,7 @@ function findServiceInProject(serviceName: string): ServiceSource | null {
   }
 
   if (projectName === serviceName) {
-    log('service is the current project, looking for API schemas locally', serviceName);
+    log(`[github] service is the current project, looking for API schemas locally`);
     const serviceSource = findServiceLocally('.', org, serviceName);
     if (serviceSource !== null) {
       return serviceSource;
@@ -119,7 +119,6 @@ function findServiceInProject(serviceName: string): ServiceSource | null {
 //     if (!existsSync(serviceFolder)) {
 //       continue;
 //     }
-//
 //     try {
 //       const serviceSource = findServiceLocally(serviceFolder, org, serviceName);
 //       if (serviceSource !== null) {
@@ -133,182 +132,178 @@ function findServiceInProject(serviceName: string): ServiceSource | null {
 // }
 
 // ---------------------------------------------------------------------------
-// GitHub fallback strategies — API (token-based) or git-clone (local dev)
+// GitHub strategies — REST API (GITHUB_TOKEN) with git-clone local fallback
 // ---------------------------------------------------------------------------
 
-// // Fetch a single file from the GitHub Contents API using a bearer token.
-// // Uses `Accept: application/vnd.github.v3.raw` so the body is the raw file, not JSON.
-// function fetchFileFromGitHubApi(org: string, repo: string, filePath: string, token: string): string | null {
-//   try {
-//     return execFileSync(process.execPath, ['--input-type=module'], {
-//       env: {
-//         ...process.env,
-//         _ATHENA_URL: `https://api.github.com/repos/${org}/${repo}/contents/${filePath}`,
-//         _ATHENA_TOKEN: token,
-//       },
-//       input: [
-//         `const r = await fetch(process.env._ATHENA_URL, { headers: {`,
-//         `  Accept: 'application/vnd.github.v3.raw',`,
-//         `  Authorization: 'Bearer ' + process.env._ATHENA_TOKEN,`,
-//         `  'User-Agent': 'eslint-plugin-checkdigit',`,
-//         `}});`,
-//         `if (!r.ok) process.exit(1);`,
-//         `process.stdout.write(await r.text());`,
-//       ].join('\n'),
-//       encoding: 'utf-8',
-//       timeout: 15_000,
-//     });
-//   } catch {
-//     return null;
-//   }
-// }
-//
-// function findServiceViaApi(serviceName: string, org: string, token: string): ServiceSource | null {
-//   log(`fetching package.json for ${org}/${serviceName} via GitHub API`);
-//   const pkgContent = fetchFileFromGitHubApi(org, serviceName, 'package.json', token);
-//   if (pkgContent === null) {
-//     return null;
-//   }
-//
-//   try {
-//     const config = readServiceConfig(pkgContent, org, serviceName);
-//     if (config === null) {
-//       return null;
-//     }
-//
-//     const endpoints: ServiceEndpoint[] = [];
-//     for (const endpoint of config.endpoints) {
-//       const swaggerPath = `${config.apiRoot}/${endpoint}/swagger.yml`;
-//       log(`fetching ${swaggerPath} for ${org}/${serviceName} via GitHub API`);
-//       const yamlContent = fetchFileFromGitHubApi(org, serviceName, swaggerPath, token);
-//       if (yamlContent !== null) {
-//         endpoints.push({ path: endpoint, yamlContent });
-//       }
-//     }
-//
-//     return endpoints.length > 0
-//       ? { organization: config.organization, serviceName: config.serviceName, endpoints }
-//       : null;
-//   } catch {
-//     return null;
-//   }
-// }
-//
-// // Shallow-clone with blob filtering: only commit + tree objects are fetched up
-// // front; `git show HEAD:<path>` lazily pulls each blob we actually need.
-// function findServiceViaGitClone(serviceName: string, org: string): ServiceSource | null {
-//   const repoUrl = `https://github.com/${org}/${serviceName}.git`;
+// Fetch a single file from the GitHub Contents API using a bearer token.
+// Uses `Accept: application/vnd.github.v3.raw` so the body is the raw file, not JSON.
+function fetchFileFromGitHubApi(org: string, repo: string, filePath: string, token: string): string | null {
+  try {
+    return execFileSync(process.execPath, ['--input-type=module'], {
+      env: {
+        ...process.env,
+        _ATHENA_URL: `https://api.github.com/repos/${org}/${repo}/contents/${filePath}`,
+        _ATHENA_TOKEN: token,
+      },
+      input: [
+        `const r = await fetch(process.env._ATHENA_URL, { headers: {`,
+        `  Accept: 'application/vnd.github.v3.raw',`,
+        `  Authorization: 'Bearer ' + process.env._ATHENA_TOKEN,`,
+        `  'User-Agent': 'eslint-plugin-checkdigit',`,
+        `}});`,
+        `if (!r.ok) process.exit(1);`,
+        `process.stdout.write(await r.text());`,
+      ].join('\n'),
+      encoding: 'utf-8',
+      timeout: 15_000,
+    });
+  } catch {
+    return null;
+  }
+}
+
+function findServiceViaApi(serviceName: string, org: string, token: string): ServiceSource | null {
+  log(`[github] trying GitHub API for ${org}/${serviceName} (GITHUB_TOKEN: set)`);
+  const pkgContent = fetchFileFromGitHubApi(org, serviceName, 'package.json', token);
+  if (pkgContent === null) {
+    log(`[github] GitHub API: package.json not found for ${org}/${serviceName}`);
+    return null;
+  }
+
+  try {
+    const config = readServiceConfig(pkgContent, org, serviceName);
+    if (config === null) {
+      log(`[github] GitHub API: no service API config in package.json for ${org}/${serviceName}`);
+      return null;
+    }
+
+    const endpoints: ServiceEndpoint[] = [];
+    for (const endpoint of config.endpoints) {
+      const swaggerPath = `${config.apiRoot}/${endpoint}/swagger.yml`;
+      log(`[github] GitHub API: fetching ${swaggerPath} for ${org}/${serviceName}`);
+      const yamlContent = fetchFileFromGitHubApi(org, serviceName, swaggerPath, token);
+      if (yamlContent !== null) {
+        endpoints.push({ path: endpoint, yamlContent });
+      } else {
+        log(`[github] GitHub API: ${swaggerPath} not found for ${org}/${serviceName}`);
+      }
+    }
+
+    return endpoints.length > 0
+      ? { organization: config.organization, serviceName: config.serviceName, endpoints }
+      : null;
+  } catch (error) {
+    log(
+      `[github] GitHub API error for ${org}/${serviceName}: ${error instanceof Error ? error.message : String(error)}`,
+    );
+    return null;
+  }
+}
+
+// Shallow-clone with blob filtering: only commit + tree objects are fetched up
+// front; `git show HEAD:<path>` lazily pulls each blob we actually need.
+// Git uses its own credential system (keychain, SSH keys, credential helpers)
+// and does not read GITHUB_TOKEN, so this works in local dev without a token.
+function findServiceViaGitClone(serviceName: string, org: string): ServiceSource | null {
+  const repoUrl = `https://github.com/${org}/${serviceName}.git`;
+  const tmpDir = mkdtempSync(join(tmpdir(), `eslint-athena-${serviceName}-`));
+  try {
+    log(`[github] trying git clone for ${org}/${serviceName}`);
+    execFileSync('git', ['clone', '--depth=1', '--no-checkout', '--filter=blob:none', repoUrl, tmpDir], {
+      timeout: 30_000,
+      stdio: 'pipe',
+    });
+
+    let pkgContent: string;
+    try {
+      pkgContent = execFileSync('git', ['-C', tmpDir, 'show', 'HEAD:package.json'], {
+        encoding: 'utf-8',
+        timeout: 10_000,
+      });
+    } catch {
+      log(`[github] git clone: package.json not found for ${org}/${serviceName}`);
+      return null;
+    }
+
+    const config = readServiceConfig(pkgContent, org, serviceName);
+    if (config === null) {
+      log(`[github] git clone: no service API config in package.json for ${org}/${serviceName}`);
+      return null;
+    }
+
+    const endpoints: ServiceEndpoint[] = [];
+    for (const endpoint of config.endpoints) {
+      const swaggerPath = `${config.apiRoot}/${endpoint}/swagger.yml`;
+      try {
+        log(`[github] git clone: reading ${swaggerPath} for ${org}/${serviceName}`);
+        const yamlContent = execFileSync('git', ['-C', tmpDir, 'show', `HEAD:${swaggerPath}`], {
+          encoding: 'utf-8',
+          timeout: 10_000,
+        });
+        endpoints.push({ path: endpoint, yamlContent });
+      } catch {
+        log(`[github] git clone: ${swaggerPath} not found for ${org}/${serviceName}`);
+      }
+    }
+
+    return endpoints.length > 0
+      ? { organization: config.organization, serviceName: config.serviceName, endpoints }
+      : null;
+  } catch (error) {
+    log(
+      `[github] git clone failed for ${org}/${serviceName}: ${error instanceof Error ? error.message : String(error)}`,
+    );
+    return null;
+  } finally {
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+}
+
+function findServiceOnGitHub(serviceName: string): ServiceSource | null {
+  const token = process.env['GITHUB_TOKEN'];
+  for (const org of GITHUB_ORGANIZATIONS) {
+    if (token !== undefined) {
+      const source = findServiceViaApi(serviceName, org, token);
+      if (source !== null) {
+        return source;
+      }
+    }
+    const source = findServiceViaGitClone(serviceName, org);
+    if (source !== null) {
+      return source;
+    }
+  }
+  return null;
+}
+
+// ---------------------------------------------------------------------------
+// npm registry strategy — kept for reference (slow; disabled)
+// ---------------------------------------------------------------------------
+
+// function findServiceViaNpm(serviceName: string, org: string): ServiceSource | null {
+//   const npmToken = process.env['NPM_TOKEN'];
+//   const packageName = `@${org}/${serviceName}`;
 //   const tmpDir = mkdtempSync(join(tmpdir(), `eslint-athena-${serviceName}-`));
 //   try {
-//     log(`cloning ${repoUrl}`);
-//     execFileSync('git', ['clone', '--depth=1', '--no-checkout', '--filter=blob:none', repoUrl, tmpDir], {
-//       timeout: 30_000,
+//     writeFileSync(join(tmpDir, 'package.json'), '{}');
+//     if (npmToken !== undefined) {
+//       writeFileSync(
+//         join(tmpDir, '.npmrc'),
+//         `@${org}:registry=https://registry.npmjs.org/\n//registry.npmjs.org/:_authToken=\${NPM_TOKEN}\n`,
+//       );
+//     }
+//     execFileSync('npm', ['install', '--prefix', tmpDir, '--no-package-lock', '--ignore-scripts', packageName], {
+//       timeout: 60_000,
 //       stdio: 'pipe',
+//       env: { ...process.env },
 //     });
-//
-//     let pkgContent: string;
-//     try {
-//       pkgContent = execFileSync('git', ['-C', tmpDir, 'show', 'HEAD:package.json'], {
-//         encoding: 'utf-8',
-//         timeout: 10_000,
-//       });
-//     } catch {
-//       return null;
-//     }
-//
-//     const config = readServiceConfig(pkgContent, org, serviceName);
-//     if (config === null) {
-//       return null;
-//     }
-//
-//     const endpoints: ServiceEndpoint[] = [];
-//     for (const endpoint of config.endpoints) {
-//       const swaggerPath = `${config.apiRoot}/${endpoint}/swagger.yml`;
-//       try {
-//         log(`reading ${swaggerPath} from ${repoUrl}`);
-//         const yamlContent = execFileSync('git', ['-C', tmpDir, 'show', `HEAD:${swaggerPath}`], {
-//           encoding: 'utf-8',
-//           timeout: 10_000,
-//         });
-//         endpoints.push({ path: endpoint, yamlContent });
-//       } catch {
-//         // file absent in this repo; try next endpoint
-//       }
-//     }
-//
-//     return endpoints.length > 0
-//       ? { organization: config.organization, serviceName: config.serviceName, endpoints }
-//       : null;
+//     return findServiceLocally(`${tmpDir}/node_modules/${packageName}`, org, serviceName);
 //   } catch {
 //     return null;
 //   } finally {
 //     rmSync(tmpDir, { recursive: true, force: true });
 //   }
 // }
-//
-// function findServiceOnGitHub(serviceName: string): ServiceSource | null {
-//   const token = process.env['GITHUB_TOKEN'];
-//   for (const org of GITHUB_ORGANIZATIONS) {
-//     // Try the GitHub REST API first when a token is available (works in CI where git may be absent).
-//     // Fall back to git clone regardless: git uses its own credential system (keychain, SSH keys,
-//     // credential helpers) and does not read GITHUB_TOKEN, so it works in local dev even without a token.
-//     if (token !== undefined) {
-//       const source = findServiceViaApi(serviceName, org, token);
-//       if (source !== null) {
-//         return source;
-//       }
-//     }
-//     const source = findServiceViaGitClone(serviceName, org);
-//     if (source !== null) {
-//       return source;
-//     }
-//   }
-//   return null;
-// }
-
-// ---------------------------------------------------------------------------
-// npm registry strategy — works for public and private packages (NPM_TOKEN)
-// ---------------------------------------------------------------------------
-
-// Install the package from the npm registry into a temp dir and reuse findServiceLocally.
-// Set NPM_TOKEN env var to authenticate against private registries.
-function findServiceViaNpm(serviceName: string, org: string): ServiceSource | null {
-  const npmToken = process.env['NPM_TOKEN'];
-  const packageName = `@${org}/${serviceName}`;
-  const tmpDir = mkdtempSync(join(tmpdir(), `eslint-athena-${serviceName}-`));
-  try {
-    // Write a minimal package.json (npm requires one in the prefix dir).
-    // If NPM_TOKEN is set, also write a .npmrc that authenticates against the scoped registry.
-    writeFileSync(join(tmpDir, 'package.json'), '{}');
-    if (npmToken !== undefined) {
-      log(`[npm] NPM_TOKEN detected — writing .npmrc for @${org} scope (token redacted)`);
-      writeFileSync(
-        join(tmpDir, '.npmrc'),
-        `@${org}:registry=https://registry.npmjs.org/\n//registry.npmjs.org/:_authToken=\${NPM_TOKEN}\n`,
-      );
-    }
-
-    log(`[npm] trying: npm install ${packageName} (token: ${npmToken !== undefined ? 'set' : 'not set'})`);
-    execFileSync('npm', ['install', '--prefix', tmpDir, '--no-package-lock', '--ignore-scripts', packageName], {
-      timeout: 60_000,
-      stdio: 'pipe',
-      // Pass NPM_TOKEN through so the .npmrc ${NPM_TOKEN} variable expansion works.
-      env: { ...process.env },
-    });
-
-    log(`[npm] install succeeded for ${packageName}, reading schema`);
-    const result = findServiceLocally(`${tmpDir}/node_modules/${packageName}`, org, serviceName);
-    if (result === null) {
-      log(`[npm] no swagger schema found inside ${packageName}`);
-    }
-    return result;
-  } catch (error) {
-    log(`[npm] failed for ${packageName}: ${error instanceof Error ? error.message : String(error)}`);
-    return null;
-  } finally {
-    rmSync(tmpDir, { recursive: true, force: true });
-  }
-}
 
 export function generateSchemasForService(
   serviceName: string,
@@ -321,19 +316,18 @@ export function generateSchemasForService(
     log(`[schema-generator] found '${serviceName}' in current project`);
   }
 
+  // findServiceInNodeModules — skipped: prefer fresh copy from GitHub
+  // findServiceViaNpm       — skipped: too slow
+
   if (source === null) {
-    log(`[schema-generator] trying npm registry for '${serviceName}'`);
-    for (const org of GITHUB_ORGANIZATIONS) {
-      source = findServiceViaNpm(serviceName, org);
-      if (source !== null) {
-        log(`[schema-generator] found '${serviceName}' via npm (@${org})`);
-        break;
-      }
+    log(
+      `[schema-generator] trying GitHub for '${serviceName}' (GITHUB_TOKEN: ${process.env['GITHUB_TOKEN'] !== undefined ? 'set' : 'not set'})`,
+    );
+    source = findServiceOnGitHub(serviceName);
+    if (source !== null) {
+      log(`[schema-generator] found '${serviceName}' via GitHub`);
     }
   }
-
-  // findServiceInNodeModules(serviceName) — skipped: prefer npm registry for a fresh copy
-  // findServiceOnGitHub(serviceName)      — skipped: requires git or GITHUB_TOKEN
 
   if (source === null) {
     log(`[schema-generator] no swagger source found for '${serviceName}'`);
