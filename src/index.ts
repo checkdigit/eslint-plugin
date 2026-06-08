@@ -30,6 +30,8 @@ import requireAwsConfig, { ruleId as requireAwsConfigRuleId } from './aws/requir
 import requireAWSBareBones, { ruleId as requireAWSBareBonesRuleId } from './aws/require-aws-bare-bones.ts';
 import requireConsistentRead, { ruleId as requireConsistentReadRuleId } from './aws/require-consistent-read.ts';
 import athena, { ruleId as athenaRuleId } from './athena/athena.ts';
+import sqlFile, { ruleId as sqlFileRuleId } from './athena/sql-file.ts';
+export { parseForESLint } from './sql-parser.ts';
 import filePathComment from './file-path-comment.ts';
 import noCardNumbers from './no-card-numbers.ts';
 import noEnum from './no-enum.ts';
@@ -45,6 +47,7 @@ import requireAssertPredicateRejectsThrows from './require-assert-predicate-reje
 import requireStrictAssert from './require-strict-assert.ts';
 import requireAssertMessage from './require-assert-message';
 import requireTsExtensionImportsExports from './require-ts-extension-imports-exports.ts';
+import { parseForESLint } from './sql-parser.ts';
 
 export { default as isAwsSdkV3Used } from './aws/is-aws-sdk-v3-used.ts';
 
@@ -78,6 +81,7 @@ const rules: Record<string, TSESLint.LooseRuleDefinition> = {
   [requireAWSBareBonesRuleId]: requireAWSBareBones,
   [requireConsistentReadRuleId]: requireConsistentRead,
   [athenaRuleId]: athena,
+  [sqlFileRuleId]: sqlFile,
 };
 
 const plugin: TSESLint.FlatConfig.Plugin = {
@@ -121,7 +125,14 @@ const configs: Record<string, TSESLint.FlatConfig.Config[]> = {
         [`@checkdigit/${requireAwsConfigRuleId}`]: 'error',
         [`@checkdigit/${requireAWSBareBonesRuleId}`]: 'error',
         [`@checkdigit/${athenaRuleId}`]: 'error',
+        [`@checkdigit/${sqlFileRuleId}`]: 'error',
       },
+    },
+    {
+      files: ['**/*.sql'],
+      plugins: { '@checkdigit': plugin },
+      languageOptions: { parser: { parseForESLint } },
+      rules: { [`@checkdigit/${sqlFileRuleId}`]: 'error' },
     },
   ],
   recommended: [
@@ -160,6 +171,7 @@ const configs: Record<string, TSESLint.FlatConfig.Config[]> = {
         [`@checkdigit/${requireAwsConfigRuleId}`]: 'off',
         [`@checkdigit/${requireAWSBareBonesRuleId}`]: 'off',
         [`@checkdigit/${athenaRuleId}`]: 'off',
+        [`@checkdigit/${sqlFileRuleId}`]: 'off',
       },
     },
   ],
