@@ -105,7 +105,7 @@
     "eslint": ">=9 <10"
   },
   "engines": {
-    "node": ">=22.18"
+    "node": ">=24.14.1"
   },
   "service": {
     "api": {

@@ -1,6 +1,8 @@
 // athena/zzz.spec.ts — unit tests for the walk() visitor dispatcher
 
-import { describe, expect, it } from '@jest/globals';
+import { strict as assert } from 'node:assert';
+
+import { describe, it } from '@jest/globals';
 
 import {
   extractBracketAccessorPath,
@@ -39,7 +41,7 @@ describe('visitor walk()', () => {
         visited.push('select');
       },
     });
-    expect(visited).toEqual(['select']);
+    assert.deepEqual(visited, ['select']);
   });
 
   it('calls visitBaseFrom for a plain table', () => {
@@ -49,7 +51,7 @@ describe('visitor walk()', () => {
         names.push(node.table);
       },
     });
-    expect(names).toEqual(['link']);
+    assert.deepEqual(names, ['link']);
   });
 
   it('calls visitColumnRef for column references in SELECT list', () => {
@@ -59,7 +61,7 @@ describe('visitor walk()', () => {
         cols.push(typeof node.column === 'string' ? node.column : '?');
       },
     });
-    expect(cols).toEqual(['url']);
+    assert.deepEqual(cols, ['url']);
   });
 
   it('does not call visitSelect for non-select nodes', () => {
@@ -70,7 +72,7 @@ describe('visitor walk()', () => {
       },
     };
     walk({ type: 'binary_expr', operator: '=', left: null, right: null }, visitor);
-    expect(visited).toHaveLength(0);
+    assert.equal(visited.length, 0);
   });
 });
 
@@ -99,22 +101,22 @@ describe('visitor extractors', () => {
 
   it('extractColumnRefs finds a column_ref inside an expr wrapper', () => {
     const refs = extractColumnRefs(colRefExpr);
-    expect(refs).toHaveLength(1);
-    expect(refs[0]?.column).toBe('responseheaders');
+    assert.equal(refs.length, 1);
+    assert.equal(refs[0]?.column, 'responseheaders');
   });
 
   it('extractColumnRefs finds column refs inside a function call', () => {
     const refs = extractColumnRefs(jsonExtractExpr);
-    expect(refs).toHaveLength(1);
-    expect(refs[0]?.column).toBe('responsebody');
+    assert.equal(refs.length, 1);
+    assert.equal(refs[0]?.column, 'responsebody');
   });
 
   it('extractJsonExtractPath returns the path argument', () => {
-    expect(extractJsonExtractPath(jsonExtractExpr)).toBe('$.name');
+    assert.equal(extractJsonExtractPath(jsonExtractExpr), '$.name');
   });
 
   it('extractJsonExtractPath returns undefined when no json_extract call present', () => {
-    expect(extractJsonExtractPath(colRefExpr)).toBeUndefined();
+    assert.equal(extractJsonExtractPath(colRefExpr), undefined);
   });
 
   it('extractBracketAccessorPath returns the JSONPath for bracket access', () => {
@@ -130,14 +132,14 @@ describe('visitor extractors', () => {
       },
       as: null,
     };
-    expect(extractBracketAccessorPath(bracketExpr)).toBe('$["accountId"]');
+    assert.equal(extractBracketAccessorPath(bracketExpr), '$["accountId"]');
   });
 
   it('hasFunctionCalls returns true when a function is present', () => {
-    expect(hasFunctionCalls(jsonExtractExpr)).toBe(true);
+    assert.equal(hasFunctionCalls(jsonExtractExpr), true);
   });
 
   it('hasFunctionCalls returns false for a plain column ref', () => {
-    expect(hasFunctionCalls(colRefExpr)).toBe(false);
+    assert.equal(hasFunctionCalls(colRefExpr), false);
   });
 });
