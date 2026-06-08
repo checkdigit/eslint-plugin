@@ -1,0 +1,226 @@
+{
+  "apis": {
+    "/link/v1/ping": {},
+    "/link/v1/link/:subjectId": {},
+    "/link/v1/link/:subjectId/:predicate": {},
+    "/link/v1/link/:subjectId/:predicate/:objectId": {
+      "put": {
+        "request": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://link.checkdigit/link/v1/schemas/api/LinkSubjectPredicateObjectPutRequestContext",
+          "type": "object",
+          "properties": {
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "subjectId": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "predicate": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "objectId": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": ["subjectId", "predicate", "objectId"]
+            },
+            "headers": {
+              "type": "object",
+              "additionalProperties": true,
+              "properties": {
+                "last-modified": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "created-on": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          },
+          "required": ["params"],
+          "additionalProperties": false
+        },
+        "responses": {
+          "204": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://link.checkdigit/link/v1/schemas/api/LinkSubjectPredicateObjectPutResponseNoContent",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "properties": {
+                  "last-modified": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "created-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "updated-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                },
+                "required": ["last-modified", "created-on", "updated-on"]
+              }
+            },
+            "required": ["headers"],
+            "additionalProperties": false
+          },
+          "409": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://link.checkdigit/link/v1/schemas/api/LinkSubjectPredicateObjectPutResponseConflict",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "default": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://link.checkdigit/link/v1/schemas/api/LinkSubjectPredicateObjectPutResponseDefault",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://link.checkdigit/link/v1/schemas/definitions/Error",
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["message"],
+                "description": "Error message.",
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Ping": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://link.checkdigit/link/v1/schemas/definitions/Ping",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["serverTime"],
+      "properties": {
+        "serverTime": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Current server time"
+        }
+      }
+    },
+    "Error": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://link.checkdigit/link/v1/schemas/definitions/Error",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["message"],
+      "description": "Error message.",
+      "properties": {
+        "message": {
+          "type": "string"
+        },
+        "code": {
+          "type": "string"
+        }
+      }
+    },
+    "Link": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://link.checkdigit/link/v1/schemas/definitions/Link",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["subjectId", "predicate", "objectId", "createdOn"],
+      "properties": {
+        "subjectId": {
+          "type": "string",
+          "description": "Unique identifier for the subject.",
+          "minLength": 1
+        },
+        "predicate": {
+          "type": "string",
+          "description": "Predicate linking the subject to the object.",
+          "minLength": 1
+        },
+        "objectId": {
+          "type": "string",
+          "description": "Unique identifier for the object.",
+          "minLength": 1
+        },
+        "createdOn": {
+          "type": "string",
+          "description": "Date linkage was created",
+          "minLength": 1
+        }
+      }
+    },
+    "Linkages": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://link.checkdigit/link/v1/schemas/definitions/Linkages",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["links"],
+      "properties": {
+        "links": {
+          "type": "array",
+          "items": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://link.checkdigit/link/v1/schemas/definitions/Link",
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["subjectId", "predicate", "objectId", "createdOn"],
+            "properties": {
+              "subjectId": {
+                "type": "string",
+                "description": "Unique identifier for the subject.",
+                "minLength": 1
+              },
+              "predicate": {
+                "type": "string",
+                "description": "Predicate linking the subject to the object.",
+                "minLength": 1
+              },
+              "objectId": {
+                "type": "string",
+                "description": "Unique identifier for the object.",
+                "minLength": 1
+              },
+              "createdOn": {
+                "type": "string",
+                "description": "Date linkage was created",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

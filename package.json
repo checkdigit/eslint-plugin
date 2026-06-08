@@ -47,7 +47,7 @@
     "ci:coverage": "NODE_OPTIONS=\"--disable-warning ExperimentalWarning --experimental-vm-modules\" jest --coverage=true",
     "ci:lint": "npm run lint",
     "ci:style": "npm run prettier",
-    "ci:test": "DEBUG=eslint-plugin:athena:service-schema-generator NODE_OPTIONS=\"--disable-warning ExperimentalWarning --experimental-vm-modules\" jest --coverage=false",
+    "ci:test": "NODE_OPTIONS=\"--disable-warning ExperimentalWarning --experimental-vm-modules\" jest --coverage=false",
     "lint": "eslint --max-warnings 0 .",
     "lint:fix": "eslint --max-warnings 0 --fix .",
     "peggy": "for file in ./src/peggy/*.peggy; do peggy \"$file\" --format es --output \"${file%.peggy}-peggy.ts\"; done",

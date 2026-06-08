@@ -1,0 +1,2843 @@
+{
+  "apis": {
+    "/payment-card/v3/ping": {},
+    "/payment-card/v3/tenant/:tenantId/public-key": {},
+    "/payment-card/v3/tenant/:tenantId/data-encryption-key/:dataEncryptionKeyId": {
+      "put": {
+        "request": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/api/TenantDataEncryptionKeyPutRequestContext",
+          "type": "object",
+          "properties": {
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "tenantId": {
+                  "type": "string"
+                },
+                "dataEncryptionKeyId": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              },
+              "required": ["tenantId", "dataEncryptionKeyId"]
+            },
+            "headers": {
+              "type": "object",
+              "additionalProperties": true,
+              "properties": {
+                "created-on": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": ["created-on"]
+            },
+            "body": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/DataEncryptionKeyRequest",
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["publicKeys"],
+              "properties": {
+                "publicKeys": {
+                  "type": "array",
+                  "minItems": 1,
+                  "description": "List of public keys in PEM format.\n\nAssociated private keys can be used to decrypt card data encrypted by Payment Card Service.\n",
+                  "items": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/PublicKey",
+                    "description": "An RSA generated public key in PEM format.",
+                    "type": "string",
+                    "example": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwm2sxmRdTF7ZIBA6+ngO\n8jOTCHmID0PpQB1q85+hrcLSfB1rWY9bzNNLabBo/ajDnA4Pcadq/x6gpg70qZcR\n9Wxm6TttKzBPZsxasGXgSTDqEi2KcYZgq1mL4qyxUvyIms7/llGy+W9b5huZaVcO\nxdT1tw/zctbOhb6S2t5vH+zkta/2ncUXjG7i8XdLsJ1qe4K1kYbA4KVkOMmAtw7O\n4STk0TZDD0YARdmrciorJjbIVt0Xj1CrYQ5QbDGrlfeXgrcZwX5f9wT2MnKlY5oZ\n5Wtb57oGtLkVf8g6vN/2jGtAmOmHK2hHwNd/+zUet5G/S5uwEli4RgMPP4pUoKgd\nGQIDAQAB\n-----END PUBLIC KEY-----\n"
+                  }
+                }
+              }
+            }
+          },
+          "required": ["params", "headers", "body"],
+          "additionalProperties": false
+        },
+        "responses": {
+          "200": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/api/TenantDataEncryptionKeyPutResponseOK",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "properties": {
+                  "created-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "updated-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                },
+                "required": ["created-on", "updated-on"]
+              },
+              "body": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/EncryptedDataEncryptionKeys",
+                "type": "object",
+                "description": "An object that contains a list of EncryptedDataEncryptionKey objects.\n",
+                "required": ["encryptedDataEncryptionKeys", "createdOn"],
+                "properties": {
+                  "createdOn": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/CreatedOn",
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "The UTC datetime the resource was created."
+                  },
+                  "encryptedDataEncryptionKeys": {
+                    "type": "array",
+                    "items": {
+                      "$schema": "https://json-schema.org/draft/2020-12/schema",
+                      "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/EncryptedDataEncryptionKey",
+                      "type": "object",
+                      "additionalProperties": false,
+                      "description": "An object that includes an encrypted data encryption key and a hashed version of the public key - using\n@checkdigit/hash - used to encrypt it.\n",
+                      "required": ["publicKeyHash", "encryptedDataEncryptionKey"],
+                      "properties": {
+                        "publicKeyHash": {
+                          "$schema": "https://json-schema.org/draft/2020-12/schema",
+                          "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/Hash",
+                          "type": "string",
+                          "format": "uuid",
+                          "example": "15a85f64-5717-4562-b3fc-2c963f66afa6",
+                          "description": "UUID derived using @checkdigit/hash."
+                        },
+                        "encryptedDataEncryptionKey": {
+                          "$schema": "https://json-schema.org/draft/2020-12/schema",
+                          "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/DataEncryptionKey",
+                          "type": "string",
+                          "description": "AES generated encryption key used to encrypt sensitive data."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "required": ["headers", "body"],
+            "additionalProperties": false
+          },
+          "409": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/api/TenantDataEncryptionKeyPutResponseConflict",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "default": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/api/TenantDataEncryptionKeyPutResponseDefault",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/Error",
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Server error message",
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "/payment-card/v3/tenant/:tenantId/cards": {},
+    "/payment-card/v3/tenant/:tenantId/card/:cardId": {},
+    "/payment-card/v3/tenant/:tenantId/card/:cardId/issued": {
+      "put": {
+        "request": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/api/TenantCardIssuedPutRequestContext",
+          "type": "object",
+          "properties": {
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "tenantId": {
+                  "type": "string"
+                },
+                "cardId": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/CardId",
+                  "type": "string",
+                  "description": "Card identifier",
+                  "format": "uuid"
+                }
+              },
+              "required": ["tenantId", "cardId"]
+            },
+            "headers": {
+              "type": "object",
+              "additionalProperties": true,
+              "properties": {
+                "created-on": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": ["created-on"]
+            },
+            "body": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/NewIssuedCardRequest",
+              "type": "object",
+              "required": [
+                "dataEncryptionKeyId",
+                "cardNumberLength",
+                "bin",
+                "expirationDate",
+                "serviceCode",
+                "sequenceNumber",
+                "state",
+                "active",
+                "block",
+                "lock"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "dataEncryptionKeyId": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/DataEncryptionKeyId",
+                  "type": "string",
+                  "description": "Identifier for the encryption keys used to encrypt the Card object.\n",
+                  "format": "uuid"
+                },
+                "cardNumberLength": {
+                  "type": "integer",
+                  "description": "Desired number of digits in the card number.",
+                  "minimum": 15,
+                  "maximum": 19
+                },
+                "bin": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/BankIdentificationNumber",
+                  "type": "string",
+                  "pattern": "^\\d{6}(\\d{2})?$",
+                  "description": "The Bank Identification Number (BIN) is either the first 6 or 8 digits of a card number.\nIt identifies the issuing financial institution in a transaction, helping to route payments correctly.\n"
+                },
+                "expirationDate": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/ExpirationDate",
+                  "type": "string",
+                  "pattern": "([0-9][0-9])(0[1-9]|1[0-2])",
+                  "format": "YYMM",
+                  "description": "Expiration date for the card and will be assumed to be the last millisecond of the month",
+                  "minLength": 4,
+                  "maxLength": 4
+                },
+                "serviceCode": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/ServiceCode",
+                  "type": "string",
+                  "pattern": "^\\d+$",
+                  "description": "Used to set general guidelines for how the card can be used, e.g. domestic only or international, online\nauthorizations only, etc.\n",
+                  "minLength": 3,
+                  "maxLength": 3
+                },
+                "sequenceNumber": {
+                  "type": "integer",
+                  "description": "Used to differentiate issuing the same card and expiration date on multiple plastics.",
+                  "minimum": 0,
+                  "maximum": 10
+                },
+                "state": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/StateStatus",
+                  "description": "The state status for the card.",
+                  "type": "string",
+                  "enum": ["CURRENT", "REISSUED", "RETIRED", "FORCED"]
+                },
+                "active": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/ActiveStatus",
+                  "description": "The active/inactive status for the card",
+                  "type": "string",
+                  "enum": ["INACTIVE", "ACTIVE"]
+                },
+                "block": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/BlockStatus",
+                  "type": "string",
+                  "description": "Whether the card is open or blocked for various reasons",
+                  "enum": ["OPEN", "BLOCKED LOST OR STOLEN", "BLOCKED NO FRAUD", "BLOCKED WITH FRAUD"]
+                },
+                "lock": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/LockStatus",
+                  "type": "string",
+                  "description": "A cardholder initiated status. A locked card will fail authorization. Locked cards can be unlocked.\n\nA cardholder may choose to lock a card while temporarily misplaced.\n",
+                  "enum": ["LOCKED", "UNLOCKED"]
+                }
+              }
+            }
+          },
+          "required": ["params", "headers", "body"],
+          "additionalProperties": false
+        },
+        "responses": {
+          "200": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/api/TenantCardIssuedPutResponseOK",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "properties": {
+                  "created-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "updated-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "etag": {
+                    "type": "string"
+                  }
+                },
+                "required": ["created-on", "updated-on", "etag"]
+              },
+              "body": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/Card",
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "cardId",
+                  "bin",
+                  "last4",
+                  "expirationDate",
+                  "encryptedCardNumber",
+                  "serviceCode",
+                  "pinOffset",
+                  "sequenceNumber",
+                  "state",
+                  "active",
+                  "block",
+                  "lock",
+                  "capture",
+                  "dataEncryptionKeyId",
+                  "storageKeyId",
+                  "updatedOn",
+                  "createdOn"
+                ],
+                "properties": {
+                  "cardId": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/CardId",
+                    "type": "string",
+                    "description": "Card identifier",
+                    "format": "uuid"
+                  },
+                  "bin": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/BankIdentificationNumber",
+                    "type": "string",
+                    "pattern": "^\\d{6}(\\d{2})?$",
+                    "description": "The Bank Identification Number (BIN) is either the first 6 or 8 digits of a card number.\nIt identifies the issuing financial institution in a transaction, helping to route payments correctly.\n"
+                  },
+                  "last4": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/Last4",
+                    "type": "string",
+                    "pattern": "^\\d+$",
+                    "description": "The last four digits of the card number.",
+                    "minLength": 4,
+                    "maxLength": 4
+                  },
+                  "expirationDate": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/ExpirationDate",
+                    "type": "string",
+                    "pattern": "([0-9][0-9])(0[1-9]|1[0-2])",
+                    "format": "YYMM",
+                    "description": "Expiration date for the card and will be assumed to be the last millisecond of the month",
+                    "minLength": 4,
+                    "maxLength": 4
+                  },
+                  "encryptedCardNumber": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/CardNumber",
+                    "type": "string",
+                    "pattern": "^\\d+$",
+                    "description": "The Primary Account Number (PAN) of the card.",
+                    "minLength": 15,
+                    "maxLength": 19
+                  },
+                  "serviceCode": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/ServiceCode",
+                    "type": "string",
+                    "pattern": "^\\d+$",
+                    "description": "Used to set general guidelines for how the card can be used, e.g. domestic only or international, online\nauthorizations only, etc.\n",
+                    "minLength": 3,
+                    "maxLength": 3
+                  },
+                  "pinOffset": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/PinOffset",
+                    "type": "string",
+                    "description": "Offset used to calculate the user-defined PIN.",
+                    "pattern": "^\\d+$",
+                    "minLength": 4,
+                    "maxLength": 12
+                  },
+                  "sequenceNumber": {
+                    "type": "integer",
+                    "description": "Used to differentiate cards with same card number and expiration date."
+                  },
+                  "state": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/StateStatus",
+                    "description": "The state status for the card.",
+                    "type": "string",
+                    "enum": ["CURRENT", "REISSUED", "RETIRED", "FORCED"]
+                  },
+                  "active": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/ActiveStatus",
+                    "description": "The active/inactive status for the card",
+                    "type": "string",
+                    "enum": ["INACTIVE", "ACTIVE"]
+                  },
+                  "block": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/BlockStatus",
+                    "type": "string",
+                    "description": "Whether the card is open or blocked for various reasons",
+                    "enum": ["OPEN", "BLOCKED LOST OR STOLEN", "BLOCKED NO FRAUD", "BLOCKED WITH FRAUD"]
+                  },
+                  "lock": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/LockStatus",
+                    "type": "string",
+                    "description": "A cardholder initiated status. A locked card will fail authorization. Locked cards can be unlocked.\n\nA cardholder may choose to lock a card while temporarily misplaced.\n",
+                    "enum": ["LOCKED", "UNLOCKED"]
+                  },
+                  "capture": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/CaptureStatus",
+                    "type": "string",
+                    "description": "An issuer initiated status. If the value is CAPTURE, a merchant has the option to confiscate the card\nfrom the cardholder at the point of sale.\n",
+                    "enum": ["CAPTURE", "NO CAPTURE"]
+                  },
+                  "dataEncryptionKeyId": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/DataEncryptionKeyId",
+                    "type": "string",
+                    "description": "Identifier for the encryption keys used to encrypt the Card object.\n",
+                    "format": "uuid"
+                  },
+                  "storageKeyId": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/StorageKeyId",
+                    "type": "string",
+                    "description": "DEK's non-derived identifier to be used by Check Digit services only.\n"
+                  },
+                  "encryptedDataEncryptionKey": {
+                    "description": "Encrypted DEK matching the publicKeyHash sent in the request. Used to decrypt values in the Card object.\n",
+                    "type": "string"
+                  },
+                  "updatedOn": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/UpdatedOn",
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "The UTC datetime the resource was last updated."
+                  },
+                  "createdOn": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/CreatedOn",
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "The UTC datetime the resource was created."
+                  }
+                }
+              }
+            },
+            "required": ["headers", "body"],
+            "additionalProperties": false
+          },
+          "409": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/api/TenantCardIssuedPutResponseConflict",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "default": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/api/TenantCardIssuedPutResponseDefault",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/Error",
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Server error message",
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "/payment-card/v3/tenant/:tenantId/card/:cardId/forced": {
+      "put": {
+        "request": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/api/TenantCardForcedPutRequestContext",
+          "type": "object",
+          "properties": {
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "tenantId": {
+                  "type": "string"
+                },
+                "cardId": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/CardId",
+                  "type": "string",
+                  "description": "Card identifier",
+                  "format": "uuid"
+                }
+              },
+              "required": ["tenantId", "cardId"]
+            },
+            "headers": {
+              "type": "object",
+              "additionalProperties": true,
+              "properties": {
+                "created-on": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": ["created-on"]
+            },
+            "body": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/NewForcedCardRequest",
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "encryptedCardNumber",
+                "encryptedDataEncryptionKey",
+                "dataEncryptionKeyId",
+                "expirationDate"
+              ],
+              "properties": {
+                "encryptedCardNumber": {
+                  "description": "The card number must be encrypted with an AES generated secret key, i.e. data encryption key (DEK). That DEK must be RSA encrypted with the PublicKey returned by this service's GET /public-key operation. The encrypted DEK must be included in this request object as the encryptedDataEncryptionKey.",
+                  "type": "string"
+                },
+                "encryptedDataEncryptionKey": {
+                  "description": "RSA encrypted data encryption key used to AES encrypt encryptedCardNumber",
+                  "type": "string"
+                },
+                "dataEncryptionKeyId": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/DataEncryptionKeyId",
+                  "type": "string",
+                  "description": "Identifier for the encryption keys used to encrypt the Card object.\n",
+                  "format": "uuid"
+                },
+                "expirationDate": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/ExpirationDate",
+                  "type": "string",
+                  "pattern": "([0-9][0-9])(0[1-9]|1[0-2])",
+                  "format": "YYMM",
+                  "description": "Expiration date for the card and will be assumed to be the last millisecond of the month",
+                  "minLength": 4,
+                  "maxLength": 4
+                }
+              }
+            }
+          },
+          "required": ["params", "headers", "body"],
+          "additionalProperties": false
+        },
+        "responses": {
+          "200": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/api/TenantCardForcedPutResponseOK",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "properties": {
+                  "created-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "updated-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "etag": {
+                    "type": "string"
+                  }
+                },
+                "required": ["created-on", "updated-on", "etag"]
+              },
+              "body": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/Card",
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "cardId",
+                  "bin",
+                  "last4",
+                  "expirationDate",
+                  "encryptedCardNumber",
+                  "serviceCode",
+                  "pinOffset",
+                  "sequenceNumber",
+                  "state",
+                  "active",
+                  "block",
+                  "lock",
+                  "capture",
+                  "dataEncryptionKeyId",
+                  "storageKeyId",
+                  "updatedOn",
+                  "createdOn"
+                ],
+                "properties": {
+                  "cardId": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/CardId",
+                    "type": "string",
+                    "description": "Card identifier",
+                    "format": "uuid"
+                  },
+                  "bin": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/BankIdentificationNumber",
+                    "type": "string",
+                    "pattern": "^\\d{6}(\\d{2})?$",
+                    "description": "The Bank Identification Number (BIN) is either the first 6 or 8 digits of a card number.\nIt identifies the issuing financial institution in a transaction, helping to route payments correctly.\n"
+                  },
+                  "last4": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/Last4",
+                    "type": "string",
+                    "pattern": "^\\d+$",
+                    "description": "The last four digits of the card number.",
+                    "minLength": 4,
+                    "maxLength": 4
+                  },
+                  "expirationDate": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/ExpirationDate",
+                    "type": "string",
+                    "pattern": "([0-9][0-9])(0[1-9]|1[0-2])",
+                    "format": "YYMM",
+                    "description": "Expiration date for the card and will be assumed to be the last millisecond of the month",
+                    "minLength": 4,
+                    "maxLength": 4
+                  },
+                  "encryptedCardNumber": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/CardNumber",
+                    "type": "string",
+                    "pattern": "^\\d+$",
+                    "description": "The Primary Account Number (PAN) of the card.",
+                    "minLength": 15,
+                    "maxLength": 19
+                  },
+                  "serviceCode": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/ServiceCode",
+                    "type": "string",
+                    "pattern": "^\\d+$",
+                    "description": "Used to set general guidelines for how the card can be used, e.g. domestic only or international, online\nauthorizations only, etc.\n",
+                    "minLength": 3,
+                    "maxLength": 3
+                  },
+                  "pinOffset": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/PinOffset",
+                    "type": "string",
+                    "description": "Offset used to calculate the user-defined PIN.",
+                    "pattern": "^\\d+$",
+                    "minLength": 4,
+                    "maxLength": 12
+                  },
+                  "sequenceNumber": {
+                    "type": "integer",
+                    "description": "Used to differentiate cards with same card number and expiration date."
+                  },
+                  "state": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/StateStatus",
+                    "description": "The state status for the card.",
+                    "type": "string",
+                    "enum": ["CURRENT", "REISSUED", "RETIRED", "FORCED"]
+                  },
+                  "active": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/ActiveStatus",
+                    "description": "The active/inactive status for the card",
+                    "type": "string",
+                    "enum": ["INACTIVE", "ACTIVE"]
+                  },
+                  "block": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/BlockStatus",
+                    "type": "string",
+                    "description": "Whether the card is open or blocked for various reasons",
+                    "enum": ["OPEN", "BLOCKED LOST OR STOLEN", "BLOCKED NO FRAUD", "BLOCKED WITH FRAUD"]
+                  },
+                  "lock": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/LockStatus",
+                    "type": "string",
+                    "description": "A cardholder initiated status. A locked card will fail authorization. Locked cards can be unlocked.\n\nA cardholder may choose to lock a card while temporarily misplaced.\n",
+                    "enum": ["LOCKED", "UNLOCKED"]
+                  },
+                  "capture": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/CaptureStatus",
+                    "type": "string",
+                    "description": "An issuer initiated status. If the value is CAPTURE, a merchant has the option to confiscate the card\nfrom the cardholder at the point of sale.\n",
+                    "enum": ["CAPTURE", "NO CAPTURE"]
+                  },
+                  "dataEncryptionKeyId": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/DataEncryptionKeyId",
+                    "type": "string",
+                    "description": "Identifier for the encryption keys used to encrypt the Card object.\n",
+                    "format": "uuid"
+                  },
+                  "storageKeyId": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/StorageKeyId",
+                    "type": "string",
+                    "description": "DEK's non-derived identifier to be used by Check Digit services only.\n"
+                  },
+                  "encryptedDataEncryptionKey": {
+                    "description": "Encrypted DEK matching the publicKeyHash sent in the request. Used to decrypt values in the Card object.\n",
+                    "type": "string"
+                  },
+                  "updatedOn": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/UpdatedOn",
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "The UTC datetime the resource was last updated."
+                  },
+                  "createdOn": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/CreatedOn",
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "The UTC datetime the resource was created."
+                  }
+                }
+              }
+            },
+            "required": ["headers", "body"],
+            "additionalProperties": false
+          },
+          "409": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/api/TenantCardForcedPutResponseConflict",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "default": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/api/TenantCardForcedPutResponseDefault",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/Error",
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Server error message",
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "/payment-card/v3/tenant/:tenantId/card/:cardId/active/:activeStatus": {
+      "put": {
+        "request": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/api/TenantCardActivePutRequestContext",
+          "type": "object",
+          "properties": {
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "tenantId": {
+                  "type": "string"
+                },
+                "cardId": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/CardId",
+                  "type": "string",
+                  "description": "Card identifier",
+                  "format": "uuid"
+                },
+                "activeStatus": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/ActiveStatus",
+                  "description": "The active/inactive status for the card",
+                  "type": "string",
+                  "enum": ["INACTIVE", "ACTIVE"]
+                }
+              },
+              "required": ["tenantId", "cardId", "activeStatus"]
+            },
+            "headers": {
+              "type": "object",
+              "additionalProperties": true,
+              "properties": {
+                "created-on": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "if-match": {
+                  "type": "string"
+                }
+              },
+              "required": ["created-on", "if-match"]
+            }
+          },
+          "required": ["params", "headers"],
+          "additionalProperties": false
+        },
+        "responses": {
+          "204": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/api/TenantCardActivePutResponseNoContent",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "properties": {
+                  "created-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "updated-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "etag": {
+                    "type": "string"
+                  }
+                },
+                "required": ["created-on", "updated-on", "etag"]
+              }
+            },
+            "required": ["headers"],
+            "additionalProperties": false
+          },
+          "409": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/api/TenantCardActivePutResponseConflict",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "412": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/api/TenantCardActivePutResponsePreconditionFailed",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "422": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/api/TenantCardActivePutResponseUnprocessableEntity",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/Error",
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Server error message",
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          },
+          "default": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/api/TenantCardActivePutResponseDefault",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/Error",
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Server error message",
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "/payment-card/v3/tenant/:tenantId/card/:cardId/block/:blockStatus": {
+      "put": {
+        "request": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/api/TenantCardBlockPutRequestContext",
+          "type": "object",
+          "properties": {
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "tenantId": {
+                  "type": "string"
+                },
+                "cardId": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/CardId",
+                  "type": "string",
+                  "description": "Card identifier",
+                  "format": "uuid"
+                },
+                "blockStatus": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/BlockStatus",
+                  "type": "string",
+                  "description": "Whether the card is open or blocked for various reasons",
+                  "enum": ["OPEN", "BLOCKED LOST OR STOLEN", "BLOCKED NO FRAUD", "BLOCKED WITH FRAUD"]
+                }
+              },
+              "required": ["tenantId", "cardId", "blockStatus"]
+            },
+            "headers": {
+              "type": "object",
+              "additionalProperties": true,
+              "properties": {
+                "created-on": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "if-match": {
+                  "type": "string"
+                }
+              },
+              "required": ["created-on", "if-match"]
+            }
+          },
+          "required": ["params", "headers"],
+          "additionalProperties": false
+        },
+        "responses": {
+          "204": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/api/TenantCardBlockPutResponseNoContent",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "properties": {
+                  "created-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "updated-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "etag": {
+                    "type": "string"
+                  }
+                },
+                "required": ["created-on", "updated-on", "etag"]
+              }
+            },
+            "required": ["headers"],
+            "additionalProperties": false
+          },
+          "409": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/api/TenantCardBlockPutResponseConflict",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "412": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/api/TenantCardBlockPutResponsePreconditionFailed",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "422": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/api/TenantCardBlockPutResponseUnprocessableEntity",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/Error",
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Server error message",
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          },
+          "default": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/api/TenantCardBlockPutResponseDefault",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/Error",
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Server error message",
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "/payment-card/v3/tenant/:tenantId/card/:cardId/capture/:captureStatus": {
+      "put": {
+        "request": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/api/TenantCardCapturePutRequestContext",
+          "type": "object",
+          "properties": {
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "tenantId": {
+                  "type": "string"
+                },
+                "cardId": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/CardId",
+                  "type": "string",
+                  "description": "Card identifier",
+                  "format": "uuid"
+                },
+                "captureStatus": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/CaptureStatus",
+                  "type": "string",
+                  "description": "An issuer initiated status. If the value is CAPTURE, a merchant has the option to confiscate the card\nfrom the cardholder at the point of sale.\n",
+                  "enum": ["CAPTURE", "NO CAPTURE"]
+                }
+              },
+              "required": ["tenantId", "cardId", "captureStatus"]
+            },
+            "headers": {
+              "type": "object",
+              "additionalProperties": true,
+              "properties": {
+                "created-on": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "if-match": {
+                  "type": "string"
+                }
+              },
+              "required": ["created-on", "if-match"]
+            }
+          },
+          "required": ["params", "headers"],
+          "additionalProperties": false
+        },
+        "responses": {
+          "204": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/api/TenantCardCapturePutResponseNoContent",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "properties": {
+                  "created-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "updated-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "etag": {
+                    "type": "string"
+                  }
+                },
+                "required": ["created-on", "updated-on", "etag"]
+              }
+            },
+            "required": ["headers"],
+            "additionalProperties": false
+          },
+          "409": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/api/TenantCardCapturePutResponseConflict",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "412": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/api/TenantCardCapturePutResponsePreconditionFailed",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "422": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/api/TenantCardCapturePutResponseUnprocessableEntity",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/Error",
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Server error message",
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          },
+          "default": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/api/TenantCardCapturePutResponseDefault",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/Error",
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Server error message",
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "/payment-card/v3/tenant/:tenantId/card/:cardId/lock/:lockStatus": {
+      "put": {
+        "request": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/api/TenantCardLockPutRequestContext",
+          "type": "object",
+          "properties": {
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "tenantId": {
+                  "type": "string"
+                },
+                "cardId": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/CardId",
+                  "type": "string",
+                  "description": "Card identifier",
+                  "format": "uuid"
+                },
+                "lockStatus": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/LockStatus",
+                  "type": "string",
+                  "description": "A cardholder initiated status. A locked card will fail authorization. Locked cards can be unlocked.\n\nA cardholder may choose to lock a card while temporarily misplaced.\n",
+                  "enum": ["LOCKED", "UNLOCKED"]
+                }
+              },
+              "required": ["tenantId", "cardId", "lockStatus"]
+            },
+            "headers": {
+              "type": "object",
+              "additionalProperties": true,
+              "properties": {
+                "created-on": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "if-match": {
+                  "type": "string"
+                }
+              },
+              "required": ["created-on", "if-match"]
+            }
+          },
+          "required": ["params", "headers"],
+          "additionalProperties": false
+        },
+        "responses": {
+          "204": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/api/TenantCardLockPutResponseNoContent",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "properties": {
+                  "created-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "updated-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "etag": {
+                    "type": "string"
+                  }
+                },
+                "required": ["created-on", "updated-on", "etag"]
+              }
+            },
+            "required": ["headers"],
+            "additionalProperties": false
+          },
+          "409": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/api/TenantCardLockPutResponseConflict",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "412": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/api/TenantCardLockPutResponsePreconditionFailed",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "422": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/api/TenantCardLockPutResponseUnprocessableEntity",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/Error",
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Server error message",
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          },
+          "default": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/api/TenantCardLockPutResponseDefault",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/Error",
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Server error message",
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "/payment-card/v3/tenant/:tenantId/card/:cardId/state/:stateStatus": {
+      "put": {
+        "request": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/api/TenantCardStatePutRequestContext",
+          "type": "object",
+          "properties": {
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "tenantId": {
+                  "type": "string"
+                },
+                "cardId": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/CardId",
+                  "type": "string",
+                  "description": "Card identifier",
+                  "format": "uuid"
+                },
+                "stateStatus": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/StateStatus",
+                  "description": "The state status for the card.",
+                  "type": "string",
+                  "enum": ["CURRENT", "REISSUED", "RETIRED", "FORCED"]
+                }
+              },
+              "required": ["tenantId", "cardId", "stateStatus"]
+            },
+            "headers": {
+              "type": "object",
+              "additionalProperties": true,
+              "properties": {
+                "created-on": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "if-match": {
+                  "type": "string"
+                }
+              },
+              "required": ["created-on", "if-match"]
+            }
+          },
+          "required": ["params", "headers"],
+          "additionalProperties": false
+        },
+        "responses": {
+          "204": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/api/TenantCardStatePutResponseNoContent",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "properties": {
+                  "created-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "updated-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "etag": {
+                    "type": "string"
+                  }
+                },
+                "required": ["created-on", "updated-on", "etag"]
+              }
+            },
+            "required": ["headers"],
+            "additionalProperties": false
+          },
+          "409": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/api/TenantCardStatePutResponseConflict",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "412": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/api/TenantCardStatePutResponsePreconditionFailed",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "422": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/api/TenantCardStatePutResponseUnprocessableEntity",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/Error",
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Server error message",
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          },
+          "default": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/api/TenantCardStatePutResponseDefault",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/Error",
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Server error message",
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "/payment-card/v3/tenant/:tenantId/card/:cardId/history": {},
+    "/payment-card/v3/tenant/:tenantId/card-number/:cardId/key/:publicKeyHashPath": {
+      "put": {
+        "request": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/api/TenantCardNumberKeyPutRequestContext",
+          "type": "object",
+          "properties": {
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "tenantId": {
+                  "type": "string"
+                },
+                "cardId": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/CardId",
+                  "type": "string",
+                  "description": "Card identifier",
+                  "format": "uuid"
+                },
+                "publicKeyHashPath": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/Hash",
+                  "type": "string",
+                  "format": "uuid",
+                  "example": "15a85f64-5717-4562-b3fc-2c963f66afa6",
+                  "description": "UUID derived using @checkdigit/hash."
+                }
+              },
+              "required": ["tenantId", "cardId", "publicKeyHashPath"]
+            },
+            "headers": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "body": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/CardNumberRequest",
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["publicKey"],
+              "properties": {
+                "publicKey": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/PublicKey",
+                  "description": "An RSA generated public key in PEM format.",
+                  "type": "string",
+                  "example": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwm2sxmRdTF7ZIBA6+ngO\n8jOTCHmID0PpQB1q85+hrcLSfB1rWY9bzNNLabBo/ajDnA4Pcadq/x6gpg70qZcR\n9Wxm6TttKzBPZsxasGXgSTDqEi2KcYZgq1mL4qyxUvyIms7/llGy+W9b5huZaVcO\nxdT1tw/zctbOhb6S2t5vH+zkta/2ncUXjG7i8XdLsJ1qe4K1kYbA4KVkOMmAtw7O\n4STk0TZDD0YARdmrciorJjbIVt0Xj1CrYQ5QbDGrlfeXgrcZwX5f9wT2MnKlY5oZ\n5Wtb57oGtLkVf8g6vN/2jGtAmOmHK2hHwNd/+zUet5G/S5uwEli4RgMPP4pUoKgd\nGQIDAQAB\n-----END PUBLIC KEY-----\n"
+                }
+              }
+            }
+          },
+          "required": ["params", "body"],
+          "additionalProperties": false
+        },
+        "responses": {
+          "200": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/api/TenantCardNumberKeyPutResponseOK",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/EncryptedCardNumber",
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["encryptedDataEncryptionKey", "encryptedCardNumber"],
+                "properties": {
+                  "encryptedDataEncryptionKey": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/DataEncryptionKey",
+                    "type": "string",
+                    "description": "AES generated encryption key used to encrypt sensitive data."
+                  },
+                  "encryptedCardNumber": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/CardNumber",
+                    "type": "string",
+                    "pattern": "^\\d+$",
+                    "description": "The Primary Account Number (PAN) of the card.",
+                    "minLength": 15,
+                    "maxLength": 19
+                  }
+                }
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          },
+          "default": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/api/TenantCardNumberKeyPutResponseDefault",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/Error",
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Server error message",
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "/payment-card/v3/tenant/:tenantId/pin-key/:pinKeyId": {
+      "put": {
+        "request": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/api/TenantPinKeyPutRequestContext",
+          "type": "object",
+          "properties": {
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "tenantId": {
+                  "type": "string"
+                },
+                "pinKeyId": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/PinKeyId",
+                  "type": "string",
+                  "description": "PIN key identifier.",
+                  "format": "uuid"
+                }
+              },
+              "required": ["tenantId", "pinKeyId"]
+            },
+            "headers": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "required": ["params"],
+          "additionalProperties": false
+        },
+        "responses": {
+          "200": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/api/TenantPinKeyPutResponseOK",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/PinKeyResponse",
+                "description": "This object contains an rsa generated public key to be used when transmitting data for a PIN change. This key\nis only valid to be used for a single PIN change.\n",
+                "type": "object",
+                "required": ["publicKey"],
+                "properties": {
+                  "publicKey": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/PublicKey",
+                    "description": "An RSA generated public key in PEM format.",
+                    "type": "string",
+                    "example": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwm2sxmRdTF7ZIBA6+ngO\n8jOTCHmID0PpQB1q85+hrcLSfB1rWY9bzNNLabBo/ajDnA4Pcadq/x6gpg70qZcR\n9Wxm6TttKzBPZsxasGXgSTDqEi2KcYZgq1mL4qyxUvyIms7/llGy+W9b5huZaVcO\nxdT1tw/zctbOhb6S2t5vH+zkta/2ncUXjG7i8XdLsJ1qe4K1kYbA4KVkOMmAtw7O\n4STk0TZDD0YARdmrciorJjbIVt0Xj1CrYQ5QbDGrlfeXgrcZwX5f9wT2MnKlY5oZ\n5Wtb57oGtLkVf8g6vN/2jGtAmOmHK2hHwNd/+zUet5G/S5uwEli4RgMPP4pUoKgd\nGQIDAQAB\n-----END PUBLIC KEY-----\n"
+                  }
+                }
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          },
+          "default": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/api/TenantPinKeyPutResponseDefault",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/Error",
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Server error message",
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "/payment-card/v3/tenant/:tenantId/card/:cardId/pin/:pinKeyId": {
+      "put": {
+        "request": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/api/TenantCardPinPutRequestContext",
+          "type": "object",
+          "properties": {
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "tenantId": {
+                  "type": "string"
+                },
+                "cardId": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/CardId",
+                  "type": "string",
+                  "description": "Card identifier",
+                  "format": "uuid"
+                },
+                "pinKeyId": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/PinKeyId",
+                  "type": "string",
+                  "description": "PIN key identifier.",
+                  "format": "uuid"
+                }
+              },
+              "required": ["tenantId", "cardId", "pinKeyId"]
+            },
+            "headers": {
+              "type": "object",
+              "additionalProperties": true,
+              "properties": {
+                "created-on": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "if-match": {
+                  "type": "string"
+                }
+              },
+              "required": ["created-on", "if-match"]
+            },
+            "body": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/PinRequest",
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["encryptedDataEncryptionKey", "encryptedPin"],
+              "properties": {
+                "encryptedDataEncryptionKey": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/DataEncryptionKey",
+                  "type": "string",
+                  "description": "AES generated encryption key used to encrypt sensitive data."
+                },
+                "encryptedPin": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/EncryptedPin",
+                  "type": "string",
+                  "description": "An AES encrypted PIN."
+                }
+              }
+            }
+          },
+          "required": ["params", "headers", "body"],
+          "additionalProperties": false
+        },
+        "responses": {
+          "204": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/api/TenantCardPinPutResponseNoContent",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "properties": {
+                  "created-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "updated-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "etag": {
+                    "type": "string"
+                  }
+                },
+                "required": ["created-on", "updated-on", "etag"]
+              }
+            },
+            "required": ["headers"],
+            "additionalProperties": false
+          },
+          "409": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/api/TenantCardPinPutResponseConflict",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "412": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/api/TenantCardPinPutResponsePreconditionFailed",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "default": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/api/TenantCardPinPutResponseDefault",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/Error",
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Server error message",
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "BankIdentificationNumber": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/BankIdentificationNumber",
+      "type": "string",
+      "pattern": "^\\d{6}(\\d{2})?$",
+      "description": "The Bank Identification Number (BIN) is either the first 6 or 8 digits of a card number.\nIt identifies the issuing financial institution in a transaction, helping to route payments correctly.\n"
+    },
+    "Last4": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/Last4",
+      "type": "string",
+      "pattern": "^\\d+$",
+      "description": "The last four digits of the card number.",
+      "minLength": 4,
+      "maxLength": 4
+    },
+    "CardNumber": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/CardNumber",
+      "type": "string",
+      "pattern": "^\\d+$",
+      "description": "The Primary Account Number (PAN) of the card.",
+      "minLength": 15,
+      "maxLength": 19
+    },
+    "PinOffset": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/PinOffset",
+      "type": "string",
+      "description": "Offset used to calculate the user-defined PIN.",
+      "pattern": "^\\d+$",
+      "minLength": 4,
+      "maxLength": 12
+    },
+    "Card": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/Card",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cardId",
+        "bin",
+        "last4",
+        "expirationDate",
+        "encryptedCardNumber",
+        "serviceCode",
+        "pinOffset",
+        "sequenceNumber",
+        "state",
+        "active",
+        "block",
+        "lock",
+        "capture",
+        "dataEncryptionKeyId",
+        "storageKeyId",
+        "updatedOn",
+        "createdOn"
+      ],
+      "properties": {
+        "cardId": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/CardId",
+          "type": "string",
+          "description": "Card identifier",
+          "format": "uuid"
+        },
+        "bin": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/BankIdentificationNumber",
+          "type": "string",
+          "pattern": "^\\d{6}(\\d{2})?$",
+          "description": "The Bank Identification Number (BIN) is either the first 6 or 8 digits of a card number.\nIt identifies the issuing financial institution in a transaction, helping to route payments correctly.\n"
+        },
+        "last4": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/Last4",
+          "type": "string",
+          "pattern": "^\\d+$",
+          "description": "The last four digits of the card number.",
+          "minLength": 4,
+          "maxLength": 4
+        },
+        "expirationDate": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/ExpirationDate",
+          "type": "string",
+          "pattern": "([0-9][0-9])(0[1-9]|1[0-2])",
+          "format": "YYMM",
+          "description": "Expiration date for the card and will be assumed to be the last millisecond of the month",
+          "minLength": 4,
+          "maxLength": 4
+        },
+        "encryptedCardNumber": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/CardNumber",
+          "type": "string",
+          "pattern": "^\\d+$",
+          "description": "The Primary Account Number (PAN) of the card.",
+          "minLength": 15,
+          "maxLength": 19
+        },
+        "serviceCode": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/ServiceCode",
+          "type": "string",
+          "pattern": "^\\d+$",
+          "description": "Used to set general guidelines for how the card can be used, e.g. domestic only or international, online\nauthorizations only, etc.\n",
+          "minLength": 3,
+          "maxLength": 3
+        },
+        "pinOffset": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/PinOffset",
+          "type": "string",
+          "description": "Offset used to calculate the user-defined PIN.",
+          "pattern": "^\\d+$",
+          "minLength": 4,
+          "maxLength": 12
+        },
+        "sequenceNumber": {
+          "type": "integer",
+          "description": "Used to differentiate cards with same card number and expiration date."
+        },
+        "state": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/StateStatus",
+          "description": "The state status for the card.",
+          "type": "string",
+          "enum": ["CURRENT", "REISSUED", "RETIRED", "FORCED"]
+        },
+        "active": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/ActiveStatus",
+          "description": "The active/inactive status for the card",
+          "type": "string",
+          "enum": ["INACTIVE", "ACTIVE"]
+        },
+        "block": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/BlockStatus",
+          "type": "string",
+          "description": "Whether the card is open or blocked for various reasons",
+          "enum": ["OPEN", "BLOCKED LOST OR STOLEN", "BLOCKED NO FRAUD", "BLOCKED WITH FRAUD"]
+        },
+        "lock": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/LockStatus",
+          "type": "string",
+          "description": "A cardholder initiated status. A locked card will fail authorization. Locked cards can be unlocked.\n\nA cardholder may choose to lock a card while temporarily misplaced.\n",
+          "enum": ["LOCKED", "UNLOCKED"]
+        },
+        "capture": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/CaptureStatus",
+          "type": "string",
+          "description": "An issuer initiated status. If the value is CAPTURE, a merchant has the option to confiscate the card\nfrom the cardholder at the point of sale.\n",
+          "enum": ["CAPTURE", "NO CAPTURE"]
+        },
+        "dataEncryptionKeyId": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/DataEncryptionKeyId",
+          "type": "string",
+          "description": "Identifier for the encryption keys used to encrypt the Card object.\n",
+          "format": "uuid"
+        },
+        "storageKeyId": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/StorageKeyId",
+          "type": "string",
+          "description": "DEK's non-derived identifier to be used by Check Digit services only.\n"
+        },
+        "encryptedDataEncryptionKey": {
+          "description": "Encrypted DEK matching the publicKeyHash sent in the request. Used to decrypt values in the Card object.\n",
+          "type": "string"
+        },
+        "updatedOn": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/UpdatedOn",
+          "type": "string",
+          "format": "date-time",
+          "description": "The UTC datetime the resource was last updated."
+        },
+        "createdOn": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/CreatedOn",
+          "type": "string",
+          "format": "date-time",
+          "description": "The UTC datetime the resource was created."
+        }
+      }
+    },
+    "UpdatedOn": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/UpdatedOn",
+      "type": "string",
+      "format": "date-time",
+      "description": "The UTC datetime the resource was last updated."
+    },
+    "CreatedOn": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/CreatedOn",
+      "type": "string",
+      "format": "date-time",
+      "description": "The UTC datetime the resource was created."
+    },
+    "CardId": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/CardId",
+      "type": "string",
+      "description": "Card identifier",
+      "format": "uuid"
+    },
+    "Cards": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/Cards",
+      "description": "An object containing a list of Card resources.",
+      "type": "object",
+      "required": ["cards"],
+      "properties": {
+        "cards": {
+          "type": "array",
+          "minItems": 0,
+          "items": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/Card",
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "cardId",
+              "bin",
+              "last4",
+              "expirationDate",
+              "encryptedCardNumber",
+              "serviceCode",
+              "pinOffset",
+              "sequenceNumber",
+              "state",
+              "active",
+              "block",
+              "lock",
+              "capture",
+              "dataEncryptionKeyId",
+              "storageKeyId",
+              "updatedOn",
+              "createdOn"
+            ],
+            "properties": {
+              "cardId": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/CardId",
+                "type": "string",
+                "description": "Card identifier",
+                "format": "uuid"
+              },
+              "bin": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/BankIdentificationNumber",
+                "type": "string",
+                "pattern": "^\\d{6}(\\d{2})?$",
+                "description": "The Bank Identification Number (BIN) is either the first 6 or 8 digits of a card number.\nIt identifies the issuing financial institution in a transaction, helping to route payments correctly.\n"
+              },
+              "last4": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/Last4",
+                "type": "string",
+                "pattern": "^\\d+$",
+                "description": "The last four digits of the card number.",
+                "minLength": 4,
+                "maxLength": 4
+              },
+              "expirationDate": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/ExpirationDate",
+                "type": "string",
+                "pattern": "([0-9][0-9])(0[1-9]|1[0-2])",
+                "format": "YYMM",
+                "description": "Expiration date for the card and will be assumed to be the last millisecond of the month",
+                "minLength": 4,
+                "maxLength": 4
+              },
+              "encryptedCardNumber": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/CardNumber",
+                "type": "string",
+                "pattern": "^\\d+$",
+                "description": "The Primary Account Number (PAN) of the card.",
+                "minLength": 15,
+                "maxLength": 19
+              },
+              "serviceCode": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/ServiceCode",
+                "type": "string",
+                "pattern": "^\\d+$",
+                "description": "Used to set general guidelines for how the card can be used, e.g. domestic only or international, online\nauthorizations only, etc.\n",
+                "minLength": 3,
+                "maxLength": 3
+              },
+              "pinOffset": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/PinOffset",
+                "type": "string",
+                "description": "Offset used to calculate the user-defined PIN.",
+                "pattern": "^\\d+$",
+                "minLength": 4,
+                "maxLength": 12
+              },
+              "sequenceNumber": {
+                "type": "integer",
+                "description": "Used to differentiate cards with same card number and expiration date."
+              },
+              "state": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/StateStatus",
+                "description": "The state status for the card.",
+                "type": "string",
+                "enum": ["CURRENT", "REISSUED", "RETIRED", "FORCED"]
+              },
+              "active": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/ActiveStatus",
+                "description": "The active/inactive status for the card",
+                "type": "string",
+                "enum": ["INACTIVE", "ACTIVE"]
+              },
+              "block": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/BlockStatus",
+                "type": "string",
+                "description": "Whether the card is open or blocked for various reasons",
+                "enum": ["OPEN", "BLOCKED LOST OR STOLEN", "BLOCKED NO FRAUD", "BLOCKED WITH FRAUD"]
+              },
+              "lock": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/LockStatus",
+                "type": "string",
+                "description": "A cardholder initiated status. A locked card will fail authorization. Locked cards can be unlocked.\n\nA cardholder may choose to lock a card while temporarily misplaced.\n",
+                "enum": ["LOCKED", "UNLOCKED"]
+              },
+              "capture": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/CaptureStatus",
+                "type": "string",
+                "description": "An issuer initiated status. If the value is CAPTURE, a merchant has the option to confiscate the card\nfrom the cardholder at the point of sale.\n",
+                "enum": ["CAPTURE", "NO CAPTURE"]
+              },
+              "dataEncryptionKeyId": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/DataEncryptionKeyId",
+                "type": "string",
+                "description": "Identifier for the encryption keys used to encrypt the Card object.\n",
+                "format": "uuid"
+              },
+              "storageKeyId": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/StorageKeyId",
+                "type": "string",
+                "description": "DEK's non-derived identifier to be used by Check Digit services only.\n"
+              },
+              "encryptedDataEncryptionKey": {
+                "description": "Encrypted DEK matching the publicKeyHash sent in the request. Used to decrypt values in the Card object.\n",
+                "type": "string"
+              },
+              "updatedOn": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/UpdatedOn",
+                "type": "string",
+                "format": "date-time",
+                "description": "The UTC datetime the resource was last updated."
+              },
+              "createdOn": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/CreatedOn",
+                "type": "string",
+                "format": "date-time",
+                "description": "The UTC datetime the resource was created."
+              }
+            }
+          }
+        }
+      }
+    },
+    "CardNumberRequest": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/CardNumberRequest",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["publicKey"],
+      "properties": {
+        "publicKey": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/PublicKey",
+          "description": "An RSA generated public key in PEM format.",
+          "type": "string",
+          "example": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwm2sxmRdTF7ZIBA6+ngO\n8jOTCHmID0PpQB1q85+hrcLSfB1rWY9bzNNLabBo/ajDnA4Pcadq/x6gpg70qZcR\n9Wxm6TttKzBPZsxasGXgSTDqEi2KcYZgq1mL4qyxUvyIms7/llGy+W9b5huZaVcO\nxdT1tw/zctbOhb6S2t5vH+zkta/2ncUXjG7i8XdLsJ1qe4K1kYbA4KVkOMmAtw7O\n4STk0TZDD0YARdmrciorJjbIVt0Xj1CrYQ5QbDGrlfeXgrcZwX5f9wT2MnKlY5oZ\n5Wtb57oGtLkVf8g6vN/2jGtAmOmHK2hHwNd/+zUet5G/S5uwEli4RgMPP4pUoKgd\nGQIDAQAB\n-----END PUBLIC KEY-----\n"
+        }
+      }
+    },
+    "EncryptedCardNumber": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/EncryptedCardNumber",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["encryptedDataEncryptionKey", "encryptedCardNumber"],
+      "properties": {
+        "encryptedDataEncryptionKey": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/DataEncryptionKey",
+          "type": "string",
+          "description": "AES generated encryption key used to encrypt sensitive data."
+        },
+        "encryptedCardNumber": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/CardNumber",
+          "type": "string",
+          "pattern": "^\\d+$",
+          "description": "The Primary Account Number (PAN) of the card.",
+          "minLength": 15,
+          "maxLength": 19
+        }
+      }
+    },
+    "Error": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/Error",
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Server error message",
+      "properties": {
+        "message": {
+          "type": "string"
+        },
+        "code": {
+          "type": "string"
+        }
+      }
+    },
+    "ExpirationDate": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/ExpirationDate",
+      "type": "string",
+      "pattern": "([0-9][0-9])(0[1-9]|1[0-2])",
+      "format": "YYMM",
+      "description": "Expiration date for the card and will be assumed to be the last millisecond of the month",
+      "minLength": 4,
+      "maxLength": 4
+    },
+    "DataEncryptionKeyId": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/DataEncryptionKeyId",
+      "type": "string",
+      "description": "Identifier for the encryption keys used to encrypt the Card object.\n",
+      "format": "uuid"
+    },
+    "DataEncryptionKeyRequest": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/DataEncryptionKeyRequest",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["publicKeys"],
+      "properties": {
+        "publicKeys": {
+          "type": "array",
+          "minItems": 1,
+          "description": "List of public keys in PEM format.\n\nAssociated private keys can be used to decrypt card data encrypted by Payment Card Service.\n",
+          "items": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/PublicKey",
+            "description": "An RSA generated public key in PEM format.",
+            "type": "string",
+            "example": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwm2sxmRdTF7ZIBA6+ngO\n8jOTCHmID0PpQB1q85+hrcLSfB1rWY9bzNNLabBo/ajDnA4Pcadq/x6gpg70qZcR\n9Wxm6TttKzBPZsxasGXgSTDqEi2KcYZgq1mL4qyxUvyIms7/llGy+W9b5huZaVcO\nxdT1tw/zctbOhb6S2t5vH+zkta/2ncUXjG7i8XdLsJ1qe4K1kYbA4KVkOMmAtw7O\n4STk0TZDD0YARdmrciorJjbIVt0Xj1CrYQ5QbDGrlfeXgrcZwX5f9wT2MnKlY5oZ\n5Wtb57oGtLkVf8g6vN/2jGtAmOmHK2hHwNd/+zUet5G/S5uwEli4RgMPP4pUoKgd\nGQIDAQAB\n-----END PUBLIC KEY-----\n"
+          }
+        }
+      }
+    },
+    "DataEncryptionKey": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/DataEncryptionKey",
+      "type": "string",
+      "description": "AES generated encryption key used to encrypt sensitive data."
+    },
+    "EncryptedDataEncryptionKey": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/EncryptedDataEncryptionKey",
+      "type": "object",
+      "additionalProperties": false,
+      "description": "An object that includes an encrypted data encryption key and a hashed version of the public key - using\n@checkdigit/hash - used to encrypt it.\n",
+      "required": ["publicKeyHash", "encryptedDataEncryptionKey"],
+      "properties": {
+        "publicKeyHash": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/Hash",
+          "type": "string",
+          "format": "uuid",
+          "example": "15a85f64-5717-4562-b3fc-2c963f66afa6",
+          "description": "UUID derived using @checkdigit/hash."
+        },
+        "encryptedDataEncryptionKey": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/DataEncryptionKey",
+          "type": "string",
+          "description": "AES generated encryption key used to encrypt sensitive data."
+        }
+      }
+    },
+    "EncryptedDataEncryptionKeys": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/EncryptedDataEncryptionKeys",
+      "type": "object",
+      "description": "An object that contains a list of EncryptedDataEncryptionKey objects.\n",
+      "required": ["encryptedDataEncryptionKeys", "createdOn"],
+      "properties": {
+        "createdOn": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/CreatedOn",
+          "type": "string",
+          "format": "date-time",
+          "description": "The UTC datetime the resource was created."
+        },
+        "encryptedDataEncryptionKeys": {
+          "type": "array",
+          "items": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/EncryptedDataEncryptionKey",
+            "type": "object",
+            "additionalProperties": false,
+            "description": "An object that includes an encrypted data encryption key and a hashed version of the public key - using\n@checkdigit/hash - used to encrypt it.\n",
+            "required": ["publicKeyHash", "encryptedDataEncryptionKey"],
+            "properties": {
+              "publicKeyHash": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/Hash",
+                "type": "string",
+                "format": "uuid",
+                "example": "15a85f64-5717-4562-b3fc-2c963f66afa6",
+                "description": "UUID derived using @checkdigit/hash."
+              },
+              "encryptedDataEncryptionKey": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/DataEncryptionKey",
+                "type": "string",
+                "description": "AES generated encryption key used to encrypt sensitive data."
+              }
+            }
+          }
+        }
+      }
+    },
+    "ActiveStatus": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/ActiveStatus",
+      "description": "The active/inactive status for the card",
+      "type": "string",
+      "enum": ["INACTIVE", "ACTIVE"]
+    },
+    "BlockStatus": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/BlockStatus",
+      "type": "string",
+      "description": "Whether the card is open or blocked for various reasons",
+      "enum": ["OPEN", "BLOCKED LOST OR STOLEN", "BLOCKED NO FRAUD", "BLOCKED WITH FRAUD"]
+    },
+    "LockStatus": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/LockStatus",
+      "type": "string",
+      "description": "A cardholder initiated status. A locked card will fail authorization. Locked cards can be unlocked.\n\nA cardholder may choose to lock a card while temporarily misplaced.\n",
+      "enum": ["LOCKED", "UNLOCKED"]
+    },
+    "CaptureStatus": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/CaptureStatus",
+      "type": "string",
+      "description": "An issuer initiated status. If the value is CAPTURE, a merchant has the option to confiscate the card\nfrom the cardholder at the point of sale.\n",
+      "enum": ["CAPTURE", "NO CAPTURE"]
+    },
+    "StateStatus": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/StateStatus",
+      "description": "The state status for the card.",
+      "type": "string",
+      "enum": ["CURRENT", "REISSUED", "RETIRED", "FORCED"]
+    },
+    "Ping": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/Ping",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["serverTime"],
+      "properties": {
+        "serverTime": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Current server time",
+          "example": "2020-01-01T00:00:00.000Z"
+        }
+      }
+    },
+    "Hash": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/Hash",
+      "type": "string",
+      "format": "uuid",
+      "example": "15a85f64-5717-4562-b3fc-2c963f66afa6",
+      "description": "UUID derived using @checkdigit/hash."
+    },
+    "ServiceCode": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/ServiceCode",
+      "type": "string",
+      "pattern": "^\\d+$",
+      "description": "Used to set general guidelines for how the card can be used, e.g. domestic only or international, online\nauthorizations only, etc.\n",
+      "minLength": 3,
+      "maxLength": 3
+    },
+    "NewIssuedCardRequest": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/NewIssuedCardRequest",
+      "type": "object",
+      "required": [
+        "dataEncryptionKeyId",
+        "cardNumberLength",
+        "bin",
+        "expirationDate",
+        "serviceCode",
+        "sequenceNumber",
+        "state",
+        "active",
+        "block",
+        "lock"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "dataEncryptionKeyId": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/DataEncryptionKeyId",
+          "type": "string",
+          "description": "Identifier for the encryption keys used to encrypt the Card object.\n",
+          "format": "uuid"
+        },
+        "cardNumberLength": {
+          "type": "integer",
+          "description": "Desired number of digits in the card number.",
+          "minimum": 15,
+          "maximum": 19
+        },
+        "bin": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/BankIdentificationNumber",
+          "type": "string",
+          "pattern": "^\\d{6}(\\d{2})?$",
+          "description": "The Bank Identification Number (BIN) is either the first 6 or 8 digits of a card number.\nIt identifies the issuing financial institution in a transaction, helping to route payments correctly.\n"
+        },
+        "expirationDate": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/ExpirationDate",
+          "type": "string",
+          "pattern": "([0-9][0-9])(0[1-9]|1[0-2])",
+          "format": "YYMM",
+          "description": "Expiration date for the card and will be assumed to be the last millisecond of the month",
+          "minLength": 4,
+          "maxLength": 4
+        },
+        "serviceCode": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/ServiceCode",
+          "type": "string",
+          "pattern": "^\\d+$",
+          "description": "Used to set general guidelines for how the card can be used, e.g. domestic only or international, online\nauthorizations only, etc.\n",
+          "minLength": 3,
+          "maxLength": 3
+        },
+        "sequenceNumber": {
+          "type": "integer",
+          "description": "Used to differentiate issuing the same card and expiration date on multiple plastics.",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "state": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/StateStatus",
+          "description": "The state status for the card.",
+          "type": "string",
+          "enum": ["CURRENT", "REISSUED", "RETIRED", "FORCED"]
+        },
+        "active": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/ActiveStatus",
+          "description": "The active/inactive status for the card",
+          "type": "string",
+          "enum": ["INACTIVE", "ACTIVE"]
+        },
+        "block": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/BlockStatus",
+          "type": "string",
+          "description": "Whether the card is open or blocked for various reasons",
+          "enum": ["OPEN", "BLOCKED LOST OR STOLEN", "BLOCKED NO FRAUD", "BLOCKED WITH FRAUD"]
+        },
+        "lock": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/LockStatus",
+          "type": "string",
+          "description": "A cardholder initiated status. A locked card will fail authorization. Locked cards can be unlocked.\n\nA cardholder may choose to lock a card while temporarily misplaced.\n",
+          "enum": ["LOCKED", "UNLOCKED"]
+        }
+      }
+    },
+    "NewForcedCardRequest": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/NewForcedCardRequest",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["encryptedCardNumber", "encryptedDataEncryptionKey", "dataEncryptionKeyId", "expirationDate"],
+      "properties": {
+        "encryptedCardNumber": {
+          "description": "The card number must be encrypted with an AES generated secret key, i.e. data encryption key (DEK). That DEK must be RSA encrypted with the PublicKey returned by this service's GET /public-key operation. The encrypted DEK must be included in this request object as the encryptedDataEncryptionKey.",
+          "type": "string"
+        },
+        "encryptedDataEncryptionKey": {
+          "description": "RSA encrypted data encryption key used to AES encrypt encryptedCardNumber",
+          "type": "string"
+        },
+        "dataEncryptionKeyId": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/DataEncryptionKeyId",
+          "type": "string",
+          "description": "Identifier for the encryption keys used to encrypt the Card object.\n",
+          "format": "uuid"
+        },
+        "expirationDate": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/ExpirationDate",
+          "type": "string",
+          "pattern": "([0-9][0-9])(0[1-9]|1[0-2])",
+          "format": "YYMM",
+          "description": "Expiration date for the card and will be assumed to be the last millisecond of the month",
+          "minLength": 4,
+          "maxLength": 4
+        }
+      }
+    },
+    "PublicKey": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/PublicKey",
+      "description": "An RSA generated public key in PEM format.",
+      "type": "string",
+      "example": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwm2sxmRdTF7ZIBA6+ngO\n8jOTCHmID0PpQB1q85+hrcLSfB1rWY9bzNNLabBo/ajDnA4Pcadq/x6gpg70qZcR\n9Wxm6TttKzBPZsxasGXgSTDqEi2KcYZgq1mL4qyxUvyIms7/llGy+W9b5huZaVcO\nxdT1tw/zctbOhb6S2t5vH+zkta/2ncUXjG7i8XdLsJ1qe4K1kYbA4KVkOMmAtw7O\n4STk0TZDD0YARdmrciorJjbIVt0Xj1CrYQ5QbDGrlfeXgrcZwX5f9wT2MnKlY5oZ\n5Wtb57oGtLkVf8g6vN/2jGtAmOmHK2hHwNd/+zUet5G/S5uwEli4RgMPP4pUoKgd\nGQIDAQAB\n-----END PUBLIC KEY-----\n"
+    },
+    "PublicKeyResponse": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/PublicKeyResponse",
+      "description": "This object contains the rsa generated public key for the Payment Card Service. This public key must be used\nwhen transmitting encrypted data to Payment Card Service APIs.\n",
+      "type": "object",
+      "required": ["publicKey"],
+      "properties": {
+        "publicKey": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/PublicKey",
+          "description": "An RSA generated public key in PEM format.",
+          "type": "string",
+          "example": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwm2sxmRdTF7ZIBA6+ngO\n8jOTCHmID0PpQB1q85+hrcLSfB1rWY9bzNNLabBo/ajDnA4Pcadq/x6gpg70qZcR\n9Wxm6TttKzBPZsxasGXgSTDqEi2KcYZgq1mL4qyxUvyIms7/llGy+W9b5huZaVcO\nxdT1tw/zctbOhb6S2t5vH+zkta/2ncUXjG7i8XdLsJ1qe4K1kYbA4KVkOMmAtw7O\n4STk0TZDD0YARdmrciorJjbIVt0Xj1CrYQ5QbDGrlfeXgrcZwX5f9wT2MnKlY5oZ\n5Wtb57oGtLkVf8g6vN/2jGtAmOmHK2hHwNd/+zUet5G/S5uwEli4RgMPP4pUoKgd\nGQIDAQAB\n-----END PUBLIC KEY-----\n"
+        }
+      }
+    },
+    "PinKeyId": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/PinKeyId",
+      "type": "string",
+      "description": "PIN key identifier.",
+      "format": "uuid"
+    },
+    "PinKeyResponse": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/PinKeyResponse",
+      "description": "This object contains an rsa generated public key to be used when transmitting data for a PIN change. This key\nis only valid to be used for a single PIN change.\n",
+      "type": "object",
+      "required": ["publicKey"],
+      "properties": {
+        "publicKey": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/PublicKey",
+          "description": "An RSA generated public key in PEM format.",
+          "type": "string",
+          "example": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwm2sxmRdTF7ZIBA6+ngO\n8jOTCHmID0PpQB1q85+hrcLSfB1rWY9bzNNLabBo/ajDnA4Pcadq/x6gpg70qZcR\n9Wxm6TttKzBPZsxasGXgSTDqEi2KcYZgq1mL4qyxUvyIms7/llGy+W9b5huZaVcO\nxdT1tw/zctbOhb6S2t5vH+zkta/2ncUXjG7i8XdLsJ1qe4K1kYbA4KVkOMmAtw7O\n4STk0TZDD0YARdmrciorJjbIVt0Xj1CrYQ5QbDGrlfeXgrcZwX5f9wT2MnKlY5oZ\n5Wtb57oGtLkVf8g6vN/2jGtAmOmHK2hHwNd/+zUet5G/S5uwEli4RgMPP4pUoKgd\nGQIDAQAB\n-----END PUBLIC KEY-----\n"
+        }
+      }
+    },
+    "EncryptedPin": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/EncryptedPin",
+      "type": "string",
+      "description": "An AES encrypted PIN."
+    },
+    "PinRequest": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/PinRequest",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["encryptedDataEncryptionKey", "encryptedPin"],
+      "properties": {
+        "encryptedDataEncryptionKey": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/DataEncryptionKey",
+          "type": "string",
+          "description": "AES generated encryption key used to encrypt sensitive data."
+        },
+        "encryptedPin": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/EncryptedPin",
+          "type": "string",
+          "description": "An AES encrypted PIN."
+        }
+      }
+    },
+    "StorageKeyId": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://payment-card.checkdigit/payment-card/v3/schemas/definitions/StorageKeyId",
+      "type": "string",
+      "description": "DEK's non-derived identifier to be used by Check Digit services only.\n"
+    }
+  }
+}

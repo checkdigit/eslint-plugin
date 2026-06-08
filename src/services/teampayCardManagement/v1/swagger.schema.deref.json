@@ -1,0 +1,4639 @@
+{
+  "apis": {
+    "/teampay-card-management/v1/ping": {},
+    "/teampay-card-management/v1/cardholder/:cardholderId": {
+      "put": {
+        "request": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/api/CardholderPutRequestContext",
+          "type": "object",
+          "properties": {
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "cardholderId": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/CardholderId",
+                  "type": "string",
+                  "description": "cardholder identifier",
+                  "format": "uuid"
+                }
+              },
+              "required": ["cardholderId"]
+            },
+            "headers": {
+              "type": "object",
+              "additionalProperties": true,
+              "properties": {
+                "if-match": {
+                  "type": "string"
+                }
+              }
+            },
+            "body": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/NewCardholder",
+              "type": "object",
+              "additionalProperties": false,
+              "description": "Cardholder Request.",
+              "required": ["clientId", "person", "transmissionKey"],
+              "properties": {
+                "clientId": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/ClientId",
+                  "type": "string",
+                  "description": "The identifier of the client that the cardholder belongs to.",
+                  "minLength": 1
+                },
+                "person": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/Person",
+                  "type": "object",
+                  "description": "Person details",
+                  "properties": {
+                    "company": {
+                      "minLength": 1,
+                      "type": "string",
+                      "description": "Encrypted company name using the AES algorithm"
+                    },
+                    "title": {
+                      "minLength": 1,
+                      "type": "string",
+                      "description": "Encrypted title using the AES algorithm"
+                    },
+                    "firstName": {
+                      "minLength": 1,
+                      "type": "string",
+                      "description": "Encrypted first name using the AES algorithm"
+                    },
+                    "middleName": {
+                      "minLength": 1,
+                      "type": "string",
+                      "description": "Encrypted middle name using the AES algorithm"
+                    },
+                    "lastName": {
+                      "minLength": 1,
+                      "type": "string",
+                      "description": "Encrypted last name using the AES algorithm"
+                    },
+                    "phones": {
+                      "type": "array",
+                      "items": {
+                        "$schema": "https://json-schema.org/draft/2020-12/schema",
+                        "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/Phone",
+                        "required": ["number", "type"],
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "description": "Type of phone",
+                            "enum": ["HOME", "WORK", "MOBILE", "FAX", "MAIN", "OTHER"]
+                          },
+                          "number": {
+                            "minLength": 1,
+                            "type": "string",
+                            "description": "The Encrypted phone number using the AES algorithm"
+                          },
+                          "extension": {
+                            "minLength": 1,
+                            "type": "string",
+                            "description": "The Encrypted phone number extension using the AES algorithm"
+                          }
+                        }
+                      }
+                    },
+                    "email": {
+                      "minLength": 1,
+                      "type": "string",
+                      "description": "Encrypted email address using the AES algorithm"
+                    },
+                    "language": {
+                      "minLength": 1,
+                      "type": "string",
+                      "description": "User's language preference"
+                    },
+                    "timeZone": {
+                      "minLength": 1,
+                      "type": "string",
+                      "description": "User's timezone"
+                    }
+                  }
+                },
+                "transmissionKey": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/TransmissionKey",
+                  "description": "The Encrypted version of the AES-256 DEK",
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "required": ["params", "body"],
+          "additionalProperties": false
+        },
+        "responses": {
+          "200": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/api/CardholderPutResponseOK",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "properties": {
+                  "last-modified": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "created-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "updated-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "etag": {
+                    "type": "string"
+                  }
+                },
+                "required": ["last-modified", "created-on", "updated-on", "etag"]
+              },
+              "body": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/Cardholder",
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Cardholder Response.",
+                "required": ["clientId", "transmissionKey", "storageKeyId", "person", "createdOn", "lastModified"],
+                "properties": {
+                  "clientId": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/ClientId",
+                    "type": "string",
+                    "description": "The identifier of the client that the cardholder belongs to.",
+                    "minLength": 1
+                  },
+                  "transmissionKey": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/TransmissionKey",
+                    "description": "The Encrypted version of the AES-256 DEK",
+                    "type": "string"
+                  },
+                  "storageKeyId": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/StorageKeyId",
+                    "type": "string",
+                    "description": "DEK's non-derived identifier to be used by Check Digit services only.\n"
+                  },
+                  "person": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/Person",
+                    "type": "object",
+                    "description": "Person details",
+                    "properties": {
+                      "company": {
+                        "minLength": 1,
+                        "type": "string",
+                        "description": "Encrypted company name using the AES algorithm"
+                      },
+                      "title": {
+                        "minLength": 1,
+                        "type": "string",
+                        "description": "Encrypted title using the AES algorithm"
+                      },
+                      "firstName": {
+                        "minLength": 1,
+                        "type": "string",
+                        "description": "Encrypted first name using the AES algorithm"
+                      },
+                      "middleName": {
+                        "minLength": 1,
+                        "type": "string",
+                        "description": "Encrypted middle name using the AES algorithm"
+                      },
+                      "lastName": {
+                        "minLength": 1,
+                        "type": "string",
+                        "description": "Encrypted last name using the AES algorithm"
+                      },
+                      "phones": {
+                        "type": "array",
+                        "items": {
+                          "$schema": "https://json-schema.org/draft/2020-12/schema",
+                          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/Phone",
+                          "required": ["number", "type"],
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "description": "Type of phone",
+                              "enum": ["HOME", "WORK", "MOBILE", "FAX", "MAIN", "OTHER"]
+                            },
+                            "number": {
+                              "minLength": 1,
+                              "type": "string",
+                              "description": "The Encrypted phone number using the AES algorithm"
+                            },
+                            "extension": {
+                              "minLength": 1,
+                              "type": "string",
+                              "description": "The Encrypted phone number extension using the AES algorithm"
+                            }
+                          }
+                        }
+                      },
+                      "email": {
+                        "minLength": 1,
+                        "type": "string",
+                        "description": "Encrypted email address using the AES algorithm"
+                      },
+                      "language": {
+                        "minLength": 1,
+                        "type": "string",
+                        "description": "User's language preference"
+                      },
+                      "timeZone": {
+                        "minLength": 1,
+                        "type": "string",
+                        "description": "User's timezone"
+                      }
+                    }
+                  },
+                  "createdOn": {
+                    "description": "Time cardholder data was initially created",
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "lastModified": {
+                    "description": "Time cardholder data was last modified",
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "updatedOn": {
+                    "description": "Time cardholder data was last modified",
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              }
+            },
+            "required": ["headers", "body"],
+            "additionalProperties": false
+          },
+          "409": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/api/CardholderPutResponseConflict",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "412": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/api/CardholderPutResponsePreconditionFailed",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "default": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/api/CardholderPutResponseDefault",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/Error",
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Server error message",
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "/teampay-card-management/v1/card/:cardId": {
+      "put": {
+        "request": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/api/CardPutRequestContext",
+          "type": "object",
+          "properties": {
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "cardId": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/CardId",
+                  "type": "string",
+                  "description": "Card identifier",
+                  "format": "uuid"
+                }
+              },
+              "required": ["cardId"]
+            },
+            "headers": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "body": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/NewCardholderCard",
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["cardholderId", "product", "expirationDate", "state", "active", "block", "lock"],
+              "properties": {
+                "limitCardId": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/LimitCardId",
+                  "type": "string",
+                  "format": "uuid",
+                  "description": "Optional card identifier of a card whose limits will be shared.\nAll cards with the same limitCardId will share the limits belonging to the card with that cardId.\nA 400 Bad Request will be returned if the limitCardId is set to a card that already has a set limitCardId.\n"
+                },
+                "cardholderId": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/CardholderId",
+                  "type": "string",
+                  "description": "cardholder identifier",
+                  "format": "uuid"
+                },
+                "product": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/CardProduct",
+                  "type": "string",
+                  "description": "Type of card product",
+                  "enum": ["VIRTUAL", "STANDARD", "PREMIUM"]
+                },
+                "expirationDate": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/ExpirationDate",
+                  "type": "string",
+                  "pattern": "([2-9][0-9])(0[1-9]|1[0-2])",
+                  "format": "YYMM",
+                  "description": "Expiration date for the card and will be assumed to be the last millisecond of the month",
+                  "minLength": 4,
+                  "maxLength": 4
+                },
+                "state": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/NewStateStatus",
+                  "description": "A card's state status.\n\n- CURRENT: A newly created card's default state.\n- REISSUED: The state set to an existing card when it is being reissued.\n- RETIRED: The state set when a card is no longer valid.\n\nPlease refer to the below state machine for allowable transitions:\nCURRENT --> REISSUED\nCURRENT --> RETIRED\nREISSUED --> RETIRED\nRETIRED - terminal state\n\nA status change that does not conform to one of the transitions listed above will result in a 400 Bad Request.\n",
+                  "type": "string",
+                  "enum": ["CURRENT", "REISSUED", "RETIRED"]
+                },
+                "active": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/ActiveStatus",
+                  "description": "A card's active status. A card is often activated once the cardholder receives it.\n\nPlease refer to the below state machine for allowable transitions:\nINACTIVE --> ACTIVE\nACTIVE --> INACTIVE\n",
+                  "type": "string",
+                  "enum": ["ACTIVE", "INACTIVE"]
+                },
+                "block": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/BlockStatus",
+                  "type": "string",
+                  "description": "A card's block status. A card may be blocked when lost, stolen, or canceled.\n\nA use case for the BLOCKED NO FRAUD state would be to place the card in this state while there is an investigation into fraudulent activity on the card. \nIf the suspected fraud is confirmed, the card may be placed into the BLOCKED WITH FRAUD state. \nOtherwise, the card may be placed back into the OPEN state when the investigation has concluded.\n\nPlease refer to the below state machine for allowable transitions:\nOPEN --> BLOCKED LOST OR STOLEN\nOPEN --> BLOCKED NO FRAUD\nOPEN --> BLOCKED WITH FRAUD\nBLOCKED NO FRAUD --> OPEN\nBLOCKED NO FRAUD --> BLOCKED WITH FRAUD\nBLOCKED LOST OR STOLEN --> terminal state\nBLOCKED WITH FRAUD --> terminal state\n\nA status change that does not conform to one of the transitions listed above will result in a 400 Bad Request.\n",
+                  "enum": ["OPEN", "BLOCKED LOST OR STOLEN", "BLOCKED NO FRAUD", "BLOCKED WITH FRAUD"]
+                },
+                "lock": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/LockStatus",
+                  "type": "string",
+                  "description": "A card's lock status. A cardholder may choose to lock a card when it's been misplaced or to temporarily prevent use.\n\nPlease refer to the below state machine for allowable transitions:\nLOCKED --> UNLOCKED\nUNLOCKED --> LOCKED\n",
+                  "enum": ["LOCKED", "UNLOCKED"]
+                },
+                "cardLimitCurrency": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/CurrencyAlphabeticCode",
+                  "type": "string",
+                  "description": "Currency codes",
+                  "enum": [
+                    "AED",
+                    "AFN",
+                    "ALL",
+                    "AMD",
+                    "ANG",
+                    "AOA",
+                    "ARS",
+                    "AUD",
+                    "AWG",
+                    "AZN",
+                    "BAM",
+                    "BBD",
+                    "BDT",
+                    "BGN",
+                    "BHD",
+                    "BIF",
+                    "BMD",
+                    "BND",
+                    "BOB",
+                    "BOV",
+                    "BRL",
+                    "BSD",
+                    "BTN",
+                    "BWP",
+                    "BYN",
+                    "BZD",
+                    "CAD",
+                    "CDF",
+                    "CHE",
+                    "CHF",
+                    "CHW",
+                    "CLF",
+                    "CLP",
+                    "CNY",
+                    "COP",
+                    "COU",
+                    "CRC",
+                    "CUC",
+                    "CUP",
+                    "CVE",
+                    "CZK",
+                    "DJF",
+                    "DKK",
+                    "DOP",
+                    "DZD",
+                    "EGP",
+                    "ERN",
+                    "ETB",
+                    "EUR",
+                    "FJD",
+                    "FKP",
+                    "GBP",
+                    "GEL",
+                    "GHS",
+                    "GIP",
+                    "GMD",
+                    "GNF",
+                    "GTQ",
+                    "GYD",
+                    "HKD",
+                    "HNL",
+                    "HRK",
+                    "HTG",
+                    "HUF",
+                    "IDR",
+                    "ILS",
+                    "INR",
+                    "IQD",
+                    "IRR",
+                    "ISK",
+                    "JMD",
+                    "JOD",
+                    "JPY",
+                    "KES",
+                    "KGS",
+                    "KHR",
+                    "KMF",
+                    "KPW",
+                    "KRW",
+                    "KWD",
+                    "KYD",
+                    "KZT",
+                    "LAK",
+                    "LBP",
+                    "LKR",
+                    "LRD",
+                    "LSL",
+                    "LYD",
+                    "MAD",
+                    "MDL",
+                    "MGA",
+                    "MKD",
+                    "MMK",
+                    "MNT",
+                    "MOP",
+                    "MRU",
+                    "MUR",
+                    "MVR",
+                    "MWK",
+                    "MXN",
+                    "MXV",
+                    "MYR",
+                    "MZN",
+                    "NAD",
+                    "NGN",
+                    "NIO",
+                    "NOK",
+                    "NPR",
+                    "NZD",
+                    "OMR",
+                    "PAB",
+                    "PEN",
+                    "PGK",
+                    "PHP",
+                    "PKR",
+                    "PLN",
+                    "PYG",
+                    "QAR",
+                    "RON",
+                    "RSD",
+                    "RUB",
+                    "RWF",
+                    "SAR",
+                    "SBD",
+                    "SCR",
+                    "SDG",
+                    "SEK",
+                    "SGD",
+                    "SHP",
+                    "SLL",
+                    "SOS",
+                    "SRD",
+                    "SSP",
+                    "STN",
+                    "SVC",
+                    "SYP",
+                    "SZL",
+                    "THB",
+                    "TJS",
+                    "TMT",
+                    "TND",
+                    "TOP",
+                    "TRY",
+                    "TTD",
+                    "TWD",
+                    "TZS",
+                    "UAH",
+                    "UGX",
+                    "USD",
+                    "USN",
+                    "UYI",
+                    "UYU",
+                    "UYW",
+                    "UZS",
+                    "VES",
+                    "VND",
+                    "VUV",
+                    "WST",
+                    "XAF",
+                    "XAG",
+                    "XAU",
+                    "XBA",
+                    "XBB",
+                    "XBC",
+                    "XBD",
+                    "XCD",
+                    "XDR",
+                    "XOF",
+                    "XPD",
+                    "XPF",
+                    "XPT",
+                    "XSU",
+                    "XTS",
+                    "XUA",
+                    "XXX",
+                    "YER",
+                    "ZAR",
+                    "ZMW",
+                    "ZWL"
+                  ]
+                }
+              }
+            }
+          },
+          "required": ["params", "body"],
+          "additionalProperties": false
+        },
+        "responses": {
+          "200": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/api/CardPutResponseOK",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "properties": {
+                  "last-modified": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "created-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "updated-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "etag": {
+                    "type": "string"
+                  }
+                },
+                "required": ["last-modified", "created-on", "updated-on", "etag"]
+              },
+              "body": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/CardholderCard",
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["cardholderId", "card", "storageKeyId", "product"],
+                "properties": {
+                  "limitCardId": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/LimitCardId",
+                    "type": "string",
+                    "format": "uuid",
+                    "description": "Optional card identifier of a card whose limits will be shared.\nAll cards with the same limitCardId will share the limits belonging to the card with that cardId.\nA 400 Bad Request will be returned if the limitCardId is set to a card that already has a set limitCardId.\n"
+                  },
+                  "cardholderId": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/CardholderId",
+                    "type": "string",
+                    "description": "cardholder identifier",
+                    "format": "uuid"
+                  },
+                  "card": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/Card",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "bin",
+                      "last4",
+                      "expirationDate",
+                      "cardNumber",
+                      "serviceCode",
+                      "applicationTransactionCounter",
+                      "sequenceNumber",
+                      "state",
+                      "active",
+                      "block",
+                      "lock",
+                      "capture",
+                      "createdOn",
+                      "lastModified"
+                    ],
+                    "properties": {
+                      "bin": {
+                        "$schema": "https://json-schema.org/draft/2020-12/schema",
+                        "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/Bin",
+                        "type": "string",
+                        "pattern": "^\\d+$",
+                        "description": "Bank Identification Number",
+                        "minLength": 8,
+                        "maxLength": 8
+                      },
+                      "last4": {
+                        "type": "string",
+                        "pattern": "^\\d+$",
+                        "description": "Last four digits of the card number",
+                        "minLength": 4,
+                        "maxLength": 4
+                      },
+                      "expirationDate": {
+                        "$schema": "https://json-schema.org/draft/2020-12/schema",
+                        "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/ExpirationDate",
+                        "type": "string",
+                        "pattern": "([2-9][0-9])(0[1-9]|1[0-2])",
+                        "format": "YYMM",
+                        "description": "Expiration date for the card and will be assumed to be the last millisecond of the month",
+                        "minLength": 4,
+                        "maxLength": 4
+                      },
+                      "cardNumber": {
+                        "type": "string",
+                        "description": "Encrypted card number (PAN)"
+                      },
+                      "serviceCode": {
+                        "type": "string",
+                        "pattern": "^\\d+$",
+                        "description": "Service code for the card",
+                        "minLength": 3,
+                        "maxLength": 3
+                      },
+                      "applicationTransactionCounter": {
+                        "type": "integer",
+                        "description": "Application transaction counter (ATC) for the card"
+                      },
+                      "sequenceNumber": {
+                        "type": "integer",
+                        "description": "Used to differentiate issuing the same card and expiration date on multiple plastics"
+                      },
+                      "state": {
+                        "$schema": "https://json-schema.org/draft/2020-12/schema",
+                        "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/StateStatus",
+                        "description": "A card's state status.",
+                        "type": "string",
+                        "enum": ["CURRENT", "REISSUED", "RETIRED", "FORCED"]
+                      },
+                      "active": {
+                        "$schema": "https://json-schema.org/draft/2020-12/schema",
+                        "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/ActiveStatus",
+                        "description": "A card's active status. A card is often activated once the cardholder receives it.\n\nPlease refer to the below state machine for allowable transitions:\nINACTIVE --> ACTIVE\nACTIVE --> INACTIVE\n",
+                        "type": "string",
+                        "enum": ["ACTIVE", "INACTIVE"]
+                      },
+                      "block": {
+                        "$schema": "https://json-schema.org/draft/2020-12/schema",
+                        "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/BlockStatus",
+                        "type": "string",
+                        "description": "A card's block status. A card may be blocked when lost, stolen, or canceled.\n\nA use case for the BLOCKED NO FRAUD state would be to place the card in this state while there is an investigation into fraudulent activity on the card. \nIf the suspected fraud is confirmed, the card may be placed into the BLOCKED WITH FRAUD state. \nOtherwise, the card may be placed back into the OPEN state when the investigation has concluded.\n\nPlease refer to the below state machine for allowable transitions:\nOPEN --> BLOCKED LOST OR STOLEN\nOPEN --> BLOCKED NO FRAUD\nOPEN --> BLOCKED WITH FRAUD\nBLOCKED NO FRAUD --> OPEN\nBLOCKED NO FRAUD --> BLOCKED WITH FRAUD\nBLOCKED LOST OR STOLEN --> terminal state\nBLOCKED WITH FRAUD --> terminal state\n\nA status change that does not conform to one of the transitions listed above will result in a 400 Bad Request.\n",
+                        "enum": ["OPEN", "BLOCKED LOST OR STOLEN", "BLOCKED NO FRAUD", "BLOCKED WITH FRAUD"]
+                      },
+                      "lock": {
+                        "$schema": "https://json-schema.org/draft/2020-12/schema",
+                        "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/LockStatus",
+                        "type": "string",
+                        "description": "A card's lock status. A cardholder may choose to lock a card when it's been misplaced or to temporarily prevent use.\n\nPlease refer to the below state machine for allowable transitions:\nLOCKED --> UNLOCKED\nUNLOCKED --> LOCKED\n",
+                        "enum": ["LOCKED", "UNLOCKED"]
+                      },
+                      "capture": {
+                        "type": "boolean",
+                        "description": "Whether the card should be captured at next use"
+                      },
+                      "createdOn": {
+                        "description": "Time card data was first stored",
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "lastModified": {
+                        "type": "string",
+                        "description": "Time card data was last modified",
+                        "format": "date-time"
+                      },
+                      "updatedOn": {
+                        "type": "string",
+                        "description": "Time card data was last modified",
+                        "format": "date-time"
+                      },
+                      "pinId": {
+                        "type": "string",
+                        "description": "Identifier for the PIN (Personal Identification Number) used for this card."
+                      }
+                    }
+                  },
+                  "storageKeyId": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/StorageKeyId",
+                    "type": "string",
+                    "description": "DEK's non-derived identifier to be used by Check Digit services only.\n"
+                  },
+                  "product": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/CardProduct",
+                    "type": "string",
+                    "description": "Type of card product",
+                    "enum": ["VIRTUAL", "STANDARD", "PREMIUM"]
+                  },
+                  "cardLimitCurrency": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/CurrencyAlphabeticCode",
+                    "type": "string",
+                    "description": "Currency codes",
+                    "enum": [
+                      "AED",
+                      "AFN",
+                      "ALL",
+                      "AMD",
+                      "ANG",
+                      "AOA",
+                      "ARS",
+                      "AUD",
+                      "AWG",
+                      "AZN",
+                      "BAM",
+                      "BBD",
+                      "BDT",
+                      "BGN",
+                      "BHD",
+                      "BIF",
+                      "BMD",
+                      "BND",
+                      "BOB",
+                      "BOV",
+                      "BRL",
+                      "BSD",
+                      "BTN",
+                      "BWP",
+                      "BYN",
+                      "BZD",
+                      "CAD",
+                      "CDF",
+                      "CHE",
+                      "CHF",
+                      "CHW",
+                      "CLF",
+                      "CLP",
+                      "CNY",
+                      "COP",
+                      "COU",
+                      "CRC",
+                      "CUC",
+                      "CUP",
+                      "CVE",
+                      "CZK",
+                      "DJF",
+                      "DKK",
+                      "DOP",
+                      "DZD",
+                      "EGP",
+                      "ERN",
+                      "ETB",
+                      "EUR",
+                      "FJD",
+                      "FKP",
+                      "GBP",
+                      "GEL",
+                      "GHS",
+                      "GIP",
+                      "GMD",
+                      "GNF",
+                      "GTQ",
+                      "GYD",
+                      "HKD",
+                      "HNL",
+                      "HRK",
+                      "HTG",
+                      "HUF",
+                      "IDR",
+                      "ILS",
+                      "INR",
+                      "IQD",
+                      "IRR",
+                      "ISK",
+                      "JMD",
+                      "JOD",
+                      "JPY",
+                      "KES",
+                      "KGS",
+                      "KHR",
+                      "KMF",
+                      "KPW",
+                      "KRW",
+                      "KWD",
+                      "KYD",
+                      "KZT",
+                      "LAK",
+                      "LBP",
+                      "LKR",
+                      "LRD",
+                      "LSL",
+                      "LYD",
+                      "MAD",
+                      "MDL",
+                      "MGA",
+                      "MKD",
+                      "MMK",
+                      "MNT",
+                      "MOP",
+                      "MRU",
+                      "MUR",
+                      "MVR",
+                      "MWK",
+                      "MXN",
+                      "MXV",
+                      "MYR",
+                      "MZN",
+                      "NAD",
+                      "NGN",
+                      "NIO",
+                      "NOK",
+                      "NPR",
+                      "NZD",
+                      "OMR",
+                      "PAB",
+                      "PEN",
+                      "PGK",
+                      "PHP",
+                      "PKR",
+                      "PLN",
+                      "PYG",
+                      "QAR",
+                      "RON",
+                      "RSD",
+                      "RUB",
+                      "RWF",
+                      "SAR",
+                      "SBD",
+                      "SCR",
+                      "SDG",
+                      "SEK",
+                      "SGD",
+                      "SHP",
+                      "SLL",
+                      "SOS",
+                      "SRD",
+                      "SSP",
+                      "STN",
+                      "SVC",
+                      "SYP",
+                      "SZL",
+                      "THB",
+                      "TJS",
+                      "TMT",
+                      "TND",
+                      "TOP",
+                      "TRY",
+                      "TTD",
+                      "TWD",
+                      "TZS",
+                      "UAH",
+                      "UGX",
+                      "USD",
+                      "USN",
+                      "UYI",
+                      "UYU",
+                      "UYW",
+                      "UZS",
+                      "VES",
+                      "VND",
+                      "VUV",
+                      "WST",
+                      "XAF",
+                      "XAG",
+                      "XAU",
+                      "XBA",
+                      "XBB",
+                      "XBC",
+                      "XBD",
+                      "XCD",
+                      "XDR",
+                      "XOF",
+                      "XPD",
+                      "XPF",
+                      "XPT",
+                      "XSU",
+                      "XTS",
+                      "XUA",
+                      "XXX",
+                      "YER",
+                      "ZAR",
+                      "ZMW",
+                      "ZWL"
+                    ]
+                  }
+                }
+              }
+            },
+            "required": ["headers", "body"],
+            "additionalProperties": false
+          },
+          "409": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/api/CardPutResponseConflict",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "default": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/api/CardPutResponseDefault",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/Error",
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Server error message",
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "/teampay-card-management/v1/card/:cardId/sensitive/:publicKeyHash": {
+      "put": {
+        "request": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/api/CardSensitivePutRequestContext",
+          "type": "object",
+          "properties": {
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "cardId": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/CardId",
+                  "type": "string",
+                  "description": "Card identifier",
+                  "format": "uuid"
+                },
+                "publicKeyHash": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/PublicKeyHash",
+                  "type": "string",
+                  "description": "UUID derived from public key\nSteps to create:\n  1. Calculate SHA512 base64 hash of the public key\n  2. Generate a v5 uuid using the namespace value: \"f25d4515-fea7-44c7-8baf-f3ca50865e66\" and the name value of the result of step 1\n\nExample implementation in TypeScript\n###\nimport { createHash } from 'crypto';\nimport { v5 as uuid } from 'uuid';\n\n/**\n * Given a string value, return hash in the form of a uuid.\n *\n * @param value to hash\n */\nfunction hash(value: string): string {\n  return uuid(\n    createHash('sha512')\n    .update(value)\n    .digest('base64'),\n    'f25d4515-fea7-44c7-8baf-f3ca50865e66' // global namespace\n  );\n}\n###\nThe public @checkdigit/hash npm package may be used to generate the hash value as well.\n",
+                  "format": "uuid",
+                  "example": "15a85f64-5717-4562-b3fc-2c963f66afa6"
+                }
+              },
+              "required": ["cardId", "publicKeyHash"]
+            },
+            "headers": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "body": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/SensitiveInformationRequest",
+              "type": "object",
+              "additionalProperties": false,
+              "description": "Required information for retrieval of sensitive card information.\nEnsure the hashed version of the publicKey supplied matches the publicKeyHash in the path parameter.\n",
+              "required": ["publicKey"],
+              "properties": {
+                "publicKey": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/PublicKey",
+                  "description": "RSA generated public key in PEM format",
+                  "type": "string",
+                  "example": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwm2sxmRdTF7ZIBA6+ngO\n8jOTCHmID0PpQB1q85+hrcLSfB1rWY9bzNNLabBo/ajDnA4Pcadq/x6gpg70qZcR\n9Wxm6TttKzBPZsxasGXgSTDqEi2KcYZgq1mL4qyxUvyIms7/llGy+W9b5huZaVcO\nxdT1tw/zctbOhb6S2t5vH+zkta/2ncUXjG7i8XdLsJ1qe4K1kYbA4KVkOMmAtw7O\n4STk0TZDD0YARdmrciorJjbIVt0Xj1CrYQ5QbDGrlfeXgrcZwX5f9wT2MnKlY5oZ\n5Wtb57oGtLkVf8g6vN/2jGtAmOmHK2hHwNd/+zUet5G/S5uwEli4RgMPP4pUoKgd\nGQIDAQAB\n-----END PUBLIC KEY-----\n"
+                }
+              }
+            }
+          },
+          "required": ["params", "body"],
+          "additionalProperties": false
+        },
+        "responses": {
+          "200": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/api/CardSensitivePutResponseOK",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/SensitiveInformation",
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["transmissionKey", "encryptedCardNumber", "encryptedCvn2", "expirationDate"],
+                "properties": {
+                  "transmissionKey": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/TransmissionKey",
+                    "description": "The Encrypted version of the AES-256 DEK",
+                    "type": "string"
+                  },
+                  "encryptedCardNumber": {
+                    "type": "string",
+                    "description": "AES-256 encrypted card number"
+                  },
+                  "encryptedCvn2": {
+                    "type": "string",
+                    "description": "AES-256 encrypted cvn2"
+                  },
+                  "expirationDate": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/ExpirationDate",
+                    "type": "string",
+                    "pattern": "([2-9][0-9])(0[1-9]|1[0-2])",
+                    "format": "YYMM",
+                    "description": "Expiration date for the card and will be assumed to be the last millisecond of the month",
+                    "minLength": 4,
+                    "maxLength": 4
+                  }
+                }
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          },
+          "404": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/api/CardSensitivePutResponseNotFound",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "default": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/api/CardSensitivePutResponseDefault",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/Error",
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Server error message",
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "/teampay-card-management/v1/card/:cardId/block/:blockStatus": {
+      "put": {
+        "request": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/api/CardBlockPutRequestContext",
+          "type": "object",
+          "properties": {
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "cardId": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/CardId",
+                  "type": "string",
+                  "description": "Card identifier",
+                  "format": "uuid"
+                },
+                "blockStatus": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/BlockStatus",
+                  "type": "string",
+                  "description": "A card's block status. A card may be blocked when lost, stolen, or canceled.\n\nA use case for the BLOCKED NO FRAUD state would be to place the card in this state while there is an investigation into fraudulent activity on the card. \nIf the suspected fraud is confirmed, the card may be placed into the BLOCKED WITH FRAUD state. \nOtherwise, the card may be placed back into the OPEN state when the investigation has concluded.\n\nPlease refer to the below state machine for allowable transitions:\nOPEN --> BLOCKED LOST OR STOLEN\nOPEN --> BLOCKED NO FRAUD\nOPEN --> BLOCKED WITH FRAUD\nBLOCKED NO FRAUD --> OPEN\nBLOCKED NO FRAUD --> BLOCKED WITH FRAUD\nBLOCKED LOST OR STOLEN --> terminal state\nBLOCKED WITH FRAUD --> terminal state\n\nA status change that does not conform to one of the transitions listed above will result in a 400 Bad Request.\n",
+                  "enum": ["OPEN", "BLOCKED LOST OR STOLEN", "BLOCKED NO FRAUD", "BLOCKED WITH FRAUD"]
+                }
+              },
+              "required": ["cardId", "blockStatus"]
+            },
+            "headers": {
+              "type": "object",
+              "additionalProperties": true,
+              "properties": {
+                "if-match": {
+                  "type": "string"
+                }
+              },
+              "required": ["If-Match"]
+            }
+          },
+          "required": ["params", "headers"],
+          "additionalProperties": false
+        },
+        "responses": {
+          "204": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/api/CardBlockPutResponseNoContent",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "properties": {
+                  "last-modified": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "created-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "updated-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "etag": {
+                    "type": "string"
+                  }
+                },
+                "required": ["last-modified", "created-on", "updated-on", "etag"]
+              }
+            },
+            "required": ["headers"],
+            "additionalProperties": false
+          },
+          "409": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/api/CardBlockPutResponseConflict",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "412": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/api/CardBlockPutResponsePreconditionFailed",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "default": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/api/CardBlockPutResponseDefault",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/Error",
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Server error message",
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "/teampay-card-management/v1/card/:cardId/active/:activeStatus": {
+      "put": {
+        "request": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/api/CardActivePutRequestContext",
+          "type": "object",
+          "properties": {
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "cardId": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/CardId",
+                  "type": "string",
+                  "description": "Card identifier",
+                  "format": "uuid"
+                },
+                "activeStatus": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/ActiveStatus",
+                  "description": "A card's active status. A card is often activated once the cardholder receives it.\n\nPlease refer to the below state machine for allowable transitions:\nINACTIVE --> ACTIVE\nACTIVE --> INACTIVE\n",
+                  "type": "string",
+                  "enum": ["ACTIVE", "INACTIVE"]
+                }
+              },
+              "required": ["cardId", "activeStatus"]
+            },
+            "headers": {
+              "type": "object",
+              "additionalProperties": true,
+              "properties": {
+                "if-match": {
+                  "type": "string"
+                }
+              },
+              "required": ["If-Match"]
+            }
+          },
+          "required": ["params", "headers"],
+          "additionalProperties": false
+        },
+        "responses": {
+          "204": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/api/CardActivePutResponseNoContent",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "properties": {
+                  "last-modified": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "created-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "updated-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "etag": {
+                    "type": "string"
+                  }
+                },
+                "required": ["last-modified", "created-on", "updated-on", "etag"]
+              }
+            },
+            "required": ["headers"],
+            "additionalProperties": false
+          },
+          "409": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/api/CardActivePutResponseConflict",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "412": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/api/CardActivePutResponsePreconditionFailed",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "default": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/api/CardActivePutResponseDefault",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/Error",
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Server error message",
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "/teampay-card-management/v1/card/:cardId/lock/:lockStatus": {
+      "put": {
+        "request": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/api/CardLockPutRequestContext",
+          "type": "object",
+          "properties": {
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "cardId": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/CardId",
+                  "type": "string",
+                  "description": "Card identifier",
+                  "format": "uuid"
+                },
+                "lockStatus": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/LockStatus",
+                  "type": "string",
+                  "description": "A card's lock status. A cardholder may choose to lock a card when it's been misplaced or to temporarily prevent use.\n\nPlease refer to the below state machine for allowable transitions:\nLOCKED --> UNLOCKED\nUNLOCKED --> LOCKED\n",
+                  "enum": ["LOCKED", "UNLOCKED"]
+                }
+              },
+              "required": ["cardId", "lockStatus"]
+            },
+            "headers": {
+              "type": "object",
+              "additionalProperties": true,
+              "properties": {
+                "if-match": {
+                  "type": "string"
+                }
+              },
+              "required": ["If-Match"]
+            }
+          },
+          "required": ["params", "headers"],
+          "additionalProperties": false
+        },
+        "responses": {
+          "204": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/api/CardLockPutResponseNoContent",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "properties": {
+                  "last-modified": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "created-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "updated-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "etag": {
+                    "type": "string"
+                  }
+                },
+                "required": ["last-modified", "created-on", "updated-on", "etag"]
+              }
+            },
+            "required": ["headers"],
+            "additionalProperties": false
+          },
+          "409": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/api/CardLockPutResponseConflict",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "412": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/api/CardLockPutResponsePreconditionFailed",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "default": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/api/CardLockPutResponseDefault",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/Error",
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Server error message",
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "/teampay-card-management/v1/card/:cardId/state/:stateStatus": {
+      "put": {
+        "request": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/api/CardStatePutRequestContext",
+          "type": "object",
+          "properties": {
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "cardId": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/CardId",
+                  "type": "string",
+                  "description": "Card identifier",
+                  "format": "uuid"
+                },
+                "stateStatus": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/NewStateStatus",
+                  "description": "A card's state status.\n\n- CURRENT: A newly created card's default state.\n- REISSUED: The state set to an existing card when it is being reissued.\n- RETIRED: The state set when a card is no longer valid.\n\nPlease refer to the below state machine for allowable transitions:\nCURRENT --> REISSUED\nCURRENT --> RETIRED\nREISSUED --> RETIRED\nRETIRED - terminal state\n\nA status change that does not conform to one of the transitions listed above will result in a 400 Bad Request.\n",
+                  "type": "string",
+                  "enum": ["CURRENT", "REISSUED", "RETIRED"]
+                }
+              },
+              "required": ["cardId", "stateStatus"]
+            },
+            "headers": {
+              "type": "object",
+              "additionalProperties": true,
+              "properties": {
+                "if-match": {
+                  "type": "string"
+                }
+              },
+              "required": ["If-Match"]
+            }
+          },
+          "required": ["params", "headers"],
+          "additionalProperties": false
+        },
+        "responses": {
+          "204": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/api/CardStatePutResponseNoContent",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "properties": {
+                  "last-modified": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "created-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "updated-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "etag": {
+                    "type": "string"
+                  }
+                },
+                "required": ["last-modified", "created-on", "updated-on", "etag"]
+              }
+            },
+            "required": ["headers"],
+            "additionalProperties": false
+          },
+          "409": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/api/CardStatePutResponseConflict",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "412": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/api/CardStatePutResponsePreconditionFailed",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "default": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/api/CardStatePutResponseDefault",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/Error",
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Server error message",
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "/teampay-card-management/v1/limit/:limitId": {
+      "put": {
+        "request": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/api/LimitPutRequestContext",
+          "type": "object",
+          "properties": {
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "limitId": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/LimitId",
+                  "type": "string",
+                  "description": "Limit identifier",
+                  "format": "uuid"
+                }
+              },
+              "required": ["limitId"]
+            },
+            "headers": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "body": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/NewLimit",
+              "type": "object",
+              "additionalProperties": false,
+              "description": "New limit details.",
+              "required": ["cardId", "period", "periodLength", "limitFunction", "value"],
+              "properties": {
+                "cardId": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/CardId",
+                  "type": "string",
+                  "description": "Card identifier",
+                  "format": "uuid"
+                },
+                "period": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/Period",
+                  "type": "string",
+                  "description": "DAY is a calendar day and will begin at 00:00:00 UTC.\nWEEK is a calendar week and will begin on Mondays at 00:00:00 UTC.\nMONTH is a calendar month and will begin on the first day of month at 00:00:00 UTC.\nYEAR is a calendar year and will begin on the first day of the year at 00:00:00 UTC.\nLIFETIME is a nonrecurring period that does not expire.\nAll periods are rolling if the associated periodLength is greater than 1\n",
+                  "enum": ["DAY", "WEEK", "MONTH", "YEAR", "LIFETIME"]
+                },
+                "periodLength": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/PeriodLength",
+                  "type": "string",
+                  "pattern": "^\\d+$",
+                  "minLength": 1,
+                  "description": "How long the period lasts"
+                },
+                "limitFunction": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/LimitFunction",
+                  "type": "string",
+                  "description": "AMOUNT functions by summing up the aggregate data point values.",
+                  "enum": ["AMOUNT"]
+                },
+                "value": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/LimitValue",
+                  "type": "string",
+                  "pattern": "^\\d+$",
+                  "minLength": 1,
+                  "description": "Limit value to use. The value is expected to be in cents."
+                },
+                "currency": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/CurrencyAlphabeticCode",
+                  "type": "string",
+                  "description": "Currency codes",
+                  "enum": [
+                    "AED",
+                    "AFN",
+                    "ALL",
+                    "AMD",
+                    "ANG",
+                    "AOA",
+                    "ARS",
+                    "AUD",
+                    "AWG",
+                    "AZN",
+                    "BAM",
+                    "BBD",
+                    "BDT",
+                    "BGN",
+                    "BHD",
+                    "BIF",
+                    "BMD",
+                    "BND",
+                    "BOB",
+                    "BOV",
+                    "BRL",
+                    "BSD",
+                    "BTN",
+                    "BWP",
+                    "BYN",
+                    "BZD",
+                    "CAD",
+                    "CDF",
+                    "CHE",
+                    "CHF",
+                    "CHW",
+                    "CLF",
+                    "CLP",
+                    "CNY",
+                    "COP",
+                    "COU",
+                    "CRC",
+                    "CUC",
+                    "CUP",
+                    "CVE",
+                    "CZK",
+                    "DJF",
+                    "DKK",
+                    "DOP",
+                    "DZD",
+                    "EGP",
+                    "ERN",
+                    "ETB",
+                    "EUR",
+                    "FJD",
+                    "FKP",
+                    "GBP",
+                    "GEL",
+                    "GHS",
+                    "GIP",
+                    "GMD",
+                    "GNF",
+                    "GTQ",
+                    "GYD",
+                    "HKD",
+                    "HNL",
+                    "HRK",
+                    "HTG",
+                    "HUF",
+                    "IDR",
+                    "ILS",
+                    "INR",
+                    "IQD",
+                    "IRR",
+                    "ISK",
+                    "JMD",
+                    "JOD",
+                    "JPY",
+                    "KES",
+                    "KGS",
+                    "KHR",
+                    "KMF",
+                    "KPW",
+                    "KRW",
+                    "KWD",
+                    "KYD",
+                    "KZT",
+                    "LAK",
+                    "LBP",
+                    "LKR",
+                    "LRD",
+                    "LSL",
+                    "LYD",
+                    "MAD",
+                    "MDL",
+                    "MGA",
+                    "MKD",
+                    "MMK",
+                    "MNT",
+                    "MOP",
+                    "MRU",
+                    "MUR",
+                    "MVR",
+                    "MWK",
+                    "MXN",
+                    "MXV",
+                    "MYR",
+                    "MZN",
+                    "NAD",
+                    "NGN",
+                    "NIO",
+                    "NOK",
+                    "NPR",
+                    "NZD",
+                    "OMR",
+                    "PAB",
+                    "PEN",
+                    "PGK",
+                    "PHP",
+                    "PKR",
+                    "PLN",
+                    "PYG",
+                    "QAR",
+                    "RON",
+                    "RSD",
+                    "RUB",
+                    "RWF",
+                    "SAR",
+                    "SBD",
+                    "SCR",
+                    "SDG",
+                    "SEK",
+                    "SGD",
+                    "SHP",
+                    "SLL",
+                    "SOS",
+                    "SRD",
+                    "SSP",
+                    "STN",
+                    "SVC",
+                    "SYP",
+                    "SZL",
+                    "THB",
+                    "TJS",
+                    "TMT",
+                    "TND",
+                    "TOP",
+                    "TRY",
+                    "TTD",
+                    "TWD",
+                    "TZS",
+                    "UAH",
+                    "UGX",
+                    "USD",
+                    "USN",
+                    "UYI",
+                    "UYU",
+                    "UYW",
+                    "UZS",
+                    "VES",
+                    "VND",
+                    "VUV",
+                    "WST",
+                    "XAF",
+                    "XAG",
+                    "XAU",
+                    "XBA",
+                    "XBB",
+                    "XBC",
+                    "XBD",
+                    "XCD",
+                    "XDR",
+                    "XOF",
+                    "XPD",
+                    "XPF",
+                    "XPT",
+                    "XSU",
+                    "XTS",
+                    "XUA",
+                    "XXX",
+                    "YER",
+                    "ZAR",
+                    "ZMW",
+                    "ZWL"
+                  ]
+                }
+              }
+            }
+          },
+          "required": ["params", "body"],
+          "additionalProperties": false
+        },
+        "responses": {
+          "204": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/api/LimitPutResponseNoContent",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "properties": {
+                  "last-modified": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "created-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "updated-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                },
+                "required": ["last-modified", "created-on", "updated-on"]
+              }
+            },
+            "required": ["headers"],
+            "additionalProperties": false
+          },
+          "409": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/api/LimitPutResponseConflict",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "default": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/api/LimitPutResponseDefault",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/Error",
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Server error message",
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "/teampay-card-management/v1/limit/:limitId/expiredOn/:expiredOn": {
+      "put": {
+        "request": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/api/LimitExpiredOnPutRequestContext",
+          "type": "object",
+          "properties": {
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "limitId": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/LimitId",
+                  "type": "string",
+                  "description": "Limit identifier",
+                  "format": "uuid"
+                },
+                "expiredOn": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": ["limitId", "expiredOn"]
+            },
+            "headers": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "required": ["params"],
+          "additionalProperties": false
+        },
+        "responses": {
+          "204": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/api/LimitExpiredOnPutResponseNoContent",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "properties": {
+                  "last-modified": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "created-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "updated-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                },
+                "required": ["last-modified", "created-on", "updated-on"]
+              }
+            },
+            "required": ["headers"],
+            "additionalProperties": false
+          },
+          "409": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/api/LimitExpiredOnPutResponseConflict",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "default": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/api/LimitExpiredOnPutResponseDefault",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/Error",
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Server error message",
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "/teampay-card-management/v1/card/:cardId/limit-balance": {},
+    "/teampay-card-management/v1/card/:cardId/active-limits": {},
+    "/teampay-card-management/v1/apple-push-provisioning/:provisionRequestId": {
+      "put": {
+        "request": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/api/ApplePushProvisioningPutRequestContext",
+          "type": "object",
+          "properties": {
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "provisionRequestId": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              },
+              "required": ["provisionRequestId"]
+            },
+            "headers": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "body": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/ApplePushProvisionRequest",
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["cardId", "certificates", "nonce", "nonceSignature"],
+              "properties": {
+                "cardId": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/CardId",
+                  "type": "string",
+                  "description": "Card identifier",
+                  "format": "uuid"
+                },
+                "certificates": {
+                  "type": "array",
+                  "description": "An array of DER encoded X.509 certificates, with the leaf first and root last.",
+                  "minItems": 2,
+                  "items": {
+                    "type": "string",
+                    "format": "byte",
+                    "example": "MIIC7jCCAnWgAwIBAgIISW0vvzqY2pcwCgYIKoZIzj0EAwIwZzEbMBkGA1UEAwwSQXBwbGUgUm9vdCBDQSAtIEczMSYwJAYDVQQLDB1BcHBsZSBDZXJ0aWZpY2F0aW9uIEF1dGhvcml0eTETMBEGA1UECgwKQXAwbGUgSW5jLjELMAkGA1UEBhMCVVMwHhcNMTQwNTA2MjM0NjMwWhcNMkkwNTA2MjM0NjMwWjB6MS4wLAYDVQQDDCVBcHBsZSBBcHBsaWNhdGlvbiBJbnRlZ3JhdGlvbiBDQSAtIEczMSYwJAYDVQQLDB1BcHBsZSBDZXJ0aWZpY2F0aW9uIEF1dGhvcml0eTETMBEGA1UECgwKQXBwbGUgSW5jLjELMAkGA1UEBhMCVVMwWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAATwFxGEGddkhdUaXiWBB3bogKLv3nuuTeCN/EuT4TNW1WZbNa4i0Jd2DSJOe7oI/XYXzojLdrtmcL7I6CmE/1RFo4H3MIH0MEYGCCsGAQUFBwEBBDowODA2BggrBgEFBQcwAYYqaHR0cDovL29jc3AuYXBwbGUuY29tL29jc3AwNC1hcHBsZXJvb3RjYWczMB0GA1UdDgQWBBQj8knET5Pk7yfmxPYobD+iu/0uSzAPBgNVHRMBAA8EBTADAQH/MB8GA1UdIwQYMBaAFLuw3qFYM4iapIqZ3r6966/ayySrMDcGA1UdHwQwMC4wLKAqoCiGJmh0dHA6Ly9jcmwuYXBwbGUuY29tL2FwcGxlcm9vdGNhZzMuY3JtMA4GA1UdDwEB/wQEAwIBBjAQBgoqhkiG92NkBgIOXAIFADAKBggqhkjOPQQDAgNnADBkAjA6z3KDURaZsYb7NcNWymK/9Bft2Q91TaKOvvGcgV5Ct4n4mPebWZ+Y1UENj53pwv4CMDIt1UQhsKMFd2xd8zg7kGf9F3wsIW2WT8ZyaYISb1T4en0bmcubCYkhYQaZDwmSHQ=="
+                  }
+                },
+                "nonce": {
+                  "type": "string",
+                  "description": "The nonce value supplied by the Apple Pay SDK, base64 encoded.",
+                  "format": "byte",
+                  "example": "VGhpcyBpcyBhIHNhbXBsZSBub25jZSB2YWx1ZQ=="
+                },
+                "nonceSignature": {
+                  "type": "string",
+                  "description": "The nonce signature value supplied by the Apple Pay SDK, base64 encoded.",
+                  "format": "byte",
+                  "example": "VGhpcyBpcyBhIHNhbXBsZSBub25jZSBzaW5nYXR1cmUgdmFsdWU="
+                }
+              }
+            }
+          },
+          "required": ["params", "body"],
+          "additionalProperties": false
+        },
+        "responses": {
+          "200": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/api/ApplePushProvisioningPutResponseOK",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "properties": {
+                  "last-modified": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "created-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "updated-on": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                },
+                "required": ["last-modified", "created-on", "updated-on"]
+              },
+              "body": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/ApplePushProvisionResponse",
+                "type": "object",
+                "description": "Contains data that should be passed back to Apple Pay to complete the provision request",
+                "additionalProperties": false,
+                "required": ["activationData", "encryptedPassData", "ephemeralPublicKey", "updatedOn", "createdOn"],
+                "properties": {
+                  "activationData": {
+                    "type": "string",
+                    "description": "Data that is needed to activate the token."
+                  },
+                  "encryptedPassData": {
+                    "type": "string",
+                    "description": "Encrypted JSON file containing the sensitive information needed to add a card to a wallet."
+                  },
+                  "ephemeralPublicKey": {
+                    "type": "string",
+                    "description": "A generated key that is combined with a private key."
+                  },
+                  "updatedOn": {
+                    "type": "string",
+                    "description": "Time the push provision request was last modified",
+                    "format": "date-time"
+                  },
+                  "createdOn": {
+                    "type": "string",
+                    "description": "Time the push provision request was initiated"
+                  }
+                }
+              }
+            },
+            "required": ["headers", "body"],
+            "additionalProperties": false
+          },
+          "409": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/api/ApplePushProvisioningPutResponseConflict",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "default": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/api/ApplePushProvisioningPutResponseDefault",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/Error",
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Server error message",
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Ping": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/Ping",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["serverTime"],
+      "properties": {
+        "serverTime": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Current server time"
+        }
+      }
+    },
+    "Error": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/Error",
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Server error message",
+      "properties": {
+        "message": {
+          "type": "string"
+        },
+        "code": {
+          "type": "string"
+        }
+      }
+    },
+    "PublicKeyHash": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/PublicKeyHash",
+      "type": "string",
+      "description": "UUID derived from public key\nSteps to create:\n  1. Calculate SHA512 base64 hash of the public key\n  2. Generate a v5 uuid using the namespace value: \"f25d4515-fea7-44c7-8baf-f3ca50865e66\" and the name value of the result of step 1\n\nExample implementation in TypeScript\n###\nimport { createHash } from 'crypto';\nimport { v5 as uuid } from 'uuid';\n\n/**\n * Given a string value, return hash in the form of a uuid.\n *\n * @param value to hash\n */\nfunction hash(value: string): string {\n  return uuid(\n    createHash('sha512')\n    .update(value)\n    .digest('base64'),\n    'f25d4515-fea7-44c7-8baf-f3ca50865e66' // global namespace\n  );\n}\n###\nThe public @checkdigit/hash npm package may be used to generate the hash value as well.\n",
+      "format": "uuid",
+      "example": "15a85f64-5717-4562-b3fc-2c963f66afa6"
+    },
+    "SensitiveInformation": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/SensitiveInformation",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["transmissionKey", "encryptedCardNumber", "encryptedCvn2", "expirationDate"],
+      "properties": {
+        "transmissionKey": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/TransmissionKey",
+          "description": "The Encrypted version of the AES-256 DEK",
+          "type": "string"
+        },
+        "encryptedCardNumber": {
+          "type": "string",
+          "description": "AES-256 encrypted card number"
+        },
+        "encryptedCvn2": {
+          "type": "string",
+          "description": "AES-256 encrypted cvn2"
+        },
+        "expirationDate": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/ExpirationDate",
+          "type": "string",
+          "pattern": "([2-9][0-9])(0[1-9]|1[0-2])",
+          "format": "YYMM",
+          "description": "Expiration date for the card and will be assumed to be the last millisecond of the month",
+          "minLength": 4,
+          "maxLength": 4
+        }
+      }
+    },
+    "SensitiveInformationRequest": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/SensitiveInformationRequest",
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Required information for retrieval of sensitive card information.\nEnsure the hashed version of the publicKey supplied matches the publicKeyHash in the path parameter.\n",
+      "required": ["publicKey"],
+      "properties": {
+        "publicKey": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/PublicKey",
+          "description": "RSA generated public key in PEM format",
+          "type": "string",
+          "example": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwm2sxmRdTF7ZIBA6+ngO\n8jOTCHmID0PpQB1q85+hrcLSfB1rWY9bzNNLabBo/ajDnA4Pcadq/x6gpg70qZcR\n9Wxm6TttKzBPZsxasGXgSTDqEi2KcYZgq1mL4qyxUvyIms7/llGy+W9b5huZaVcO\nxdT1tw/zctbOhb6S2t5vH+zkta/2ncUXjG7i8XdLsJ1qe4K1kYbA4KVkOMmAtw7O\n4STk0TZDD0YARdmrciorJjbIVt0Xj1CrYQ5QbDGrlfeXgrcZwX5f9wT2MnKlY5oZ\n5Wtb57oGtLkVf8g6vN/2jGtAmOmHK2hHwNd/+zUet5G/S5uwEli4RgMPP4pUoKgd\nGQIDAQAB\n-----END PUBLIC KEY-----\n"
+        }
+      }
+    },
+    "NewLimit": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/NewLimit",
+      "type": "object",
+      "additionalProperties": false,
+      "description": "New limit details.",
+      "required": ["cardId", "period", "periodLength", "limitFunction", "value"],
+      "properties": {
+        "cardId": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/CardId",
+          "type": "string",
+          "description": "Card identifier",
+          "format": "uuid"
+        },
+        "period": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/Period",
+          "type": "string",
+          "description": "DAY is a calendar day and will begin at 00:00:00 UTC.\nWEEK is a calendar week and will begin on Mondays at 00:00:00 UTC.\nMONTH is a calendar month and will begin on the first day of month at 00:00:00 UTC.\nYEAR is a calendar year and will begin on the first day of the year at 00:00:00 UTC.\nLIFETIME is a nonrecurring period that does not expire.\nAll periods are rolling if the associated periodLength is greater than 1\n",
+          "enum": ["DAY", "WEEK", "MONTH", "YEAR", "LIFETIME"]
+        },
+        "periodLength": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/PeriodLength",
+          "type": "string",
+          "pattern": "^\\d+$",
+          "minLength": 1,
+          "description": "How long the period lasts"
+        },
+        "limitFunction": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/LimitFunction",
+          "type": "string",
+          "description": "AMOUNT functions by summing up the aggregate data point values.",
+          "enum": ["AMOUNT"]
+        },
+        "value": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/LimitValue",
+          "type": "string",
+          "pattern": "^\\d+$",
+          "minLength": 1,
+          "description": "Limit value to use. The value is expected to be in cents."
+        },
+        "currency": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/CurrencyAlphabeticCode",
+          "type": "string",
+          "description": "Currency codes",
+          "enum": [
+            "AED",
+            "AFN",
+            "ALL",
+            "AMD",
+            "ANG",
+            "AOA",
+            "ARS",
+            "AUD",
+            "AWG",
+            "AZN",
+            "BAM",
+            "BBD",
+            "BDT",
+            "BGN",
+            "BHD",
+            "BIF",
+            "BMD",
+            "BND",
+            "BOB",
+            "BOV",
+            "BRL",
+            "BSD",
+            "BTN",
+            "BWP",
+            "BYN",
+            "BZD",
+            "CAD",
+            "CDF",
+            "CHE",
+            "CHF",
+            "CHW",
+            "CLF",
+            "CLP",
+            "CNY",
+            "COP",
+            "COU",
+            "CRC",
+            "CUC",
+            "CUP",
+            "CVE",
+            "CZK",
+            "DJF",
+            "DKK",
+            "DOP",
+            "DZD",
+            "EGP",
+            "ERN",
+            "ETB",
+            "EUR",
+            "FJD",
+            "FKP",
+            "GBP",
+            "GEL",
+            "GHS",
+            "GIP",
+            "GMD",
+            "GNF",
+            "GTQ",
+            "GYD",
+            "HKD",
+            "HNL",
+            "HRK",
+            "HTG",
+            "HUF",
+            "IDR",
+            "ILS",
+            "INR",
+            "IQD",
+            "IRR",
+            "ISK",
+            "JMD",
+            "JOD",
+            "JPY",
+            "KES",
+            "KGS",
+            "KHR",
+            "KMF",
+            "KPW",
+            "KRW",
+            "KWD",
+            "KYD",
+            "KZT",
+            "LAK",
+            "LBP",
+            "LKR",
+            "LRD",
+            "LSL",
+            "LYD",
+            "MAD",
+            "MDL",
+            "MGA",
+            "MKD",
+            "MMK",
+            "MNT",
+            "MOP",
+            "MRU",
+            "MUR",
+            "MVR",
+            "MWK",
+            "MXN",
+            "MXV",
+            "MYR",
+            "MZN",
+            "NAD",
+            "NGN",
+            "NIO",
+            "NOK",
+            "NPR",
+            "NZD",
+            "OMR",
+            "PAB",
+            "PEN",
+            "PGK",
+            "PHP",
+            "PKR",
+            "PLN",
+            "PYG",
+            "QAR",
+            "RON",
+            "RSD",
+            "RUB",
+            "RWF",
+            "SAR",
+            "SBD",
+            "SCR",
+            "SDG",
+            "SEK",
+            "SGD",
+            "SHP",
+            "SLL",
+            "SOS",
+            "SRD",
+            "SSP",
+            "STN",
+            "SVC",
+            "SYP",
+            "SZL",
+            "THB",
+            "TJS",
+            "TMT",
+            "TND",
+            "TOP",
+            "TRY",
+            "TTD",
+            "TWD",
+            "TZS",
+            "UAH",
+            "UGX",
+            "USD",
+            "USN",
+            "UYI",
+            "UYU",
+            "UYW",
+            "UZS",
+            "VES",
+            "VND",
+            "VUV",
+            "WST",
+            "XAF",
+            "XAG",
+            "XAU",
+            "XBA",
+            "XBB",
+            "XBC",
+            "XBD",
+            "XCD",
+            "XDR",
+            "XOF",
+            "XPD",
+            "XPF",
+            "XPT",
+            "XSU",
+            "XTS",
+            "XUA",
+            "XXX",
+            "YER",
+            "ZAR",
+            "ZMW",
+            "ZWL"
+          ]
+        }
+      }
+    },
+    "Limit": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/Limit",
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Limit details.",
+      "required": [
+        "cardId",
+        "limitId",
+        "period",
+        "periodLength",
+        "limitFunction",
+        "value",
+        "lastModified",
+        "createdOn"
+      ],
+      "properties": {
+        "cardId": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/CardId",
+          "type": "string",
+          "description": "Card identifier",
+          "format": "uuid"
+        },
+        "limitId": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/LimitId",
+          "type": "string",
+          "description": "Limit identifier",
+          "format": "uuid"
+        },
+        "period": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/Period",
+          "type": "string",
+          "description": "DAY is a calendar day and will begin at 00:00:00 UTC.\nWEEK is a calendar week and will begin on Mondays at 00:00:00 UTC.\nMONTH is a calendar month and will begin on the first day of month at 00:00:00 UTC.\nYEAR is a calendar year and will begin on the first day of the year at 00:00:00 UTC.\nLIFETIME is a nonrecurring period that does not expire.\nAll periods are rolling if the associated periodLength is greater than 1\n",
+          "enum": ["DAY", "WEEK", "MONTH", "YEAR", "LIFETIME"]
+        },
+        "periodLength": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/PeriodLength",
+          "type": "string",
+          "pattern": "^\\d+$",
+          "minLength": 1,
+          "description": "How long the period lasts"
+        },
+        "limitFunction": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/LimitFunction",
+          "type": "string",
+          "description": "AMOUNT functions by summing up the aggregate data point values.",
+          "enum": ["AMOUNT"]
+        },
+        "value": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/LimitValue",
+          "type": "string",
+          "pattern": "^\\d+$",
+          "minLength": 1,
+          "description": "Limit value to use. The value is expected to be in cents."
+        },
+        "currency": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/CurrencyAlphabeticCode",
+          "type": "string",
+          "description": "Currency codes",
+          "enum": [
+            "AED",
+            "AFN",
+            "ALL",
+            "AMD",
+            "ANG",
+            "AOA",
+            "ARS",
+            "AUD",
+            "AWG",
+            "AZN",
+            "BAM",
+            "BBD",
+            "BDT",
+            "BGN",
+            "BHD",
+            "BIF",
+            "BMD",
+            "BND",
+            "BOB",
+            "BOV",
+            "BRL",
+            "BSD",
+            "BTN",
+            "BWP",
+            "BYN",
+            "BZD",
+            "CAD",
+            "CDF",
+            "CHE",
+            "CHF",
+            "CHW",
+            "CLF",
+            "CLP",
+            "CNY",
+            "COP",
+            "COU",
+            "CRC",
+            "CUC",
+            "CUP",
+            "CVE",
+            "CZK",
+            "DJF",
+            "DKK",
+            "DOP",
+            "DZD",
+            "EGP",
+            "ERN",
+            "ETB",
+            "EUR",
+            "FJD",
+            "FKP",
+            "GBP",
+            "GEL",
+            "GHS",
+            "GIP",
+            "GMD",
+            "GNF",
+            "GTQ",
+            "GYD",
+            "HKD",
+            "HNL",
+            "HRK",
+            "HTG",
+            "HUF",
+            "IDR",
+            "ILS",
+            "INR",
+            "IQD",
+            "IRR",
+            "ISK",
+            "JMD",
+            "JOD",
+            "JPY",
+            "KES",
+            "KGS",
+            "KHR",
+            "KMF",
+            "KPW",
+            "KRW",
+            "KWD",
+            "KYD",
+            "KZT",
+            "LAK",
+            "LBP",
+            "LKR",
+            "LRD",
+            "LSL",
+            "LYD",
+            "MAD",
+            "MDL",
+            "MGA",
+            "MKD",
+            "MMK",
+            "MNT",
+            "MOP",
+            "MRU",
+            "MUR",
+            "MVR",
+            "MWK",
+            "MXN",
+            "MXV",
+            "MYR",
+            "MZN",
+            "NAD",
+            "NGN",
+            "NIO",
+            "NOK",
+            "NPR",
+            "NZD",
+            "OMR",
+            "PAB",
+            "PEN",
+            "PGK",
+            "PHP",
+            "PKR",
+            "PLN",
+            "PYG",
+            "QAR",
+            "RON",
+            "RSD",
+            "RUB",
+            "RWF",
+            "SAR",
+            "SBD",
+            "SCR",
+            "SDG",
+            "SEK",
+            "SGD",
+            "SHP",
+            "SLL",
+            "SOS",
+            "SRD",
+            "SSP",
+            "STN",
+            "SVC",
+            "SYP",
+            "SZL",
+            "THB",
+            "TJS",
+            "TMT",
+            "TND",
+            "TOP",
+            "TRY",
+            "TTD",
+            "TWD",
+            "TZS",
+            "UAH",
+            "UGX",
+            "USD",
+            "USN",
+            "UYI",
+            "UYU",
+            "UYW",
+            "UZS",
+            "VES",
+            "VND",
+            "VUV",
+            "WST",
+            "XAF",
+            "XAG",
+            "XAU",
+            "XBA",
+            "XBB",
+            "XBC",
+            "XBD",
+            "XCD",
+            "XDR",
+            "XOF",
+            "XPD",
+            "XPF",
+            "XPT",
+            "XSU",
+            "XTS",
+            "XUA",
+            "XXX",
+            "YER",
+            "ZAR",
+            "ZMW",
+            "ZWL"
+          ]
+        },
+        "lastModified": {
+          "description": "Time limit data was last modified",
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedOn": {
+          "description": "Time limit data was last modified",
+          "type": "string",
+          "format": "date-time"
+        },
+        "createdOn": {
+          "description": "Time limit data was initially created",
+          "type": "string",
+          "format": "date-time"
+        },
+        "expiredOn": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The time of limit expiration, set using the expiredOn endpoint."
+        }
+      }
+    },
+    "Period": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/Period",
+      "type": "string",
+      "description": "DAY is a calendar day and will begin at 00:00:00 UTC.\nWEEK is a calendar week and will begin on Mondays at 00:00:00 UTC.\nMONTH is a calendar month and will begin on the first day of month at 00:00:00 UTC.\nYEAR is a calendar year and will begin on the first day of the year at 00:00:00 UTC.\nLIFETIME is a nonrecurring period that does not expire.\nAll periods are rolling if the associated periodLength is greater than 1\n",
+      "enum": ["DAY", "WEEK", "MONTH", "YEAR", "LIFETIME"]
+    },
+    "LimitFunction": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/LimitFunction",
+      "type": "string",
+      "description": "AMOUNT functions by summing up the aggregate data point values.",
+      "enum": ["AMOUNT"]
+    },
+    "PeriodLength": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/PeriodLength",
+      "type": "string",
+      "pattern": "^\\d+$",
+      "minLength": 1,
+      "description": "How long the period lasts"
+    },
+    "LimitValue": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/LimitValue",
+      "type": "string",
+      "pattern": "^\\d+$",
+      "minLength": 1,
+      "description": "Limit value to use. The value is expected to be in cents."
+    },
+    "NewCardholder": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/NewCardholder",
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Cardholder Request.",
+      "required": ["clientId", "person", "transmissionKey"],
+      "properties": {
+        "clientId": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/ClientId",
+          "type": "string",
+          "description": "The identifier of the client that the cardholder belongs to.",
+          "minLength": 1
+        },
+        "person": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/Person",
+          "type": "object",
+          "description": "Person details",
+          "properties": {
+            "company": {
+              "minLength": 1,
+              "type": "string",
+              "description": "Encrypted company name using the AES algorithm"
+            },
+            "title": {
+              "minLength": 1,
+              "type": "string",
+              "description": "Encrypted title using the AES algorithm"
+            },
+            "firstName": {
+              "minLength": 1,
+              "type": "string",
+              "description": "Encrypted first name using the AES algorithm"
+            },
+            "middleName": {
+              "minLength": 1,
+              "type": "string",
+              "description": "Encrypted middle name using the AES algorithm"
+            },
+            "lastName": {
+              "minLength": 1,
+              "type": "string",
+              "description": "Encrypted last name using the AES algorithm"
+            },
+            "phones": {
+              "type": "array",
+              "items": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/Phone",
+                "required": ["number", "type"],
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "description": "Type of phone",
+                    "enum": ["HOME", "WORK", "MOBILE", "FAX", "MAIN", "OTHER"]
+                  },
+                  "number": {
+                    "minLength": 1,
+                    "type": "string",
+                    "description": "The Encrypted phone number using the AES algorithm"
+                  },
+                  "extension": {
+                    "minLength": 1,
+                    "type": "string",
+                    "description": "The Encrypted phone number extension using the AES algorithm"
+                  }
+                }
+              }
+            },
+            "email": {
+              "minLength": 1,
+              "type": "string",
+              "description": "Encrypted email address using the AES algorithm"
+            },
+            "language": {
+              "minLength": 1,
+              "type": "string",
+              "description": "User's language preference"
+            },
+            "timeZone": {
+              "minLength": 1,
+              "type": "string",
+              "description": "User's timezone"
+            }
+          }
+        },
+        "transmissionKey": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/TransmissionKey",
+          "description": "The Encrypted version of the AES-256 DEK",
+          "type": "string"
+        }
+      }
+    },
+    "Cardholder": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/Cardholder",
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Cardholder Response.",
+      "required": ["clientId", "transmissionKey", "storageKeyId", "person", "createdOn", "lastModified"],
+      "properties": {
+        "clientId": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/ClientId",
+          "type": "string",
+          "description": "The identifier of the client that the cardholder belongs to.",
+          "minLength": 1
+        },
+        "transmissionKey": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/TransmissionKey",
+          "description": "The Encrypted version of the AES-256 DEK",
+          "type": "string"
+        },
+        "storageKeyId": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/StorageKeyId",
+          "type": "string",
+          "description": "DEK's non-derived identifier to be used by Check Digit services only.\n"
+        },
+        "person": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/Person",
+          "type": "object",
+          "description": "Person details",
+          "properties": {
+            "company": {
+              "minLength": 1,
+              "type": "string",
+              "description": "Encrypted company name using the AES algorithm"
+            },
+            "title": {
+              "minLength": 1,
+              "type": "string",
+              "description": "Encrypted title using the AES algorithm"
+            },
+            "firstName": {
+              "minLength": 1,
+              "type": "string",
+              "description": "Encrypted first name using the AES algorithm"
+            },
+            "middleName": {
+              "minLength": 1,
+              "type": "string",
+              "description": "Encrypted middle name using the AES algorithm"
+            },
+            "lastName": {
+              "minLength": 1,
+              "type": "string",
+              "description": "Encrypted last name using the AES algorithm"
+            },
+            "phones": {
+              "type": "array",
+              "items": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/Phone",
+                "required": ["number", "type"],
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "description": "Type of phone",
+                    "enum": ["HOME", "WORK", "MOBILE", "FAX", "MAIN", "OTHER"]
+                  },
+                  "number": {
+                    "minLength": 1,
+                    "type": "string",
+                    "description": "The Encrypted phone number using the AES algorithm"
+                  },
+                  "extension": {
+                    "minLength": 1,
+                    "type": "string",
+                    "description": "The Encrypted phone number extension using the AES algorithm"
+                  }
+                }
+              }
+            },
+            "email": {
+              "minLength": 1,
+              "type": "string",
+              "description": "Encrypted email address using the AES algorithm"
+            },
+            "language": {
+              "minLength": 1,
+              "type": "string",
+              "description": "User's language preference"
+            },
+            "timeZone": {
+              "minLength": 1,
+              "type": "string",
+              "description": "User's timezone"
+            }
+          }
+        },
+        "createdOn": {
+          "description": "Time cardholder data was initially created",
+          "type": "string",
+          "format": "date-time"
+        },
+        "lastModified": {
+          "description": "Time cardholder data was last modified",
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedOn": {
+          "description": "Time cardholder data was last modified",
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "Person": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/Person",
+      "type": "object",
+      "description": "Person details",
+      "properties": {
+        "company": {
+          "minLength": 1,
+          "type": "string",
+          "description": "Encrypted company name using the AES algorithm"
+        },
+        "title": {
+          "minLength": 1,
+          "type": "string",
+          "description": "Encrypted title using the AES algorithm"
+        },
+        "firstName": {
+          "minLength": 1,
+          "type": "string",
+          "description": "Encrypted first name using the AES algorithm"
+        },
+        "middleName": {
+          "minLength": 1,
+          "type": "string",
+          "description": "Encrypted middle name using the AES algorithm"
+        },
+        "lastName": {
+          "minLength": 1,
+          "type": "string",
+          "description": "Encrypted last name using the AES algorithm"
+        },
+        "phones": {
+          "type": "array",
+          "items": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/Phone",
+            "required": ["number", "type"],
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "Type of phone",
+                "enum": ["HOME", "WORK", "MOBILE", "FAX", "MAIN", "OTHER"]
+              },
+              "number": {
+                "minLength": 1,
+                "type": "string",
+                "description": "The Encrypted phone number using the AES algorithm"
+              },
+              "extension": {
+                "minLength": 1,
+                "type": "string",
+                "description": "The Encrypted phone number extension using the AES algorithm"
+              }
+            }
+          }
+        },
+        "email": {
+          "minLength": 1,
+          "type": "string",
+          "description": "Encrypted email address using the AES algorithm"
+        },
+        "language": {
+          "minLength": 1,
+          "type": "string",
+          "description": "User's language preference"
+        },
+        "timeZone": {
+          "minLength": 1,
+          "type": "string",
+          "description": "User's timezone"
+        }
+      }
+    },
+    "Phone": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/Phone",
+      "required": ["number", "type"],
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Type of phone",
+          "enum": ["HOME", "WORK", "MOBILE", "FAX", "MAIN", "OTHER"]
+        },
+        "number": {
+          "minLength": 1,
+          "type": "string",
+          "description": "The Encrypted phone number using the AES algorithm"
+        },
+        "extension": {
+          "minLength": 1,
+          "type": "string",
+          "description": "The Encrypted phone number extension using the AES algorithm"
+        }
+      }
+    },
+    "PublicKey": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/PublicKey",
+      "description": "RSA generated public key in PEM format",
+      "type": "string",
+      "example": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwm2sxmRdTF7ZIBA6+ngO\n8jOTCHmID0PpQB1q85+hrcLSfB1rWY9bzNNLabBo/ajDnA4Pcadq/x6gpg70qZcR\n9Wxm6TttKzBPZsxasGXgSTDqEi2KcYZgq1mL4qyxUvyIms7/llGy+W9b5huZaVcO\nxdT1tw/zctbOhb6S2t5vH+zkta/2ncUXjG7i8XdLsJ1qe4K1kYbA4KVkOMmAtw7O\n4STk0TZDD0YARdmrciorJjbIVt0Xj1CrYQ5QbDGrlfeXgrcZwX5f9wT2MnKlY5oZ\n5Wtb57oGtLkVf8g6vN/2jGtAmOmHK2hHwNd/+zUet5G/S5uwEli4RgMPP4pUoKgd\nGQIDAQAB\n-----END PUBLIC KEY-----\n"
+    },
+    "ClientId": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/ClientId",
+      "type": "string",
+      "description": "The identifier of the client that the cardholder belongs to.",
+      "minLength": 1
+    },
+    "CardId": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/CardId",
+      "type": "string",
+      "description": "Card identifier",
+      "format": "uuid"
+    },
+    "TransmissionKey": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/TransmissionKey",
+      "description": "The Encrypted version of the AES-256 DEK",
+      "type": "string"
+    },
+    "NewCardholderCard": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/NewCardholderCard",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cardholderId", "product", "expirationDate", "state", "active", "block", "lock"],
+      "properties": {
+        "limitCardId": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/LimitCardId",
+          "type": "string",
+          "format": "uuid",
+          "description": "Optional card identifier of a card whose limits will be shared.\nAll cards with the same limitCardId will share the limits belonging to the card with that cardId.\nA 400 Bad Request will be returned if the limitCardId is set to a card that already has a set limitCardId.\n"
+        },
+        "cardholderId": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/CardholderId",
+          "type": "string",
+          "description": "cardholder identifier",
+          "format": "uuid"
+        },
+        "product": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/CardProduct",
+          "type": "string",
+          "description": "Type of card product",
+          "enum": ["VIRTUAL", "STANDARD", "PREMIUM"]
+        },
+        "expirationDate": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/ExpirationDate",
+          "type": "string",
+          "pattern": "([2-9][0-9])(0[1-9]|1[0-2])",
+          "format": "YYMM",
+          "description": "Expiration date for the card and will be assumed to be the last millisecond of the month",
+          "minLength": 4,
+          "maxLength": 4
+        },
+        "state": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/NewStateStatus",
+          "description": "A card's state status.\n\n- CURRENT: A newly created card's default state.\n- REISSUED: The state set to an existing card when it is being reissued.\n- RETIRED: The state set when a card is no longer valid.\n\nPlease refer to the below state machine for allowable transitions:\nCURRENT --> REISSUED\nCURRENT --> RETIRED\nREISSUED --> RETIRED\nRETIRED - terminal state\n\nA status change that does not conform to one of the transitions listed above will result in a 400 Bad Request.\n",
+          "type": "string",
+          "enum": ["CURRENT", "REISSUED", "RETIRED"]
+        },
+        "active": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/ActiveStatus",
+          "description": "A card's active status. A card is often activated once the cardholder receives it.\n\nPlease refer to the below state machine for allowable transitions:\nINACTIVE --> ACTIVE\nACTIVE --> INACTIVE\n",
+          "type": "string",
+          "enum": ["ACTIVE", "INACTIVE"]
+        },
+        "block": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/BlockStatus",
+          "type": "string",
+          "description": "A card's block status. A card may be blocked when lost, stolen, or canceled.\n\nA use case for the BLOCKED NO FRAUD state would be to place the card in this state while there is an investigation into fraudulent activity on the card. \nIf the suspected fraud is confirmed, the card may be placed into the BLOCKED WITH FRAUD state. \nOtherwise, the card may be placed back into the OPEN state when the investigation has concluded.\n\nPlease refer to the below state machine for allowable transitions:\nOPEN --> BLOCKED LOST OR STOLEN\nOPEN --> BLOCKED NO FRAUD\nOPEN --> BLOCKED WITH FRAUD\nBLOCKED NO FRAUD --> OPEN\nBLOCKED NO FRAUD --> BLOCKED WITH FRAUD\nBLOCKED LOST OR STOLEN --> terminal state\nBLOCKED WITH FRAUD --> terminal state\n\nA status change that does not conform to one of the transitions listed above will result in a 400 Bad Request.\n",
+          "enum": ["OPEN", "BLOCKED LOST OR STOLEN", "BLOCKED NO FRAUD", "BLOCKED WITH FRAUD"]
+        },
+        "lock": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/LockStatus",
+          "type": "string",
+          "description": "A card's lock status. A cardholder may choose to lock a card when it's been misplaced or to temporarily prevent use.\n\nPlease refer to the below state machine for allowable transitions:\nLOCKED --> UNLOCKED\nUNLOCKED --> LOCKED\n",
+          "enum": ["LOCKED", "UNLOCKED"]
+        },
+        "cardLimitCurrency": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/CurrencyAlphabeticCode",
+          "type": "string",
+          "description": "Currency codes",
+          "enum": [
+            "AED",
+            "AFN",
+            "ALL",
+            "AMD",
+            "ANG",
+            "AOA",
+            "ARS",
+            "AUD",
+            "AWG",
+            "AZN",
+            "BAM",
+            "BBD",
+            "BDT",
+            "BGN",
+            "BHD",
+            "BIF",
+            "BMD",
+            "BND",
+            "BOB",
+            "BOV",
+            "BRL",
+            "BSD",
+            "BTN",
+            "BWP",
+            "BYN",
+            "BZD",
+            "CAD",
+            "CDF",
+            "CHE",
+            "CHF",
+            "CHW",
+            "CLF",
+            "CLP",
+            "CNY",
+            "COP",
+            "COU",
+            "CRC",
+            "CUC",
+            "CUP",
+            "CVE",
+            "CZK",
+            "DJF",
+            "DKK",
+            "DOP",
+            "DZD",
+            "EGP",
+            "ERN",
+            "ETB",
+            "EUR",
+            "FJD",
+            "FKP",
+            "GBP",
+            "GEL",
+            "GHS",
+            "GIP",
+            "GMD",
+            "GNF",
+            "GTQ",
+            "GYD",
+            "HKD",
+            "HNL",
+            "HRK",
+            "HTG",
+            "HUF",
+            "IDR",
+            "ILS",
+            "INR",
+            "IQD",
+            "IRR",
+            "ISK",
+            "JMD",
+            "JOD",
+            "JPY",
+            "KES",
+            "KGS",
+            "KHR",
+            "KMF",
+            "KPW",
+            "KRW",
+            "KWD",
+            "KYD",
+            "KZT",
+            "LAK",
+            "LBP",
+            "LKR",
+            "LRD",
+            "LSL",
+            "LYD",
+            "MAD",
+            "MDL",
+            "MGA",
+            "MKD",
+            "MMK",
+            "MNT",
+            "MOP",
+            "MRU",
+            "MUR",
+            "MVR",
+            "MWK",
+            "MXN",
+            "MXV",
+            "MYR",
+            "MZN",
+            "NAD",
+            "NGN",
+            "NIO",
+            "NOK",
+            "NPR",
+            "NZD",
+            "OMR",
+            "PAB",
+            "PEN",
+            "PGK",
+            "PHP",
+            "PKR",
+            "PLN",
+            "PYG",
+            "QAR",
+            "RON",
+            "RSD",
+            "RUB",
+            "RWF",
+            "SAR",
+            "SBD",
+            "SCR",
+            "SDG",
+            "SEK",
+            "SGD",
+            "SHP",
+            "SLL",
+            "SOS",
+            "SRD",
+            "SSP",
+            "STN",
+            "SVC",
+            "SYP",
+            "SZL",
+            "THB",
+            "TJS",
+            "TMT",
+            "TND",
+            "TOP",
+            "TRY",
+            "TTD",
+            "TWD",
+            "TZS",
+            "UAH",
+            "UGX",
+            "USD",
+            "USN",
+            "UYI",
+            "UYU",
+            "UYW",
+            "UZS",
+            "VES",
+            "VND",
+            "VUV",
+            "WST",
+            "XAF",
+            "XAG",
+            "XAU",
+            "XBA",
+            "XBB",
+            "XBC",
+            "XBD",
+            "XCD",
+            "XDR",
+            "XOF",
+            "XPD",
+            "XPF",
+            "XPT",
+            "XSU",
+            "XTS",
+            "XUA",
+            "XXX",
+            "YER",
+            "ZAR",
+            "ZMW",
+            "ZWL"
+          ]
+        }
+      }
+    },
+    "CardholderCard": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/CardholderCard",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cardholderId", "card", "storageKeyId", "product"],
+      "properties": {
+        "limitCardId": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/LimitCardId",
+          "type": "string",
+          "format": "uuid",
+          "description": "Optional card identifier of a card whose limits will be shared.\nAll cards with the same limitCardId will share the limits belonging to the card with that cardId.\nA 400 Bad Request will be returned if the limitCardId is set to a card that already has a set limitCardId.\n"
+        },
+        "cardholderId": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/CardholderId",
+          "type": "string",
+          "description": "cardholder identifier",
+          "format": "uuid"
+        },
+        "card": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/Card",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "bin",
+            "last4",
+            "expirationDate",
+            "cardNumber",
+            "serviceCode",
+            "applicationTransactionCounter",
+            "sequenceNumber",
+            "state",
+            "active",
+            "block",
+            "lock",
+            "capture",
+            "createdOn",
+            "lastModified"
+          ],
+          "properties": {
+            "bin": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/Bin",
+              "type": "string",
+              "pattern": "^\\d+$",
+              "description": "Bank Identification Number",
+              "minLength": 8,
+              "maxLength": 8
+            },
+            "last4": {
+              "type": "string",
+              "pattern": "^\\d+$",
+              "description": "Last four digits of the card number",
+              "minLength": 4,
+              "maxLength": 4
+            },
+            "expirationDate": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/ExpirationDate",
+              "type": "string",
+              "pattern": "([2-9][0-9])(0[1-9]|1[0-2])",
+              "format": "YYMM",
+              "description": "Expiration date for the card and will be assumed to be the last millisecond of the month",
+              "minLength": 4,
+              "maxLength": 4
+            },
+            "cardNumber": {
+              "type": "string",
+              "description": "Encrypted card number (PAN)"
+            },
+            "serviceCode": {
+              "type": "string",
+              "pattern": "^\\d+$",
+              "description": "Service code for the card",
+              "minLength": 3,
+              "maxLength": 3
+            },
+            "applicationTransactionCounter": {
+              "type": "integer",
+              "description": "Application transaction counter (ATC) for the card"
+            },
+            "sequenceNumber": {
+              "type": "integer",
+              "description": "Used to differentiate issuing the same card and expiration date on multiple plastics"
+            },
+            "state": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/StateStatus",
+              "description": "A card's state status.",
+              "type": "string",
+              "enum": ["CURRENT", "REISSUED", "RETIRED", "FORCED"]
+            },
+            "active": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/ActiveStatus",
+              "description": "A card's active status. A card is often activated once the cardholder receives it.\n\nPlease refer to the below state machine for allowable transitions:\nINACTIVE --> ACTIVE\nACTIVE --> INACTIVE\n",
+              "type": "string",
+              "enum": ["ACTIVE", "INACTIVE"]
+            },
+            "block": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/BlockStatus",
+              "type": "string",
+              "description": "A card's block status. A card may be blocked when lost, stolen, or canceled.\n\nA use case for the BLOCKED NO FRAUD state would be to place the card in this state while there is an investigation into fraudulent activity on the card. \nIf the suspected fraud is confirmed, the card may be placed into the BLOCKED WITH FRAUD state. \nOtherwise, the card may be placed back into the OPEN state when the investigation has concluded.\n\nPlease refer to the below state machine for allowable transitions:\nOPEN --> BLOCKED LOST OR STOLEN\nOPEN --> BLOCKED NO FRAUD\nOPEN --> BLOCKED WITH FRAUD\nBLOCKED NO FRAUD --> OPEN\nBLOCKED NO FRAUD --> BLOCKED WITH FRAUD\nBLOCKED LOST OR STOLEN --> terminal state\nBLOCKED WITH FRAUD --> terminal state\n\nA status change that does not conform to one of the transitions listed above will result in a 400 Bad Request.\n",
+              "enum": ["OPEN", "BLOCKED LOST OR STOLEN", "BLOCKED NO FRAUD", "BLOCKED WITH FRAUD"]
+            },
+            "lock": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/LockStatus",
+              "type": "string",
+              "description": "A card's lock status. A cardholder may choose to lock a card when it's been misplaced or to temporarily prevent use.\n\nPlease refer to the below state machine for allowable transitions:\nLOCKED --> UNLOCKED\nUNLOCKED --> LOCKED\n",
+              "enum": ["LOCKED", "UNLOCKED"]
+            },
+            "capture": {
+              "type": "boolean",
+              "description": "Whether the card should be captured at next use"
+            },
+            "createdOn": {
+              "description": "Time card data was first stored",
+              "type": "string",
+              "format": "date-time"
+            },
+            "lastModified": {
+              "type": "string",
+              "description": "Time card data was last modified",
+              "format": "date-time"
+            },
+            "updatedOn": {
+              "type": "string",
+              "description": "Time card data was last modified",
+              "format": "date-time"
+            },
+            "pinId": {
+              "type": "string",
+              "description": "Identifier for the PIN (Personal Identification Number) used for this card."
+            }
+          }
+        },
+        "storageKeyId": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/StorageKeyId",
+          "type": "string",
+          "description": "DEK's non-derived identifier to be used by Check Digit services only.\n"
+        },
+        "product": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/CardProduct",
+          "type": "string",
+          "description": "Type of card product",
+          "enum": ["VIRTUAL", "STANDARD", "PREMIUM"]
+        },
+        "cardLimitCurrency": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/CurrencyAlphabeticCode",
+          "type": "string",
+          "description": "Currency codes",
+          "enum": [
+            "AED",
+            "AFN",
+            "ALL",
+            "AMD",
+            "ANG",
+            "AOA",
+            "ARS",
+            "AUD",
+            "AWG",
+            "AZN",
+            "BAM",
+            "BBD",
+            "BDT",
+            "BGN",
+            "BHD",
+            "BIF",
+            "BMD",
+            "BND",
+            "BOB",
+            "BOV",
+            "BRL",
+            "BSD",
+            "BTN",
+            "BWP",
+            "BYN",
+            "BZD",
+            "CAD",
+            "CDF",
+            "CHE",
+            "CHF",
+            "CHW",
+            "CLF",
+            "CLP",
+            "CNY",
+            "COP",
+            "COU",
+            "CRC",
+            "CUC",
+            "CUP",
+            "CVE",
+            "CZK",
+            "DJF",
+            "DKK",
+            "DOP",
+            "DZD",
+            "EGP",
+            "ERN",
+            "ETB",
+            "EUR",
+            "FJD",
+            "FKP",
+            "GBP",
+            "GEL",
+            "GHS",
+            "GIP",
+            "GMD",
+            "GNF",
+            "GTQ",
+            "GYD",
+            "HKD",
+            "HNL",
+            "HRK",
+            "HTG",
+            "HUF",
+            "IDR",
+            "ILS",
+            "INR",
+            "IQD",
+            "IRR",
+            "ISK",
+            "JMD",
+            "JOD",
+            "JPY",
+            "KES",
+            "KGS",
+            "KHR",
+            "KMF",
+            "KPW",
+            "KRW",
+            "KWD",
+            "KYD",
+            "KZT",
+            "LAK",
+            "LBP",
+            "LKR",
+            "LRD",
+            "LSL",
+            "LYD",
+            "MAD",
+            "MDL",
+            "MGA",
+            "MKD",
+            "MMK",
+            "MNT",
+            "MOP",
+            "MRU",
+            "MUR",
+            "MVR",
+            "MWK",
+            "MXN",
+            "MXV",
+            "MYR",
+            "MZN",
+            "NAD",
+            "NGN",
+            "NIO",
+            "NOK",
+            "NPR",
+            "NZD",
+            "OMR",
+            "PAB",
+            "PEN",
+            "PGK",
+            "PHP",
+            "PKR",
+            "PLN",
+            "PYG",
+            "QAR",
+            "RON",
+            "RSD",
+            "RUB",
+            "RWF",
+            "SAR",
+            "SBD",
+            "SCR",
+            "SDG",
+            "SEK",
+            "SGD",
+            "SHP",
+            "SLL",
+            "SOS",
+            "SRD",
+            "SSP",
+            "STN",
+            "SVC",
+            "SYP",
+            "SZL",
+            "THB",
+            "TJS",
+            "TMT",
+            "TND",
+            "TOP",
+            "TRY",
+            "TTD",
+            "TWD",
+            "TZS",
+            "UAH",
+            "UGX",
+            "USD",
+            "USN",
+            "UYI",
+            "UYU",
+            "UYW",
+            "UZS",
+            "VES",
+            "VND",
+            "VUV",
+            "WST",
+            "XAF",
+            "XAG",
+            "XAU",
+            "XBA",
+            "XBB",
+            "XBC",
+            "XBD",
+            "XCD",
+            "XDR",
+            "XOF",
+            "XPD",
+            "XPF",
+            "XPT",
+            "XSU",
+            "XTS",
+            "XUA",
+            "XXX",
+            "YER",
+            "ZAR",
+            "ZMW",
+            "ZWL"
+          ]
+        }
+      }
+    },
+    "CardProduct": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/CardProduct",
+      "type": "string",
+      "description": "Type of card product",
+      "enum": ["VIRTUAL", "STANDARD", "PREMIUM"]
+    },
+    "Card": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/Card",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bin",
+        "last4",
+        "expirationDate",
+        "cardNumber",
+        "serviceCode",
+        "applicationTransactionCounter",
+        "sequenceNumber",
+        "state",
+        "active",
+        "block",
+        "lock",
+        "capture",
+        "createdOn",
+        "lastModified"
+      ],
+      "properties": {
+        "bin": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/Bin",
+          "type": "string",
+          "pattern": "^\\d+$",
+          "description": "Bank Identification Number",
+          "minLength": 8,
+          "maxLength": 8
+        },
+        "last4": {
+          "type": "string",
+          "pattern": "^\\d+$",
+          "description": "Last four digits of the card number",
+          "minLength": 4,
+          "maxLength": 4
+        },
+        "expirationDate": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/ExpirationDate",
+          "type": "string",
+          "pattern": "([2-9][0-9])(0[1-9]|1[0-2])",
+          "format": "YYMM",
+          "description": "Expiration date for the card and will be assumed to be the last millisecond of the month",
+          "minLength": 4,
+          "maxLength": 4
+        },
+        "cardNumber": {
+          "type": "string",
+          "description": "Encrypted card number (PAN)"
+        },
+        "serviceCode": {
+          "type": "string",
+          "pattern": "^\\d+$",
+          "description": "Service code for the card",
+          "minLength": 3,
+          "maxLength": 3
+        },
+        "applicationTransactionCounter": {
+          "type": "integer",
+          "description": "Application transaction counter (ATC) for the card"
+        },
+        "sequenceNumber": {
+          "type": "integer",
+          "description": "Used to differentiate issuing the same card and expiration date on multiple plastics"
+        },
+        "state": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/StateStatus",
+          "description": "A card's state status.",
+          "type": "string",
+          "enum": ["CURRENT", "REISSUED", "RETIRED", "FORCED"]
+        },
+        "active": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/ActiveStatus",
+          "description": "A card's active status. A card is often activated once the cardholder receives it.\n\nPlease refer to the below state machine for allowable transitions:\nINACTIVE --> ACTIVE\nACTIVE --> INACTIVE\n",
+          "type": "string",
+          "enum": ["ACTIVE", "INACTIVE"]
+        },
+        "block": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/BlockStatus",
+          "type": "string",
+          "description": "A card's block status. A card may be blocked when lost, stolen, or canceled.\n\nA use case for the BLOCKED NO FRAUD state would be to place the card in this state while there is an investigation into fraudulent activity on the card. \nIf the suspected fraud is confirmed, the card may be placed into the BLOCKED WITH FRAUD state. \nOtherwise, the card may be placed back into the OPEN state when the investigation has concluded.\n\nPlease refer to the below state machine for allowable transitions:\nOPEN --> BLOCKED LOST OR STOLEN\nOPEN --> BLOCKED NO FRAUD\nOPEN --> BLOCKED WITH FRAUD\nBLOCKED NO FRAUD --> OPEN\nBLOCKED NO FRAUD --> BLOCKED WITH FRAUD\nBLOCKED LOST OR STOLEN --> terminal state\nBLOCKED WITH FRAUD --> terminal state\n\nA status change that does not conform to one of the transitions listed above will result in a 400 Bad Request.\n",
+          "enum": ["OPEN", "BLOCKED LOST OR STOLEN", "BLOCKED NO FRAUD", "BLOCKED WITH FRAUD"]
+        },
+        "lock": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/LockStatus",
+          "type": "string",
+          "description": "A card's lock status. A cardholder may choose to lock a card when it's been misplaced or to temporarily prevent use.\n\nPlease refer to the below state machine for allowable transitions:\nLOCKED --> UNLOCKED\nUNLOCKED --> LOCKED\n",
+          "enum": ["LOCKED", "UNLOCKED"]
+        },
+        "capture": {
+          "type": "boolean",
+          "description": "Whether the card should be captured at next use"
+        },
+        "createdOn": {
+          "description": "Time card data was first stored",
+          "type": "string",
+          "format": "date-time"
+        },
+        "lastModified": {
+          "type": "string",
+          "description": "Time card data was last modified",
+          "format": "date-time"
+        },
+        "updatedOn": {
+          "type": "string",
+          "description": "Time card data was last modified",
+          "format": "date-time"
+        },
+        "pinId": {
+          "type": "string",
+          "description": "Identifier for the PIN (Personal Identification Number) used for this card."
+        }
+      }
+    },
+    "Bin": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/Bin",
+      "type": "string",
+      "pattern": "^\\d+$",
+      "description": "Bank Identification Number",
+      "minLength": 8,
+      "maxLength": 8
+    },
+    "BlockStatus": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/BlockStatus",
+      "type": "string",
+      "description": "A card's block status. A card may be blocked when lost, stolen, or canceled.\n\nA use case for the BLOCKED NO FRAUD state would be to place the card in this state while there is an investigation into fraudulent activity on the card. \nIf the suspected fraud is confirmed, the card may be placed into the BLOCKED WITH FRAUD state. \nOtherwise, the card may be placed back into the OPEN state when the investigation has concluded.\n\nPlease refer to the below state machine for allowable transitions:\nOPEN --> BLOCKED LOST OR STOLEN\nOPEN --> BLOCKED NO FRAUD\nOPEN --> BLOCKED WITH FRAUD\nBLOCKED NO FRAUD --> OPEN\nBLOCKED NO FRAUD --> BLOCKED WITH FRAUD\nBLOCKED LOST OR STOLEN --> terminal state\nBLOCKED WITH FRAUD --> terminal state\n\nA status change that does not conform to one of the transitions listed above will result in a 400 Bad Request.\n",
+      "enum": ["OPEN", "BLOCKED LOST OR STOLEN", "BLOCKED NO FRAUD", "BLOCKED WITH FRAUD"]
+    },
+    "ActiveStatus": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/ActiveStatus",
+      "description": "A card's active status. A card is often activated once the cardholder receives it.\n\nPlease refer to the below state machine for allowable transitions:\nINACTIVE --> ACTIVE\nACTIVE --> INACTIVE\n",
+      "type": "string",
+      "enum": ["ACTIVE", "INACTIVE"]
+    },
+    "LockStatus": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/LockStatus",
+      "type": "string",
+      "description": "A card's lock status. A cardholder may choose to lock a card when it's been misplaced or to temporarily prevent use.\n\nPlease refer to the below state machine for allowable transitions:\nLOCKED --> UNLOCKED\nUNLOCKED --> LOCKED\n",
+      "enum": ["LOCKED", "UNLOCKED"]
+    },
+    "NewStateStatus": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/NewStateStatus",
+      "description": "A card's state status.\n\n- CURRENT: A newly created card's default state.\n- REISSUED: The state set to an existing card when it is being reissued.\n- RETIRED: The state set when a card is no longer valid.\n\nPlease refer to the below state machine for allowable transitions:\nCURRENT --> REISSUED\nCURRENT --> RETIRED\nREISSUED --> RETIRED\nRETIRED - terminal state\n\nA status change that does not conform to one of the transitions listed above will result in a 400 Bad Request.\n",
+      "type": "string",
+      "enum": ["CURRENT", "REISSUED", "RETIRED"]
+    },
+    "StateStatus": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/StateStatus",
+      "description": "A card's state status.",
+      "type": "string",
+      "enum": ["CURRENT", "REISSUED", "RETIRED", "FORCED"]
+    },
+    "ExpirationDate": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/ExpirationDate",
+      "type": "string",
+      "pattern": "([2-9][0-9])(0[1-9]|1[0-2])",
+      "format": "YYMM",
+      "description": "Expiration date for the card and will be assumed to be the last millisecond of the month",
+      "minLength": 4,
+      "maxLength": 4
+    },
+    "CardholderId": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/CardholderId",
+      "type": "string",
+      "description": "cardholder identifier",
+      "format": "uuid"
+    },
+    "Limits": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/Limits",
+      "type": "array",
+      "description": "The list of limits that apply to a card",
+      "minItems": 0,
+      "items": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/Limit",
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Limit details.",
+        "required": [
+          "cardId",
+          "limitId",
+          "period",
+          "periodLength",
+          "limitFunction",
+          "value",
+          "lastModified",
+          "createdOn"
+        ],
+        "properties": {
+          "cardId": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/CardId",
+            "type": "string",
+            "description": "Card identifier",
+            "format": "uuid"
+          },
+          "limitId": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/LimitId",
+            "type": "string",
+            "description": "Limit identifier",
+            "format": "uuid"
+          },
+          "period": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/Period",
+            "type": "string",
+            "description": "DAY is a calendar day and will begin at 00:00:00 UTC.\nWEEK is a calendar week and will begin on Mondays at 00:00:00 UTC.\nMONTH is a calendar month and will begin on the first day of month at 00:00:00 UTC.\nYEAR is a calendar year and will begin on the first day of the year at 00:00:00 UTC.\nLIFETIME is a nonrecurring period that does not expire.\nAll periods are rolling if the associated periodLength is greater than 1\n",
+            "enum": ["DAY", "WEEK", "MONTH", "YEAR", "LIFETIME"]
+          },
+          "periodLength": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/PeriodLength",
+            "type": "string",
+            "pattern": "^\\d+$",
+            "minLength": 1,
+            "description": "How long the period lasts"
+          },
+          "limitFunction": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/LimitFunction",
+            "type": "string",
+            "description": "AMOUNT functions by summing up the aggregate data point values.",
+            "enum": ["AMOUNT"]
+          },
+          "value": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/LimitValue",
+            "type": "string",
+            "pattern": "^\\d+$",
+            "minLength": 1,
+            "description": "Limit value to use. The value is expected to be in cents."
+          },
+          "currency": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/CurrencyAlphabeticCode",
+            "type": "string",
+            "description": "Currency codes",
+            "enum": [
+              "AED",
+              "AFN",
+              "ALL",
+              "AMD",
+              "ANG",
+              "AOA",
+              "ARS",
+              "AUD",
+              "AWG",
+              "AZN",
+              "BAM",
+              "BBD",
+              "BDT",
+              "BGN",
+              "BHD",
+              "BIF",
+              "BMD",
+              "BND",
+              "BOB",
+              "BOV",
+              "BRL",
+              "BSD",
+              "BTN",
+              "BWP",
+              "BYN",
+              "BZD",
+              "CAD",
+              "CDF",
+              "CHE",
+              "CHF",
+              "CHW",
+              "CLF",
+              "CLP",
+              "CNY",
+              "COP",
+              "COU",
+              "CRC",
+              "CUC",
+              "CUP",
+              "CVE",
+              "CZK",
+              "DJF",
+              "DKK",
+              "DOP",
+              "DZD",
+              "EGP",
+              "ERN",
+              "ETB",
+              "EUR",
+              "FJD",
+              "FKP",
+              "GBP",
+              "GEL",
+              "GHS",
+              "GIP",
+              "GMD",
+              "GNF",
+              "GTQ",
+              "GYD",
+              "HKD",
+              "HNL",
+              "HRK",
+              "HTG",
+              "HUF",
+              "IDR",
+              "ILS",
+              "INR",
+              "IQD",
+              "IRR",
+              "ISK",
+              "JMD",
+              "JOD",
+              "JPY",
+              "KES",
+              "KGS",
+              "KHR",
+              "KMF",
+              "KPW",
+              "KRW",
+              "KWD",
+              "KYD",
+              "KZT",
+              "LAK",
+              "LBP",
+              "LKR",
+              "LRD",
+              "LSL",
+              "LYD",
+              "MAD",
+              "MDL",
+              "MGA",
+              "MKD",
+              "MMK",
+              "MNT",
+              "MOP",
+              "MRU",
+              "MUR",
+              "MVR",
+              "MWK",
+              "MXN",
+              "MXV",
+              "MYR",
+              "MZN",
+              "NAD",
+              "NGN",
+              "NIO",
+              "NOK",
+              "NPR",
+              "NZD",
+              "OMR",
+              "PAB",
+              "PEN",
+              "PGK",
+              "PHP",
+              "PKR",
+              "PLN",
+              "PYG",
+              "QAR",
+              "RON",
+              "RSD",
+              "RUB",
+              "RWF",
+              "SAR",
+              "SBD",
+              "SCR",
+              "SDG",
+              "SEK",
+              "SGD",
+              "SHP",
+              "SLL",
+              "SOS",
+              "SRD",
+              "SSP",
+              "STN",
+              "SVC",
+              "SYP",
+              "SZL",
+              "THB",
+              "TJS",
+              "TMT",
+              "TND",
+              "TOP",
+              "TRY",
+              "TTD",
+              "TWD",
+              "TZS",
+              "UAH",
+              "UGX",
+              "USD",
+              "USN",
+              "UYI",
+              "UYU",
+              "UYW",
+              "UZS",
+              "VES",
+              "VND",
+              "VUV",
+              "WST",
+              "XAF",
+              "XAG",
+              "XAU",
+              "XBA",
+              "XBB",
+              "XBC",
+              "XBD",
+              "XCD",
+              "XDR",
+              "XOF",
+              "XPD",
+              "XPF",
+              "XPT",
+              "XSU",
+              "XTS",
+              "XUA",
+              "XXX",
+              "YER",
+              "ZAR",
+              "ZMW",
+              "ZWL"
+            ]
+          },
+          "lastModified": {
+            "description": "Time limit data was last modified",
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedOn": {
+            "description": "Time limit data was last modified",
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdOn": {
+            "description": "Time limit data was initially created",
+            "type": "string",
+            "format": "date-time"
+          },
+          "expiredOn": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The time of limit expiration, set using the expiredOn endpoint."
+          }
+        }
+      }
+    },
+    "LimitId": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/LimitId",
+      "type": "string",
+      "description": "Limit identifier",
+      "format": "uuid"
+    },
+    "StorageKeyId": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/StorageKeyId",
+      "type": "string",
+      "description": "DEK's non-derived identifier to be used by Check Digit services only.\n"
+    },
+    "LimitCardId": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/LimitCardId",
+      "type": "string",
+      "format": "uuid",
+      "description": "Optional card identifier of a card whose limits will be shared.\nAll cards with the same limitCardId will share the limits belonging to the card with that cardId.\nA 400 Bad Request will be returned if the limitCardId is set to a card that already has a set limitCardId.\n"
+    },
+    "ApplePushProvisionRequest": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/ApplePushProvisionRequest",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cardId", "certificates", "nonce", "nonceSignature"],
+      "properties": {
+        "cardId": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/CardId",
+          "type": "string",
+          "description": "Card identifier",
+          "format": "uuid"
+        },
+        "certificates": {
+          "type": "array",
+          "description": "An array of DER encoded X.509 certificates, with the leaf first and root last.",
+          "minItems": 2,
+          "items": {
+            "type": "string",
+            "format": "byte",
+            "example": "MIIC7jCCAnWgAwIBAgIISW0vvzqY2pcwCgYIKoZIzj0EAwIwZzEbMBkGA1UEAwwSQXBwbGUgUm9vdCBDQSAtIEczMSYwJAYDVQQLDB1BcHBsZSBDZXJ0aWZpY2F0aW9uIEF1dGhvcml0eTETMBEGA1UECgwKQXAwbGUgSW5jLjELMAkGA1UEBhMCVVMwHhcNMTQwNTA2MjM0NjMwWhcNMkkwNTA2MjM0NjMwWjB6MS4wLAYDVQQDDCVBcHBsZSBBcHBsaWNhdGlvbiBJbnRlZ3JhdGlvbiBDQSAtIEczMSYwJAYDVQQLDB1BcHBsZSBDZXJ0aWZpY2F0aW9uIEF1dGhvcml0eTETMBEGA1UECgwKQXBwbGUgSW5jLjELMAkGA1UEBhMCVVMwWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAATwFxGEGddkhdUaXiWBB3bogKLv3nuuTeCN/EuT4TNW1WZbNa4i0Jd2DSJOe7oI/XYXzojLdrtmcL7I6CmE/1RFo4H3MIH0MEYGCCsGAQUFBwEBBDowODA2BggrBgEFBQcwAYYqaHR0cDovL29jc3AuYXBwbGUuY29tL29jc3AwNC1hcHBsZXJvb3RjYWczMB0GA1UdDgQWBBQj8knET5Pk7yfmxPYobD+iu/0uSzAPBgNVHRMBAA8EBTADAQH/MB8GA1UdIwQYMBaAFLuw3qFYM4iapIqZ3r6966/ayySrMDcGA1UdHwQwMC4wLKAqoCiGJmh0dHA6Ly9jcmwuYXBwbGUuY29tL2FwcGxlcm9vdGNhZzMuY3JtMA4GA1UdDwEB/wQEAwIBBjAQBgoqhkiG92NkBgIOXAIFADAKBggqhkjOPQQDAgNnADBkAjA6z3KDURaZsYb7NcNWymK/9Bft2Q91TaKOvvGcgV5Ct4n4mPebWZ+Y1UENj53pwv4CMDIt1UQhsKMFd2xd8zg7kGf9F3wsIW2WT8ZyaYISb1T4en0bmcubCYkhYQaZDwmSHQ=="
+          }
+        },
+        "nonce": {
+          "type": "string",
+          "description": "The nonce value supplied by the Apple Pay SDK, base64 encoded.",
+          "format": "byte",
+          "example": "VGhpcyBpcyBhIHNhbXBsZSBub25jZSB2YWx1ZQ=="
+        },
+        "nonceSignature": {
+          "type": "string",
+          "description": "The nonce signature value supplied by the Apple Pay SDK, base64 encoded.",
+          "format": "byte",
+          "example": "VGhpcyBpcyBhIHNhbXBsZSBub25jZSBzaW5nYXR1cmUgdmFsdWU="
+        }
+      }
+    },
+    "ApplePushProvisionResponse": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/ApplePushProvisionResponse",
+      "type": "object",
+      "description": "Contains data that should be passed back to Apple Pay to complete the provision request",
+      "additionalProperties": false,
+      "required": ["activationData", "encryptedPassData", "ephemeralPublicKey", "updatedOn", "createdOn"],
+      "properties": {
+        "activationData": {
+          "type": "string",
+          "description": "Data that is needed to activate the token."
+        },
+        "encryptedPassData": {
+          "type": "string",
+          "description": "Encrypted JSON file containing the sensitive information needed to add a card to a wallet."
+        },
+        "ephemeralPublicKey": {
+          "type": "string",
+          "description": "A generated key that is combined with a private key."
+        },
+        "updatedOn": {
+          "type": "string",
+          "description": "Time the push provision request was last modified",
+          "format": "date-time"
+        },
+        "createdOn": {
+          "type": "string",
+          "description": "Time the push provision request was initiated"
+        }
+      }
+    },
+    "CurrencyAlphabeticCode": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/CurrencyAlphabeticCode",
+      "type": "string",
+      "description": "Currency codes",
+      "enum": [
+        "AED",
+        "AFN",
+        "ALL",
+        "AMD",
+        "ANG",
+        "AOA",
+        "ARS",
+        "AUD",
+        "AWG",
+        "AZN",
+        "BAM",
+        "BBD",
+        "BDT",
+        "BGN",
+        "BHD",
+        "BIF",
+        "BMD",
+        "BND",
+        "BOB",
+        "BOV",
+        "BRL",
+        "BSD",
+        "BTN",
+        "BWP",
+        "BYN",
+        "BZD",
+        "CAD",
+        "CDF",
+        "CHE",
+        "CHF",
+        "CHW",
+        "CLF",
+        "CLP",
+        "CNY",
+        "COP",
+        "COU",
+        "CRC",
+        "CUC",
+        "CUP",
+        "CVE",
+        "CZK",
+        "DJF",
+        "DKK",
+        "DOP",
+        "DZD",
+        "EGP",
+        "ERN",
+        "ETB",
+        "EUR",
+        "FJD",
+        "FKP",
+        "GBP",
+        "GEL",
+        "GHS",
+        "GIP",
+        "GMD",
+        "GNF",
+        "GTQ",
+        "GYD",
+        "HKD",
+        "HNL",
+        "HRK",
+        "HTG",
+        "HUF",
+        "IDR",
+        "ILS",
+        "INR",
+        "IQD",
+        "IRR",
+        "ISK",
+        "JMD",
+        "JOD",
+        "JPY",
+        "KES",
+        "KGS",
+        "KHR",
+        "KMF",
+        "KPW",
+        "KRW",
+        "KWD",
+        "KYD",
+        "KZT",
+        "LAK",
+        "LBP",
+        "LKR",
+        "LRD",
+        "LSL",
+        "LYD",
+        "MAD",
+        "MDL",
+        "MGA",
+        "MKD",
+        "MMK",
+        "MNT",
+        "MOP",
+        "MRU",
+        "MUR",
+        "MVR",
+        "MWK",
+        "MXN",
+        "MXV",
+        "MYR",
+        "MZN",
+        "NAD",
+        "NGN",
+        "NIO",
+        "NOK",
+        "NPR",
+        "NZD",
+        "OMR",
+        "PAB",
+        "PEN",
+        "PGK",
+        "PHP",
+        "PKR",
+        "PLN",
+        "PYG",
+        "QAR",
+        "RON",
+        "RSD",
+        "RUB",
+        "RWF",
+        "SAR",
+        "SBD",
+        "SCR",
+        "SDG",
+        "SEK",
+        "SGD",
+        "SHP",
+        "SLL",
+        "SOS",
+        "SRD",
+        "SSP",
+        "STN",
+        "SVC",
+        "SYP",
+        "SZL",
+        "THB",
+        "TJS",
+        "TMT",
+        "TND",
+        "TOP",
+        "TRY",
+        "TTD",
+        "TWD",
+        "TZS",
+        "UAH",
+        "UGX",
+        "USD",
+        "USN",
+        "UYI",
+        "UYU",
+        "UYW",
+        "UZS",
+        "VES",
+        "VND",
+        "VUV",
+        "WST",
+        "XAF",
+        "XAG",
+        "XAU",
+        "XBA",
+        "XBB",
+        "XBC",
+        "XBD",
+        "XCD",
+        "XDR",
+        "XOF",
+        "XPD",
+        "XPF",
+        "XPT",
+        "XSU",
+        "XTS",
+        "XUA",
+        "XXX",
+        "YER",
+        "ZAR",
+        "ZMW",
+        "ZWL"
+      ]
+    },
+    "CardLimitBalance": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://teampay-card-management.checkdigit/teampay-card-management/v1/schemas/definitions/CardLimitBalance",
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Card limit balance details.\n- The currency of the available card limit balance and ledger card limit balance is according to the currency of the active limit at the specified point in time.\n- The balance values are to the smallest decimal place for the card limits currency. For example, 100 US Dollars would show as 10000.\n- A negative balance value will have a '-' character in front of the value.\n",
+      "required": ["availableBalance", "ledgerBalance"],
+      "properties": {
+        "availableBalance": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Available card limit balance for the card at the specified point in time. This value takes into account pending transactions."
+        },
+        "ledgerBalance": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Ledger card limit balance for the card at the specified point in time. This value does not take into account any pending transactions."
+        }
+      }
+    }
+  }
+}

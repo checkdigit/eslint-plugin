@@ -1,0 +1,167 @@
+{
+  "apis": {
+    "/eslint-plugin/v1/ping": {
+      "get": {
+        "request": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://eslint-plugin.checkdigit/eslint-plugin/v1/schemas/api/PingGetRequestContext",
+          "type": "object",
+          "properties": {
+            "headers": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "responses": {
+          "200": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/eslint-plugin/v1/schemas/api/PingGetResponseOK",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://eslint-plugin.checkdigit/eslint-plugin/v1/schemas/definitions/Ping",
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["serverTime"],
+                "properties": {
+                  "serverTime": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Current server time"
+                  }
+                }
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          },
+          "default": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/eslint-plugin/v1/schemas/api/PingGetResponseDefault",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://eslint-plugin.checkdigit/eslint-plugin/v1/schemas/definitions/Error",
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Error message",
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "head": {
+        "request": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://eslint-plugin.checkdigit/eslint-plugin/v1/schemas/api/PingHeadRequestContext",
+          "type": "object",
+          "properties": {
+            "headers": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "responses": {
+          "200": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/eslint-plugin/v1/schemas/api/PingHeadResponseOK",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "default": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://eslint-plugin.checkdigit/eslint-plugin/v1/schemas/api/PingHeadResponseDefault",
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "body": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "https://eslint-plugin.checkdigit/eslint-plugin/v1/schemas/definitions/Error",
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Error message",
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "required": ["body"],
+            "additionalProperties": false
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Ping": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/eslint-plugin/v1/schemas/definitions/Ping",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["serverTime"],
+      "properties": {
+        "serverTime": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Current server time"
+        }
+      }
+    },
+    "Error": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://eslint-plugin.checkdigit/eslint-plugin/v1/schemas/definitions/Error",
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Error message",
+      "properties": {
+        "message": {
+          "type": "string"
+        },
+        "code": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

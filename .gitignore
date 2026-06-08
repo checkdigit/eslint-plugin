@@ -4,4 +4,3 @@ coverage
 build
 dist-*
 node_modules
-src/services
