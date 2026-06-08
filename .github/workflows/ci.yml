@@ -37,6 +37,9 @@ jobs:
         run: npm run ci:lint
       - name: Run Tests
         run: npm run ci:test
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   branchBuild:
     name: Branch Build
@@ -68,3 +71,6 @@ jobs:
         run: npm run ci:lint
       - name: Run Tests
         run: npm run ci:test
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

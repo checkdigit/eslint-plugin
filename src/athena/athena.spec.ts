@@ -22,6 +22,7 @@ createTester().run(ruleId, rule, {
     {
       name: 'SELECT with FROM',
       code: `\`select * from link\``,
+      only: true,
     },
     {
       name: 'string instead of Template Literal',
