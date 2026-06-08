@@ -1,7 +1,9 @@
 // openapi/service-schema-generator.ts
 
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
 import debug from 'debug';
 
@@ -51,18 +53,6 @@ function derefApiSchemas(schemas: ApiSchemas): ApiSchemas {
     };
   }
   return { apis: resolvedApis };
-}
-
-function fetchUrlSync(url: string): string | null {
-  try {
-    return execFileSync(process.execPath, ['--input-type=module'], {
-      input: `const r=await fetch(${JSON.stringify(url)});if(!r.ok)process.exit(1);process.stdout.write(await r.text());`,
-      encoding: 'utf-8',
-      timeout: 15_000,
-    });
-  } catch {
-    return null;
-  }
 }
 
 function readServiceConfig(
@@ -142,16 +132,29 @@ function findServiceInNodeModules(serviceName: string): ServiceSource | null {
   return null;
 }
 
+// Shallow-clone the repo with blob filtering so only the objects we explicitly
+// request via `git show HEAD:<path>` are downloaded, keeping network usage minimal.
 function findServiceOnGitHub(serviceName: string): ServiceSource | null {
   for (const org of GITHUB_ORGANIZATIONS) {
-    const pkgUrl = `https://raw.githubusercontent.com/${org}/${serviceName}/main/package.json`;
-    log(`fetching package.json from ${pkgUrl}`);
-    const pkgContent = fetchUrlSync(pkgUrl);
-    if (pkgContent === null) {
-      continue;
-    }
-
+    const repoUrl = `https://github.com/${org}/${serviceName}.git`;
+    const tmpDir = mkdtempSync(join(tmpdir(), `eslint-athena-${serviceName}-`));
     try {
+      log(`cloning ${repoUrl}`);
+      execFileSync('git', ['clone', '--depth=1', '--no-checkout', '--filter=blob:none', repoUrl, tmpDir], {
+        timeout: 30_000,
+        stdio: 'pipe',
+      });
+
+      let pkgContent: string;
+      try {
+        pkgContent = execFileSync('git', ['-C', tmpDir, 'show', 'HEAD:package.json'], {
+          encoding: 'utf-8',
+          timeout: 10_000,
+        });
+      } catch {
+        continue;
+      }
+
       const config = readServiceConfig(pkgContent, org, serviceName);
       if (config === null) {
         continue;
@@ -159,11 +162,16 @@ function findServiceOnGitHub(serviceName: string): ServiceSource | null {
 
       const endpoints: ServiceEndpoint[] = [];
       for (const endpoint of config.endpoints) {
-        const swaggerUrl = `https://raw.githubusercontent.com/${org}/${serviceName}/main/${config.apiRoot}/${endpoint}/swagger.yml`;
-        log(`fetching swagger.yml from ${swaggerUrl}`);
-        const yamlContent = fetchUrlSync(swaggerUrl);
-        if (yamlContent !== null) {
+        const swaggerPath = `${config.apiRoot}/${endpoint}/swagger.yml`;
+        try {
+          log(`reading ${swaggerPath} from ${repoUrl}`);
+          const yamlContent = execFileSync('git', ['-C', tmpDir, 'show', `HEAD:${swaggerPath}`], {
+            encoding: 'utf-8',
+            timeout: 10_000,
+          });
           endpoints.push({ path: endpoint, yamlContent });
+        } catch {
+          // file absent in this repo/org; continue to next endpoint
         }
       }
 
@@ -171,7 +179,9 @@ function findServiceOnGitHub(serviceName: string): ServiceSource | null {
         return { organization: config.organization, serviceName: config.serviceName, endpoints };
       }
     } catch {
-      // continue to next org
+      // repo not found for this org; try next
+    } finally {
+      rmSync(tmpDir, { recursive: true, force: true });
     }
   }
   return null;
