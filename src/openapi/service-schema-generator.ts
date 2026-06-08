@@ -132,56 +132,135 @@ function findServiceInNodeModules(serviceName: string): ServiceSource | null {
   return null;
 }
 
-// Shallow-clone the repo with blob filtering so only the objects we explicitly
-// request via `git show HEAD:<path>` are downloaded, keeping network usage minimal.
-function findServiceOnGitHub(serviceName: string): ServiceSource | null {
-  for (const org of GITHUB_ORGANIZATIONS) {
-    const repoUrl = `https://github.com/${org}/${serviceName}.git`;
-    const tmpDir = mkdtempSync(join(tmpdir(), `eslint-athena-${serviceName}-`));
-    try {
-      log(`cloning ${repoUrl}`);
-      execFileSync('git', ['clone', '--depth=1', '--no-checkout', '--filter=blob:none', repoUrl, tmpDir], {
-        timeout: 30_000,
-        stdio: 'pipe',
-      });
+// ---------------------------------------------------------------------------
+// GitHub fallback strategies — API (token-based) or git-clone (local dev)
+// ---------------------------------------------------------------------------
 
-      let pkgContent: string;
+// Fetch a single file from the GitHub Contents API using a bearer token.
+// Uses `Accept: application/vnd.github.v3.raw` so the body is the raw file, not JSON.
+function fetchFileFromGitHubApi(org: string, repo: string, filePath: string, token: string): string | null {
+  try {
+    return execFileSync(process.execPath, ['--input-type=module'], {
+      env: {
+        ...process.env,
+        _ATHENA_URL: `https://api.github.com/repos/${org}/${repo}/contents/${filePath}`,
+        _ATHENA_TOKEN: token,
+      },
+      input: [
+        `const r = await fetch(process.env._ATHENA_URL, { headers: {`,
+        `  Accept: 'application/vnd.github.v3.raw',`,
+        `  Authorization: 'Bearer ' + process.env._ATHENA_TOKEN,`,
+        `  'User-Agent': 'eslint-plugin-checkdigit',`,
+        `}});`,
+        `if (!r.ok) process.exit(1);`,
+        `process.stdout.write(await r.text());`,
+      ].join('\n'),
+      encoding: 'utf-8',
+      timeout: 15_000,
+    });
+  } catch {
+    return null;
+  }
+}
+
+function findServiceViaApi(serviceName: string, org: string, token: string): ServiceSource | null {
+  log(`fetching package.json for ${org}/${serviceName} via GitHub API`);
+  const pkgContent = fetchFileFromGitHubApi(org, serviceName, 'package.json', token);
+  if (pkgContent === null) {
+    return null;
+  }
+
+  try {
+    const config = readServiceConfig(pkgContent, org, serviceName);
+    if (config === null) {
+      return null;
+    }
+
+    const endpoints: ServiceEndpoint[] = [];
+    for (const endpoint of config.endpoints) {
+      const swaggerPath = `${config.apiRoot}/${endpoint}/swagger.yml`;
+      log(`fetching ${swaggerPath} for ${org}/${serviceName} via GitHub API`);
+      const yamlContent = fetchFileFromGitHubApi(org, serviceName, swaggerPath, token);
+      if (yamlContent !== null) {
+        endpoints.push({ path: endpoint, yamlContent });
+      }
+    }
+
+    return endpoints.length > 0
+      ? { organization: config.organization, serviceName: config.serviceName, endpoints }
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+// Shallow-clone with blob filtering: only commit + tree objects are fetched up
+// front; `git show HEAD:<path>` lazily pulls each blob we actually need.
+function findServiceViaGitClone(serviceName: string, org: string): ServiceSource | null {
+  const repoUrl = `https://github.com/${org}/${serviceName}.git`;
+  const tmpDir = mkdtempSync(join(tmpdir(), `eslint-athena-${serviceName}-`));
+  try {
+    log(`cloning ${repoUrl}`);
+    execFileSync('git', ['clone', '--depth=1', '--no-checkout', '--filter=blob:none', repoUrl, tmpDir], {
+      timeout: 30_000,
+      stdio: 'pipe',
+    });
+
+    let pkgContent: string;
+    try {
+      pkgContent = execFileSync('git', ['-C', tmpDir, 'show', 'HEAD:package.json'], {
+        encoding: 'utf-8',
+        timeout: 10_000,
+      });
+    } catch {
+      return null;
+    }
+
+    const config = readServiceConfig(pkgContent, org, serviceName);
+    if (config === null) {
+      return null;
+    }
+
+    const endpoints: ServiceEndpoint[] = [];
+    for (const endpoint of config.endpoints) {
+      const swaggerPath = `${config.apiRoot}/${endpoint}/swagger.yml`;
       try {
-        pkgContent = execFileSync('git', ['-C', tmpDir, 'show', 'HEAD:package.json'], {
+        log(`reading ${swaggerPath} from ${repoUrl}`);
+        const yamlContent = execFileSync('git', ['-C', tmpDir, 'show', `HEAD:${swaggerPath}`], {
           encoding: 'utf-8',
           timeout: 10_000,
         });
+        endpoints.push({ path: endpoint, yamlContent });
       } catch {
-        continue;
+        // file absent in this repo; try next endpoint
       }
+    }
 
-      const config = readServiceConfig(pkgContent, org, serviceName);
-      if (config === null) {
-        continue;
-      }
+    return endpoints.length > 0
+      ? { organization: config.organization, serviceName: config.serviceName, endpoints }
+      : null;
+  } catch {
+    return null;
+  } finally {
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+}
 
-      const endpoints: ServiceEndpoint[] = [];
-      for (const endpoint of config.endpoints) {
-        const swaggerPath = `${config.apiRoot}/${endpoint}/swagger.yml`;
-        try {
-          log(`reading ${swaggerPath} from ${repoUrl}`);
-          const yamlContent = execFileSync('git', ['-C', tmpDir, 'show', `HEAD:${swaggerPath}`], {
-            encoding: 'utf-8',
-            timeout: 10_000,
-          });
-          endpoints.push({ path: endpoint, yamlContent });
-        } catch {
-          // file absent in this repo/org; continue to next endpoint
-        }
+function findServiceOnGitHub(serviceName: string): ServiceSource | null {
+  const token = process.env['GITHUB_TOKEN'];
+  for (const org of GITHUB_ORGANIZATIONS) {
+    // Try the GitHub REST API first when a token is available (works in CI where git may be absent).
+    // Fall back to git clone regardless: git uses its own credential system (keychain, SSH keys,
+    // credential helpers) and does not read GITHUB_TOKEN, so it works in local dev even without a token.
+    if (token !== undefined) {
+      const source = findServiceViaApi(serviceName, org, token);
+      if (source !== null) {
+        return source;
       }
-
-      if (endpoints.length > 0) {
-        return { organization: config.organization, serviceName: config.serviceName, endpoints };
-      }
-    } catch {
-      // repo not found for this org; try next
-    } finally {
-      rmSync(tmpDir, { recursive: true, force: true });
+    }
+    const source = findServiceViaGitClone(serviceName, org);
+    if (source !== null) {
+      return source;
     }
   }
   return null;
