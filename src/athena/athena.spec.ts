@@ -356,6 +356,30 @@ WHERE method = 'PUT'
       partition_date > '2020-01-01'
       \``,
     },
+    {
+      name: 'different aliases for same service table can be joined together and accessed in SELECT',
+      code: `\`
+    SELECT
+      SPLIT(tcm.url, '/') [5] AS CardId,
+      json_extract_scalar(tcm.requestbody, '$.product') AS Product,
+      json_extract_scalar(tcm.responseheaders, '$["created-on"]') AS CreatedOn,
+      json_extract_scalar(tcm.requestbody, '$.cardholderId') AS CardholderId,
+      json_extract_scalar(tcmch.requestbody, '$.clientId') AS ClientId
+    FROM
+      "teampay-card-management" AS tcm,
+      "teampay-card-management" AS tcmch
+    WHERE
+      SPLIT(tcm.url, '/') [4] = 'card'
+      AND cardinality(SPLIT(tcm.url, '/')) = 5
+      AND tcm.responsestatus = '200'
+      AND tcm.method = 'PUT'
+      AND SPLIT(tcmch.url, '/') [4] = 'cardholder'
+      AND cardinality(SPLIT(tcmch.url, '/')) = 5
+      AND tcmch.responsestatus = '200'
+      AND tcmch.method = 'PUT'
+      AND json_extract_scalar(tcm.requestbody, '$.cardholderId') = SPLIT(tcmch.url, '/') [5]
+      \``,
+    },
   ],
   invalid: [
     {
@@ -2334,7 +2358,7 @@ FROM "payment-card" WHERE method = 'PUT' AND responsestatus = '200'\``,
         {
           messageId: 'AthenaError',
           data: {
-            errorMessage: `unknown table or alias 'x'; known tables: link`,
+            errorMessage: `unknown table or alias 'x'; known tables: l, r`,
           },
         },
       ],

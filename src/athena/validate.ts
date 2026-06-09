@@ -58,6 +58,7 @@ export function offsetToLoc(text: string, offset: number): { line: number; colum
 }
 
 const log = debug('eslint-plugin:athena');
+const ANONYMOUS_TABLE = '<anonymous>';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -77,6 +78,10 @@ function getApiSchemas(serviceName: string, ctx: VisitContext) {
 }
 
 function lookupTables(nameOrAlias: string, ctx: VisitContext): ResolvedTable[] {
+  // Direct hit first: aliases are now stored under their alias key in ctx.tables.
+  if (ctx.tables.has(nameOrAlias)) {
+    return ctx.tables.get(nameOrAlias) ?? [];
+  }
   const canonical = ctx.aliases.get(nameOrAlias) ?? nameOrAlias;
   return ctx.tables.get(canonical) ?? [];
 }
@@ -95,15 +100,18 @@ function fromClauseItems(select: Select): From[] {
 // Pass 1 — Resolve FROM clause: service tables → ctx.tables + ctx.aliases
 // ---------------------------------------------------------------------------
 
-function resolveServiceTable(select: Select, item: BaseFrom, ctx: VisitContext): void {
+function resolveServiceTable(select: Select, item: BaseFrom, ctx: VisitContext, storageKey?: string): void {
   const { table: tableName } = item;
+  const key = storageKey ?? tableName;
   try {
     const apiSchemas = getApiSchemas(tableName, ctx);
     if (apiSchemas.length === 0) {
       throw new AthenaError(ATHENA_ERROR, `service not found: "${tableName}" (no swagger schema located)`, item);
     }
     const operations = matchApi(select, item, apiSchemas) ?? [];
-    ctx.tables.set(tableName, buildServiceTables(tableName, operations));
+    // Always use the canonical table name for ResolvedTable.name so that error messages
+    // ("in tables: …") show the service name, not the alias.
+    ctx.tables.set(key, buildServiceTables(tableName, operations));
   } catch (error) {
     if (error instanceof AthenaError) {
       throw error;
@@ -116,6 +124,11 @@ function restrictToFromClause(select: Select, ctx: VisitContext): void {
   const fromNames = new Set<string>();
   for (const item of fromClauseItems(select)) {
     if (isBaseFrom(item) || isJoin(item)) {
+      // Service tables are stored under the alias key; CTEs are stored under the
+      // canonical name.  Add both so either lookup survives the prune.
+      if (item.as !== null) {
+        fromNames.add(item.as);
+      }
       fromNames.add(item.table);
     } else if (isTableExpr(item)) {
       fromNames.add(typeof item.as === 'string' ? item.as : '<subquery>');
@@ -128,45 +141,35 @@ function restrictToFromClause(select: Select, ctx: VisitContext): void {
   }
 }
 
+function tableIsResolved(tableName: string, storageKey: string, ctx: VisitContext): boolean {
+  return ctx.tables.has(storageKey) || ctx.tables.has(tableName);
+}
+
+// Shared resolution logic for BaseFrom and Join items (Join extends BaseFrom).
+function resolveTableOrJoinItem(select: Select, item: BaseFrom, ctx: VisitContext): void {
+  const { table: tableName, as: alias } = item;
+  if (alias !== null) {
+    ctx.aliases.set(alias, tableName);
+  }
+  const storageKey = alias ?? tableName;
+  // Skip if already resolved: CTE stored under canonical name, or duplicate alias.
+  if (!tableIsResolved(tableName, storageKey, ctx)) {
+    resolveServiceTable(select, item, ctx, alias ?? undefined);
+  }
+}
+
 function resolveFromClause(select: Select, ctx: VisitContext): void {
   for (const item of fromClauseItems(select)) {
     if (isUnnestFrom(item)) {
       continue;
     }
-
     if (isTableExpr(item)) {
       const alias = typeof item.as === 'string' ? item.as : '<subquery>';
       // eslint-disable-next-line no-use-before-define
       checkSelect(item.expr.ast, ctx, alias);
-      continue;
+    } else if (isJoin(item) || isBaseFrom(item)) {
+      resolveTableOrJoinItem(select, item, ctx);
     }
-
-    if (isJoin(item)) {
-      const { table: tableName, as: alias } = item;
-      if (alias !== null) {
-        ctx.aliases.set(alias, tableName);
-      }
-      if (!ctx.tables.has(tableName)) {
-        resolveServiceTable(select, item, ctx);
-      }
-      continue;
-    }
-
-    if (!isBaseFrom(item)) {
-      continue;
-    }
-
-    const { table: tableName, as: alias } = item;
-
-    if (alias !== null) {
-      ctx.aliases.set(alias, tableName);
-    }
-
-    if (ctx.tables.has(tableName)) {
-      continue;
-    }
-
-    resolveServiceTable(select, item, ctx);
   }
 }
 
@@ -219,7 +222,7 @@ function applyUnnestPre(mappings: UnnestMapping[], ctx: VisitContext): UnnestMap
 
     const sourceColumns = ownerTable.columns.get(fromColumn) ?? [];
     const sourceSchema = sourceColumns[0]?.schema;
-    const unnestTableName = `${ownerTable.name ?? '<anonymous>'}:<unnested>`;
+    const unnestTableName = `${ownerTable.name ?? ANONYMOUS_TABLE}:<unnested>`;
     const apiOperation = ownerTable.apiOperation !== undefined ? { apiOperation: ownerTable.apiOperation } : {};
 
     if (sourceSchema?.type === 'array') {
@@ -388,7 +391,7 @@ function lookupColumnOrThrow(colRef: string, ref: object, referencedTables: Reso
   const resolvedColumns = referencedTables.flatMap((table) => table.columns.get(colRef) ?? []);
   if (resolvedColumns.length === 0) {
     const tableNames = [
-      ...new Set(referencedTables.map((referenceTable) => referenceTable.name ?? '<anonymous>')),
+      ...new Set(referencedTables.map((referenceTable) => referenceTable.name ?? ANONYMOUS_TABLE)),
     ].join(', ');
     const availableCols = [...new Set(referencedTables.flatMap((table) => [...table.columns.keys()]))].join(', ');
     throw new AthenaError(
@@ -460,10 +463,9 @@ function resolveSingleColumnRef(
 
   const referencedTables = tableRef !== undefined ? lookupTables(tableRef, ctx) : allTables;
   if (referencedTables.length === 0) {
-    const tableNames = [...ctx.tables.keys()].join(', ');
     throw new AthenaError(
       ATHENA_ERROR,
-      `unknown table or alias '${tableRef ?? colRef}'; known tables: ${tableNames}`,
+      `unknown table or alias '${tableRef ?? colRef}'; known tables: ${[...ctx.tables.keys()].join(', ')}`,
       ref,
     );
   }

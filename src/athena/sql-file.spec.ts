@@ -51,6 +51,20 @@ tester.run(ruleId, rule, {
 FROM link
 WHERE method = 'PUT'`,
     },
+    {
+      name: 'different aliases for same service table can be joined together and accessed in SELECT',
+      code: `SELECT tcm.url, tcmch.url
+FROM "teampay-card-management" AS tcm,
+     "teampay-card-management" AS tcmch
+WHERE tcm.method = 'PUT'
+  AND cardinality(split(tcm.url, '/')) = 5
+  AND split(tcm.url, '/')[4] = 'card'
+  AND tcm.responsestatus = '200'
+  AND split(tcmch.url, '/')[4] = 'cardholder'
+  AND cardinality(split(tcmch.url, '/')) = 5
+  AND tcmch.responsestatus = '200'
+  AND tcmch.method = 'PUT'`,
+    },
   ],
 
   invalid: [
