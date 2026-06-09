@@ -32,6 +32,7 @@ import {
   isJoin,
   isTableExpr,
   isUnnestFrom,
+  isValuesFrom,
 } from './visitor.ts';
 
 export const SYNTEXT_ERROR = 'SyntextError';
@@ -132,6 +133,11 @@ function restrictToFromClause(select: Select, ctx: VisitContext): void {
       fromNames.add(item.table);
     } else if (isTableExpr(item)) {
       fromNames.add(typeof item.as === 'string' ? item.as : '<subquery>');
+    } else if (isValuesFrom(item)) {
+      const tableAlias = item.as.name.name[0]?.value;
+      if (tableAlias !== undefined) {
+        fromNames.add(tableAlias);
+      }
     }
   }
   for (const name of [...ctx.tables.keys()]) {
@@ -163,7 +169,15 @@ function resolveFromClause(select: Select, ctx: VisitContext): void {
     if (isUnnestFrom(item)) {
       continue;
     }
-    if (isTableExpr(item)) {
+    if (isValuesFrom(item)) {
+      const tableAlias = item.as.name.name[0]?.value;
+      if (tableAlias !== undefined) {
+        const columns = new Map(
+          item.as.args.value.map((columnRef) => [columnRef.column, [resolvedCol(columnRef.column, {})]]),
+        );
+        ctx.tables.set(tableAlias, [{ name: tableAlias, columns }]);
+      }
+    } else if (isTableExpr(item)) {
       const alias = typeof item.as === 'string' ? item.as : '<subquery>';
       // eslint-disable-next-line no-use-before-define
       checkSelect(item.expr.ast, ctx, alias);

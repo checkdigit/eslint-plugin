@@ -67,7 +67,16 @@ export interface Dual {
   type: 'dual';
   loc?: LocationRange;
 }
-export type From = BaseFrom | Join | TableExpr | Dual;
+// Represents: (VALUES (...), ...) alias(col1, col2, ...)
+export interface ValuesFrom {
+  expr: { type: 'values' };
+  as: {
+    type: 'function';
+    name: { name: { value: string }[] };
+    args: { type: 'expr_list'; value: { column: string }[] };
+  };
+}
+export type From = BaseFrom | Join | TableExpr | ValuesFrom | Dual;
 export interface LimitValue {
   type: string;
   value: number;

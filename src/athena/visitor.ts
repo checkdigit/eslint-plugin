@@ -20,6 +20,7 @@ import type {
   Join,
   Select,
   TableExpr,
+  ValuesFrom,
   With,
 } from './types';
 
@@ -73,6 +74,14 @@ export function isUnnestFrom(node: unknown): node is UnnestFrom {
 
 export function isDual(node: unknown): node is Dual {
   return typeof node === 'object' && node !== null && (node as { type?: unknown }).type === 'dual';
+}
+
+export function isValuesFrom(node: unknown): node is ValuesFrom {
+  if (typeof node !== 'object' || node === null) {
+    return false;
+  }
+  const expr = (node as { expr?: unknown }).expr;
+  return typeof expr === 'object' && expr !== null && (expr as { type?: unknown }).type === 'values';
 }
 
 export function isTableExpr(node: unknown): node is TableExpr {
@@ -218,6 +227,9 @@ function walkFrom(node: From, visitor: VisitorMap): void {
     if (node.on !== undefined) {
       walkExpr(node.on, visitor);
     }
+    return;
+  }
+  if (isValuesFrom(node)) {
     return;
   }
   visitor.visitBaseFrom?.(node);

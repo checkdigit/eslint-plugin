@@ -380,6 +380,13 @@ WHERE method = 'PUT'
       AND json_extract_scalar(tcm.requestbody, '$.cardholderId') = SPLIT(tcmch.url, '/') [5]
       \``,
     },
+    {
+      name: 'support adhoc table via "Values" keyword along with column aliasing',
+      code: `\`
+SELECT paymentSourceType AS "Payment Source Type"
+FROM (values ('ach'), ('trade'), ('check'), ('card'), ('wire')) x(paymentSourceType)
+\``,
+    },
   ],
   invalid: [
     {
