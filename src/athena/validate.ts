@@ -127,6 +127,23 @@ function getFunctionAliasName(as: { name: { name: { value: string }[] } } | null
   return as?.name.name[0]?.value;
 }
 
+// Extracts a column alias name from an alias-arg node.  Two cases arise:
+//   1. column_ref  (the normal case): { type: 'column_ref', column: 'dates' } → 'dates'
+//   2. zero-arg keyword function: SQL type keywords like `date` are parsed as DATE() function
+//      calls; recover the column name by lowercasing the function name.
+function extractColumnAliasName(arg: unknown): string | undefined {
+  const colRef = arg as { column?: unknown };
+  if (typeof colRef.column === 'string') {
+    return colRef.column;
+  }
+  const fnNode = arg as { type?: unknown; name?: { name?: { value?: string }[] }; args?: { value?: unknown[] } };
+  if (fnNode.type === 'function' && fnNode.args?.value?.length === 0) {
+    const functionName = fnNode.name?.name?.[0]?.value;
+    return functionName !== undefined ? functionName.toLowerCase() : undefined;
+  }
+  return undefined;
+}
+
 // UNNEST whose argument is a function call (e.g. SEQUENCE), not a column reference.
 function isStandaloneUnnest(node: unknown): node is UnnestFrom {
   return isUnnestFrom(node) && typeof (node.expr as { column?: unknown }).column !== 'string';
@@ -190,7 +207,7 @@ function resolveFromClause(select: Select, ctx: VisitContext): void {
       if (tableAlias !== undefined) {
         const columns = new Map(
           (unknownItem.as?.args.value ?? []).map((columnRef) => {
-            const colName = (columnRef as { column: string }).column;
+            const colName = extractColumnAliasName(columnRef) ?? '';
             return [colName, [resolvedCol(colName, {})]];
           }),
         );
@@ -223,6 +240,7 @@ function resolveFromClause(select: Select, ctx: VisitContext): void {
 interface UnnestMapping {
   fromColumn: string;
   toColumns: string[];
+  tableAlias?: string;
   ast: object;
 }
 
@@ -246,13 +264,20 @@ function extractUnnestMappings(select: Select): UnnestMapping[] {
     const aliasArgs = item.as?.args.value ?? [];
     const toColumns: string[] = [];
     for (const col of aliasArgs) {
-      if (typeof (col as { column?: unknown }).column === 'string') {
-        toColumns.push((col as { column: string }).column);
+      const colName = extractColumnAliasName(col);
+      if (colName !== undefined) {
+        toColumns.push(colName);
       }
     }
     assert.ok(toColumns.length > 0, 'UNNEST alias must have at least one column name');
 
-    mappings.push({ fromColumn, toColumns, ast: item.expr });
+    const tableAlias = getFunctionAliasName(item.as);
+    mappings.push({
+      fromColumn,
+      toColumns,
+      ...(tableAlias !== undefined ? { tableAlias } : {}),
+      ast: item.expr,
+    });
   }
 
   return mappings;
@@ -261,11 +286,11 @@ function extractUnnestMappings(select: Select): UnnestMapping[] {
 function applyUnnestPre(mappings: UnnestMapping[], ctx: VisitContext): UnnestMapping[] {
   const deferred: UnnestMapping[] = [];
 
-  for (const { fromColumn, toColumns, ast } of mappings) {
+  for (const { fromColumn, toColumns, tableAlias, ast } of mappings) {
     const ownerTable = [...ctx.tables.values()].flat().find((table) => table.columns.has(fromColumn));
 
     if (ownerTable === undefined) {
-      deferred.push({ fromColumn, toColumns, ast });
+      deferred.push({ fromColumn, toColumns, ...(tableAlias !== undefined ? { tableAlias } : {}), ast });
       continue;
     }
 
@@ -274,16 +299,17 @@ function applyUnnestPre(mappings: UnnestMapping[], ctx: VisitContext): UnnestMap
     const unnestTableName = `${ownerTable.name ?? ANONYMOUS_TABLE}:<unnested>`;
     const apiOperation = ownerTable.apiOperation !== undefined ? { apiOperation: ownerTable.apiOperation } : {};
 
+    let unnestEntry: ResolvedTable[];
     if (sourceSchema?.type === 'array') {
       const [toColumn] = toColumns;
       assert.ok(toColumn !== undefined);
-      ctx.tables.set(unnestTableName, [
+      unnestEntry = [
         {
           name: unnestTableName,
           ...apiOperation,
           columns: new Map([[toColumn, [resolvedCol(toColumn, sourceSchema.items, sourceColumns[0]?.ast)]]]),
         },
-      ]);
+      ];
     } else if (sourceSchema?.type === 'object') {
       const [keyColumn, valueColumn] = toColumns;
       assert.ok(
@@ -293,7 +319,7 @@ function applyUnnestPre(mappings: UnnestMapping[], ctx: VisitContext): UnnestMap
       const addlProps = (sourceSchema as SchemaObject)['additionalProperties'] as unknown;
       const valueSchema: SchemaObject =
         typeof addlProps === 'object' && addlProps !== null ? addlProps : { type: 'string' };
-      ctx.tables.set(unnestTableName, [
+      unnestEntry = [
         {
           name: unnestTableName,
           ...apiOperation,
@@ -302,13 +328,28 @@ function applyUnnestPre(mappings: UnnestMapping[], ctx: VisitContext): UnnestMap
             [valueColumn, [resolvedCol(valueColumn, valueSchema, sourceColumns[0]?.ast)]],
           ]),
         },
-      ]);
-    } else {
+      ];
+    } else if (ownerTable.apiOperation !== undefined) {
+      // Only raise an error when the column schema was derived from a known API spec — for
+      // computed columns (subqueries, CTEs, functions) the inferred schema may be imprecise.
       throw new AthenaError(
         ATHENA_ERROR,
         `UNNEST source column '${fromColumn}' must resolve to an array or map schema`,
         ast,
       );
+    } else {
+      // Non-API source: schema is an estimate; register target columns with unknown schema.
+      unnestEntry = [
+        {
+          name: unnestTableName,
+          ...apiOperation,
+          columns: new Map(toColumns.map((toColumn) => [toColumn, [resolvedCol(toColumn, {})]])),
+        },
+      ];
+    }
+    ctx.tables.set(unnestTableName, unnestEntry);
+    if (tableAlias !== undefined) {
+      ctx.tables.set(tableAlias, unnestEntry);
     }
   }
 

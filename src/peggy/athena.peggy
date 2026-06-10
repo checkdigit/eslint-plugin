@@ -1099,10 +1099,10 @@ column_list_item
     }
 
 value_alias_clause
-  = KW_AS? __ i:(func_call / alias_ident) { return i; }
-  
+  = KW_AS? __ i:(a:alias_ident !(__ LPAREN) { return a; } / func_call) { return i; }
+
 alias_clause
-  = KW_AS __ i:(func_call / alias_ident) { return i; }
+  = KW_AS __ i:(a:alias_ident !(__ LPAREN) { return a; } / func_call) { return i; }
   / KW_AS? __ i:ident { return i; }
 
 with_offset

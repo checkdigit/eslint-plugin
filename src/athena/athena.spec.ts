@@ -393,6 +393,12 @@ FROM (values ('ach'), ('trade'), ('check'), ('card'), ('wire')) x(paymentSourceT
 SELECT DATE_FORMAT(DATE_ADD('day', -n, CURRENT_DATE), '%Y-%m-%d') AS date FROM UNNEST(SEQUENCE(0, DATE_DIFF('day', DATE_ADD('day', -30, CURRENT_DATE), CURRENT_DATE))) AS t(n)
 \``,
     },
+    {
+      name: 'support unnest following the target table in the same FROM clause',
+      code: `\`
+SELECT substr(to_iso8601(t.date), 1, 10) AS Date
+FROM (SELECT sequence(current_date - interval '1' year, current_date, interval '1' day) dates), unnest(dates) as t(date)\``,
+    },
   ],
   invalid: [
     {
