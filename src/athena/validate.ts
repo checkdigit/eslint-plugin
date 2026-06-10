@@ -33,6 +33,7 @@ import {
   isTableExpr,
   isUnnestFrom,
   isValuesFrom,
+  type UnnestFrom,
 } from './visitor.ts';
 
 export const SYNTEXT_ERROR = 'SyntextError';
@@ -121,25 +122,41 @@ function resolveServiceTable(select: Select, item: BaseFrom, ctx: VisitContext, 
   }
 }
 
-function restrictToFromClause(select: Select, ctx: VisitContext): void {
-  const fromNames = new Set<string>();
-  for (const item of fromClauseItems(select)) {
-    if (isBaseFrom(item) || isJoin(item)) {
-      // Service tables are stored under the alias key; CTEs are stored under the
-      // canonical name.  Add both so either lookup survives the prune.
-      if (item.as !== null) {
-        fromNames.add(item.as);
-      }
-      fromNames.add(item.table);
-    } else if (isTableExpr(item)) {
-      fromNames.add(typeof item.as === 'string' ? item.as : '<subquery>');
-    } else if (isValuesFrom(item)) {
-      const tableAlias = item.as.name.name[0]?.value;
-      if (tableAlias !== undefined) {
-        fromNames.add(tableAlias);
-      }
-    }
+// Returns the alias name for a ValuesFrom or a standalone UnnestFrom (UNNEST(fn(...))).
+function getFunctionAliasName(as: { name: { name: { value: string }[] } } | null): string | undefined {
+  return as?.name.name[0]?.value;
+}
+
+// UNNEST whose argument is a function call (e.g. SEQUENCE), not a column reference.
+function isStandaloneUnnest(node: unknown): node is UnnestFrom {
+  return isUnnestFrom(node) && typeof (node.expr as { column?: unknown }).column !== 'string';
+}
+
+// Returns every name under which this FROM item can be stored in ctx.tables.
+// Both the alias key and the canonical table name are returned so that service
+// tables (stored under alias) and CTEs (stored under canonical name) both survive
+// the prune in restrictToFromClause.
+function fromItemTableNames(item: From): string[] {
+  if (isBaseFrom(item) || isJoin(item)) {
+    return item.as !== null ? [item.as, item.table] : [item.table];
   }
+  if (isTableExpr(item)) {
+    return [typeof item.as === 'string' ? item.as : '<subquery>'];
+  }
+  if (isValuesFrom(item)) {
+    const alias = getFunctionAliasName(item.as);
+    return alias !== undefined ? [alias] : [];
+  }
+  const unknownItem = item as unknown;
+  if (isStandaloneUnnest(unknownItem)) {
+    const alias = getFunctionAliasName(unknownItem.as);
+    return alias !== undefined ? [alias] : [];
+  }
+  return [];
+}
+
+function restrictToFromClause(select: Select, ctx: VisitContext): void {
+  const fromNames = new Set(fromClauseItems(select).flatMap(fromItemTableNames));
   for (const name of [...ctx.tables.keys()]) {
     if (!fromNames.has(name)) {
       ctx.tables.delete(name);
@@ -166,11 +183,23 @@ function resolveTableOrJoinItem(select: Select, item: BaseFrom, ctx: VisitContex
 
 function resolveFromClause(select: Select, ctx: VisitContext): void {
   for (const item of fromClauseItems(select)) {
-    if (isUnnestFrom(item)) {
-      continue;
-    }
-    if (isValuesFrom(item)) {
-      const tableAlias = item.as.name.name[0]?.value;
+    const unknownItem = item as unknown;
+    if (isStandaloneUnnest(unknownItem)) {
+      // Standalone UNNEST(fn()) — register alias with declared column names (schema unknown).
+      const tableAlias = getFunctionAliasName(unknownItem.as);
+      if (tableAlias !== undefined) {
+        const columns = new Map(
+          (unknownItem.as?.args.value ?? []).map((columnRef) => {
+            const colName = (columnRef as { column: string }).column;
+            return [colName, [resolvedCol(colName, {})]];
+          }),
+        );
+        ctx.tables.set(tableAlias, [{ name: tableAlias, columns }]);
+      }
+    } else if (isUnnestFrom(unknownItem)) {
+      // CROSS JOIN UNNEST with a column ref — handled later by extractUnnestMappings.
+    } else if (isValuesFrom(item)) {
+      const tableAlias = getFunctionAliasName(item.as);
       if (tableAlias !== undefined) {
         const columns = new Map(
           item.as.args.value.map((columnRef) => [columnRef.column, [resolvedCol(columnRef.column, {})]]),
@@ -205,8 +234,14 @@ function extractUnnestMappings(select: Select): UnnestMapping[] {
       continue;
     }
 
-    const fromColumn = typeof item.expr.column === 'string' ? item.expr.column : undefined;
-    assert.ok(fromColumn !== undefined, 'UNNEST expr must be a column_ref with a string column name');
+    const fromColumn =
+      typeof (item.expr as { column?: unknown }).column === 'string'
+        ? (item.expr as { column: string }).column
+        : undefined;
+    if (fromColumn === undefined) {
+      // Standalone UNNEST (e.g. UNNEST(SEQUENCE(...))) — registered in resolveFromClause.
+      continue;
+    }
 
     const aliasArgs = item.as?.args.value ?? [];
     const toColumns: string[] = [];

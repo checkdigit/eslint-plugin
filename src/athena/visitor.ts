@@ -27,7 +27,9 @@ import type {
 // UNNEST is not in types.ts (the grammar produces it but the TS types don't model it).
 export interface UnnestFrom {
   type: 'unnest';
-  expr: ColumnRefItem;
+  // expr is a column_ref when used with CROSS JOIN; for standalone UNNEST (e.g.
+  // UNNEST(SEQUENCE(...))) it is a function call with no `column` property.
+  expr: ColumnRefItem | { type: string };
   parentheses: boolean;
   as: {
     type: 'function';
