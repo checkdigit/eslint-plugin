@@ -1297,7 +1297,7 @@ or_and_expr
   }
 
 on_clause
-  = KW_ON __ e:or_and_where_expr { return e; }
+  = KW_ON __ e:or_and_expr { return e; }
 
 where_clause
   = KW_WHERE __ e:or_and_where_expr { return e; }

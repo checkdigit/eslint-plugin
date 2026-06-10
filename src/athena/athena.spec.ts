@@ -399,6 +399,44 @@ SELECT DATE_FORMAT(DATE_ADD('day', -n, CURRENT_DATE), '%Y-%m-%d') AS date FROM U
 SELECT substr(to_iso8601(t.date), 1, 10) AS Date
 FROM (SELECT sequence(current_date - interval '1' year, current_date, interval '1' day) dates), unnest(dates) as t(date)\``,
     },
+    {
+      name: 'Permissive if cross join is appended after inner join separated using comma',
+      code: `\`
+WITH
+hundred_days AS (
+  SELECT to_iso8601(date_add('day', -(ones.digit + (10 * tens.digit) + (100 * hundreds.digit)), current_date)) AS Day
+  FROM       (SELECT 0 AS digit UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) AS ones
+  CROSS JOIN (SELECT 0 AS digit UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) AS tens
+  CROSS JOIN (SELECT 0 AS digit UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) AS hundreds
+  ORDER BY to_iso8601(date_add('day', -(ones.digit + (10 * tens.digit) + (100 * hundreds.digit)), current_date)) DESC
+  LIMIT 100),
+provisions_by_day AS (
+    SELECT substr(json_extract_scalar(responseheaders, '$["created-on"]'), 1, 10) AS Day,
+           count(*) AS Count
+    FROM "dataapi"."teampay-card-management"
+    WHERE strpos(url, '/apple-push-provisioning/') > 0 AND responsestatus = '200' AND method = 'PUT'
+    GROUP BY substr(json_extract_scalar(responseheaders, '$["created-on"]'), 1, 10)
+    ORDER BY substr(json_extract_scalar(responseheaders, '$["created-on"]'), 1, 10) DESC
+),
+declines_by_day AS (
+    SELECT substr(json_extract_scalar(responseheaders, '$["created-on"]'), 1, 10) AS Day,
+           count(*) AS Count
+    FROM "dataapi"."teampay-card-management"
+    WHERE strpos(url, '/apple-push-provisioning/') > 0 AND responsestatus <> '200' AND method = 'PUT'
+    GROUP BY substr(json_extract_scalar(responseheaders, '$["created-on"]'), 1, 10)
+    ORDER BY substr(json_extract_scalar(responseheaders, '$["created-on"]'), 1, 10) DESC
+)
+SELECT date(hundred_days.Day) AS Day,
+	   COALESCE(provisions_by_day.Count, 0) AS "Push Provisions",
+	   COALESCE(declines_by_day.Count, 0) AS "Declines"
+FROM hundred_days
+  LEFT OUTER JOIN provisions_by_day ON hundred_days.Day = provisions_by_day.Day
+  LEFT OUTER JOIN declines_by_day ON hundred_days.Day = declines_by_day.Day,
+  provisions_by_day as ac
+WHERE ac.Day <= hundred_days.Day
+GROUP BY hundred_days.Day, provisions_by_day.Count, declines_by_day.Count
+ORDER BY hundred_days.Day DESC\``,
+    },
   ],
   invalid: [
     {

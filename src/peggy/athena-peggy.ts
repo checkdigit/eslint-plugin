@@ -7696,7 +7696,7 @@ function peg$parse(input: any, options: any): any {
     s1 = peg$parseKW_ON();
     if (s1 !== peg$FAILED) {
       s2 = peg$parse__();
-      s3 = peg$parseor_and_where_expr();
+      s3 = peg$parseor_and_expr();
       if (s3 !== peg$FAILED) {
         peg$savedPos = s0;
         s0 = peg$f120(s3);
