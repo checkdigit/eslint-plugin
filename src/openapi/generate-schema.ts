@@ -308,13 +308,13 @@ function buildApiSchemaFromDocument(
   document: v31.Document,
   organization: string,
   serviceName: string,
-): ApiSchemas | null {
+): ApiSchemas | undefined {
   if (document.paths === undefined) {
-    return null;
+    return undefined;
   }
   const serverUri = document.servers?.[0]?.url;
   if (serverUri === undefined) {
-    return null;
+    return undefined;
   }
   const serverPathname = serverUri.startsWith('http') ? new URL(serverUri).pathname : serverUri;
   const endpointSchemasBaseUri = `https://${serviceName}.${organization}${serverPathname}/schemas`;
@@ -370,7 +370,7 @@ export function buildApiSchemaFromYaml(
   yamlContent: string,
   organization: string,
   serviceName: string,
-): ApiSchemas | null {
+): ApiSchemas | undefined {
   // eslint-disable-next-line import/no-named-as-default-member
   const document = jsYaml.load(yamlContent) as v31.Document;
   return buildApiSchemaFromDocument(document, organization, serviceName);
@@ -386,7 +386,7 @@ async function generateEndpointSchemas(
   // eslint-disable-next-line import/no-named-as-default-member
   const document = (await jsYaml.load(documentContents)) as v31.Document;
   const normalizedApiSchemas = buildApiSchemaFromDocument(document, organization, serviceName);
-  if (normalizedApiSchemas === null) {
+  if (normalizedApiSchemas === undefined) {
     return;
   }
   const swaggerSchemaFilename = `${root}/${endpoint}/${SWAGGER_SCHEMA_FILENAME}`;

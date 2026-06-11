@@ -18,7 +18,7 @@ const REQUIRE_TS_EXTENSION_EXPORTS = 'REQUIRE-TS-EXTENSION-EXPORTS';
 
 const createRule = ESLintUtils.RuleCreator((name) => getDocumentationUrl(name));
 
-const checkPath = (filename: string, filePath: string): { fixedPath: string | null; isFixNeeded: boolean } => {
+const checkPath = (filename: string, filePath: string): { fixedPath: string | undefined; isFixNeeded: boolean } => {
   if (filePath.startsWith('.') && !filePath.endsWith('.ts') && !filePath.endsWith('.json')) {
     const absolutePath = path.resolve(path.dirname(filename), filePath);
     const tsPath = `${absolutePath}.ts`;
@@ -30,7 +30,7 @@ const checkPath = (filename: string, filePath: string): { fixedPath: string | nu
       return { fixedPath, isFixNeeded: true };
     }
   }
-  return { fixedPath: null, isFixNeeded: false };
+  return { fixedPath: undefined, isFixNeeded: false };
 };
 
 const rule: TSESLint.RuleModule<string, unknown[]> = createRule({
@@ -57,7 +57,7 @@ const rule: TSESLint.RuleModule<string, unknown[]> = createRule({
       if (node.source !== null) {
         const importPath = node.source.value;
         const { fixedPath, isFixNeeded } = checkPath(filename, importPath);
-        if (isFixNeeded && fixedPath !== null) {
+        if (isFixNeeded && fixedPath !== undefined) {
           context.report({
             loc: node.source.loc,
             messageId:

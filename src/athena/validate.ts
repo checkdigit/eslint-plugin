@@ -134,7 +134,7 @@ function resolveServiceTable(select: Select, item: BaseFrom, ctx: VisitContext, 
 }
 
 // Returns the alias name for a ValuesFrom or a standalone UnnestFrom (UNNEST(fn(...))).
-function getFunctionAliasName(as: { name: { name: { value: string }[] } } | null): string | undefined {
+function getFunctionAliasName(as: { name: { name: { value: string }[] } } | undefined): string | undefined {
   return as?.name.name[0]?.value;
 }
 
@@ -179,7 +179,7 @@ function fromItemTableNames(item: From): string[] {
   }
   const unknownItem = item as unknown;
   if (isStandaloneUnnest(unknownItem)) {
-    return aliasAsSingleton(getFunctionAliasName(unknownItem.as));
+    return aliasAsSingleton(getFunctionAliasName(unknownItem.as ?? undefined));
   }
   return [];
 }
@@ -219,7 +219,7 @@ function resolveFromClause(select: Select, ctx: VisitContext): void {
     const unknownItem = item as unknown;
     if (isStandaloneUnnest(unknownItem)) {
       // Standalone UNNEST(fn()) — register alias with declared column names (schema unknown).
-      const tableAlias = getFunctionAliasName(unknownItem.as);
+      const tableAlias = getFunctionAliasName(unknownItem.as ?? undefined);
       if (tableAlias !== undefined) {
         const columns = new Map(
           (unknownItem.as?.args.value ?? []).map((columnRef) => {
@@ -287,7 +287,7 @@ function extractUnnestMappings(select: Select): UnnestMapping[] {
     }
     assert.ok(toColumns.length > 0, 'UNNEST alias must have at least one column name');
 
-    const tableAlias = getFunctionAliasName(item.as);
+    const tableAlias = getFunctionAliasName(item.as ?? undefined);
     mappings.push({
       fromColumn,
       toColumns,
@@ -396,7 +396,7 @@ function applyUnnestPost(mappings: UnnestMapping[], columns: Map<string, Resolve
 // ---------------------------------------------------------------------------
 
 function resolveDefaultSchemaColumn(
-  columnAlias: string | null,
+  columnAlias: string | undefined,
   indexedName: string,
   columnAST: unknown,
   columns: Map<string, ResolvedColumn[]>,
@@ -549,7 +549,7 @@ function validateComplexColumnExpression(columnAST: unknown, allTables: Resolved
 
 function resolveSingleColumnRef(
   columnAST: unknown,
-  columnAlias: string | null,
+  columnAlias: string | undefined,
   indexedName: string,
   ref: NonNullable<ReturnType<typeof extractColumnRefs>[number]>,
   allTables: ResolvedTable[],
@@ -584,7 +584,7 @@ function resolveSingleColumnRef(
 
 function applySchemaTypeOverride(
   columnAST: unknown,
-  columnAlias: string | null,
+  columnAlias: string | undefined,
   indexedName: string,
   columns: Map<string, ResolvedColumn[]>,
   predicate: (expression: unknown) => boolean,
@@ -620,7 +620,7 @@ function resolveSelectColumns(select: Select, ctx: VisitContext): Map<string, Re
   for (const [index, columnAST] of select.columns.entries()) {
     log('resolving column', columnAST);
 
-    const columnAlias = (columnAST as { as?: string | null }).as ?? null;
+    const columnAlias = (columnAST as { as?: string | null }).as ?? undefined;
     const indexedName = `_col${String(index)}`;
     const columnRefs = extractColumnRefs(columnAST);
 

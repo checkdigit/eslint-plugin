@@ -10,5 +10,5 @@ export async function derefSchema(schemaFileName: string): Promise<void> {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const json = JSON.parse(adjustedSchemaFileForDeref);
   const deref = await dereference(json);
-  await fs.writeFile(`${schemaFileName}.deref.json`, JSON.stringify(deref, null, 2));
+  await fs.writeFile(`${schemaFileName}.deref.json`, JSON.stringify(deref, undefined, 2));
 }

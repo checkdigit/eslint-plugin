@@ -52,8 +52,8 @@ function getColumnName(node: unknown): string | undefined {
   return typeof column === 'string' ? column.toLowerCase() : undefined;
 }
 
-function getColumnTable(node: unknown): string | null | undefined {
-  return getColumnRef(node)?.table;
+function getColumnTable(node: unknown): string | undefined {
+  return getColumnRef(node)?.table ?? undefined;
 }
 
 function getStringValue(node: unknown): string | undefined {
@@ -115,8 +115,8 @@ function isCardinalitySplitUrl(node: unknown): node is SqlFunction {
 }
 
 // Returns the table qualifier of the left-hand side of a matchable binary condition.
-// null means unqualified (applies to every table); undefined means indeterminate.
-function getConditionTableQualifier(left: unknown): string | null | undefined {
+// undefined means either unqualified (applies to every table) or indeterminate.
+function getConditionTableQualifier(left: unknown): string | undefined {
   const colName = getColumnName(left);
   if (colName !== undefined) {
     return getColumnTable(left);
@@ -124,13 +124,13 @@ function getConditionTableQualifier(left: unknown): string | null | undefined {
 
   const splitArgs = getSplitUrlFunctionArgs(left, 'split') ?? getSplitUrlFunctionArgs(left, 'split_part');
   if (splitArgs !== undefined) {
-    return getColumnTable(splitArgs[0]) ?? null;
+    return getColumnTable(splitArgs[0]);
   }
   if (isCardinalitySplitUrl(left)) {
     const outerArgs = (rec(left)?.['args'] as { value?: unknown[] } | undefined)?.value;
     const splitFn = rec(outerArgs?.[0]);
     const innerArgs = (splitFn?.['args'] as { value?: unknown[] } | undefined)?.value;
-    return getColumnTable(innerArgs?.[0]) ?? null;
+    return getColumnTable(innerArgs?.[0]);
   }
   return undefined;
 }
@@ -147,18 +147,18 @@ function buildPathSegmentPredicate(index: number, value: string): OperationPredi
   };
 }
 
-// tableAlias: the alias (or null if none) of the FROM-clause item we are currently matching.
+// tableAlias: the alias (or undefined if none) of the FROM-clause item we are currently matching.
 // Conditions that explicitly reference a different alias are skipped (treated as ALWAYS_TRUE).
-function buildLeafPredicate(node: Binary, tableAlias: string | null): OperationPredicate | undefined {
+function buildLeafPredicate(node: Binary, tableAlias: string | undefined): OperationPredicate | undefined {
   if (node.operator !== '=') {
     return undefined;
   }
   const { left, right } = node;
 
   const conditionTable = getConditionTableQualifier(left);
-  // conditionTable === null  → unqualified, applies to all tables
-  // conditionTable === string → qualified; skip if it names a different alias
-  if (conditionTable !== null && conditionTable !== undefined && tableAlias !== null && conditionTable !== tableAlias) {
+  // conditionTable === undefined → unqualified or indeterminate, applies to all tables
+  // conditionTable === string   → qualified; skip if it names a different alias
+  if (conditionTable !== undefined && tableAlias !== undefined && conditionTable !== tableAlias) {
     return undefined;
   }
 
@@ -207,7 +207,7 @@ function buildLeafPredicate(node: Binary, tableAlias: string | null): OperationP
   return undefined;
 }
 
-function buildPredicate(expr: unknown, tableAlias: string | null): OperationPredicate {
+function buildPredicate(expr: unknown, tableAlias: string | undefined): OperationPredicate {
   const node = rec(expr);
   if (node?.['type'] !== 'binary_expr') {
     return ALWAYS_TRUE;
@@ -241,8 +241,8 @@ export function matchApi(
   tableAST: object,
   apiSchemas: ApiSchemas[],
 ): MatchedOperation[] | undefined {
-  const tableAlias = (tableAST as { as?: string | null }).as ?? null;
-  const predicate = buildPredicate((selectAST as { where?: unknown }).where ?? null, tableAlias);
+  const tableAlias = (tableAST as { as?: string | null }).as ?? undefined;
+  const predicate = buildPredicate((selectAST as { where?: unknown }).where, tableAlias);
 
   const allOperations: OperationToMatch[] = apiSchemas
     .flatMap((apiSchema) => Object.entries(apiSchema.apis))

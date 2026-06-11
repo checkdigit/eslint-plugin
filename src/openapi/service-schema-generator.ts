@@ -60,7 +60,7 @@ function readServiceConfig(
   packageJsonContent: string,
   org: string,
   serviceName: string,
-): { organization: string; serviceName: string; apiRoot: string; endpoints: string[] } | null {
+): { organization: string; serviceName: string; apiRoot: string; endpoints: string[] } | undefined {
   const packageJson = JSON.parse(packageJsonContent) as {
     name?: string;
     service?: { api?: { root?: string; endpoints?: string[] } };
@@ -68,16 +68,16 @@ function readServiceConfig(
   const apiRoot = packageJson.service?.api?.root;
   const apiEndpoints = packageJson.service?.api?.endpoints;
   if (apiRoot === undefined || apiEndpoints === undefined || apiEndpoints.length === 0) {
-    return null;
+    return undefined;
   }
   const [pkgOrg = org, pkgServiceName = serviceName] = packageJson.name?.slice(1).split('/') ?? [];
   return { organization: pkgOrg, serviceName: pkgServiceName, apiRoot, endpoints: apiEndpoints };
 }
 
-function findServiceLocally(serviceFolder: string, org: string, serviceName: string): ServiceSource | null {
+function findServiceLocally(serviceFolder: string, org: string, serviceName: string): ServiceSource | undefined {
   const config = readServiceConfig(readFileSync(`${serviceFolder}/package.json`, 'utf-8'), org, serviceName);
-  if (config === null) {
-    return null;
+  if (config === undefined) {
+    return undefined;
   }
 
   const endpoints: ServiceEndpoint[] = [];
@@ -91,20 +91,20 @@ function findServiceLocally(serviceFolder: string, org: string, serviceName: str
   if (endpoints.length > 0) {
     return { organization: config.organization, serviceName: config.serviceName, endpoints };
   }
-  return null;
+  return undefined;
 }
 
-function findServiceInProject(serviceName: string): ServiceSource | null {
+function findServiceInProject(serviceName: string): ServiceSource | undefined {
   const packageJson = JSON.parse(readFileSync('./package.json', 'utf-8')) as { name?: string };
   const [org, projectName] = (packageJson.name ?? '').slice(1).split('/');
   if (org === undefined || projectName !== serviceName) {
-    return null;
+    return undefined;
   }
   log(`[schema-generator] '${serviceName}' is the current project, reading local swagger files`);
   return findServiceLocally('.', org, serviceName);
 }
 
-function findServiceInNodeModules(serviceName: string): ServiceSource | null {
+function findServiceInNodeModules(serviceName: string): ServiceSource | undefined {
   for (const org of GITHUB_ORGANIZATIONS) {
     const serviceFolder = `node_modules/@${org}/${serviceName}`;
     if (!existsSync(serviceFolder)) {
@@ -114,7 +114,7 @@ function findServiceInNodeModules(serviceName: string): ServiceSource | null {
     try {
       log(`[schema-generator] found in node_modules: @${org}/${serviceName}, reading swagger files`);
       const source = findServiceLocally(serviceFolder, org, serviceName);
-      if (source !== null) {
+      if (source !== undefined) {
         return source;
       }
       log(`[schema-generator] no swagger schema inside node_modules/@${org}/${serviceName}`);
@@ -122,7 +122,7 @@ function findServiceInNodeModules(serviceName: string): ServiceSource | null {
       log(`[schema-generator] error reading node_modules/@${org}/${serviceName}: ${errorMessageFromError(error)}`);
     }
   }
-  return null;
+  return undefined;
 }
 
 export function generateSchemasForService(
@@ -132,7 +132,7 @@ export function generateSchemasForService(
   log(`[schema-generator] locating service '${serviceName}'`);
 
   const source = findServiceInProject(serviceName) ?? findServiceInNodeModules(serviceName);
-  if (source === null) {
+  if (source === undefined) {
     log(
       `[schema-generator] '${serviceName}' not found — ensure it is listed as a devDependency or the repo is accessible via git`,
     );
@@ -145,7 +145,7 @@ export function generateSchemasForService(
   for (const { path: endpoint, yamlContent } of source.endpoints) {
     try {
       const rawSchema = buildApiSchemaFromYaml(yamlContent, source.organization, source.serviceName);
-      if (rawSchema === null) {
+      if (rawSchema === undefined) {
         continue;
       }
       const schema = derefApiSchemas(rawSchema);

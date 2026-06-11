@@ -140,7 +140,7 @@ const isVariableDeclarationNewExpression = (node: TSESTree.Node): boolean => {
 };
 
 // Update the hasSideEffects function to return a string indicating the type of side effect
-const hasSideEffects = (statement: TSESTree.Node, excludedIdentifiers: string[]): string | null => {
+const hasSideEffects = (statement: TSESTree.Node, excludedIdentifiers: string[]): string | undefined => {
   if (isAwaitExpression(statement)) {
     return TSESTree.AST_NODE_TYPES.AwaitExpression;
   }
@@ -171,7 +171,7 @@ const hasSideEffects = (statement: TSESTree.Node, excludedIdentifiers: string[])
   if (isAssignmentExpression(statement)) {
     return TSESTree.AST_NODE_TYPES.AssignmentExpression;
   }
-  return null;
+  return undefined;
 };
 
 const createRule: ReturnType<typeof ESLintUtils.RuleCreator> = ESLintUtils.RuleCreator((name) =>
@@ -220,7 +220,7 @@ const rule: ReturnType<typeof createRule> = createRule({
 
         node.body.forEach((statement: TSESTree.Node) => {
           const sideEffectType = hasSideEffects(statement, excludedIdentifiers);
-          if (sideEffectType !== null) {
+          if (sideEffectType !== undefined) {
             context.report({
               node: statement,
               messageId: NO_SIDE_EFFECTS,
