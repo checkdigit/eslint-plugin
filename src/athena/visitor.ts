@@ -1,9 +1,5 @@
 // athena/visitor.ts
 
-import debug from 'debug';
-
-const log = debug('athena:visitor');
-
 import type {
   AggrFunc,
   BaseFrom,
@@ -70,20 +66,23 @@ export interface VisitorMap {
 // nodes without an intermediate cast.
 // -------------------------------------------------------------------
 
+function hasNodeType(node: unknown, type: string): boolean {
+  return typeof node === 'object' && node !== null && (node as { type?: unknown }).type === type;
+}
+
 export function isUnnestFrom(node: unknown): node is UnnestFrom {
-  return typeof node === 'object' && node !== null && (node as { type?: unknown }).type === 'unnest';
+  return hasNodeType(node, 'unnest');
 }
 
 export function isDual(node: unknown): node is Dual {
-  return typeof node === 'object' && node !== null && (node as { type?: unknown }).type === 'dual';
+  return hasNodeType(node, 'dual');
 }
 
 export function isValuesFrom(node: unknown): node is ValuesFrom {
   if (typeof node !== 'object' || node === null) {
     return false;
   }
-  const expr = (node as { expr?: unknown }).expr;
-  return typeof expr === 'object' && expr !== null && (expr as { type?: unknown }).type === 'values';
+  return hasNodeType((node as { expr?: unknown }).expr, 'values');
 }
 
 export function isTableExpr(node: unknown): node is TableExpr {
@@ -94,27 +93,16 @@ export function isTableExpr(node: unknown): node is TableExpr {
   return typeof expr === 'object' && expr !== null && 'ast' in expr;
 }
 
+function isRegularFromItem(node: unknown): boolean {
+  return typeof node === 'object' && node !== null && !isUnnestFrom(node) && !isDual(node) && !isTableExpr(node);
+}
+
 export function isJoin(node: unknown): node is Join {
-  return (
-    !isUnnestFrom(node) &&
-    !isDual(node) &&
-    !isTableExpr(node) &&
-    typeof node === 'object' &&
-    node !== null &&
-    'join' in node
-  );
+  return isRegularFromItem(node) && 'join' in (node as object);
 }
 
 export function isBaseFrom(node: unknown): node is BaseFrom {
-  return (
-    !isUnnestFrom(node) &&
-    !isDual(node) &&
-    !isTableExpr(node) &&
-    !isJoin(node) &&
-    typeof node === 'object' &&
-    node !== null &&
-    'table' in node
-  );
+  return isRegularFromItem(node) && !isJoin(node) && 'table' in (node as object);
 }
 
 export function hasArrayIndex(node: ColumnRefItem): node is ColumnRefWithIndex {
@@ -237,6 +225,17 @@ function walkFrom(node: From, visitor: VisitorMap): void {
   visitor.visitBaseFrom?.(node);
 }
 
+/** Normalise select.from (null / single item / array) to a From[]. */
+export function fromClauseItems(select: Select): From[] {
+  if (Array.isArray(select.from)) {
+    return select.from;
+  }
+  if (select.from !== null) {
+    return [select.from];
+  }
+  return [];
+}
+
 // -------------------------------------------------------------------
 // Core walk — dispatches per node type and recurses into children.
 // -------------------------------------------------------------------
@@ -254,15 +253,7 @@ export function walk(node: unknown, visitor: VisitorMap): void {
       visitor.visitWith?.(withItem);
       walk(withItem.stmt.ast, visitor);
     }
-    let fromItems: From[];
-    if (Array.isArray(sel.from)) {
-      fromItems = sel.from;
-    } else if (sel.from !== null) {
-      fromItems = [sel.from];
-    } else {
-      fromItems = [];
-    }
-    for (const fromItem of fromItems) {
+    for (const fromItem of fromClauseItems(sel)) {
       walkFrom(fromItem, visitor);
     }
     for (const col of sel.columns) {
@@ -307,30 +298,6 @@ export function extractColumnRefs(expr: unknown): ColumnRefItem[] {
   return refs;
 }
 
-/** Return the path string from the first json_extract_scalar / json_extract call found. */
-export function extractJsonExtractPath(expr: unknown): string | undefined {
-  let path: string | undefined;
-  walkExpr(expr, {
-    visitFunction(node) {
-      if (path !== undefined) {
-        return;
-      }
-      const fnName = node.name.name[0]?.value;
-      if (fnName === 'json_extract_scalar' || fnName === 'json_extract') {
-        const pathArg = node.args?.value[1];
-        if (pathArg !== undefined) {
-          const val = (pathArg as unknown as { value?: unknown }).value;
-          if (typeof val === 'string') {
-            path = val;
-          }
-        }
-        log('extractJsonExtractPath, function:', fnName, path);
-      }
-    },
-  });
-  return path;
-}
-
 export interface JsonExtractCall {
   ref: ColumnRefItem;
   path: string;
@@ -366,6 +333,11 @@ export function extractJsonExtractCalls(expr: unknown): JsonExtractCall[] {
   return calls;
 }
 
+/** Return the path string from the first json_extract_scalar / json_extract call found. */
+export function extractJsonExtractPath(expr: unknown): string | undefined {
+  return extractJsonExtractCalls(expr)[0]?.path;
+}
+
 /** Return the JSONPath-style string from a bracket accessor (col['key']), or undefined. */
 export function extractBracketAccessorPath(expr: unknown): string | undefined {
   let path: string | undefined;
@@ -397,13 +369,12 @@ export function hasFunctionCalls(expr: unknown): boolean {
   return found;
 }
 
-/** Return true when the expression tree contains any CAST / TRY_CAST to ARRAY<…>. */
-export function containsCastToArray(expr: unknown): boolean {
+function containsCastToType(expr: unknown, dataType: 'ARRAY' | 'MAP'): boolean {
   let found = false;
   walkExpr(expr, {
     visitCast(node) {
       const target = (node as unknown as { target?: { dataType?: string }[] }).target?.[0];
-      if (target?.dataType === 'ARRAY') {
+      if (target?.dataType === dataType) {
         found = true;
       }
     },
@@ -411,16 +382,12 @@ export function containsCastToArray(expr: unknown): boolean {
   return found;
 }
 
+/** Return true when the expression tree contains any CAST / TRY_CAST to ARRAY<…>. */
+export function containsCastToArray(expr: unknown): boolean {
+  return containsCastToType(expr, 'ARRAY');
+}
+
 /** Return true when the expression tree contains any CAST / TRY_CAST to MAP<…>. */
 export function containsCastToMap(expr: unknown): boolean {
-  let found = false;
-  walkExpr(expr, {
-    visitCast(node) {
-      const target = (node as unknown as { target?: { dataType?: string }[] }).target?.[0];
-      if (target?.dataType === 'MAP') {
-        found = true;
-      }
-    },
-  });
-  return found;
+  return containsCastToType(expr, 'MAP');
 }

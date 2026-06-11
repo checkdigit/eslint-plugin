@@ -86,8 +86,9 @@ function getRequestParametersSchema(
     return;
   }
 
-  let parameters = getParameters(operation.parameters, document);
-  parameters = parameters.filter((parameter) => parameter.in === parameterType);
+  const parameters = getParameters(operation.parameters, document).filter(
+    (parameter) => parameter.in === parameterType,
+  );
   if (parameters.length === 0) {
     return;
   }
@@ -95,8 +96,7 @@ function getRequestParametersSchema(
   const parametersSchema = Object.fromEntries(
     parameters.map((parameter) => [
       parameterType === 'header' ? parameter.name.toLowerCase() : parameter.name,
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-      parameter.schema ?? ({ type: 'string' } as v31.SchemaObject),
+      parameter.schema ?? { type: 'string' as const },
     ]),
   );
   const requiredParameterNames = parameters
@@ -113,17 +113,8 @@ function getRequestParametersSchema(
 }
 
 function getBodySchema(contents: Record<string, v31.MediaTypeObject> | undefined): v31.SchemaObject | undefined {
-  if (contents === undefined) {
-    return undefined;
-  }
-
-  const schema = Object.values(contents)[0]?.schema;
-  if (schema !== undefined && Object.keys(schema).length === 0) {
-    // empty schema should be treated as undefined
-    return undefined;
-  }
-
-  return schema;
+  const schema = Object.values(contents ?? {})[0]?.schema;
+  return schema !== undefined && Object.keys(schema).length > 0 ? schema : undefined;
 }
 
 function getRequestBodySchema(operation: v31.OperationObject, document: v31.Document) {
@@ -201,15 +192,10 @@ function getResponseHeadersSchema(
     Object.entries(headers).map(([name, header]) => [name.toLowerCase(), resolve(document, header)]),
   );
   const resolvedHeaderSchemas = Object.fromEntries(
-    Object.entries(resolvedHeaders).map(([name, header]) => [
-      name,
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-      header.schema ?? ({ type: 'string' } as v31.SchemaObject),
-    ]),
+    Object.entries(resolvedHeaders).map(([name, header]) => [name, header.schema ?? { type: 'string' as const }]),
   );
   const requiredHeaderNames = Object.entries(resolvedHeaders)
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    .filter(([_name, header]) => header.required === true)
+    .filter(([, header]) => header.required === true)
     .map(([name]) => name);
   return {
     type: 'object',
@@ -282,12 +268,10 @@ function getOperationId(
 
   // KISS, we could try to to come up with a better naming convension in case of name collision, but it's probably better to leave it to the service to decide a appropriate operationId
   let operationIdIndex = 1;
-  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-  while (operationIds.has(`${operationId}${operationIdIndex}`)) {
+  while (operationIds.has(`${operationId}${operationIdIndex.toString()}`)) {
     operationIdIndex += 1;
   }
-  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-  return `${operationId}${operationIdIndex}`;
+  return `${operationId}${operationIdIndex.toString()}`;
 }
 
 function updateOpenapiSchemaDefinitionsReferences(
@@ -315,6 +299,11 @@ function updateOpenapiSchemaDefinitionsReferences(
   return value;
 }
 
+function getFirehoseLoggedExtension(obj: object): unknown {
+  const record = obj as Record<string, unknown>;
+  return record['x-firehose-logged'] ?? record['x-firehoseLogged'];
+}
+
 function buildApiSchemaFromDocument(
   document: v31.Document,
   organization: string,
@@ -333,24 +322,19 @@ function buildApiSchemaFromDocument(
   const apiSchemas: Record<string, Record<string, OperationSchemas>> = {};
   const allSchemas: ApiSchemas = { apis: apiSchemas };
   const operationIds = new Set<string>();
-  const documentFirehoseLogged =
-    (document as Record<string, unknown>)['x-firehose-logged'] ??
-    (document as Record<string, unknown>)['x-firehoseLogged'];
+  const documentFirehoseLogged = getFirehoseLoggedExtension(document);
   log('document firehose logged value', documentFirehoseLogged);
 
   for (const [path, pathItems] of Object.entries(document.paths)) {
     // convert openapi path to koa router path, e.g. "/user/{userId}" --> "/user/:userId"
-    // eslint-disable-next-line prefer-named-capture-group
-    const koaPath = path.replaceAll(/\{([^}]+)\}/gu, ':$1');
+    const koaPath = path.replaceAll(/\{(?<param>[^}]+)\}/gu, ':$<param>');
     const pathSchemas: Record<string, OperationSchemas> = {};
     apiSchemas[`${serverPathname}${koaPath}`] = pathSchemas;
 
     for (const method of ALL_OPERATION_METHODS) {
       const operation = pathItems?.[method];
       if (operation !== undefined) {
-        const operationFirehoseLogged =
-          (operation as Record<string, unknown>)['x-firehose-logged'] ??
-          (operation as Record<string, unknown>)['x-firehoseLogged'];
+        const operationFirehoseLogged = getFirehoseLoggedExtension(operation);
         log('operation firehose logged value', operationFirehoseLogged);
         const effectiveFirehoseLogged = operationFirehoseLogged ?? documentFirehoseLogged;
         if (effectiveFirehoseLogged !== true) {

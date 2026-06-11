@@ -13,11 +13,6 @@ const LEGACY_TABLE_SUFFIX = '_logs';
 // eslint-disable-next-line no-magic-numbers
 const SCHEMA_MAX_AGE_MS = 60 * 60 * 1000; // 1 hour
 
-function upperCaseFirstCharacter(value: string): string {
-  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-  return `${value[0]?.toUpperCase()}${value.slice(1)}`;
-}
-
 export function locateApi(originalServiceName: string): ApiSchemas[] {
   log('locating API for service', originalServiceName);
 
@@ -27,14 +22,13 @@ export function locateApi(originalServiceName: string): ApiSchemas[] {
     serviceName = serviceName.slice(0, -LEGACY_TABLE_SUFFIX.length);
   }
 
-  const serviceNameParts = serviceName.split('-');
-  const camelCaseServiceName = [serviceNameParts[0], ...serviceNameParts.slice(1).map(upperCaseFirstCharacter)].join(
-    '',
-  );
+  const camelCaseServiceName = serviceName.replace(/-(?<letter>[a-z])/gu, (_, letter: string) => letter.toUpperCase());
 
   const allSchemaFilenames = fs.globSync(`${SERVICES_ROOT_FOLDER}/${camelCaseServiceName}/*/swagger.schema.deref.json`);
-  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-  log(`${allSchemaFilenames.length} versions of API schemas located for service ${serviceName}`, allSchemaFilenames);
+  log(
+    `${allSchemaFilenames.length.toString()} versions of API schemas located for service ${serviceName}`,
+    allSchemaFilenames,
+  );
 
   const outputDir = `${SERVICES_ROOT_FOLDER}/${camelCaseServiceName}`;
 

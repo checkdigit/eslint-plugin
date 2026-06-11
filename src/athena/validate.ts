@@ -27,6 +27,7 @@ import {
   extractColumnRefs,
   extractJsonExtractCalls,
   extractJsonExtractPath,
+  fromClauseItems,
   hasFunctionCalls,
   isBaseFrom,
   isJoin,
@@ -61,6 +62,7 @@ export function offsetToLoc(text: string, offset: number): { line: number; colum
 
 const log = debug('eslint-plugin:athena');
 const ANONYMOUS_TABLE = '<anonymous>';
+const SUBQUERY_TABLE = '<subquery>';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -80,22 +82,31 @@ function getApiSchemas(serviceName: string, ctx: VisitContext) {
 }
 
 function lookupTables(nameOrAlias: string, ctx: VisitContext): ResolvedTable[] {
-  // Direct hit first: aliases are now stored under their alias key in ctx.tables.
-  if (ctx.tables.has(nameOrAlias)) {
-    return ctx.tables.get(nameOrAlias) ?? [];
-  }
+  // Aliases are stored under their alias key in ctx.tables, so direct lookup wins.
   const canonical = ctx.aliases.get(nameOrAlias) ?? nameOrAlias;
-  return ctx.tables.get(canonical) ?? [];
+  return ctx.tables.get(nameOrAlias) ?? ctx.tables.get(canonical) ?? [];
 }
 
-function fromClauseItems(select: Select): From[] {
-  if (Array.isArray(select.from)) {
-    return select.from;
-  }
-  if (select.from !== null) {
-    return [select.from];
-  }
-  return [];
+function flattenTables(ctx: VisitContext): ResolvedTable[] {
+  return [...ctx.tables.values()].flat();
+}
+
+function resolveReferencedTables(
+  tableRef: string | undefined,
+  allTables: ResolvedTable[],
+  ctx: VisitContext,
+): ResolvedTable[] {
+  return tableRef !== undefined ? lookupTables(tableRef, ctx) : allTables;
+}
+
+function resolveColumnRefParts(ref: { table: string | null; column: unknown }): {
+  tableRef: string | undefined;
+  colRef: string | undefined;
+} {
+  return {
+    tableRef: ref.table ?? undefined,
+    colRef: typeof ref.column === 'string' ? ref.column : undefined,
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -138,8 +149,7 @@ function extractColumnAliasName(arg: unknown): string | undefined {
   }
   const fnNode = arg as { type?: unknown; name?: { name?: { value?: string }[] }; args?: { value?: unknown[] } };
   if (fnNode.type === 'function' && fnNode.args?.value?.length === 0) {
-    const functionName = fnNode.name?.name?.[0]?.value;
-    return functionName !== undefined ? functionName.toLowerCase() : undefined;
+    return fnNode.name?.name?.[0]?.value?.toLowerCase();
   }
   return undefined;
 }
@@ -147,6 +157,10 @@ function extractColumnAliasName(arg: unknown): string | undefined {
 // UNNEST whose argument is a function call (e.g. SEQUENCE), not a column reference.
 function isStandaloneUnnest(node: unknown): node is UnnestFrom {
   return isUnnestFrom(node) && typeof (node.expr as { column?: unknown }).column !== 'string';
+}
+
+function aliasAsSingleton(alias: string | undefined): string[] {
+  return alias !== undefined ? [alias] : [];
 }
 
 // Returns every name under which this FROM item can be stored in ctx.tables.
@@ -158,16 +172,14 @@ function fromItemTableNames(item: From): string[] {
     return item.as !== null ? [item.as, item.table] : [item.table];
   }
   if (isTableExpr(item)) {
-    return [typeof item.as === 'string' ? item.as : '<subquery>'];
+    return [typeof item.as === 'string' ? item.as : SUBQUERY_TABLE];
   }
   if (isValuesFrom(item)) {
-    const alias = getFunctionAliasName(item.as);
-    return alias !== undefined ? [alias] : [];
+    return aliasAsSingleton(getFunctionAliasName(item.as));
   }
   const unknownItem = item as unknown;
   if (isStandaloneUnnest(unknownItem)) {
-    const alias = getFunctionAliasName(unknownItem.as);
-    return alias !== undefined ? [alias] : [];
+    return aliasAsSingleton(getFunctionAliasName(unknownItem.as));
   }
   return [];
 }
@@ -183,6 +195,10 @@ function restrictToFromClause(select: Select, ctx: VisitContext): void {
 
 function tableIsResolved(tableName: string, storageKey: string, ctx: VisitContext): boolean {
   return ctx.tables.has(storageKey) || ctx.tables.has(tableName);
+}
+
+function registerAliasedTable(tableAlias: string, columns: Map<string, ResolvedColumn[]>, ctx: VisitContext): void {
+  ctx.tables.set(tableAlias, [{ name: tableAlias, columns }]);
 }
 
 // Shared resolution logic for BaseFrom and Join items (Join extends BaseFrom).
@@ -211,7 +227,7 @@ function resolveFromClause(select: Select, ctx: VisitContext): void {
             return [colName, [resolvedCol(colName, {})]];
           }),
         );
-        ctx.tables.set(tableAlias, [{ name: tableAlias, columns }]);
+        registerAliasedTable(tableAlias, columns, ctx);
       }
     } else if (isUnnestFrom(unknownItem)) {
       // CROSS JOIN UNNEST with a column ref — handled later by extractUnnestMappings.
@@ -221,10 +237,10 @@ function resolveFromClause(select: Select, ctx: VisitContext): void {
         const columns = new Map(
           item.as.args.value.map((columnRef) => [columnRef.column, [resolvedCol(columnRef.column, {})]]),
         );
-        ctx.tables.set(tableAlias, [{ name: tableAlias, columns }]);
+        registerAliasedTable(tableAlias, columns, ctx);
       }
     } else if (isTableExpr(item)) {
-      const alias = typeof item.as === 'string' ? item.as : '<subquery>';
+      const alias = typeof item.as === 'string' ? item.as : SUBQUERY_TABLE;
       // eslint-disable-next-line no-use-before-define
       checkSelect(item.expr.ast, ctx, alias);
     } else if (isJoin(item) || isBaseFrom(item)) {
@@ -283,11 +299,51 @@ function extractUnnestMappings(select: Select): UnnestMapping[] {
   return mappings;
 }
 
+// Resolves UNNEST source schema into target column entries.
+// When hasKnownApiOperation is true, an unrecognised schema type throws; otherwise unknown columns
+// are registered with an empty schema (the schema is an estimate for non-API sources).
+function buildUnnestColumnMap(
+  fromColumn: string,
+  toColumns: string[],
+  sourceSchema: ResolvedColumn['schema'] | undefined,
+  sourceAst: object | undefined,
+  ast: object,
+  hasKnownApiOperation: boolean,
+): Map<string, ResolvedColumn[]> {
+  if (sourceSchema?.type === 'array') {
+    const [toColumn] = toColumns;
+    assert.ok(toColumn !== undefined);
+    return new Map([[toColumn, [resolvedCol(toColumn, sourceSchema.items, sourceAst)]]]);
+  }
+  if (sourceSchema?.type === 'object') {
+    const [keyColumn, valueColumn] = toColumns;
+    assert.ok(
+      keyColumn !== undefined && valueColumn !== undefined,
+      `UNNEST of map column '${fromColumn}' requires exactly two alias columns (key, value)`,
+    );
+    const addlProps = (sourceSchema as SchemaObject)['additionalProperties'] as unknown;
+    const valueSchema: SchemaObject =
+      typeof addlProps === 'object' && addlProps !== null ? addlProps : { type: 'string' };
+    return new Map([
+      [keyColumn, [resolvedCol(keyColumn, { type: 'string' }, sourceAst)]],
+      [valueColumn, [resolvedCol(valueColumn, valueSchema, sourceAst)]],
+    ]);
+  }
+  if (!hasKnownApiOperation) {
+    return new Map(toColumns.map((toColumn) => [toColumn, [resolvedCol(toColumn, {})]]));
+  }
+  throw new AthenaError(
+    ATHENA_ERROR,
+    `UNNEST source column '${fromColumn}' must resolve to an array or map schema`,
+    ast,
+  );
+}
+
 function applyUnnestPre(mappings: UnnestMapping[], ctx: VisitContext): UnnestMapping[] {
   const deferred: UnnestMapping[] = [];
 
   for (const { fromColumn, toColumns, tableAlias, ast } of mappings) {
-    const ownerTable = [...ctx.tables.values()].flat().find((table) => table.columns.has(fromColumn));
+    const ownerTable = flattenTables(ctx).find((table) => table.columns.has(fromColumn));
 
     if (ownerTable === undefined) {
       deferred.push({ fromColumn, toColumns, ...(tableAlias !== undefined ? { tableAlias } : {}), ast });
@@ -295,58 +351,17 @@ function applyUnnestPre(mappings: UnnestMapping[], ctx: VisitContext): UnnestMap
     }
 
     const sourceColumns = ownerTable.columns.get(fromColumn) ?? [];
-    const sourceSchema = sourceColumns[0]?.schema;
     const unnestTableName = `${ownerTable.name ?? ANONYMOUS_TABLE}:<unnested>`;
     const apiOperation = ownerTable.apiOperation !== undefined ? { apiOperation: ownerTable.apiOperation } : {};
-
-    let unnestEntry: ResolvedTable[];
-    if (sourceSchema?.type === 'array') {
-      const [toColumn] = toColumns;
-      assert.ok(toColumn !== undefined);
-      unnestEntry = [
-        {
-          name: unnestTableName,
-          ...apiOperation,
-          columns: new Map([[toColumn, [resolvedCol(toColumn, sourceSchema.items, sourceColumns[0]?.ast)]]]),
-        },
-      ];
-    } else if (sourceSchema?.type === 'object') {
-      const [keyColumn, valueColumn] = toColumns;
-      assert.ok(
-        keyColumn !== undefined && valueColumn !== undefined,
-        `UNNEST of map column '${fromColumn}' requires exactly two alias columns (key, value)`,
-      );
-      const addlProps = (sourceSchema as SchemaObject)['additionalProperties'] as unknown;
-      const valueSchema: SchemaObject =
-        typeof addlProps === 'object' && addlProps !== null ? addlProps : { type: 'string' };
-      unnestEntry = [
-        {
-          name: unnestTableName,
-          ...apiOperation,
-          columns: new Map([
-            [keyColumn, [resolvedCol(keyColumn, { type: 'string' }, sourceColumns[0]?.ast)]],
-            [valueColumn, [resolvedCol(valueColumn, valueSchema, sourceColumns[0]?.ast)]],
-          ]),
-        },
-      ];
-    } else if (ownerTable.apiOperation !== undefined) {
-      // Only raise an error when the column schema was derived from a known API spec — for
-      // computed columns (subqueries, CTEs, functions) the inferred schema may be imprecise.
-      throw new AthenaError(
-        ATHENA_ERROR,
-        `UNNEST source column '${fromColumn}' must resolve to an array or map schema`,
-        ast,
-      );
-    } else {
-      // Non-API source: schema is an estimate; register target columns with unknown schema.
-      unnestEntry = [
-        {
-          name: unnestTableName,
-          ...apiOperation,
-          columns: new Map(toColumns.map((toColumn) => [toColumn, [resolvedCol(toColumn, {})]])),
-        },
-      ];
-    }
+    const unnestColumns = buildUnnestColumnMap(
+      fromColumn,
+      toColumns,
+      sourceColumns[0]?.schema,
+      sourceColumns[0]?.ast,
+      ast,
+      ownerTable.apiOperation !== undefined,
+    );
+    const unnestEntry: ResolvedTable[] = [{ name: unnestTableName, ...apiOperation, columns: unnestColumns }];
     ctx.tables.set(unnestTableName, unnestEntry);
     if (tableAlias !== undefined) {
       ctx.tables.set(tableAlias, unnestEntry);
@@ -362,29 +377,16 @@ function applyUnnestPost(mappings: UnnestMapping[], columns: Map<string, Resolve
     if (sourceColumns === undefined) {
       throw new AthenaError(ATHENA_ERROR, `UNNEST source column '${fromColumn}' not found in SELECT`, ast);
     }
-    const sourceSchema = sourceColumns[0]?.schema;
-
-    if (sourceSchema?.type === 'array') {
-      const [toColumn] = toColumns;
-      assert.ok(toColumn !== undefined);
-      columns.set(toColumn, [resolvedCol(toColumn, sourceSchema.items, sourceColumns[0]?.ast)]);
-    } else if (sourceSchema?.type === 'object') {
-      const [keyColumn, valueColumn] = toColumns;
-      assert.ok(
-        keyColumn !== undefined && valueColumn !== undefined,
-        `UNNEST of map column '${fromColumn}' requires exactly two alias columns (key, value)`,
-      );
-      const addlProps = (sourceSchema as SchemaObject)['additionalProperties'] as unknown;
-      const valueSchema: SchemaObject =
-        typeof addlProps === 'object' && addlProps !== null ? addlProps : { type: 'string' };
-      columns.set(keyColumn, [resolvedCol(keyColumn, { type: 'string' }, sourceColumns[0]?.ast)]);
-      columns.set(valueColumn, [resolvedCol(valueColumn, valueSchema, sourceColumns[0]?.ast)]);
-    } else {
-      throw new AthenaError(
-        ATHENA_ERROR,
-        `UNNEST source column '${fromColumn}' must resolve to an array or map schema`,
-        ast,
-      );
+    const unnestColumns = buildUnnestColumnMap(
+      fromColumn,
+      toColumns,
+      sourceColumns[0]?.schema,
+      sourceColumns[0]?.ast,
+      ast,
+      true,
+    );
+    for (const [key, value] of unnestColumns) {
+      columns.set(key, value);
     }
   }
 }
@@ -415,19 +417,14 @@ function schemaPropertyHint(resolvedColumns: ResolvedColumn[]): string {
   if (resolvedColumns.length === 0) {
     return '';
   }
-  const first = JSON.stringify(resolvedColumns[0]?.schema);
-  if (!resolvedColumns.every((col) => JSON.stringify(col.schema) === first)) {
+  const firstSchema = resolvedColumns[0]?.schema;
+  if (!resolvedColumns.every((col) => JSON.stringify(col.schema) === JSON.stringify(firstSchema))) {
     return '';
   }
-  const schema = resolvedColumns[0]?.schema;
-  if (schema?.type !== 'object') {
+  if (firstSchema?.type !== 'object' || firstSchema.properties === undefined) {
     return '';
   }
-  const properties = schema.properties;
-  if (properties === undefined) {
-    return '';
-  }
-  const propNames = Object.keys(properties);
+  const propNames = Object.keys(firstSchema.properties);
   return propNames.length > 0 ? `; available properties: ${propNames.join(', ')}` : '';
 }
 
@@ -438,8 +435,7 @@ function resolveSchemaAtPath(
   ast?: object,
 ): SchemaObject[] {
   // Double-dot handles allOf / anyOf / oneOf wrappers that may appear in the schema.
-  // eslint-disable-next-line prefer-named-capture-group
-  const adjustedPath = `$.${propertyAccessor.substring(1).replace(/(\.|\[)/gu, '..properties$1')}`;
+  const adjustedPath = `$.${propertyAccessor.substring(1).replace(/(?<sep>\.|\[)/gu, '..properties$<sep>')}`;
   log('adjusted path', adjustedPath);
 
   const extractedSchemas = resolvedColumns.flatMap((col) =>
@@ -477,6 +473,28 @@ function navigateSchemaPath(
 // Pass 2 — Resolve SELECT columns → Map<name, ResolvedColumn[]>
 // ---------------------------------------------------------------------------
 
+function throwUnknownTableError(tableRef: string | undefined, colRef: string, ctx: VisitContext, ref: object): never {
+  throw new AthenaError(
+    ATHENA_ERROR,
+    `unknown table or alias '${tableRef ?? colRef}'; known tables: ${[...ctx.tables.keys()].join(', ')}`,
+    ref,
+  );
+}
+
+function resolveReferencedTablesOrThrow(
+  tableRef: string | undefined,
+  colRef: string,
+  allTables: ResolvedTable[],
+  ctx: VisitContext,
+  ref: object,
+): ResolvedTable[] {
+  const referencedTables = resolveReferencedTables(tableRef, allTables, ctx);
+  if (referencedTables.length === 0) {
+    throwUnknownTableError(tableRef, colRef, ctx, ref);
+  }
+  return referencedTables;
+}
+
 function lookupColumnOrThrow(colRef: string, ref: object, referencedTables: ResolvedTable[]): ResolvedColumn[] {
   const resolvedColumns = referencedTables.flatMap((table) => table.columns.get(colRef) ?? []);
   if (resolvedColumns.length === 0) {
@@ -503,34 +521,25 @@ function checkColumnRefsExist(
     return;
   }
   for (const ref of extractColumnRefs(ast)) {
-    const colRef = typeof ref.column === 'string' ? ref.column : undefined;
+    const { tableRef, colRef } = resolveColumnRefParts(ref);
     if (colRef === undefined || colRef === '*') {
       continue;
     }
-    const tableRef = ref.table ?? undefined;
     if (tableRef === undefined && selectColumns?.has(colRef) === true) {
       continue;
     }
-    const referencedTables = tableRef !== undefined ? lookupTables(tableRef, ctx) : allTables;
-    if (referencedTables.length === 0) {
-      throw new AthenaError(
-        ATHENA_ERROR,
-        `unknown table or alias '${tableRef ?? colRef}'; known tables: ${[...ctx.tables.keys()].join(', ')}`,
-        ref,
-      );
-    }
+    const referencedTables = resolveReferencedTablesOrThrow(tableRef, colRef, allTables, ctx, ref);
     lookupColumnOrThrow(colRef, ref, referencedTables);
   }
 }
 
 function validateComplexColumnExpression(columnAST: unknown, allTables: ResolvedTable[], ctx: VisitContext): void {
   for (const { ref, path, fnNode } of extractJsonExtractCalls(columnAST)) {
-    const tableRef = ref.table ?? undefined;
-    const colRef = typeof ref.column === 'string' ? ref.column : undefined;
+    const { tableRef, colRef } = resolveColumnRefParts(ref);
     if (colRef === undefined) {
       continue;
     }
-    const referencedTables = tableRef !== undefined ? lookupTables(tableRef, ctx) : allTables;
+    const referencedTables = resolveReferencedTables(tableRef, allTables, ctx);
     const resolvedColumns = referencedTables.flatMap((table) => table.columns.get(colRef) ?? []);
     if (resolvedColumns.length > 0) {
       resolveSchemaAtPath(colRef, path, resolvedColumns, fnNode);
@@ -547,18 +556,10 @@ function resolveSingleColumnRef(
   ctx: VisitContext,
   columns: Map<string, ResolvedColumn[]>,
 ): void {
-  const tableRef = ref.table ?? undefined;
-  const colRef = typeof ref.column === 'string' ? ref.column : undefined;
+  const { tableRef, colRef } = resolveColumnRefParts(ref);
   assert.ok(colRef !== undefined, 'column_ref must have a string column name');
 
-  const referencedTables = tableRef !== undefined ? lookupTables(tableRef, ctx) : allTables;
-  if (referencedTables.length === 0) {
-    throw new AthenaError(
-      ATHENA_ERROR,
-      `unknown table or alias '${tableRef ?? colRef}'; known tables: ${[...ctx.tables.keys()].join(', ')}`,
-      ref,
-    );
-  }
+  const referencedTables = resolveReferencedTablesOrThrow(tableRef, colRef, allTables, ctx, ref);
 
   if (colRef === '*') {
     expandWildcard(referencedTables, columns);
@@ -581,8 +582,39 @@ function resolveSingleColumnRef(
   );
 }
 
+function applySchemaTypeOverride(
+  columnAST: unknown,
+  columnAlias: string | null,
+  indexedName: string,
+  columns: Map<string, ResolvedColumn[]>,
+  predicate: (expression: unknown) => boolean,
+  schemaType: 'array' | 'object',
+): void {
+  if (!predicate(columnAST)) {
+    return;
+  }
+  const colName = columnAlias ?? indexedName;
+  const existing = columns.get(colName);
+  if (existing !== undefined && existing[0]?.schema.type !== schemaType) {
+    columns.set(
+      colName,
+      existing.map((col) => resolvedCol(col.name, { type: schemaType }, col.ast)),
+    );
+  }
+}
+
+function validateClauseExpression(
+  expression: unknown,
+  allTables: ResolvedTable[],
+  ctx: VisitContext,
+  selectColumns?: Map<string, ResolvedColumn[]>,
+): void {
+  checkColumnRefsExist(expression, allTables, ctx, selectColumns);
+  validateComplexColumnExpression(expression, allTables, ctx);
+}
+
 function resolveSelectColumns(select: Select, ctx: VisitContext): Map<string, ResolvedColumn[]> {
-  const allTables = [...ctx.tables.values()].flat();
+  const allTables = flattenTables(ctx);
   const columns = new Map<string, ResolvedColumn[]>();
 
   for (const [index, columnAST] of select.columns.entries()) {
@@ -593,8 +625,7 @@ function resolveSelectColumns(select: Select, ctx: VisitContext): Map<string, Re
     const columnRefs = extractColumnRefs(columnAST);
 
     if (columnRefs.length !== 1) {
-      checkColumnRefsExist(columnAST, allTables, ctx);
-      validateComplexColumnExpression(columnAST, allTables, ctx);
+      validateClauseExpression(columnAST, allTables, ctx);
       resolveDefaultSchemaColumn(columnAlias, indexedName, columnAST, columns);
     } else {
       const [ref] = columnRefs;
@@ -602,27 +633,8 @@ function resolveSelectColumns(select: Select, ctx: VisitContext): Map<string, Re
       resolveSingleColumnRef(columnAST, columnAlias, indexedName, ref, allTables, ctx, columns);
     }
 
-    if (containsCastToArray(columnAST)) {
-      const colName = columnAlias ?? indexedName;
-      const existing = columns.get(colName);
-      if (existing !== undefined && existing[0]?.schema.type !== 'array') {
-        columns.set(
-          colName,
-          existing.map((col) => resolvedCol(col.name, { type: 'array' }, col.ast)),
-        );
-      }
-    }
-
-    if (containsCastToMap(columnAST)) {
-      const colName = columnAlias ?? indexedName;
-      const existing = columns.get(colName);
-      if (existing !== undefined && existing[0]?.schema.type !== 'object') {
-        columns.set(
-          colName,
-          existing.map((col) => resolvedCol(col.name, { type: 'object' }, col.ast)),
-        );
-      }
-    }
+    applySchemaTypeOverride(columnAST, columnAlias, indexedName, columns, containsCastToArray, 'array');
+    applySchemaTypeOverride(columnAST, columnAlias, indexedName, columns, containsCastToMap, 'object');
   }
 
   return columns;
@@ -652,41 +664,34 @@ function checkSelect(
 
   log('resolved columns', [...columns.keys()]);
 
-  const allTables = [...selectCtx.tables.values()].flat();
+  const allTables = flattenTables(selectCtx);
   for (const item of fromClauseItems(select)) {
     const onExpr = (item as { on?: unknown }).on;
     if (onExpr !== undefined) {
-      checkColumnRefsExist(onExpr, allTables, selectCtx);
-      validateComplexColumnExpression(onExpr, allTables, selectCtx);
+      validateClauseExpression(onExpr, allTables, selectCtx);
     }
   }
   if (select.where !== null) {
-    checkColumnRefsExist(select.where, allTables, selectCtx);
-    validateComplexColumnExpression(select.where, allTables, selectCtx);
+    validateClauseExpression(select.where, allTables, selectCtx);
   }
   if (select.having !== null) {
-    checkColumnRefsExist(select.having, allTables, selectCtx, columns);
-    validateComplexColumnExpression(select.having, allTables, selectCtx);
+    validateClauseExpression(select.having, allTables, selectCtx, columns);
   }
   for (const orderItem of select.orderby ?? []) {
-    checkColumnRefsExist(orderItem.expr, allTables, selectCtx, columns);
-    validateComplexColumnExpression(orderItem.expr, allTables, selectCtx);
+    validateClauseExpression(orderItem.expr, allTables, selectCtx, columns);
   }
   if (select.groupby?.columns !== undefined) {
     for (const groupCol of select.groupby.columns) {
-      checkColumnRefsExist(groupCol, allTables, selectCtx, columns);
-      validateComplexColumnExpression(groupCol, allTables, selectCtx);
+      validateClauseExpression(groupCol, allTables, selectCtx, columns);
     }
   }
 
   if (select._next !== undefined) {
     const nextColumns = checkSelect(select._next, ctx, withTableName);
-    const currentNumberOfKeys = columns.size;
-    const nextNumberOfKeys = nextColumns.size;
-    if (currentNumberOfKeys !== nextNumberOfKeys) {
+    if (columns.size !== nextColumns.size) {
       throw new AthenaError(
         ATHENA_ERROR,
-        `UNION ALL parts have different number of columns: ${currentNumberOfKeys.toString()} vs ${nextNumberOfKeys.toString()}`,
+        `UNION ALL parts have different number of columns: ${columns.size.toString()} vs ${nextColumns.size.toString()}`,
         select._next,
       );
     }

@@ -11,6 +11,10 @@ const log = debug('eslint-plugin:athena:service-schema-generator');
 const GITHUB_ORGANIZATIONS = ['checkdigit', 'rebolt-checkdigit'] as const;
 const SWAGGER_SCHEMA_DEREF_FILENAME = 'swagger.schema.deref.json';
 
+function errorMessageFromError(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
 interface ServiceEndpoint {
   path: string;
   yamlContent: string;
@@ -66,8 +70,7 @@ function readServiceConfig(
   if (apiRoot === undefined || apiEndpoints === undefined || apiEndpoints.length === 0) {
     return null;
   }
-  const pkgOrg = packageJson.name?.slice(1).split('/')[0] ?? org;
-  const pkgServiceName = packageJson.name?.slice(1).split('/')[1] ?? serviceName;
+  const [pkgOrg = org, pkgServiceName = serviceName] = packageJson.name?.slice(1).split('/') ?? [];
   return { organization: pkgOrg, serviceName: pkgServiceName, apiRoot, endpoints: apiEndpoints };
 }
 
@@ -116,9 +119,7 @@ function findServiceInNodeModules(serviceName: string): ServiceSource | null {
       }
       log(`[schema-generator] no swagger schema inside node_modules/@${org}/${serviceName}`);
     } catch (error) {
-      log(
-        `[schema-generator] error reading node_modules/@${org}/${serviceName}: ${error instanceof Error ? error.message : String(error)}`,
-      );
+      log(`[schema-generator] error reading node_modules/@${org}/${serviceName}: ${errorMessageFromError(error)}`);
     }
   }
   return null;
@@ -158,9 +159,7 @@ export function generateSchemasForService(
         log(`[schema-generator] cached schema to ${dir}/${SWAGGER_SCHEMA_DEREF_FILENAME}`);
       }
     } catch (error) {
-      log(
-        `[schema-generator] error processing endpoint ${endpoint}: ${error instanceof Error ? error.message : String(error)}`,
-      );
+      log(`[schema-generator] error processing endpoint ${endpoint}: ${errorMessageFromError(error)}`);
     }
   }
 

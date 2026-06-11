@@ -42,21 +42,18 @@ function getFunctionName(node: unknown): string | undefined {
   return firstName === undefined ? undefined : firstName.value.toLowerCase();
 }
 
-function getColumnName(node: unknown): string | undefined {
+function getColumnRef(node: unknown): ColumnRefItem | undefined {
   const col = rec(node);
-  if (col?.['type'] !== 'column_ref') {
-    return undefined;
-  }
-  const column = (node as ColumnRefItem).column;
+  return col?.['type'] === 'column_ref' ? (node as ColumnRefItem) : undefined;
+}
+
+function getColumnName(node: unknown): string | undefined {
+  const column = getColumnRef(node)?.column;
   return typeof column === 'string' ? column.toLowerCase() : undefined;
 }
 
 function getColumnTable(node: unknown): string | null | undefined {
-  const col = rec(node);
-  if (col?.['type'] !== 'column_ref') {
-    return undefined;
-  }
-  return (node as ColumnRefItem).table;
+  return getColumnRef(node)?.table;
 }
 
 function getStringValue(node: unknown): string | undefined {
@@ -72,75 +69,49 @@ function getNumberValue(node: unknown): number | undefined {
   return val?.['type'] === 'number' && typeof val['value'] === 'number' ? val['value'] : undefined;
 }
 
+// Returns the function args when the node is split(url, '/') or split_part(url, '/'), else undefined.
+function getSplitUrlFunctionArgs(node: unknown, functionName: 'split' | 'split_part'): unknown[] | undefined {
+  if (getFunctionName(node) !== functionName) {
+    return undefined;
+  }
+  const args = (rec(node)?.['args'] as { value?: unknown[] } | undefined)?.value;
+  if (!Array.isArray(args) || args.length < 2) {
+    return undefined;
+  }
+  if (getColumnName(args[0]) !== 'url' || getStringValue(args[1]) !== '/') {
+    return undefined;
+  }
+  return args;
+}
+
 // Matches: split(url, '/')[N]  — a Function node carrying an array_index extension
 interface SplitUrlIndexed extends SqlFunction {
   array_index: { brackets: true; index: { type: string; value: unknown } }[];
 }
 function isSplitUrlIndexed(node: unknown): node is SplitUrlIndexed {
+  if (getSplitUrlFunctionArgs(node, 'split') === undefined) {
+    return false;
+  }
   const fn = rec(node);
-  if (fn?.['type'] !== 'function') {
-    return false;
-  }
-  if (getFunctionName(node) !== 'split') {
-    return false;
-  }
-  const args = (fn['args'] as { value?: unknown[] } | undefined)?.value;
-  if (!Array.isArray(args) || args.length < 2) {
-    return false;
-  }
-  if (getColumnName(args[0]) !== 'url') {
-    return false;
-  }
-  if (getStringValue(args[1]) !== '/') {
-    return false;
-  }
-  return Array.isArray(fn['array_index']) && (fn['array_index'] as unknown[]).length > 0;
+  return Array.isArray(fn?.['array_index']) && (fn['array_index'] as unknown[]).length > 0;
 }
 
 // Matches: split_part(url, '/', N)  — Presto-style, index in args[2] (1-based)
 function isSplitPartUrl(node: unknown): node is SqlFunction {
-  const fn = rec(node);
-  if (fn?.['type'] !== 'function') {
-    return false;
-  }
-  if (getFunctionName(node) !== 'split_part') {
-    return false;
-  }
-  const args = (fn['args'] as { value?: unknown[] } | undefined)?.value;
-  if (!Array.isArray(args) || args[2] === undefined) {
-    return false;
-  }
-  if (getColumnName(args[0]) !== 'url') {
-    return false;
-  }
-  return getStringValue(args[1]) === '/' && getNumberValue(args[2]) !== undefined;
+  const args = getSplitUrlFunctionArgs(node, 'split_part');
+  return getNumberValue(args?.[2]) !== undefined;
 }
 
 // Matches: cardinality(split(url, '/'))
 function isCardinalitySplitUrl(node: unknown): node is SqlFunction {
-  const fn = rec(node);
-  if (fn?.['type'] !== 'function') {
-    return false;
-  }
   if (getFunctionName(node) !== 'cardinality') {
     return false;
   }
-  const outerArgs = (fn['args'] as { value?: unknown[] } | undefined)?.value;
+  const outerArgs = (rec(node)?.['args'] as { value?: unknown[] } | undefined)?.value;
   if (!Array.isArray(outerArgs) || outerArgs.length === 0) {
     return false;
   }
-  const innerFn = rec(outerArgs[0]);
-  if (innerFn?.['type'] !== 'function') {
-    return false;
-  }
-  if (getFunctionName(outerArgs[0]) !== 'split') {
-    return false;
-  }
-  const innerArgs = (innerFn['args'] as { value?: unknown[] } | undefined)?.value;
-  if (!Array.isArray(innerArgs) || innerArgs.length < 2) {
-    return false;
-  }
-  return getColumnName(innerArgs[0]) === 'url' && getStringValue(innerArgs[1]) === '/';
+  return getSplitUrlFunctionArgs(outerArgs[0], 'split') !== undefined;
 }
 
 // Returns the table qualifier of the left-hand side of a matchable binary condition.
@@ -151,13 +122,9 @@ function getConditionTableQualifier(left: unknown): string | null | undefined {
     return getColumnTable(left);
   }
 
-  if (isSplitUrlIndexed(left)) {
-    const args = (rec(left)?.['args'] as { value?: unknown[] } | undefined)?.value;
-    return getColumnTable(args?.[0]) ?? null;
-  }
-  if (isSplitPartUrl(left)) {
-    const args = (rec(left)?.['args'] as { value?: unknown[] } | undefined)?.value;
-    return getColumnTable(args?.[0]) ?? null;
+  const splitArgs = getSplitUrlFunctionArgs(left, 'split') ?? getSplitUrlFunctionArgs(left, 'split_part');
+  if (splitArgs !== undefined) {
+    return getColumnTable(splitArgs[0]) ?? null;
   }
   if (isCardinalitySplitUrl(left)) {
     const outerArgs = (rec(left)?.['args'] as { value?: unknown[] } | undefined)?.value;
@@ -169,6 +136,16 @@ function getConditionTableQualifier(left: unknown): string | null | undefined {
 }
 
 // --- Predicate builders ---
+
+// Builds a predicate that checks whether the Nth path segment (1-based) equals a fixed value.
+// Path parameters (`:param`) are treated as wildcards and always match.
+function buildPathSegmentPredicate(index: number, value: string): OperationPredicate {
+  return (path) => {
+    const part = path.split('/')[index - 1];
+    log('checking path segment', { path, index, part, value });
+    return part?.startsWith(':') === true ? true : part === value;
+  };
+}
 
 // tableAlias: the alias (or null if none) of the FROM-clause item we are currently matching.
 // Conditions that explicitly reference a different alias are skipped (treated as ALWAYS_TRUE).
@@ -206,27 +183,16 @@ function buildLeafPredicate(node: Binary, tableAlias: string | null): OperationP
     const index = left.array_index[0]?.index.value;
     const value = getStringValue(right);
     if (typeof index === 'number' && value !== undefined) {
-      return (path) => {
-        const parts = path.split('/');
-        const part = parts[index - 1]; // athena index is 1-based
-        log(`checking path part`, { path, index, part, value });
-        return part?.startsWith(':') === true ? true : part === value;
-      };
+      return buildPathSegmentPredicate(index, value);
     }
   }
 
   // split_part(url, '/', N) = 'value'
   if (isSplitPartUrl(left)) {
-    const args = (rec(left)?.['args'] as { value?: unknown[] } | undefined)?.value;
-    const index = getNumberValue(args?.[2]);
+    const index = getNumberValue(getSplitUrlFunctionArgs(left, 'split_part')?.[2]);
     const value = getStringValue(right);
     if (index !== undefined && value !== undefined) {
-      return (path) => {
-        const parts = path.split('/');
-        const part = parts[index - 1]; // 1-based
-        log('checking split_part path part', { path, index, part, value });
-        return part?.startsWith(':') === true ? true : part === value;
-      };
+      return buildPathSegmentPredicate(index, value);
     }
   }
 
