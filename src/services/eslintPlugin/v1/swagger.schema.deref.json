@@ -30,9 +30,7 @@
                 "$id": "https://eslint-plugin.checkdigit/eslint-plugin/v1/schemas/definitions/Ping",
                 "type": "object",
                 "additionalProperties": false,
-                "required": [
-                  "serverTime"
-                ],
+                "required": ["serverTime"],
                 "properties": {
                   "serverTime": {
                     "type": "string",
@@ -42,9 +40,7 @@
                 }
               }
             },
-            "required": [
-              "body"
-            ],
+            "required": ["body"],
             "additionalProperties": false
           },
           "default": {
@@ -72,9 +68,7 @@
                 }
               }
             },
-            "required": [
-              "body"
-            ],
+            "required": ["body"],
             "additionalProperties": false
           }
         }
@@ -132,9 +126,7 @@
                 }
               }
             },
-            "required": [
-              "body"
-            ],
+            "required": ["body"],
             "additionalProperties": false
           }
         }
@@ -147,9 +139,7 @@
       "$id": "https://eslint-plugin.checkdigit/eslint-plugin/v1/schemas/definitions/Ping",
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "serverTime"
-      ],
+      "required": ["serverTime"],
       "properties": {
         "serverTime": {
           "type": "string",
