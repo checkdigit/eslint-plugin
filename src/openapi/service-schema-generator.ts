@@ -8,7 +8,7 @@ import { type ApiSchemas, buildApiSchemaFromYaml } from './generate-schema.ts';
 
 const log = debug('eslint-plugin:athena:service-schema-generator');
 
-const GITHUB_ORGANIZATIONS = ['checkdigit', 'rebolt-checkdigit'] as const;
+const ORGANIZATIONS = ['checkdigit'] as const;
 const SWAGGER_SCHEMA_DEREF_FILENAME = 'swagger.schema.deref.json';
 
 function errorMessageFromError(error: unknown): string {
@@ -105,7 +105,7 @@ function findServiceInProject(serviceName: string): ServiceSource | undefined {
 }
 
 function findServiceInNodeModules(serviceName: string): ServiceSource | undefined {
-  for (const org of GITHUB_ORGANIZATIONS) {
+  for (const org of ORGANIZATIONS) {
     const serviceFolder = `node_modules/@${org}/${serviceName}`;
     if (!existsSync(serviceFolder)) {
       log(`[schema-generator] not found in node_modules: @${org}/${serviceName}`);
