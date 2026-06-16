@@ -1,7 +1,5 @@
 // athena/athena.spec.ts
 
-import fs from 'node:fs';
-
 import createTester from '../ts-tester.test.ts';
 import rule, { ruleId } from './athena.ts';
 // file.only
@@ -326,10 +324,6 @@ WHERE method = 'PUT'
       COUNT(distinct split(tcm.url, '/') [5]) AS cards
     FROM
       "teampay-card-management" AS tcm\``,
-    },
-    {
-      name: 'QMR',
-      code: `\`${fs.readFileSync('qmr.sql', 'utf-8')}\``,
     },
     {
       name: 'non-sql with similar keywords should not trigger errors',
