@@ -30,12 +30,10 @@ function getPropertyName(property: TSESTree.Property): string | undefined {
     return undefined;
   }
   const propertyKey = property.key;
-  // eslint-disable-next-line no-nested-ternary
-  return propertyKey.type === AST_NODE_TYPES.Identifier
-    ? propertyKey.name
-    : typeof propertyKey.value === 'string'
-      ? propertyKey.value
-      : undefined;
+  if (propertyKey.type === AST_NODE_TYPES.Identifier) {
+    return propertyKey.name;
+  }
+  return typeof propertyKey.value === 'string' ? propertyKey.value : undefined;
 }
 
 function extractObjectProperties(

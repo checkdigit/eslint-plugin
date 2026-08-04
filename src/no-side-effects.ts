@@ -237,6 +237,8 @@ const rule: ReturnType<typeof createRule> = createRule({
         properties: {
           excludedIdentifiers: {
             type: 'array',
+            description:
+              'Function and method identifiers that may run at module scope.',
             items: { type: 'string' },
           },
         },
@@ -246,10 +248,12 @@ const rule: ReturnType<typeof createRule> = createRule({
     messages: {
       [NO_SIDE_EFFECTS]: 'No side effects can occur at the module-level',
     },
+    defaultOptions: [{ excludedIdentifiers: [''] }],
   },
-  defaultOptions: [{ excludedIdentifiers: [''] }],
   create(context) {
-    const options: RuleOptions = context.options[0] as RuleOptions;
+    const options: RuleOptions = context.options[0] ?? {
+      excludedIdentifiers: [''],
+    };
     const excludedIdentifiers =
       options.excludedIdentifiers.length > 0 ? options.excludedIdentifiers : [];
     return {

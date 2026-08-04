@@ -36,9 +36,15 @@ const rule: ESLintUtils.RuleModule<
       noLegacyServiceTyping:
         'Please remove the usage of legacy service typings.',
     },
-    schema: [{ type: 'array', items: { type: 'string' } }],
+    schema: [
+      {
+        type: 'array',
+        description: 'Service type names that the rule should disallow.',
+        items: { type: 'string' },
+      },
+    ],
+    defaultOptions: [DISALLOWED_SERVICE_TYPINGS],
   },
-  defaultOptions: [DISALLOWED_SERVICE_TYPINGS],
   create(context) {
     return {
       TSTypeReference: (typeReference: TSESTree.TSTypeReference) => {

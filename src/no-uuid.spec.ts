@@ -26,8 +26,8 @@ const STRING_TEST = `
 const NOT_A_UUID = "I'm not a uuid, I think";
 `;
 
-// eslint-disable-next-line no-template-curly-in-string
 const TEMPLATE_TEST =
+  // eslint-disable-next-line no-template-curly-in-string
   "const NOT_A_UUID = `A template that isn't a uuid. ${1+1} = 2`";
 
 const STRING_WITH_NON_UUID = `

@@ -9,9 +9,9 @@
 import type { Rule, SourceCode } from 'eslint';
 import type { Comment } from 'estree';
 
-const wallabyRegex = /(?<=(?:^|\*\/)\s*)[?]{1,2}|file\.only|file\.skip/gu;
+const wallabyRegex = /(?:^[ \t]*\?{1,2}|file\.(?:only|skip))/gu;
 const commentRegex =
-  /\s*(?:\/\/|<!--)\s*(?<comment>\?{1,2}\.?\s*|file\.(?:only|skip))\s*/gu;
+  /(?:\/\/|<!--)[ \t]*(?:\?{1,2}\.?|file\.(?:only|skip))[ \t]*$/gu;
 function removeWallabyComment(
   context: Rule.RuleContext,
   sourceCode: SourceCode,
@@ -38,9 +38,10 @@ function processLineComment(
     if (line !== undefined) {
       let match;
       while ((match = commentRegex.exec(line)) !== null) {
+        const lineBeforeComment = line.slice(0, match.index);
         const start = sourceCode.getIndexFromLoc({
           line: comment.loc.start.line,
-          column: match.index,
+          column: lineBeforeComment.trimEnd().length,
         });
         const end = sourceCode.getIndexFromLoc({
           line: comment.loc.start.line,

@@ -21,9 +21,9 @@ export const ruleId = 'require-fixed-services-import';
 
 const createRule = ESLintUtils.RuleCreator((name) => getDocumentationUrl(name));
 const SERVICE_TYPINGS_IMPORT_PATH =
-  /(?<path>\.\.\/)+services(?!\/index(?:\.ts)?)\/.*/u;
+  /(?:\.\.\/)+services(?!\/index(?:\.ts)?)\/.*/u;
 const SERVICE_TYPINGS_IMPORT_PATH_WITH_VERSION =
-  /(?<path>\.\.\/)+services\/(?<service>\w+)\/(?<version>v\d+)(?<index>\/index(?:\.ts)?)?/u;
+  /(?:\.\.\/)+services\/(?<service>\w+)\/(?<version>v\d+)(?:\/index(?:\.ts)?)?/u;
 
 const rule: ESLintUtils.RuleModule<
   | 'updateServicesImportSpecifier'

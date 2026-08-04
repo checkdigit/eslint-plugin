@@ -30,5 +30,5 @@ function configureRuleTester(ruleTester: RuleTesterHooks): void {
   ruleTester.itSkip = test.it.skip;
 }
 
-configureRuleTester(ESLintRuleTester as unknown as RuleTesterHooks);
-configureRuleTester(TypeScriptRuleTester as unknown as RuleTesterHooks);
+configureRuleTester(ESLintRuleTester);
+configureRuleTester(TypeScriptRuleTester);

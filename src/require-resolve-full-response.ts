@@ -43,6 +43,7 @@ const rule: ESLintUtils.RuleModule<'invalidOptions' | 'unknownError'> =
       schema: [],
     },
     defaultOptions: [],
+    // eslint-disable-next-line max-lines-per-function
     create(context) {
       const sourceCode = context.sourceCode;
       const scopeManager = sourceCode.scopeManager;
@@ -94,7 +95,7 @@ const rule: ESLintUtils.RuleModule<'invalidOptions' | 'unknownError'> =
       }
 
       function isServiceLikeName(name: string) {
-        return /.*[Ss]ervice$/u.test(name);
+        return /[Ss]ervice$/u.test(name);
       }
 
       function isCalleeServiceWrapper(serviceCall: TSESTree.CallExpression) {
