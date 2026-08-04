@@ -7,7 +7,7 @@
  */
 
 import { RuleTester } from 'eslint';
-import { describe } from 'node:test';
+import { describe, it } from 'node:test';
 
 import './setup.test.ts';
 import rule from './regular-expression-comment.ts';
@@ -102,111 +102,113 @@ describe('regular-expression-comment', () => {
       parserOptions: { ecmaVersion: 'latest' },
     },
   });
-  ruleTester.run('regular-expression-comment', rule, {
-    valid: [
-      {
-        code: VALID_TEST_1,
-      },
-      {
-        code: VALID_TEST_2,
-      },
-      {
-        code: VALID_TEST_3,
-      },
-      {
-        code: VALID_TEST_4,
-      },
-      {
-        code: VALID_TEST_5,
-      },
-      {
-        code: VALID_TEST_6,
-      },
-      {
-        code: VALID_TEST_7,
-      },
-      {
-        code: VALID_TEST_8,
-      },
-      {
-        code: VALID_TEST_9,
-      },
-      {
-        code: VALID_TEST_10,
-      },
-      {
-        code: VALID_TEST_11,
-      },
-    ],
-    invalid: [
-      {
-        code: INVALID_TEST_1,
-        errors: [
-          {
-            message: 'Missing comment for regular expression',
-          },
-        ],
-      },
-      {
-        code: INVALID_TEST_2,
-        errors: [
-          {
-            message: 'Missing comment for regular expression',
-          },
-          {
-            message: 'Missing comment for regular expression',
-          },
-        ],
-      },
-      {
-        code: INVALID_TEST_3,
-        errors: [
-          {
-            message: 'Missing comment for regular expression',
-          },
-        ],
-      },
-      {
-        code: INVALID_TEST_4,
-        errors: [
-          {
-            message: 'Missing comment for regular expression',
-          },
-          {
-            message: 'Missing comment for regular expression',
-          },
-        ],
-      },
-      {
-        code: INVALID_TEST_5,
-        errors: [
-          {
-            message: 'Missing comment for regular expression',
-          },
-          {
-            message: 'Missing comment for regular expression',
-          },
-        ],
-      },
-      {
-        code: INVALID_TEST_6,
-        errors: [
-          {
-            message: 'Missing comment for regular expression',
-          },
-          {
-            message: 'Missing comment for regular expression',
-          },
-        ],
-      },
-      {
-        code: INVALID_TEST_7,
-        errors: [
-          {
-            message: 'Missing comment for regular expression',
-          },
-        ],
-      },
-    ],
+  it('works', () => {
+    ruleTester.run('regular-expression-comment', rule, {
+      valid: [
+        {
+          code: VALID_TEST_1,
+        },
+        {
+          code: VALID_TEST_2,
+        },
+        {
+          code: VALID_TEST_3,
+        },
+        {
+          code: VALID_TEST_4,
+        },
+        {
+          code: VALID_TEST_5,
+        },
+        {
+          code: VALID_TEST_6,
+        },
+        {
+          code: VALID_TEST_7,
+        },
+        {
+          code: VALID_TEST_8,
+        },
+        {
+          code: VALID_TEST_9,
+        },
+        {
+          code: VALID_TEST_10,
+        },
+        {
+          code: VALID_TEST_11,
+        },
+      ],
+      invalid: [
+        {
+          code: INVALID_TEST_1,
+          errors: [
+            {
+              message: 'Missing comment for regular expression',
+            },
+          ],
+        },
+        {
+          code: INVALID_TEST_2,
+          errors: [
+            {
+              message: 'Missing comment for regular expression',
+            },
+            {
+              message: 'Missing comment for regular expression',
+            },
+          ],
+        },
+        {
+          code: INVALID_TEST_3,
+          errors: [
+            {
+              message: 'Missing comment for regular expression',
+            },
+          ],
+        },
+        {
+          code: INVALID_TEST_4,
+          errors: [
+            {
+              message: 'Missing comment for regular expression',
+            },
+            {
+              message: 'Missing comment for regular expression',
+            },
+          ],
+        },
+        {
+          code: INVALID_TEST_5,
+          errors: [
+            {
+              message: 'Missing comment for regular expression',
+            },
+            {
+              message: 'Missing comment for regular expression',
+            },
+          ],
+        },
+        {
+          code: INVALID_TEST_6,
+          errors: [
+            {
+              message: 'Missing comment for regular expression',
+            },
+            {
+              message: 'Missing comment for regular expression',
+            },
+          ],
+        },
+        {
+          code: INVALID_TEST_7,
+          errors: [
+            {
+              message: 'Missing comment for regular expression',
+            },
+          ],
+        },
+      ],
+    });
   });
 });

@@ -1,7 +1,7 @@
 // require-assert-message.ts
 
 /*
- * Copyright (c) 2022-2025 Check Digit, LLC
+ * Copyright (c) 2022-2026 Check Digit, LLC
  *
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */

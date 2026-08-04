@@ -7,7 +7,7 @@
  */
 
 import { RuleTester } from 'eslint';
-import { describe } from 'node:test';
+import { describe, it } from 'node:test';
 
 import './setup.test.ts';
 import rule from './no-uuid.ts';
@@ -59,35 +59,37 @@ describe('no-uuid', () => {
       parserOptions: { ecmaVersion: 'latest' },
     },
   });
-  ruleTester.run('no-uuid', rule, {
-    valid: [
-      {
-        code: STRING_TEST,
-      },
-      {
-        code: TEMPLATE_TEST,
-      },
-      {
-        code: STRING_WITH_NON_UUID,
-      },
-    ],
-    invalid: [
-      {
-        code: CONTAINS_UUID_IN_STRING,
-        errors: [UUID_FOUND_MSG],
-      },
-      {
-        code: CONTAINS_MULTIPLE_UUIDS_IN_STRING,
-        errors: [UUIDS_FOUND_MSG],
-      },
-      {
-        code: CONTAINS_UUID_IN_COMMENT,
-        errors: [UUID_FOUND_MSG],
-      },
-      {
-        code: CONTAINS_MULTIPLE_UUIDS_IN_COMMENT,
-        errors: [UUIDS_FOUND_MSG],
-      },
-    ],
+  it('works', () => {
+    ruleTester.run('no-uuid', rule, {
+      valid: [
+        {
+          code: STRING_TEST,
+        },
+        {
+          code: TEMPLATE_TEST,
+        },
+        {
+          code: STRING_WITH_NON_UUID,
+        },
+      ],
+      invalid: [
+        {
+          code: CONTAINS_UUID_IN_STRING,
+          errors: [UUID_FOUND_MSG],
+        },
+        {
+          code: CONTAINS_MULTIPLE_UUIDS_IN_STRING,
+          errors: [UUIDS_FOUND_MSG],
+        },
+        {
+          code: CONTAINS_UUID_IN_COMMENT,
+          errors: [UUID_FOUND_MSG],
+        },
+        {
+          code: CONTAINS_MULTIPLE_UUIDS_IN_COMMENT,
+          errors: [UUIDS_FOUND_MSG],
+        },
+      ],
+    });
   });
 });

@@ -7,7 +7,7 @@
  */
 
 import { RuleTester } from 'eslint';
-import { describe } from 'node:test';
+import { describe, it } from 'node:test';
 
 import './setup.test.ts';
 import rule, {
@@ -67,49 +67,51 @@ describe('object-literal-response', () => {
       parserOptions: { ecmaVersion: 'latest', project: true },
     },
   });
-  ruleTester.run('object-literal-response', rule, {
-    valid: [
-      {
-        code: RESPONSE_200_OBJECT_LITERAL,
-      },
-      {
-        code: RESPONSE_200_NUMBER_OBJECT_LITERAL,
-      },
-      {
-        code: RESPONSE_200_OBJECT_LITERAL_NOT_USED,
-      },
-      {
-        code: RESPONSE_204_WITHOUT_BODY,
-      },
-      {
-        code: RESPONSE_409_WITHOUT_BODY,
-      },
-    ],
-    invalid: [
-      {
-        code: OBJECT_LITERAL_NOT_USED_AT_TOP_LEVEL,
-        errors: [
-          {
-            messageId: REQUIRE_OBJECT_LITERAL_MESSAGE_ID,
-          },
-        ],
-      },
-      {
-        code: RESPONSE_400_OBJECT_LITERAL_NOT_USED,
-        errors: [
-          {
-            messageId: REQUIRE_OBJECT_LITERAL_FOR_ERROR_RESPONSE_MESSAGE_ID,
-          },
-        ],
-      },
-      {
-        code: OBJECT_LITERAL_NOT_USED_IN_HEADERS,
-        errors: [
-          {
-            messageId: REQUIRE_OBJECT_LITERAL_FOR_HEADERS_MESSAGE_ID,
-          },
-        ],
-      },
-    ],
+  it('works', () => {
+    ruleTester.run('object-literal-response', rule, {
+      valid: [
+        {
+          code: RESPONSE_200_OBJECT_LITERAL,
+        },
+        {
+          code: RESPONSE_200_NUMBER_OBJECT_LITERAL,
+        },
+        {
+          code: RESPONSE_200_OBJECT_LITERAL_NOT_USED,
+        },
+        {
+          code: RESPONSE_204_WITHOUT_BODY,
+        },
+        {
+          code: RESPONSE_409_WITHOUT_BODY,
+        },
+      ],
+      invalid: [
+        {
+          code: OBJECT_LITERAL_NOT_USED_AT_TOP_LEVEL,
+          errors: [
+            {
+              messageId: REQUIRE_OBJECT_LITERAL_MESSAGE_ID,
+            },
+          ],
+        },
+        {
+          code: RESPONSE_400_OBJECT_LITERAL_NOT_USED,
+          errors: [
+            {
+              messageId: REQUIRE_OBJECT_LITERAL_FOR_ERROR_RESPONSE_MESSAGE_ID,
+            },
+          ],
+        },
+        {
+          code: OBJECT_LITERAL_NOT_USED_IN_HEADERS,
+          errors: [
+            {
+              messageId: REQUIRE_OBJECT_LITERAL_FOR_HEADERS_MESSAGE_ID,
+            },
+          ],
+        },
+      ],
+    });
   });
 });
