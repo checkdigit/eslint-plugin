@@ -8,6 +8,7 @@
 import { RuleTester } from 'eslint';
 import { describe } from 'node:test';
 
+import './setup.test.ts';
 import rule from './no-wallaby-comment.ts';
 
 const LINE_ONE_NO_COMMENTS = `const NOT_A_SECRET = "A template that isn't a secret.";`;
@@ -210,7 +211,7 @@ const TEST = "this isn't secret"; // testing with ? here and there ??.
 describe('no-wallaby-comment', () => {
   const ruleTester = new RuleTester({
     languageOptions: {
-      parserOptions: { ecmaVersion: 2020 },
+      parserOptions: { ecmaVersion: 'latest' },
     },
   });
 

@@ -9,11 +9,12 @@
 import { RuleTester } from 'eslint';
 import { describe } from 'node:test';
 
+import './setup.test.ts';
 import rule from './file-path-comment.ts';
 
 describe('file-path-comment', () => {
   const ruleTester = new RuleTester({
-    languageOptions: { parserOptions: { ecmaVersion: 2020 } },
+    languageOptions: { parserOptions: { ecmaVersion: 'latest' } },
   });
 
   ruleTester.run('file-path-comment', rule, {

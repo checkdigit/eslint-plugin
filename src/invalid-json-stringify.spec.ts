@@ -8,6 +8,8 @@
 
 import { RuleTester } from 'eslint';
 import { describe } from 'node:test';
+
+import './setup.test.ts';
 import rule, {
   INVALID_JSON_STRINGIFY,
   ruleId,
@@ -17,7 +19,7 @@ describe(ruleId, () => {
   new RuleTester({
     languageOptions: {
       parserOptions: {
-        ecmaVersion: 2020,
+        ecmaVersion: 'latest',
         sourceType: 'module',
       },
     },

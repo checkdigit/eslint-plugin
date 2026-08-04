@@ -8,12 +8,13 @@
 import { RuleTester } from 'eslint';
 import { describe } from 'node:test';
 
+import './setup.test.ts';
 import rule from './require-strict-assert.ts';
 
 describe('require-strict-assert', () => {
   const ruleTester = new RuleTester({
     languageOptions: {
-      parserOptions: { ecmaVersion: 2020, sourceType: 'module' },
+      parserOptions: { ecmaVersion: 'latest', sourceType: 'module' },
     },
   });
   ruleTester.run('require-strict-assert', rule, {

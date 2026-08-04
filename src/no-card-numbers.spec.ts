@@ -9,6 +9,7 @@
 import { RuleTester } from 'eslint';
 import { describe } from 'node:test';
 
+import './setup.test.ts';
 import rule from './no-card-numbers.ts';
 
 const CARD_NUMBER_FOUND = 'CARD_NUMBER_FOUND';
@@ -97,7 +98,7 @@ const foo = '9118724531442999';
 describe('no-card-numbers', () => {
   const ruleTester = new RuleTester({
     languageOptions: {
-      parserOptions: { ecmaVersion: 2020 },
+      parserOptions: { ecmaVersion: 'latest' },
     },
   });
   ruleTester.run('no-card-numbers', rule, {

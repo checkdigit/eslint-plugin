@@ -1,4 +1,4 @@
-// test-setup.ts
+// setup.test.ts
 
 /*
  * Copyright (c) 2026 Check Digit, LLC

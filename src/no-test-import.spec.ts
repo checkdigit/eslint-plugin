@@ -8,6 +8,8 @@
 
 import { RuleTester } from 'eslint';
 import { describe } from 'node:test';
+
+import './setup.test.ts';
 import rule, {
   NO_TEST_IMPORT,
   type NoTestImportRuleOptions,
@@ -17,7 +19,7 @@ describe('no-test-import', () => {
   new RuleTester({
     languageOptions: {
       parserOptions: {
-        ecmaVersion: 2020,
+        ecmaVersion: 'latest',
         sourceType: 'module',
       },
     },
@@ -94,7 +96,7 @@ describe('no-test-import', () => {
   new RuleTester({
     languageOptions: {
       parserOptions: {
-        ecmaVersion: 2020,
+        ecmaVersion: 'latest',
         sourceType: 'module',
       },
     },

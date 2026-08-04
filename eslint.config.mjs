@@ -5,6 +5,7 @@ import sonarjs from 'eslint-plugin-sonarjs';
 import noOnlyTests from 'eslint-plugin-no-only-tests';
 import noSecrets from 'eslint-plugin-no-secrets';
 import eslintPlugin from 'eslint-plugin-eslint-plugin';
+import importX from 'eslint-plugin-import-x';
 import tsParser from '@typescript-eslint/parser';
 import js from '@eslint/js';
 import prettier from 'eslint-config-prettier';
@@ -14,6 +15,7 @@ const ignores = [
     .split('\n')
     .filter((path) => path.trim() !== ''),
   'eslint.config.mjs',
+  'wallaby.mjs',
   'ts-init/**/*',
 ];
 
@@ -29,6 +31,7 @@ export default [
   ...ts.configs.stylisticTypeChecked,
   sonarjs.configs.recommended,
   prettier,
+  importX.flatConfigs.typescript,
   eslintPlugin.configs.recommended,
   {
     plugins: {
@@ -41,6 +44,12 @@ export default [
       sourceType: 'module',
       parserOptions: {
         projectService: true,
+      },
+    },
+    settings: {
+      'import-x/resolver': {
+        typescript: true,
+        node: true,
       },
     },
     rules: {

@@ -8,6 +8,8 @@
 
 import { RuleTester } from 'eslint';
 
+import './setup.test.ts';
+
 export default function createTester(): RuleTester {
   return new RuleTester({
     languageOptions: {

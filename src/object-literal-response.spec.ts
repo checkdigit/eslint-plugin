@@ -8,6 +8,8 @@
 
 import { RuleTester } from 'eslint';
 import { describe } from 'node:test';
+
+import './setup.test.ts';
 import rule, {
   REQUIRE_OBJECT_LITERAL_FOR_ERROR_RESPONSE_MESSAGE_ID,
   REQUIRE_OBJECT_LITERAL_FOR_HEADERS_MESSAGE_ID,
@@ -62,7 +64,7 @@ setResponse(response, {
 describe('object-literal-response', () => {
   const ruleTester = new RuleTester({
     languageOptions: {
-      parserOptions: { ecmaVersion: 2020, project: true },
+      parserOptions: { ecmaVersion: 'latest', project: true },
     },
   });
   ruleTester.run('object-literal-response', rule, {

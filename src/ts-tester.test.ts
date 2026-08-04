@@ -2,6 +2,8 @@
 
 import { RuleTester } from '@typescript-eslint/rule-tester';
 
+import './setup.test.ts';
+
 export default function createTester(): RuleTester {
   return new RuleTester({
     languageOptions: {

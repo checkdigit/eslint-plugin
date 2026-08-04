@@ -7,12 +7,14 @@
  */
 
 import { RuleTester } from '@typescript-eslint/rule-tester';
+
+import './setup.test.ts';
 import rule, { ruleId } from './no-util.ts';
 
 const ruleTester = new RuleTester({
   languageOptions: {
     parserOptions: {
-      ecmaVersion: 2020,
+      ecmaVersion: 'latest',
       sourceType: 'module',
     },
   },

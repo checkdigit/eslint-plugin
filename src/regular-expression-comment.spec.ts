@@ -9,6 +9,7 @@
 import { RuleTester } from 'eslint';
 import { describe } from 'node:test';
 
+import './setup.test.ts';
 import rule from './regular-expression-comment.ts';
 
 const VALID_TEST_1 = `// This regular expression removes all non-alphanumeric characters.
@@ -98,7 +99,7 @@ const INVALID_TEST_7 = `const testRegex1 = /error processing x:test\\.test-xyz\\
 describe('regular-expression-comment', () => {
   const ruleTester = new RuleTester({
     languageOptions: {
-      parserOptions: { ecmaVersion: 2020 },
+      parserOptions: { ecmaVersion: 'latest' },
     },
   });
   ruleTester.run('regular-expression-comment', rule, {
