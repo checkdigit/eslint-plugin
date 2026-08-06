@@ -1,21 +1,27 @@
 // require-service-call-response-declaration.ts
 
 /*
- * Copyright (c) 2021-2024 Check Digit, LLC
+ * Copyright (c) 2021-2026 Check Digit, LLC
  *
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
-import { AST_NODE_TYPES, ESLintUtils, TSESTree } from '@typescript-eslint/utils';
+import {
+  AST_NODE_TYPES,
+  ESLintUtils,
+  TSESTree,
+} from '@typescript-eslint/utils';
 
-import getDocumentationUrl from './get-documentation-url';
-import { isServiceResponse } from './service';
+import getDocumentationUrl from './get-documentation-url.ts';
+import { isServiceResponse } from './service.ts';
 
 export const ruleId = 'require-service-call-response-declaration';
 
 const createRule = ESLintUtils.RuleCreator((name) => getDocumentationUrl(name));
 
-const rule: ESLintUtils.RuleModule<'unknownError' | 'requireServiceCallResponseDeclaration'> = createRule({
+const rule: ESLintUtils.RuleModule<
+  'unknownError' | 'requireServiceCallResponseDeclaration'
+> = createRule({
   name: ruleId,
   meta: {
     type: 'suggestion',
@@ -26,7 +32,8 @@ const rule: ESLintUtils.RuleModule<'unknownError' | 'requireServiceCallResponseD
     messages: {
       requireServiceCallResponseDeclaration:
         'Awaited service call is required to declare variable for its return value which should be examined later on.',
-      unknownError: 'Unknown error occurred in file "{{fileName}}": {{ error }}.',
+      unknownError:
+        'Unknown error occurred in file "{{fileName}}": {{ error }}.',
     },
     fixable: 'code',
     schema: [],
@@ -39,7 +46,9 @@ const rule: ESLintUtils.RuleModule<'unknownError' | 'requireServiceCallResponseD
     return {
       AwaitExpression(serviceCall: TSESTree.AwaitExpression) {
         try {
-          const tsNode = parserServices.esTreeNodeToTSNodeMap.get(serviceCall.argument);
+          const tsNode = parserServices.esTreeNodeToTSNodeMap.get(
+            serviceCall.argument,
+          );
           const type = typeChecker.getTypeAtLocation(tsNode);
           const awaitedType = typeChecker.getAwaitedType(type);
           if (
@@ -54,13 +63,19 @@ const rule: ESLintUtils.RuleModule<'unknownError' | 'requireServiceCallResponseD
           }
         } catch (error) {
           // eslint-disable-next-line no-console
-          console.error(`Failed to apply ${ruleId} rule for file "${context.filename}":`, error);
+          console.error(
+            `Failed to apply ${ruleId} rule for file "${context.filename}":`,
+            error,
+          );
           context.report({
             node: serviceCall,
             messageId: 'unknownError',
             data: {
               fileName: context.filename,
-              error: error instanceof Error ? error.toString() : JSON.stringify(error),
+              error:
+                error instanceof Error
+                  ? error.toString()
+                  : JSON.stringify(error),
             },
           });
         }

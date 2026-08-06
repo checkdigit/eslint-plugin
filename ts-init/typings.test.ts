@@ -29,7 +29,11 @@ interface EndpointFunction<T = unknown> {
 
 interface EndpointFunctionWithRequestBody<T = unknown> {
   (uri: string, json?: object, options?: BodyResponseOptions): Promise<T>;
-  (uri: string, json?: object, options?: FullResponseOptions): Promise<FullResponse<T>>;
+  (
+    uri: string,
+    json?: object,
+    options?: FullResponseOptions,
+  ): Promise<FullResponse<T>>;
 }
 
 export interface Endpoint {
@@ -73,23 +77,29 @@ interface ApiResponseContext {
   headers?: Record<string, string>;
 }
 
-type MappedResponse<ResponseContextUnion> = ResponseContextUnion extends infer ResponseContext
-  ? ResponseContext extends ApiResponseContext
-    ? {
-        status: ResponseContext['status'];
-        statusCode: ResponseContext['status'];
-      } & MappedResponseHeaders<ResponseContext['headers']> &
-        MappedResponseBody<ResponseContext['body']>
-    : never
-  : never;
+type MappedResponse<ResponseContextUnion> =
+  ResponseContextUnion extends infer ResponseContext
+    ? ResponseContext extends ApiResponseContext
+      ? {
+          status: ResponseContext['status'];
+          statusCode: ResponseContext['status'];
+        } & MappedResponseHeaders<ResponseContext['headers']> &
+          MappedResponseBody<ResponseContext['body']>
+      : never
+    : never;
 
-type ResponseType<Context, IsFull> = Context extends { response: infer ResponseContext }
+type ResponseType<Context, IsFull> = Context extends {
+  response: infer ResponseContext;
+}
   ? IsFull extends true
     ? MappedResponse<ResponseContext>
     : Extract<ResponseContext, { body: any }>['body']
   : never;
 
-type ContextType<FunctionTypes, MatchingUrl> = FunctionTypes extends [infer Head, ...infer Rest]
+type ContextType<FunctionTypes, MatchingUrl> = FunctionTypes extends [
+  infer Head,
+  ...infer Rest,
+]
   ? Head extends { url: infer Url; context: infer Context }
     ? MatchingUrl extends Url
       ? Context
@@ -198,7 +208,11 @@ type GetFunctionTypes = [PingGet];
 type GetUrl = GetFunctionTypes[number]['url'];
 
 export interface SampleApi {
-  get<Url extends GetUrl, IsFull extends boolean = false, Context = ContextType<GetFunctionTypes, Url>>(
+  get<
+    Url extends GetUrl,
+    IsFull extends boolean = false,
+    Context = ContextType<GetFunctionTypes, Url>,
+  >(
     url: Url,
     ...options: ArgumentsWithoutBody<Context, IsFull>
   ): Promise<ResponseType<Context, IsFull>>;

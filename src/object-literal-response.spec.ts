@@ -1,13 +1,15 @@
 // object-literal-response.spec.ts
 
 /*
- * Copyright (c) 2022-2024 Check Digit, LLC
+ * Copyright (c) 2022-2026 Check Digit, LLC
  *
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
 import { RuleTester } from 'eslint';
-import { describe } from '@jest/globals';
+import { describe, it } from 'node:test';
+
+import './setup.test.ts';
 import rule, {
   REQUIRE_OBJECT_LITERAL_FOR_ERROR_RESPONSE_MESSAGE_ID,
   REQUIRE_OBJECT_LITERAL_FOR_HEADERS_MESSAGE_ID,
@@ -62,52 +64,54 @@ setResponse(response, {
 describe('object-literal-response', () => {
   const ruleTester = new RuleTester({
     languageOptions: {
-      parserOptions: { ecmaVersion: 2020, project: true },
+      parserOptions: { ecmaVersion: 'latest', project: true },
     },
   });
-  ruleTester.run('object-literal-response', rule, {
-    valid: [
-      {
-        code: RESPONSE_200_OBJECT_LITERAL,
-      },
-      {
-        code: RESPONSE_200_NUMBER_OBJECT_LITERAL,
-      },
-      {
-        code: RESPONSE_200_OBJECT_LITERAL_NOT_USED,
-      },
-      {
-        code: RESPONSE_204_WITHOUT_BODY,
-      },
-      {
-        code: RESPONSE_409_WITHOUT_BODY,
-      },
-    ],
-    invalid: [
-      {
-        code: OBJECT_LITERAL_NOT_USED_AT_TOP_LEVEL,
-        errors: [
-          {
-            messageId: REQUIRE_OBJECT_LITERAL_MESSAGE_ID,
-          },
-        ],
-      },
-      {
-        code: RESPONSE_400_OBJECT_LITERAL_NOT_USED,
-        errors: [
-          {
-            messageId: REQUIRE_OBJECT_LITERAL_FOR_ERROR_RESPONSE_MESSAGE_ID,
-          },
-        ],
-      },
-      {
-        code: OBJECT_LITERAL_NOT_USED_IN_HEADERS,
-        errors: [
-          {
-            messageId: REQUIRE_OBJECT_LITERAL_FOR_HEADERS_MESSAGE_ID,
-          },
-        ],
-      },
-    ],
+  it('works', () => {
+    ruleTester.run('object-literal-response', rule, {
+      valid: [
+        {
+          code: RESPONSE_200_OBJECT_LITERAL,
+        },
+        {
+          code: RESPONSE_200_NUMBER_OBJECT_LITERAL,
+        },
+        {
+          code: RESPONSE_200_OBJECT_LITERAL_NOT_USED,
+        },
+        {
+          code: RESPONSE_204_WITHOUT_BODY,
+        },
+        {
+          code: RESPONSE_409_WITHOUT_BODY,
+        },
+      ],
+      invalid: [
+        {
+          code: OBJECT_LITERAL_NOT_USED_AT_TOP_LEVEL,
+          errors: [
+            {
+              messageId: REQUIRE_OBJECT_LITERAL_MESSAGE_ID,
+            },
+          ],
+        },
+        {
+          code: RESPONSE_400_OBJECT_LITERAL_NOT_USED,
+          errors: [
+            {
+              messageId: REQUIRE_OBJECT_LITERAL_FOR_ERROR_RESPONSE_MESSAGE_ID,
+            },
+          ],
+        },
+        {
+          code: OBJECT_LITERAL_NOT_USED_IN_HEADERS,
+          errors: [
+            {
+              messageId: REQUIRE_OBJECT_LITERAL_FOR_HEADERS_MESSAGE_ID,
+            },
+          ],
+        },
+      ],
+    });
   });
 });

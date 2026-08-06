@@ -1,7 +1,7 @@
 // no-util.ts
 
 /*
- * Copyright (c) 2021-2025 Check Digit, LLC
+ * Copyright (c) 2021-2026 Check Digit, LLC
  *
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
@@ -35,7 +35,9 @@ const rule: ESLintUtils.RuleModule<typeof NO_UTIL> = createRule({
           const sourceCode = context.sourceCode;
           const tokens = sourceCode.tokensAndComments;
           const firstNonCommentToken = tokens.find(
-            (token) => token.type !== AST_TOKEN_TYPES.Block && token.type !== AST_TOKEN_TYPES.Line,
+            (token) =>
+              token.type !== AST_TOKEN_TYPES.Block &&
+              token.type !== AST_TOKEN_TYPES.Line,
           );
           if (firstNonCommentToken !== undefined) {
             context.report({

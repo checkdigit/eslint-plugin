@@ -4,14 +4,16 @@ import type { Rule } from 'eslint';
 import getDocumentationUrl from './get-documentation-url.ts';
 
 /*
- * Copyright (c) 2021-2024 Check Digit, LLC
+ * Copyright (c) 2021-2026 Check Digit, LLC
  *
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
 export const ruleId = 'no-promise-instance-method';
-export const NO_PROMISE_INSTANCE_METHOD_THEN = 'NO_PROMISE_INSTANCE_METHOD_THEN';
-export const NO_PROMISE_INSTANCE_METHOD_CATCH_FINALLY = 'NO_PROMISE_INSTANCE_METHOD_CATCH_FINALLY';
+export const NO_PROMISE_INSTANCE_METHOD_THEN =
+  'NO_PROMISE_INSTANCE_METHOD_THEN';
+export const NO_PROMISE_INSTANCE_METHOD_CATCH_FINALLY =
+  'NO_PROMISE_INSTANCE_METHOD_CATCH_FINALLY';
 
 export default {
   meta: {
@@ -29,7 +31,10 @@ export default {
   create(context) {
     return {
       MemberExpression(node) {
-        if (node.property.type === 'Identifier' && ['then', 'catch', 'finally'].includes(node.property.name)) {
+        if (
+          node.property.type === 'Identifier' &&
+          ['then', 'catch', 'finally'].includes(node.property.name)
+        ) {
           context.report({
             node,
             messageId:

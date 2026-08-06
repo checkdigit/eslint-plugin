@@ -1,64 +1,68 @@
 // require-resolve-full-response.spec.ts
 
 /*
- * Copyright (c) 2021-2024 Check Digit, LLC
+ * Copyright (c) 2021-2026 Check Digit, LLC
  *
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 
+import { describe, it } from 'node:test';
+
 import rule, { ruleId } from './require-resolve-full-response.ts';
 import createTester from './ts-tester.test.ts';
 
-createTester().run(ruleId, rule, {
-  valid: [
-    {
-      name: 'none service wrapper call will not trigger an error',
-      code: `response.headers.get('foo');`,
-    },
-    {
-      name: 'no error if service wrapper call sets resolveWithFullResponse as true',
-      code: `
+describe('require-resolve-full-response', () => {
+  it('works', () => {
+    createTester().run(ruleId, rule, {
+      valid: [
+        {
+          name: 'none service wrapper call will not trigger an error',
+          code: `response.headers.get('foo');`,
+        },
+        {
+          name: 'no error if service wrapper call sets resolveWithFullResponse as true',
+          code: `
           async function getKey(pingService: Endpoint) {
             await pingService.get(\`\${PING_BASE_PATH}/key/\${keyId}\`, {
               resolveWithFullResponse: true,
             });
           }
         `,
-    },
-    {
-      name: 'no error if options is an identifier with type of FullResponseOptions',
-      code: `
+        },
+        {
+          name: 'no error if options is an identifier with type of FullResponseOptions',
+          code: `
           async function getKey(pingService: Endpoint) {
             const options: FullResponseOptions = { resolveWithFullResponse: true };
             await pingService.get(\`\${PING_BASE_PATH}/key/\${keyId}\`, options);
           }
         `,
-    },
-    {
-      name: 'no error if options is an identifier with FullResponseOptions-ish type',
-      code: `
+        },
+        {
+          name: 'no error if options is an identifier with FullResponseOptions-ish type',
+          code: `
           async function getKey(pingService: Endpoint) {
             const options = { resolveWithFullResponse: true };
             await pingService.get(\`\${PING_BASE_PATH}/key/\${keyId}\`, options);
           }
         `,
-    },
-  ],
-  invalid: [
-    {
-      name: 'service wrapper passed in as a function argument with type as Endpoint',
-      code: `
+        },
+      ],
+      invalid: [
+        {
+          name: 'service wrapper passed in as a function argument with type as Endpoint',
+          code: `
           async function getKey(pingService: Endpoint) {
             await pingService.get(\`\${PING_BASE_PATH}/key/\${keyId}\`, {
               resolveWithFullResponse: false,
             });
           }
         `,
-      errors: [{ messageId: 'invalidOptions' }],
-    },
-    {
-      name: 'service wrapper passed in as a function argument with type as ResolvedService',
-      code: `
+          errors: [{ messageId: 'invalidOptions' }],
+        },
+        {
+          name: 'service wrapper passed in as a function argument with type as ResolvedService',
+          code: `
           async function getKey(
             pingService: ResolvedService,
             request: InboundContext
@@ -68,11 +72,11 @@ createTester().run(ruleId, rule, {
             });
           }
         `,
-      errors: [{ messageId: 'invalidOptions' }],
-    },
-    {
-      name: 'service configuration passed in as a argument with type as Configuration',
-      code: `
+          errors: [{ messageId: 'invalidOptions' }],
+        },
+        {
+          name: 'service configuration passed in as a argument with type as Configuration',
+          code: `
           async function getKey(
             config: Configuration,
           ) {
@@ -81,11 +85,11 @@ createTester().run(ruleId, rule, {
             });
           }
         `,
-      errors: [{ messageId: 'invalidOptions' }],
-    },
-    {
-      name: 'fixture passed in as a argument',
-      code: `
+          errors: [{ messageId: 'invalidOptions' }],
+        },
+        {
+          name: 'fixture passed in as a argument',
+          code: `
           async function getKey(
             fixture: Fixture,
           ) {
@@ -94,11 +98,11 @@ createTester().run(ruleId, rule, {
             });
           }
         `,
-      errors: [{ messageId: 'invalidOptions' }],
-    },
-    {
-      name: 'url declared as a variable',
-      code: `
+          errors: [{ messageId: 'invalidOptions' }],
+        },
+        {
+          name: 'url declared as a variable',
+          code: `
         async function doSomething() {
           const url = \`\${PING_BASE_PATH}/key/\${keyId}\`;
           await pingService.get(url, {
@@ -106,11 +110,11 @@ createTester().run(ruleId, rule, {
           });
         }
       `,
-      errors: [{ messageId: 'invalidOptions' }],
-    },
-    {
-      name: 'handle request with headers',
-      code: `
+          errors: [{ messageId: 'invalidOptions' }],
+        },
+        {
+          name: 'handle request with headers',
+          code: `
           async function getKey(
             fixture: Fixture,
           ) {
@@ -122,11 +126,11 @@ createTester().run(ruleId, rule, {
             });
           }
         `,
-      errors: [{ messageId: 'invalidOptions' }],
-    },
-    {
-      name: 'handle request with body',
-      code: `
+          errors: [{ messageId: 'invalidOptions' }],
+        },
+        {
+          name: 'handle request with body',
+          code: `
           async function getKey(
             fixture: Fixture,
           ) {
@@ -136,11 +140,11 @@ createTester().run(ruleId, rule, {
             });
           }
         `,
-      errors: [{ messageId: 'invalidOptions' }],
-    },
-    {
-      name: 'handle PUT request with undefined body',
-      code: `
+          errors: [{ messageId: 'invalidOptions' }],
+        },
+        {
+          name: 'handle PUT request with undefined body',
+          code: `
           async function getKey(
             fixture: Fixture,
           ) {
@@ -150,11 +154,11 @@ createTester().run(ruleId, rule, {
             });
           }
         `,
-      errors: [{ messageId: 'invalidOptions' }],
-    },
-    {
-      name: 'handle request with both body and headers',
-      code: `
+          errors: [{ messageId: 'invalidOptions' }],
+        },
+        {
+          name: 'handle request with both body and headers',
+          code: `
           async function getKey(
             fixture: Fixture,
             keyRequest: ping.KeyRequest,
@@ -167,11 +171,11 @@ createTester().run(ruleId, rule, {
             });
           }
         `,
-      errors: [{ messageId: 'invalidOptions' }],
-    },
-    {
-      name: 'initiate and call serve-runtime service in the same function',
-      code: `
+          errors: [{ messageId: 'invalidOptions' }],
+        },
+        {
+          name: 'initiate and call serve-runtime service in the same function',
+          code: `
           import type { Configuration, InboundContext } from '@checkdigit/serve-runtime';
           import type { pingV1 as ping } from '../services';
 
@@ -191,22 +195,22 @@ createTester().run(ruleId, rule, {
             return newKeyResponse.body;
           }
         `,
-      errors: [{ messageId: 'invalidOptions' }],
-    },
-    {
-      name: 'handle multi-line url string literal',
-      code: `
+          errors: [{ messageId: 'invalidOptions' }],
+        },
+        {
+          name: 'handle multi-line url string literal',
+          code: `
         await pingService.get(\`/message/v1/picked-request?cardId=\${cardIds.toString()}fromDate={encodeURIComponent(
           fromDate,
         )}toDate=\${encodeURIComponent(
           toDate,
         )}fields=ADVICE_RESPONSE,CATEGORIZATION,CREATED_ON,MATCHED_MESSAGE_ID,SETTLEMENT_AMOUNT,MESSAGE_ID,RECEIVED_DATE_TIME\`);
       `,
-      errors: [{ messageId: 'invalidOptions' }],
-    },
-    {
-      name: 'handle url provided as a function argument',
-      code: `
+          errors: [{ messageId: 'invalidOptions' }],
+        },
+        {
+          name: 'handle url provided as a function argument',
+          code: `
           async function getKey(
             fixture: Fixture,
             keyRequest: ping.KeyRequest,
@@ -220,7 +224,9 @@ createTester().run(ruleId, rule, {
             });
           }
         `,
-      errors: [{ messageId: 'invalidOptions' }],
-    },
-  ],
+          errors: [{ messageId: 'invalidOptions' }],
+        },
+      ],
+    });
+  });
 });

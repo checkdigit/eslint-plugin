@@ -3,7 +3,7 @@
 import type { Rule } from 'eslint';
 
 /*
- * Copyright (c) 2021-2024 Check Digit, LLC
+ * Copyright (c) 2021-2026 Check Digit, LLC
  *
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
@@ -43,12 +43,18 @@ export default {
     },
   },
   create(context) {
-    const options = { ...DEFAULT_OPTIONS, ...(context.options[0] as NoTestImportRuleOptions) };
+    const options = {
+      ...DEFAULT_OPTIONS,
+      ...(context.options[0] as NoTestImportRuleOptions),
+    };
     const testFileRegexp = new RegExp(options.testFilePattern, 'u');
 
     return {
       ImportDeclaration(node) {
-        if (typeof node.source.value === 'string' && testFileRegexp.test(node.source.value)) {
+        if (
+          typeof node.source.value === 'string' &&
+          testFileRegexp.test(node.source.value)
+        ) {
           context.report({
             node,
             messageId: NO_TEST_IMPORT,

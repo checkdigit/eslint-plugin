@@ -1,7 +1,7 @@
 // require-strict-assert.ts
 
 /*
- * Copyright (c) 2021-2024 Check Digit, LLC
+ * Copyright (c) 2021-2026 Check Digit, LLC
  *
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
@@ -15,7 +15,8 @@ export default {
   meta: {
     type: 'problem',
     docs: {
-      description: 'Require importing strict version of node:assert and using non-strict assert functions.',
+      description:
+        'Require importing strict version of node:assert and using non-strict assert functions.',
       url: 'https://github.com/checkdigit/eslint-plugin',
     },
     fixable: 'code',
@@ -37,23 +38,33 @@ export default {
             const importDeclaration = node.parent;
             const defaultSpecifier = importDeclaration.specifiers.find(
               (specifier) =>
-                specifier.type === 'ImportDefaultSpecifier' || specifier.type === 'ImportNamespaceSpecifier',
+                specifier.type === 'ImportDefaultSpecifier' ||
+                specifier.type === 'ImportNamespaceSpecifier',
             );
 
             if (defaultSpecifier !== undefined) {
               const importDeclarationRange = importDeclaration.range ?? [0, 0];
-              let rangeToReplace = defaultSpecifier.range ?? importDeclarationRange;
+              let rangeToReplace =
+                defaultSpecifier.range ?? importDeclarationRange;
               let correctedText = `{ strict as ${defaultSpecifier.local.name} }`;
 
-              if (node.value === NODE_ASSERT_STRICT && defaultSpecifier.range && importDeclaration.source.range) {
-                rangeToReplace = [defaultSpecifier.range[0], importDeclaration.source.range[1]];
+              if (
+                node.value === NODE_ASSERT_STRICT &&
+                defaultSpecifier.range &&
+                importDeclaration.source.range
+              ) {
+                rangeToReplace = [
+                  defaultSpecifier.range[0],
+                  importDeclaration.source.range[1],
+                ];
                 correctedText = `{ strict as ${defaultSpecifier.local.name} } from '${NODE_ASSERT}'`;
               }
 
               context.report({
                 node: importDeclaration,
                 message: 'Invalid form of strict assertion mode',
-                fix: (fixer) => fixer.replaceTextRange(rangeToReplace, correctedText),
+                fix: (fixer) =>
+                  fixer.replaceTextRange(rangeToReplace, correctedText),
               });
             }
           }
@@ -67,7 +78,8 @@ export default {
           callee.object.name !== '' &&
           callee.property.type === 'Identifier' &&
           callee.property.name !== '' &&
-          (callee.property.name.includes('strict') || callee.property.name.includes('Strict'))
+          (callee.property.name.includes('strict') ||
+            callee.property.name.includes('Strict'))
         ) {
           const nodeValue = nodeValues[callee.object.name];
           if (nodeValue === NODE_ASSERT || nodeValue === NODE_ASSERT_STRICT) {
@@ -84,7 +96,8 @@ export default {
             }
             context.report({
               node,
-              message: 'strict method not required when in strict assertion mode.',
+              message:
+                'strict method not required when in strict assertion mode.',
               fix: (fixer) => fixer.replaceText(callee, nonStrictFunctionName),
             });
           }

@@ -1,7 +1,7 @@
 // require-type-out-of-type-only-imports.ts
 
 /*
- * Copyright (c) 2021-2024 Check Digit, LLC
+ * Copyright (c) 2021-2026 Check Digit, LLC
  *
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
@@ -21,7 +21,8 @@ const rule: ESLintUtils.RuleModule<'moveTypeOutside'> = createRule({
       description: 'Require "type" to be out side of type-only imports.',
     },
     messages: {
-      moveTypeOutside: 'Update the type-only imports to put "type" specifier outside of the curly braces.',
+      moveTypeOutside:
+        'Update the type-only imports to put "type" specifier outside of the curly braces.',
     },
     fixable: 'code',
     schema: [],
@@ -37,7 +38,8 @@ const rule: ESLintUtils.RuleModule<'moveTypeOutside'> = createRule({
           declaration.specifiers.length === 0 ||
           !declaration.specifiers.every(
             (specifier) =>
-              specifier.type === TSESTree.AST_NODE_TYPES.ImportSpecifier && specifier.importKind === 'type',
+              specifier.type === TSESTree.AST_NODE_TYPES.ImportSpecifier &&
+              specifier.importKind === 'type',
           )
         ) {
           return;
@@ -49,8 +51,14 @@ const rule: ESLintUtils.RuleModule<'moveTypeOutside'> = createRule({
           *fix(fixer) {
             const moduleName = declaration.source.value;
             const mergedSpecifiers = declaration.specifiers
-              .filter((specifier) => specifier.type !== TSESTree.AST_NODE_TYPES.ImportDefaultSpecifier)
-              .map((specifier) => sourceCode.getText(specifier).replace('type ', ''));
+              .filter(
+                (specifier) =>
+                  specifier.type !==
+                  TSESTree.AST_NODE_TYPES.ImportDefaultSpecifier,
+              )
+              .map((specifier) =>
+                sourceCode.getText(specifier).replace('type ', ''),
+              );
             const updatedImportDeclaration = `import type { ${mergedSpecifiers.join(', ')} } from '${moduleName}';`;
 
             yield fixer.replaceText(declaration, updatedImportDeclaration);

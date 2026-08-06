@@ -16,9 +16,13 @@ export default async function isAwsSdkV3Used(): Promise<boolean> {
     return cachedIsAwsSdkV3Used;
   }
 
-  const packageJson = JSON.parse(await fs.readFile('package.json', 'utf8')) as PackageJson;
+  const packageJson = JSON.parse(
+    await fs.readFile('package.json', 'utf8'),
+  ) as PackageJson;
   const dependencies = packageJson.dependencies ?? {};
   // eslint-disable-next-line require-atomic-updates
-  cachedIsAwsSdkV3Used = Object.keys(dependencies).some((dependency) => dependency.startsWith('@aws-sdk/'));
+  cachedIsAwsSdkV3Used = Object.keys(dependencies).some((dependency) =>
+    dependency.startsWith('@aws-sdk/'),
+  );
   return cachedIsAwsSdkV3Used;
 }

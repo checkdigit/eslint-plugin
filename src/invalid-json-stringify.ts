@@ -4,7 +4,7 @@ import type { Rule } from 'eslint';
 import getDocumentationUrl from './get-documentation-url.ts';
 
 /*
- * Copyright (c) 2021-2024 Check Digit, LLC
+ * Copyright (c) 2021-2026 Check Digit, LLC
  *
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
@@ -25,7 +25,8 @@ export default {
       {
         type: 'array',
         items: {
-          description: 'Regular expression pattern to match the name of the first parameter of JSON.stringify().',
+          description:
+            'Regular expression pattern to match the name of the first parameter of JSON.stringify().',
           type: 'string',
           minItems: 1,
         },
@@ -39,7 +40,9 @@ export default {
   },
   create(context) {
     const options = (context.options[0] ?? DEFAULT_OPTIONS) as string[];
-    const invalidParameterNamePatterns = options.map((option) => new RegExp(option, 'u'));
+    const invalidParameterNamePatterns = options.map(
+      (option) => new RegExp(option, 'u'),
+    );
 
     return {
       CallExpression(node) {
@@ -67,7 +70,10 @@ export default {
                         parameterName: argument.name,
                       },
                       fix(fixer) {
-                        return fixer.replaceText(node, `String(${argument.name})`);
+                        return fixer.replaceText(
+                          node,
+                          `String(${argument.name})`,
+                        );
                       },
                     },
                   ],

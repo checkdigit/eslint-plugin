@@ -1,7 +1,7 @@
 // library/ts-tree.ts
 
 /*
- * Copyright (c) 2021-2024 Check Digit, LLC
+ * Copyright (c) 2021-2026 Check Digit, LLC
  *
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
@@ -14,7 +14,9 @@ interface NodeParentExtension {
   parent: NodeParent;
 }
 
-export function getParent(node: TSESTree.Node): TSESTree.Node | undefined | null {
+export function getParent(
+  node: TSESTree.Node,
+): TSESTree.Node | undefined | null {
   return (node as unknown as NodeParentExtension).parent;
 }
 
@@ -42,13 +44,22 @@ export function isBlockStatement(node: TSESTree.Node): boolean {
   return node.type.endsWith('Statement') || node.type.endsWith('Declaration');
 }
 
-export function getEnclosingStatement(node: TSESTree.Node): TSESTree.Node | undefined {
+export function getEnclosingStatement(
+  node: TSESTree.Node,
+): TSESTree.Node | undefined {
   return getAncestor(node, isBlockStatement);
 }
 
-export function getEnclosingScopeNode(node: TSESTree.Node): TSESTree.Node | undefined {
+export function getEnclosingScopeNode(
+  node: TSESTree.Node,
+): TSESTree.Node | undefined {
   return getAncestor(node, (parentNode) =>
-    ['FunctionExpression', 'FunctionDeclaration', 'ArrowFunctionExpression', 'Program'].includes(parentNode.type),
+    [
+      'FunctionExpression',
+      'FunctionDeclaration',
+      'ArrowFunctionExpression',
+      'Program',
+    ].includes(parentNode.type),
   );
 }
 
@@ -64,7 +75,8 @@ export function isUsedInArrayOrAsArgument(node: TSESTree.Node): boolean {
 
   if (
     parent.type === AST_NODE_TYPES.ArrayExpression ||
-    (parent.type === AST_NODE_TYPES.CallExpression && parent.arguments.includes(node as TSESTree.Expression))
+    (parent.type === AST_NODE_TYPES.CallExpression &&
+      parent.arguments.includes(node as TSESTree.Expression))
   ) {
     return true;
   }
@@ -75,7 +87,11 @@ export function isUsedInArrayOrAsArgument(node: TSESTree.Node): boolean {
 
 export function getEnclosingFunction(
   node: TSESTree.Node,
-): TSESTree.ArrowFunctionExpression | TSESTree.FunctionDeclaration | TSESTree.FunctionExpression | undefined {
+):
+  | TSESTree.ArrowFunctionExpression
+  | TSESTree.FunctionDeclaration
+  | TSESTree.FunctionExpression
+  | undefined {
   if (
     node.type === AST_NODE_TYPES.FunctionDeclaration ||
     node.type === AST_NODE_TYPES.FunctionExpression ||
@@ -97,7 +113,8 @@ export function getTypeParentNode(
   if (!node) {
     return undefined;
   }
-  return node.type === AST_NODE_TYPES.TSTypeAnnotation || node.type === AST_NODE_TYPES.TSAsExpression
+  return node.type === AST_NODE_TYPES.TSTypeAnnotation ||
+    node.type === AST_NODE_TYPES.TSAsExpression
     ? node
     : getTypeParentNode(node.parent);
 }

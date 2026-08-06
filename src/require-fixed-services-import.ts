@@ -1,7 +1,7 @@
 // require-fixed-services-import.ts
 
 /*
- * Copyright (c) 2021-2024 Check Digit, LLC
+ * Copyright (c) 2021-2026 Check Digit, LLC
  *
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
@@ -9,31 +9,41 @@
 import { strict as assert } from 'node:assert';
 import path from 'node:path';
 
-import { AST_NODE_TYPES, ESLintUtils, TSESTree } from '@typescript-eslint/utils';
+import {
+  AST_NODE_TYPES,
+  ESLintUtils,
+  TSESTree,
+} from '@typescript-eslint/utils';
 
 import getDocumentationUrl from './get-documentation-url.ts';
 
 export const ruleId = 'require-fixed-services-import';
 
 const createRule = ESLintUtils.RuleCreator((name) => getDocumentationUrl(name));
-const SERVICE_TYPINGS_IMPORT_PATH = /(?<path>\.\.\/)+services(?!\/index(?:\.ts)?)\/.*/u;
+const SERVICE_TYPINGS_IMPORT_PATH =
+  /(?:\.\.\/)+services(?!\/index(?:\.ts)?)\/.*/u;
 const SERVICE_TYPINGS_IMPORT_PATH_WITH_VERSION =
-  /(?<path>\.\.\/)+services\/(?<service>\w+)\/(?<version>v\d+)(?<index>\/index(?:\.ts)?)?/u;
+  /(?:\.\.\/)+services\/(?<service>\w+)\/(?<version>v\d+)(?:\/index(?:\.ts)?)?/u;
 
 const rule: ESLintUtils.RuleModule<
-  'updateServicesImportSpecifier' | 'updateServicesImportSource' | 'renameServiceTypeReference'
+  | 'updateServicesImportSpecifier'
+  | 'updateServicesImportSource'
+  | 'renameServiceTypeReference'
 > = createRule({
   name: ruleId,
   meta: {
     type: 'suggestion',
     docs: {
-      description: 'Require fixed "from" with service typing imports from "src/services".',
+      description:
+        'Require fixed "from" with service typing imports from "src/services".',
     },
     messages: {
       updateServicesImportSpecifier:
         'Update service typing import specifiers to be from the corresponding service version namespace.',
-      updateServicesImportSource: 'Update service typing imports to be from the fixed "src/services" path.',
-      renameServiceTypeReference: 'Rename service type reference using the corresponding service version namespace.',
+      updateServicesImportSource:
+        'Update service typing imports to be from the fixed "src/services" path.',
+      renameServiceTypeReference:
+        'Rename service type reference using the corresponding service version namespace.',
     },
     fixable: 'code',
     schema: [],
@@ -53,7 +63,8 @@ const rule: ESLintUtils.RuleModule<
 
         if (SERVICE_TYPINGS_IMPORT_PATH.test(moduleName)) {
           // make sure that it matches only the src/services path
-          const match = SERVICE_TYPINGS_IMPORT_PATH_WITH_VERSION.exec(moduleName);
+          const match =
+            SERVICE_TYPINGS_IMPORT_PATH_WITH_VERSION.exec(moduleName);
           if (match?.groups) {
             // need to import the service typings from the fixed path, and also apply the namespace to the referenced types
             const { service, version } = match.groups;
@@ -65,7 +76,10 @@ const rule: ESLintUtils.RuleModule<
                 specifier.type === AST_NODE_TYPES.ImportSpecifier &&
                 specifier.imported.type === AST_NODE_TYPES.Identifier
               ) {
-                importedServiceTypeMapping.set(specifier.local.name, `${service}.${specifier.imported.name}`);
+                importedServiceTypeMapping.set(
+                  specifier.local.name,
+                  `${service}.${specifier.imported.name}`,
+                );
               }
             }
 
@@ -78,7 +92,10 @@ const rule: ESLintUtils.RuleModule<
               messageId: 'updateServicesImportSpecifier',
               node: importDeclaration.source,
               *fix(fixer) {
-                yield fixer.replaceTextRange([rangeStart, rangeEnd], `${service}V${version.slice(1)} as ${service}`);
+                yield fixer.replaceTextRange(
+                  [rangeStart, rangeEnd],
+                  `${service}V${version.slice(1)} as ${service}`,
+                );
               },
             });
           }
@@ -102,7 +119,9 @@ const rule: ESLintUtils.RuleModule<
           typeReference.typeName.type === AST_NODE_TYPES.Identifier &&
           importedServiceTypeMapping.has(typeReference.typeName.name)
         ) {
-          const renamedTypeName = importedServiceTypeMapping.get(typeReference.typeName.name);
+          const renamedTypeName = importedServiceTypeMapping.get(
+            typeReference.typeName.name,
+          );
           assert.ok(renamedTypeName !== undefined);
           context.report({
             messageId: 'renameServiceTypeReference',

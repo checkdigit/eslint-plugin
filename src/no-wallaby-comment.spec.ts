@@ -1,13 +1,14 @@
 // no-wallaby-comment.spec.ts
 
 /*
- * Copyright (c) 2022-2024 Check Digit, LLC
+ * Copyright (c) 2022-2026 Check Digit, LLC
  *
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
 import { RuleTester } from 'eslint';
-import { describe } from '@jest/globals';
+import { describe, it } from 'node:test';
 
+import './setup.test.ts';
 import rule from './no-wallaby-comment.ts';
 
 const LINE_ONE_NO_COMMENTS = `const NOT_A_SECRET = "A template that isn't a secret.";`;
@@ -210,141 +211,143 @@ const TEST = "this isn't secret"; // testing with ? here and there ??.
 describe('no-wallaby-comment', () => {
   const ruleTester = new RuleTester({
     languageOptions: {
-      parserOptions: { ecmaVersion: 2020 },
+      parserOptions: { ecmaVersion: 'latest' },
     },
   });
 
-  ruleTester.run('no-wallaby-comment', rule, {
-    valid: [
-      {
-        code: LINE_ONE_NO_COMMENTS,
-      },
-      {
-        code: LINE_TWO_NO_COMMENTS,
-      },
-      {
-        code: LINE_SEVEN_WITH_COMMENTS,
-      },
-      {
-        code: LINE_12_WITH_COMMENTS,
-      },
-      {
-        code: LINE_13_WITH_COMMENTS,
-      },
-      {
-        code: LINE_14_WITH_COMMENTS,
-      },
-      {
-        code: LINE_15_WITH_COMMENTS,
-      },
-      {
-        code: LINE_16_WITH_COMMENTS,
-      },
-      {
-        code: LINE_17_WITH_COMMENTS,
-      },
-    ],
-    invalid: [
-      {
-        code: `const NOT_A_SECRET = "A template that isn't a secret.";// ? `,
-        errors: [{ message: 'Remove wallaby-specific comments' }],
-        output: `const NOT_A_SECRET = "A template that isn't a secret.";`,
-      },
-      {
-        code: `const NOT_A_SECRET = "A template that isn't a secret.";// ?? `,
-        errors: [{ message: 'Remove wallaby-specific comments' }],
-        output: `const NOT_A_SECRET = "A template that isn't a secret.";`,
-      },
-      {
-        code: `const NOT_A_SECRET = "A template that isn't a secret.";// ?. `,
-        errors: [{ message: 'Remove wallaby-specific comments' }],
-        output: `const NOT_A_SECRET = "A template that isn't a secret.";`,
-      },
-      {
-        code: `const NOT_A_SECRET = "A template that isn't a secret.";// ??. `,
-        errors: [{ message: 'Remove wallaby-specific comments' }],
-        output: `const NOT_A_SECRET = "A template that isn't a secret.";`,
-      },
-      {
-        code: `const NOT_A_SECRET = "A template that isn't a secret.";     // ?     `,
-        errors: [{ message: 'Remove wallaby-specific comments' }],
-        output: `const NOT_A_SECRET = "A template that isn't a secret.";`,
-      },
-      {
-        code: `  // file.only    `,
-        errors: [{ message: 'Remove wallaby-specific comments' }],
-        output: ``,
-      },
-      {
-        code: `// file.only   `,
-        errors: [{ message: 'Remove wallaby-specific comments' }],
-        output: ``,
-      },
-      {
-        code: `//  file.skip   `,
-        errors: [{ message: 'Remove wallaby-specific comments' }],
-        output: ``,
-      },
-      {
-        code: LINE_ONE_WITH_MULTIPLE_COMMENTS,
-        errors: [
-          { message: 'Remove wallaby-specific comments' },
-          { message: 'Remove wallaby-specific comments' },
-          { message: 'Remove wallaby-specific comments' },
-          { message: 'Remove wallaby-specific comments' },
-        ],
-        output: LINE_ONE_WITH_MULTIPLE_COMMENTS_EXPECTED,
-      },
-      {
-        code: LINE_TWO_WITH_MULTIPLE_COMMENTS,
-        errors: [
-          { message: 'Remove wallaby-specific comments' },
-          { message: 'Remove wallaby-specific comments' },
-          { message: 'Remove wallaby-specific comments' },
-          { message: 'Remove wallaby-specific comments' },
-        ],
-        output: LINE_TWO_WITH_MULTIPLE_COMMENTS_EXPECTED,
-      },
-      {
-        code: LINE_THREE_WITH_COMMENTS,
-        errors: [{ message: 'Remove wallaby-specific comments' }],
-        output: '',
-      },
-      {
-        code: LINE_FOUR_WITH_COMMENTS,
-        errors: [{ message: 'Remove wallaby-specific comments' }],
-        output: '',
-      },
-      {
-        code: LINE_FIVE_WITH_COMMENTS,
-        errors: [{ message: 'Remove wallaby-specific comments' }],
-        output: '',
-      },
-      {
-        code: LINE_SIX_WITH_COMMENTS,
-        errors: [{ message: 'Remove wallaby-specific comments' }],
-        output: LINE_SIX_WITH_COMMENTS_EXPECTED,
-      },
-      {
-        code: LINE_EIGHT_WITH_COMMENTS,
-        errors: [{ message: 'Remove wallaby-specific comments' }],
-        output: LINE_EIGHT_WITH_COMMENTS_EXPECTED,
-      },
-      {
-        code: LINE_NINE_WITH_COMMENTS,
-        errors: [{ message: 'Remove wallaby-specific comments' }],
-        output: LINE_NINE_WITH_COMMENTS_EXPECTED,
-      },
-      {
-        code: LINE_TEN_WITH_COMMENTS,
-        errors: [{ message: 'Remove wallaby-specific comments' }],
-        output: LINE_TEN_WITH_COMMENTS_EXPECTED,
-      },
-      {
-        code: LINE_11_WITH_COMMENTS,
-        errors: [{ message: 'Remove wallaby-specific comments' }],
-        output: LINE_11_WITH_COMMENTS_EXPECTED,
-      },
-    ],
+  it('works', () => {
+    ruleTester.run('no-wallaby-comment', rule, {
+      valid: [
+        {
+          code: LINE_ONE_NO_COMMENTS,
+        },
+        {
+          code: LINE_TWO_NO_COMMENTS,
+        },
+        {
+          code: LINE_SEVEN_WITH_COMMENTS,
+        },
+        {
+          code: LINE_12_WITH_COMMENTS,
+        },
+        {
+          code: LINE_13_WITH_COMMENTS,
+        },
+        {
+          code: LINE_14_WITH_COMMENTS,
+        },
+        {
+          code: LINE_15_WITH_COMMENTS,
+        },
+        {
+          code: LINE_16_WITH_COMMENTS,
+        },
+        {
+          code: LINE_17_WITH_COMMENTS,
+        },
+      ],
+      invalid: [
+        {
+          code: `const NOT_A_SECRET = "A template that isn't a secret.";// ? `,
+          errors: [{ message: 'Remove wallaby-specific comments' }],
+          output: `const NOT_A_SECRET = "A template that isn't a secret.";`,
+        },
+        {
+          code: `const NOT_A_SECRET = "A template that isn't a secret.";// ?? `,
+          errors: [{ message: 'Remove wallaby-specific comments' }],
+          output: `const NOT_A_SECRET = "A template that isn't a secret.";`,
+        },
+        {
+          code: `const NOT_A_SECRET = "A template that isn't a secret.";// ?. `,
+          errors: [{ message: 'Remove wallaby-specific comments' }],
+          output: `const NOT_A_SECRET = "A template that isn't a secret.";`,
+        },
+        {
+          code: `const NOT_A_SECRET = "A template that isn't a secret.";// ??. `,
+          errors: [{ message: 'Remove wallaby-specific comments' }],
+          output: `const NOT_A_SECRET = "A template that isn't a secret.";`,
+        },
+        {
+          code: `const NOT_A_SECRET = "A template that isn't a secret.";     // ?     `,
+          errors: [{ message: 'Remove wallaby-specific comments' }],
+          output: `const NOT_A_SECRET = "A template that isn't a secret.";`,
+        },
+        {
+          code: `  // file.only    `,
+          errors: [{ message: 'Remove wallaby-specific comments' }],
+          output: ``,
+        },
+        {
+          code: `// file.only   `,
+          errors: [{ message: 'Remove wallaby-specific comments' }],
+          output: ``,
+        },
+        {
+          code: `//  file.skip   `,
+          errors: [{ message: 'Remove wallaby-specific comments' }],
+          output: ``,
+        },
+        {
+          code: LINE_ONE_WITH_MULTIPLE_COMMENTS,
+          errors: [
+            { message: 'Remove wallaby-specific comments' },
+            { message: 'Remove wallaby-specific comments' },
+            { message: 'Remove wallaby-specific comments' },
+            { message: 'Remove wallaby-specific comments' },
+          ],
+          output: LINE_ONE_WITH_MULTIPLE_COMMENTS_EXPECTED,
+        },
+        {
+          code: LINE_TWO_WITH_MULTIPLE_COMMENTS,
+          errors: [
+            { message: 'Remove wallaby-specific comments' },
+            { message: 'Remove wallaby-specific comments' },
+            { message: 'Remove wallaby-specific comments' },
+            { message: 'Remove wallaby-specific comments' },
+          ],
+          output: LINE_TWO_WITH_MULTIPLE_COMMENTS_EXPECTED,
+        },
+        {
+          code: LINE_THREE_WITH_COMMENTS,
+          errors: [{ message: 'Remove wallaby-specific comments' }],
+          output: '',
+        },
+        {
+          code: LINE_FOUR_WITH_COMMENTS,
+          errors: [{ message: 'Remove wallaby-specific comments' }],
+          output: '',
+        },
+        {
+          code: LINE_FIVE_WITH_COMMENTS,
+          errors: [{ message: 'Remove wallaby-specific comments' }],
+          output: '',
+        },
+        {
+          code: LINE_SIX_WITH_COMMENTS,
+          errors: [{ message: 'Remove wallaby-specific comments' }],
+          output: LINE_SIX_WITH_COMMENTS_EXPECTED,
+        },
+        {
+          code: LINE_EIGHT_WITH_COMMENTS,
+          errors: [{ message: 'Remove wallaby-specific comments' }],
+          output: LINE_EIGHT_WITH_COMMENTS_EXPECTED,
+        },
+        {
+          code: LINE_NINE_WITH_COMMENTS,
+          errors: [{ message: 'Remove wallaby-specific comments' }],
+          output: LINE_NINE_WITH_COMMENTS_EXPECTED,
+        },
+        {
+          code: LINE_TEN_WITH_COMMENTS,
+          errors: [{ message: 'Remove wallaby-specific comments' }],
+          output: LINE_TEN_WITH_COMMENTS_EXPECTED,
+        },
+        {
+          code: LINE_11_WITH_COMMENTS,
+          errors: [{ message: 'Remove wallaby-specific comments' }],
+          output: LINE_11_WITH_COMMENTS_EXPECTED,
+        },
+      ],
+    });
   });
 });

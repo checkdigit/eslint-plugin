@@ -1,7 +1,7 @@
 // library/tree.ts
 
 /*
- * Copyright (c) 2021-2024 Check Digit, LLC
+ * Copyright (c) 2021-2026 Check Digit, LLC
  *
  * This code is licensed under the MIT license (see LICENSE.txt for details).
  */
@@ -48,7 +48,12 @@ export function getEnclosingStatement(node: Node): Node | undefined {
 
 export function getEnclosingScopeNode(node: Node): Node | undefined {
   return getAncestor(node, (parentNode) =>
-    ['FunctionExpression', 'FunctionDeclaration', 'ArrowFunctionExpression', 'Program'].includes(parentNode.type),
+    [
+      'FunctionExpression',
+      'FunctionDeclaration',
+      'ArrowFunctionExpression',
+      'Program',
+    ].includes(parentNode.type),
   );
 }
 
@@ -65,7 +70,8 @@ export function isUsedInArrayOrAsArgument(node: Node): boolean {
   if (
     parent.type === 'ArrayExpression' ||
     parent.type === 'ArrowFunctionExpression' ||
-    (parent.type === 'CallExpression' && parent.arguments.includes(node as Expression))
+    (parent.type === 'CallExpression' &&
+      parent.arguments.includes(node as Expression))
   ) {
     return true;
   }
