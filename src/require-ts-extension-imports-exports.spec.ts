@@ -7,23 +7,25 @@ type StatSyncFn = (path: PathLike) => Stats;
 
 mock.module('fs', {
   cache: true,
-  defaultExport: {
-    existsSync(path: PathLike) {
-      return (
-        typeof path === 'string' &&
-        (path.endsWith('bar') ||
-          path.endsWith('src/bar') ||
-          path.endsWith('bar-dir') ||
-          path.endsWith('services') ||
-          path.endsWith('.test') ||
-          path.endsWith('swagger'))
-      );
+  exports: {
+    default: {
+      existsSync(path: PathLike) {
+        return (
+          typeof path === 'string' &&
+          (path.endsWith('bar') ||
+            path.endsWith('src/bar') ||
+            path.endsWith('bar-dir') ||
+            path.endsWith('services') ||
+            path.endsWith('.test') ||
+            path.endsWith('swagger'))
+        );
+      },
+      statSync: ((path: PathLike) => ({
+        isDirectory: () =>
+          typeof path === 'string' &&
+          (path.endsWith('bar-dir') || path.endsWith('services')),
+      })) as StatSyncFn,
     },
-    statSync: ((path: PathLike) => ({
-      isDirectory: () =>
-        typeof path === 'string' &&
-        (path.endsWith('bar-dir') || path.endsWith('services')),
-    })) as StatSyncFn,
   },
 });
 
