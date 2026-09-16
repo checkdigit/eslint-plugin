@@ -23,10 +23,10 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
+      - name: Install Latest npm
+        run: npm install --global npm@latest
       - name: Install Dependencies
         run: npm ci --ignore-scripts
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Prepare
         run: npm run prepare
       - name: Compile
@@ -54,10 +54,10 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
+      - name: Install Latest npm
+        run: npm install --global npm@latest
       - name: Install Dependencies
         run: npm ci --ignore-scripts
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Prepare
         run: npm run prepare
       - name: Compile
