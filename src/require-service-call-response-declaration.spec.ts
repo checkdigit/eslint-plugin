@@ -44,6 +44,32 @@ describe('require-service-call-response-declaration', () => {
           code: `const response = await fetch(\`https://ping.checkdigit/ping/v1/ping\`);`,
         },
         {
+          name: 'awaited service wrapper call assigned to a variable declared earlier',
+          code: `
+          import type { SampleApi } from './typings.test.ts';
+          async function getKey(pingService: SampleApi, useAlternatePath: boolean) {
+            let response;
+            if (useAlternatePath) {
+              response = await pingService.get(\`/ping/v1/alternate-ping\`, {
+                resolveWithFullResponse: true,
+              });
+            } else {
+              response = await pingService.get(\`/ping/v1/ping\`, {
+                resolveWithFullResponse: true,
+              });
+            }
+            // assert.ok(response.status===200)
+          }
+        `,
+        },
+        {
+          name: 'awaited fetch service call assigned to a property of an existing object',
+          code: `
+          const pingResults: { response?: Response } = {};
+          pingResults.response = await fetch(\`https://ping.checkdigit/ping/v1/ping\`);
+        `,
+        },
+        {
           name: 'non-awaited service wrapper call with the legacy typings without response variable declared',
           code: `
           import type { Endpoint } from './typings.test.ts';
