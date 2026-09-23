@@ -25,6 +25,7 @@ function isResponseCaptured(serviceCall: TSESTree.AwaitExpression): boolean {
   return (
     parent.type === AST_NODE_TYPES.VariableDeclarator ||
     (parent.type === AST_NODE_TYPES.AssignmentExpression &&
+      parent.operator === '=' &&
       parent.right === serviceCall)
   );
 }
