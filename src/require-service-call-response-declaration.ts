@@ -19,6 +19,17 @@ export const ruleId = 'require-service-call-response-declaration';
 
 const createRule = ESLintUtils.RuleCreator((name) => getDocumentationUrl(name));
 
+// assigning to an already-declared variable captures the response just as well as declaring a new one
+function isResponseCaptured(serviceCall: TSESTree.AwaitExpression): boolean {
+  const { parent } = serviceCall;
+  return (
+    parent.type === AST_NODE_TYPES.VariableDeclarator ||
+    (parent.type === AST_NODE_TYPES.AssignmentExpression &&
+      parent.operator === '=' &&
+      parent.right === serviceCall)
+  );
+}
+
 const rule: ESLintUtils.RuleModule<
   'unknownError' | 'requireServiceCallResponseDeclaration'
 > = createRule({
@@ -27,11 +38,11 @@ const rule: ESLintUtils.RuleModule<
     type: 'suggestion',
     docs: {
       description:
-        'Awaited service call is required to declare variable for its return value which should be examined later on.',
+        'Awaited service call is required to capture its return value in a variable which should be examined later on.',
     },
     messages: {
       requireServiceCallResponseDeclaration:
-        'Awaited service call is required to declare variable for its return value which should be examined later on.',
+        'Awaited service call is required to capture its return value in a variable which should be examined later on.',
       unknownError:
         'Unknown error occurred in file "{{fileName}}": {{ error }}.',
     },
@@ -54,7 +65,7 @@ const rule: ESLintUtils.RuleModule<
           if (
             awaitedType !== undefined &&
             isServiceResponse(awaitedType) &&
-            serviceCall.parent.type !== AST_NODE_TYPES.VariableDeclarator
+            !isResponseCaptured(serviceCall)
           ) {
             context.report({
               node: serviceCall,
