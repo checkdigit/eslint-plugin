@@ -33,6 +33,9 @@ import requireTypeOutOfTypeOnlyImports, {
 import noServeRuntime, {
   ruleId as noServeRuntimeRuleId,
 } from './no-serve-runtime.ts';
+import requireApiRouteImport, {
+  ruleId as requireApiRouteImportRuleId,
+} from './require-api-route-import.ts';
 import requireServiceCallResponseDeclaration, {
   ruleId as requireServiceCallResponseDeclarationRuleId,
 } from './require-service-call-response-declaration.ts';
@@ -94,6 +97,7 @@ const rules: Record<string, TSESLint.LooseRuleDefinition> = {
   [requireTypeOutOfTypeOnlyImportsRuleId]: requireTypeOutOfTypeOnlyImports,
   [requireAWSBareBonesRuleId]: requireAWSBareBones,
   [requireConsistentReadRuleId]: requireConsistentRead,
+  [requireApiRouteImportRuleId]: requireApiRouteImport,
 };
 
 const plugin: TSESLint.FlatConfig.Plugin = {
@@ -136,6 +140,7 @@ const configs: Record<string, TSESLint.FlatConfig.Config[]> = {
         [`@checkdigit/${requireConsistentReadRuleId}`]: 'error',
         [`@checkdigit/${requireAwsConfigRuleId}`]: 'error',
         [`@checkdigit/${requireAWSBareBonesRuleId}`]: 'error',
+        [`@checkdigit/${requireApiRouteImportRuleId}`]: 'error',
       },
     },
   ],
@@ -174,6 +179,7 @@ const configs: Record<string, TSESLint.FlatConfig.Config[]> = {
         [`@checkdigit/${requireConsistentReadRuleId}`]: 'off',
         [`@checkdigit/${requireAwsConfigRuleId}`]: 'off',
         [`@checkdigit/${requireAWSBareBonesRuleId}`]: 'off',
+        [`@checkdigit/${requireApiRouteImportRuleId}`]: 'off',
       },
     },
   ],
