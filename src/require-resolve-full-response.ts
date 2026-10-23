@@ -42,7 +42,6 @@ const rule: ESLintUtils.RuleModule<'invalidOptions' | 'unknownError'> =
       },
       schema: [],
     },
-    defaultOptions: [],
     // eslint-disable-next-line max-lines-per-function
     create(context) {
       const sourceCode = context.sourceCode;

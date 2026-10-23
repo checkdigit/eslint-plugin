@@ -95,7 +95,6 @@ const rule: TSESLint.RuleModule<
         'Avoid using the `uuid` module for v4 UUID generation',
     },
   },
-  defaultOptions: [],
   create(context) {
     const aliases: Aliases = {};
 

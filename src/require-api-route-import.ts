@@ -39,7 +39,6 @@ const rule: ESLintUtils.RuleModule<'requireApiRouteImport'> = createRule({
     },
     schema: [],
   },
-  defaultOptions: [],
   create(context) {
     const filePath = context.filename.replaceAll('\\', '/');
     if (!API_FILE_PATH.test(filePath) || EXCLUDED_FILE_NAME.test(filePath)) {

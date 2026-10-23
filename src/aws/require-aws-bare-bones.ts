@@ -83,7 +83,6 @@ const rule: ESLintUtils.RuleModule<typeof MESSAGE_ID_AGGREGATED_CLIENT> =
       },
       schema: [],
     },
-    defaultOptions: [],
     create(context) {
       return {
         ImportDeclaration(node) {

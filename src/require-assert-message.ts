@@ -31,7 +31,6 @@ const rule: TSESLint.RuleModule<string, unknown[]> = createRule({
         'Missing message argument in {{methodName}}() method.',
     },
   },
-  defaultOptions: [],
   create(context) {
     const parserServices = ESLintUtils.getParserServices(context);
     const checker = parserServices.program.getTypeChecker();

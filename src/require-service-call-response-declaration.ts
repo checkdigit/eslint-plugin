@@ -49,7 +49,6 @@ const rule: ESLintUtils.RuleModule<
     fixable: 'code',
     schema: [],
   },
-  defaultOptions: [],
   create(context) {
     const parserServices = ESLintUtils.getParserServices(context);
     const typeChecker = parserServices.program.getTypeChecker();

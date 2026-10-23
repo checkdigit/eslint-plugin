@@ -163,7 +163,6 @@ const rule: ESLintUtils.RuleModule<
     },
     schema: [],
   },
-  defaultOptions: [],
   create(context) {
     const sourceCode = context.sourceCode;
 
