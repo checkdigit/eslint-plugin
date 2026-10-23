@@ -22,6 +22,7 @@ Copyright (c) 2021-2026 [Check Digit, LLC](https://checkdigit.com)
 - `@checkdigit/require-type-out-of-type-only-imports`
 - `@checkdigit/require-ts-extension-imports`
 - `@checkdigit/no-enum`
+- `@checkdigit/require-api-route-import`
 
 ## Configurations
 

@@ -1,0 +1,3 @@
+# Require every API route implementation to be imported by `src/api/v{N}/index.ts`
+
+A route implementation (a `.ts` file directly inside `src/api/v{N}` that creates a `new Router(...)`) is only served once the folder's `index.ts` imports it and adds it to the `Service` list. Forgetting the import silently drops the new endpoint, so this rule reports the route implementation itself, on its `new Router(...)`, when the folder's `index.ts` does not import it.
