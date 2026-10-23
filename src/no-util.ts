@@ -25,6 +25,7 @@ const rule: ESLintUtils.RuleModule<typeof NO_UTIL> = createRule({
       [NO_UTIL]: "File name '{{filename}}' contains banned 'util' pattern.",
     },
   },
+  defaultOptions: [],
   create(context) {
     return {
       Program() {

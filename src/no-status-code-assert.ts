@@ -38,7 +38,7 @@ const hasStatusCodeOrValue = (arg: TSESTree.Node): boolean => {
     case AST_NODE_TYPES.Literal:
       if (
         typeof arg.value === 'number' &&
-        Object.values<unknown>(StatusCodes).includes(arg.value)
+        Object.values(StatusCodes).includes(arg.value)
       ) {
         return true;
       }
@@ -81,6 +81,7 @@ const rule: TSESLint.RuleModule<typeof NO_STATUS_CODE_ASSERT> = createRule({
         'Do not use status codes in assertions; use error handling instead',
     },
   },
+  defaultOptions: [],
   create(context) {
     return {
       CallExpression(node: TSESTree.CallExpression) {

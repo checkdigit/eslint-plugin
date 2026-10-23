@@ -48,6 +48,7 @@ const rule: ESLintUtils.RuleModule<
     fixable: 'code',
     schema: [],
   },
+  defaultOptions: [],
   create(context) {
     const importedServiceTypeMapping = new Map<string, string>();
     const fileFolder = path.dirname(context.filename);

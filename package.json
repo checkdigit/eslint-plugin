@@ -59,8 +59,8 @@
   },
   "prettier": "@checkdigit/prettier-config",
   "dependencies": {
-    "@typescript-eslint/type-utils": "^8.72.0",
-    "@typescript-eslint/utils": "^8.72.0",
+    "@typescript-eslint/type-utils": "^8.70.1",
+    "@typescript-eslint/utils": "^8.70.1",
     "http-status-codes": "^2.3.0",
     "ts-api-utils": "^2.5.0"
   },
@@ -70,9 +70,9 @@
     "@eslint/js": "^10.0.1",
     "@types/eslint": "^9.6.1",
     "@types/eslint-config-prettier": "^6.11.3",
-    "@typescript-eslint/parser": "^8.72.0",
-    "@typescript-eslint/rule-tester": "^8.72.0",
-    "eslint": "^10.13.0",
+    "@typescript-eslint/parser": "^8.70.1",
+    "@typescript-eslint/rule-tester": "^8.70.1",
+    "eslint": "^10.11.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-import-resolver-typescript": "^4.4.5",
     "eslint-plugin-eslint-plugin": "^7.6.2",
@@ -80,8 +80,8 @@
     "eslint-plugin-no-only-tests": "^3.4.0",
     "eslint-plugin-no-secrets": "^2.3.3",
     "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-sonarjs": "4.2.2",
-    "typescript-eslint": "^8.72.0"
+    "eslint-plugin-sonarjs": "4.2.1",
+    "typescript-eslint": "^8.70.1"
   },
   "peerDependencies": {
     "eslint": ">=10 <11"

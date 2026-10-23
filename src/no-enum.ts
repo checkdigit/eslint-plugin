@@ -25,6 +25,7 @@ const rule: ESLintUtils.RuleModule<typeof NO_ENUM> = createRule({
       [NO_ENUM]: 'Avoid using `enum` in TypeScript.',
     },
   },
+  defaultOptions: [],
   create(context) {
     return {
       TSEnumDeclaration(node: TSESTree.TSEnumDeclaration) {

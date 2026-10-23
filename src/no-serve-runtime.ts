@@ -25,6 +25,7 @@ const rule: ESLintUtils.RuleModule<'noServeRuntime'> = createRule({
     },
     schema: [],
   },
+  defaultOptions: [],
   create(context) {
     return {
       ImportDeclaration: (importDeclaration: TSESTree.ImportDeclaration) => {

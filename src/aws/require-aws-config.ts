@@ -54,6 +54,7 @@ const rule: ESLintUtils.RuleModule<
     },
     schema: [],
   },
+  defaultOptions: [],
   create(context) {
     const { isAwsSdkV3Used } = context.settings;
     const importedAwsClients = new Set<string>();

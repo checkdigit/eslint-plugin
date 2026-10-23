@@ -132,6 +132,7 @@ const rule: ESLintUtils.RuleModule<'mergeDuplicatedImports'> = createRule({
     fixable: 'code',
     schema: [],
   },
+  defaultOptions: [],
   create(context) {
     const sourceCode = context.sourceCode;
     const importDeclarations = new Map<string, TSESTree.ImportDeclaration[]>();

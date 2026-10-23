@@ -57,6 +57,7 @@ const rule: TSESLint.RuleModule<string, unknown[]> = createRule({
         'Export paths should end with .ts extension',
     },
   },
+  defaultOptions: [],
   create(context) {
     const filename = context.filename;
 

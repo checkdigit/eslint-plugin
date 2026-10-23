@@ -27,6 +27,7 @@ const rule: ESLintUtils.RuleModule<'moveTypeOutside'> = createRule({
     fixable: 'code',
     schema: [],
   },
+  defaultOptions: [],
   create(context) {
     const sourceCode = context.sourceCode;
 
