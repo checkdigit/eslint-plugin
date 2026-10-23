@@ -37,32 +37,7 @@ function createApiFolder(
 }
 
 describe('require-api-route-import', () => {
-  it('valid - every route implementation is imported, non-route siblings are ignored', (testContext) => {
-    const apiFolder = createApiFolder(testContext, 'src/api/v1', {
-      'ping.ts': `import Router from '@koa/router';\nexport default async function () { const router = new Router(); }`,
-      'a-get.ts': `import Router from '@koa/router';\nexport default async function () { const router = new Router<'v1'>(); }`,
-      'constants.ts': `export const ETAG_HEADER = 'etag';`,
-      'ping.spec.ts': `import Router from '@koa/router';\nconst router = new Router();`,
-      'service/b.ts': `import Router from '@koa/router';\nconst router = new Router();`,
-    });
-    new RuleTester().run(ruleId, rule, {
-      valid: [
-        {
-          filename: path.join(apiFolder, 'index.ts'),
-          code: `
-            import type { Service } from '@checkdigit/serve-runtime';
-            import ping from './ping.ts';
-            import aGet from './a-get.ts';
-            const service: Service = async () => [ping, aGet];
-            export default service;
-          `,
-        },
-      ],
-      invalid: [],
-    });
-  });
-
-  it('valid - route file - non-route sibling not imported by index.ts is not checked', (testContext) => {
+  it('valid - non-route sibling not imported by index.ts is not checked', (testContext) => {
     const apiFolder = createApiFolder(testContext, 'src/api/v1', {
       'index.ts': `import ping from './ping.ts';\nexport default async () => [ping];`,
     });
@@ -77,7 +52,26 @@ describe('require-api-route-import', () => {
     });
   });
 
-  it('valid - route file - imported by index.ts', (testContext) => {
+  it('valid - non-route sibling mentioning new Router only in a comment or string is not checked', (testContext) => {
+    const apiFolder = createApiFolder(testContext, 'src/api/v1', {
+      'index.ts': `import ping from './ping.ts';\nexport default async () => [ping];`,
+    });
+    new RuleTester().run(ruleId, rule, {
+      valid: [
+        {
+          filename: path.join(apiFolder, 'helper.ts'),
+          code: `
+            // a route implementation calls new Router() and is imported by index.ts
+            export const usage = 'new Router()';
+            export const template = \`new Router()\`;
+          `,
+        },
+      ],
+      invalid: [],
+    });
+  });
+
+  it('valid - imported by index.ts', (testContext) => {
     const apiFolder = createApiFolder(testContext, 'src/api/v1', {
       'index.ts': `import ping from './ping.ts';\nimport aGet from './a-get';\nexport default async () => [ping, aGet];`,
     });
@@ -102,7 +96,7 @@ describe('require-api-route-import', () => {
     });
   });
 
-  it('valid - route file - test files, sub-folders and folders without index.ts are not checked', (testContext) => {
+  it('valid - index.ts, test files, sub-folders and folders without index.ts are not checked', (testContext) => {
     const apiFolder = createApiFolder(testContext, 'src/api/v1', {
       'index.ts': `import ping from './ping.ts';\nexport default async () => [ping];`,
     });
@@ -126,6 +120,13 @@ describe('require-api-route-import', () => {
           `,
         },
         {
+          filename: path.join(apiFolder, 'index.ts'),
+          code: `
+            import Router from '@koa/router';
+            const router = new Router();
+          `,
+        },
+        {
           filename: path.join(apiFolderWithoutIndex, 'a-get.ts'),
           code: `
             import Router from '@koa/router';
@@ -137,7 +138,7 @@ describe('require-api-route-import', () => {
     });
   });
 
-  it('invalid - route file - newly added route implementation is not imported by index.ts', (testContext) => {
+  it('invalid - newly added route implementation is not imported by index.ts', (testContext) => {
     const apiFolder = createApiFolder(testContext, 'src/api/v1', {
       'index.ts': `import ping from './ping.ts';\n// import aPut from './a-put.ts';\nexport default async () => [ping];`,
     });
@@ -155,66 +156,9 @@ describe('require-api-route-import', () => {
           `,
           errors: [
             {
-              messageId: 'requireImportByApiIndex',
+              messageId: 'requireApiRouteImport',
               line: 4,
               column: 30,
-            },
-          ],
-        },
-      ],
-    });
-  });
-
-  it('invalid - newly added route implementation is not imported', (testContext) => {
-    const apiFolder = createApiFolder(testContext, 'src/api/v1', {
-      'ping.ts': `import Router from '@koa/router';\nexport default async function () { const router = new Router(); }`,
-      'a-put.ts': `import Router from '@koa/router';\nexport default async function () { const router = new Router(); }`,
-    });
-    new RuleTester().run(ruleId, rule, {
-      valid: [],
-      invalid: [
-        {
-          filename: path.join(apiFolder, 'index.ts'),
-          code: `
-            import ping from './ping.ts';
-            export default async () => [ping];
-          `,
-          errors: [
-            {
-              messageId: 'requireApiRouteImport',
-              data: { routeFileName: 'a-put.ts' },
-              line: 1,
-              column: 1,
-            },
-          ],
-        },
-      ],
-    });
-  });
-
-  it('invalid - every missing route implementation is reported in file name order', (testContext) => {
-    const apiFolder = createApiFolder(testContext, 'src/api/v2', {
-      'ping.ts': `import Router from '@koa/router';\nexport default async function () { const router = new Router(); }`,
-      'b-get.ts': `import Router from '@koa/router';\nexport default async function () { const router = new Router(); }`,
-      'a-put.ts': `import Router from '@koa/router';\nexport default async function () { const router = new Router(); }`,
-    });
-    new RuleTester().run(ruleId, rule, {
-      valid: [],
-      invalid: [
-        {
-          filename: path.join(apiFolder, 'index.ts'),
-          code: `
-            import ping from './ping.ts';
-            export default async () => [ping];
-          `,
-          errors: [
-            {
-              messageId: 'requireApiRouteImport',
-              data: { routeFileName: 'a-put.ts' },
-            },
-            {
-              messageId: 'requireApiRouteImport',
-              data: { routeFileName: 'b-get.ts' },
             },
           ],
         },
